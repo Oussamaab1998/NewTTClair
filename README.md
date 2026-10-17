@@ -1,5 +1,12 @@
 This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
 
+# Dev tools (debug builds only)
+
+The Composants / Proba / Bidi tabs and the lesson's event log are hidden by default.
+In a **debug build**, press and hold the lesson title (« تمرين الاحتمالات ») for **2 seconds** to show them; hold again to hide them.
+Release builds never show them. The flag lives in `src/app/devFlags.ts`.
+The Proba tab has a perf panel (React commit times per component, keypad height): use it to take measurements on a device.
+
 # Getting Started
 
 > **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
