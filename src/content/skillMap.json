@@ -1,0 +1,36 @@
+{
+  "contentVersion": "skills-0.1.0",
+  "reviewed": false,
+  "note": "Minimal prerequisite map for Exercise 2 (bac2022c-ex2) and the Exercise 4 checkpoints in docs/exercises/EX4_ANALYSIS.md. Drafted by the dev team, not reviewed by a teacher.",
+  "skills": [
+    { "id": "sample-space", "kind": "math", "requires": [] },
+    { "id": "simultaneous-draw", "kind": "math", "requires": ["sample-space"] },
+    { "id": "counting-pairs", "kind": "math", "requires": ["simultaneous-draw", "sample-space"] },
+    { "id": "equiprobability", "kind": "math", "requires": ["counting-pairs"] },
+    { "id": "probability-sure-event", "kind": "math", "requires": [] },
+    { "id": "event-as-set", "kind": "math", "requires": ["sample-space"] },
+    { "id": "complement-event", "kind": "math", "requires": ["event-as-set", "probability-sure-event"] },
+    { "id": "au-moins-un", "kind": "math", "requires": ["complement-event"] },
+    { "id": "product-zero", "kind": "math", "requires": [] },
+    { "id": "random-variable-values", "kind": "math", "requires": ["sample-space", "product-zero"] },
+    { "id": "random-variable-law", "kind": "math", "requires": ["random-variable-values", "event-as-set", "equiprobability"] },
+    { "id": "law-sum-one", "kind": "math", "requires": ["random-variable-law", "probability-sure-event"] },
+
+    { "id": "exp-rules", "kind": "math", "requires": [] },
+    { "id": "domain-symmetric", "kind": "math", "requires": [] },
+    { "id": "function-parity", "kind": "math", "requires": ["domain-symmetric", "exp-rules"] },
+    { "id": "exp-limits", "kind": "math", "requires": ["exp-rules"] },
+    { "id": "forme-indeterminee", "kind": "math", "requires": ["exp-limits"] },
+    { "id": "limit-at-infinity", "kind": "math", "requires": ["forme-indeterminee", "exp-limits"] },
+    { "id": "asymptote-interpretation", "kind": "math", "requires": ["limit-at-infinity"] },
+    { "id": "derivative-meaning", "kind": "math", "requires": [] },
+    { "id": "quotient-rule", "kind": "math", "requires": ["derivative-meaning"] },
+    { "id": "chain-rule-exp", "kind": "math", "requires": ["derivative-meaning", "exp-rules"] },
+    { "id": "variation-table", "kind": "math", "requires": ["quotient-rule", "chain-rule-exp"] },
+
+    { "id": "writing-parentheses", "kind": "writing", "requires": [] },
+    { "id": "writing-conclusion", "kind": "writing", "requires": [] },
+    { "id": "writing-domain-check", "kind": "writing", "requires": [] },
+    { "id": "writing-interpretation", "kind": "writing", "requires": [] }
+  ]
+}

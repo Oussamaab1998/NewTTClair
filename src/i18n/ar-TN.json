@@ -1,0 +1,179 @@
+{
+  "bidiTest": {
+    "title": "تجربة: عربي، كلمات بالفرنسي ورياضيات",
+    "unreviewed": "محتوى تجريبي، مازال ما راجعوش أستاذ.",
+    "switchLocale": "Français",
+    "deviceInfo": "{{os}} {{version}} · I18nManager.isRTL={{rtl}}",
+    "sectionFeed": "مثال من الدرس",
+    "sectionSentences": "الجمل: أربعة طرق للعزل",
+    "sectionMath": "الرياضيات: زوز طرق للرسم",
+    "sectionStress": "تجربة الثقل",
+    "strategy": {
+      "none": "بلا عزل (مرجع)",
+      "unicode": "حروف يونيكود",
+      "nested": "نصوص داخل بعضها",
+      "both": "الزوز مع بعض (المقترح)"
+    },
+    "renderMs": "{{renderer}} : {{ms}} ms",
+    "renderPending": "{{renderer}} : …",
+    "renderError": "{{renderer}} : ⚠",
+    "stressRun": "20 × {{renderer}}",
+    "stressResult": "{{renderer}} : {{count}} × {{ms}} ms",
+    "stressRunning": "{{renderer}} : …",
+    "stressClear": "نفسخ",
+    "tab": {
+      "feed": "الدرس",
+      "sentences": "الجمل",
+      "math": "الرياضيات",
+      "stress": "الثقل"
+    }
+  },
+  "app": {
+    "tab": {
+      "lesson": "الدرس",
+      "demo": "العناصر",
+      "bidi": "تجربة الكتيبة",
+      "proba": "احتمالات"
+    }
+  },
+  "lesson": {
+    "title": "تمرين الاحتمالات",
+    "unreviewed": "مسودّة: مازال ما راجعهاش أستاذ.",
+    "correct": "صحيح.",
+    "wrong": "موش هكا. عاود ثبّت.",
+    "invalidInput": "الكتيبة موش كاملة. ثبّت فيها وعاود.",
+    "notSure": "ما نعرفش",
+    "ladderEnd": "شفت التلميحات الكل. تنجم تشوف الحل.",
+    "revealed": "هاو الجواب:",
+    "noCannedAnswer": "ما عنديش جواب جاهز على هذا توّا. سؤالك تسجّل.",
+    "deepDiveTitle": "نفهمو بالشوية",
+    "returnToQuestion": "نرجعو للسؤال ↓",
+    "askMode": {
+      "explain": "اشرحلي",
+      "why": "علاش؟",
+      "example": "مثال"
+    },
+    "componentFallback": "هذا الجزء مازال ما تحضّرش.",
+    "writeupTitle": "كيفاش تكتبها في الورقة",
+    "done": "كمّلت السؤال.",
+    "hint": "تلميح",
+    "showAnswer": "ورّيني الحل",
+    "back": "نرجعو للسؤال",
+    "check": "نثبّت",
+    "clear": "نفسخ الكل",
+    "backspace": "نفسخ حرف",
+    "askPlaceholder": "اسأل على أي حاجة…",
+    "askSend": "ابعث",
+    "menuTitle": "شنوّة تحب؟",
+    "cancel": "نبطّل",
+    "fromLesson": "من الدرس",
+    "draft": "مسودّة",
+    "events": "الأحداث",
+    "loadError": "المحتوى فيه غلطة:",
+    "longPressHint": "اضغط مطوّل باش تسأل",
+    "part": "السؤال",
+    "showKeys": "ورّيني الأزرار",
+    "hideKeys": "خبّي الأزرار",
+    "skip": "نتخطّى",
+    "skipKnows": "نعرفها",
+    "skipNotNow": "موش توّا",
+    "skipped": "تخطّيت التمرين هذا.",
+    "askMore": "اسأل",
+    "tableUpdated": "الجدول تعمّر ↓",
+    "lawSolved": "لقيتها",
+    "lawRevealed": "تورّات",
+    "changeMethod": "غيّر الطريقة",
+    "simpler": "حاجة أسهل",
+    "teacherNoteSaved": "سجّلنا ملاحظة للأستاذ متاعك.",
+    "compressOn": "باهي: نفوتو الشرح ونخلّيو الأسئلة.",
+    "clarify": {
+      "counting": "العدّان",
+      "why": "علاش",
+      "link": "العلاقة مع النتيجة اللي قبل"
+    },
+    "selfReport": {
+      "understood": "فهمت علاش",
+      "guessed": "خمّنت",
+      "dismissed": "موش توّا"
+    },
+    "card": {
+      "clarify": {
+        "title": "شنوّة اللي موش واضح؟"
+      },
+      "self_report": {
+        "title": "فهمت علاش ولا خمّنت؟"
+      },
+      "compress": {
+        "title": "ماشي مليح. نختصرو الشرح؟",
+        "yes": "إيه، نختصرو",
+        "no": "لا، خطوة خطوة"
+      },
+      "repair": {
+        "title": "تحب نشوفوها بطريقة أخرى؟",
+        "yes": "إيه، ورّيني",
+        "no": "لا، نعاود وحدي"
+      },
+      "teacher_note": {
+        "title": "نسجّلو ملاحظة للأستاذ ونكمّلو؟",
+        "yes": "إيه",
+        "no": "لا"
+      },
+      "closed": "فات"
+    },
+    "variantStart": {
+      "alternative": "بطريقة أخرى",
+      "transfer": "نفس الفكرة، سؤال جديد",
+      "simpler": "مثال أسهل",
+      "prerequisite": "نبداو بحاجة قبلها"
+    },
+    "jumpToCurrent": "ارجع للسؤال ↓"
+  },
+  "proba": {
+    "urn": {
+      "pick": "اختار الكور اللي تجبدهم.",
+      "draw": "التيراج:"
+    },
+    "outcomes": {
+      "count": "عدد التيراجات:",
+      "tapHint": "اضغط على تيراج باش تشوف القيمة متاعو.",
+      "showAll": "ورّيني الكل",
+      "showLess": "صغّر",
+      "legend": "اضغط على قيمة باش تبرز التيراجات متاعها."
+    },
+    "picker": {
+      "hint": "اختار التيراجات الكل اللي تحقّق الحدث، ومبعد ثبّت.",
+      "selected": "اخترت:",
+      "check": "نثبّت",
+      "correct": "صحيح: هاذوما التيراجات الكل.",
+      "extra": "التيراجات اللي عليهم العلامة ما يحقّقوش الحدث.",
+      "missed": "مازال ناقصين تيراجات:",
+      "probability": "الاحتمال:",
+      "exhausted": "استعمل تلميح ولا اسأل.",
+      "solution": "التيراجات اللي تحقّق الحدث:"
+    },
+    "complement": {
+      "hint": "اضغط على الجزء اللي فيه علامة استفهام.",
+      "showOutcomes": "ورّيني التيراجات",
+      "hideOutcomes": "خبّي التيراجات"
+    },
+    "law": {
+      "fillHint": "اختار خانة واكتب الاحتمال متاعها.",
+      "assignHint": "اختار تيراج، ومبعد اضغط على القيمة متاعو.",
+      "wrongAssign": "موش هذي القيمة متاع التيراج هذا. احسب من جديد.",
+      "sum": "المجموع:",
+      "sumOk": "المجموع يساوي واحد: القانون كامل.",
+      "sumNotOne": "المجموع لازم يساوي واحد. ثبّت في الخانات اللي عليهم علامة.",
+      "wrongCells": "فمّا خانات غالطين: بدّلهم.",
+      "done": "صحيح: القانون كامل.",
+      "unassigned": "التيراجات اللي مازالو:"
+    },
+    "chart": {
+      "tapBar": "اضغط على عمود باش تشوف التيراجات متاعو.",
+      "compute": "نحسبو"
+    },
+    "perf": {
+      "title": "قيس السرعة",
+      "reset": "نفسخ"
+    }
+  }
+}

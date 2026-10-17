@@ -1,0 +1,216 @@
+{
+  "source": "TRANSCRIBED by the dev team from docs/samples/ex2_session_1_expected_planner.md (the product owner's table, one session), updated 2026-10-17 to the current content and the product owner's decisions (brief wins on conflicts; rows 2, 5, 7 via interactive deep dives). These are NOT teacher labels. Rows with two actions are split into two points; where the table needed interpretation, the note says so.",
+  "teacherReviewed": false,
+  "log": "ex2_session_1.converted.jsonl",
+  "excluded": [
+    "row 10 (whole session: make AskField visible, log component events): not a decision point",
+    "row 1 'ask self_report once after in1': removed by the product owner (self-report only after help or odd timing, not with compress)"
+  ],
+  "points": [
+    {
+      "row": 1,
+      "at": {
+        "step": "1a/in1",
+        "trigger": "correct",
+        "occurrence": 1
+      },
+      "preferred": {
+        "kinds": [
+          "compress_steps"
+        ]
+      },
+      "note": "Offer to compress 1.b (opt-in), with the stronger signal (in1 guessed typed). Updated: no self-report at this point (no help, no timing data)."
+    },
+    {
+      "row": 2,
+      "at": {
+        "step": "1b/s3",
+        "trigger": "not_sure",
+        "occurrence": 1
+      },
+      "preferred": {
+        "kinds": [
+          "deep_dive",
+          "variant",
+          "show_component"
+        ],
+        "representations": [
+          "text+ComplementView",
+          "ComplementView"
+        ]
+      },
+      "note": "Updated: the deep dive with its ComplementView satisfies 'ComplementView instead of text-only'."
+    },
+    {
+      "row": 2,
+      "at": {
+        "step": "1b/s3",
+        "trigger": "correct",
+        "occurrence": 1
+      },
+      "preferred": {
+        "kinds": [
+          "self_report"
+        ]
+      },
+      "note": "Updated: correct after help -> self-report (brief). The 'au moins un 2' transfer belongs to 1b/s8."
+    },
+    {
+      "row": 3,
+      "at": {
+        "step": "1b/s8",
+        "trigger": "wrong",
+        "occurrence": 1
+      },
+      "preferred": {
+        "kinds": [
+          "continue",
+          "numeric_check",
+          "variant"
+        ]
+      },
+      "note": "Updated (brief wins): authored feedback + numeric check when the value is known + optional repair offer when the misconception has one."
+    },
+    {
+      "row": 4,
+      "at": {
+        "step": "1b/s8",
+        "trigger": "not_sure",
+        "occurrence": 1
+      },
+      "preferred": {
+        "kinds": [
+          "variant",
+          "show_component"
+        ],
+        "representations": [
+          "OutcomeSpace",
+          "ComplementView"
+        ]
+      },
+      "note": "Change representation: 'numeric bar with 10 pairs, 3 colored'. Transcriber's reading: either component can show it."
+    },
+    {
+      "row": 5,
+      "at": {
+        "step": "2a/s6",
+        "trigger": "not_sure",
+        "occurrence": 1
+      },
+      "preferred": {
+        "kinds": [
+          "deep_dive",
+          "variant",
+          "show_component"
+        ],
+        "representations": [
+          "text+OutcomeSpace",
+          "Urn",
+          "OutcomeSpace"
+        ]
+      },
+      "note": "Updated: the deep dive with an OutcomeSpace list of a 3-ball urn ('Urn with 3 balls -> OutcomeSpace listing; avoid text-only')."
+    },
+    {
+      "row": 5,
+      "at": {
+        "step": "2a/s6",
+        "trigger": "detour_closed",
+        "occurrence": 1
+      },
+      "preferred": {
+        "kinds": [
+          "variant",
+          "show_component"
+        ],
+        "representations": [
+          "Urn",
+          "OutcomeSpace"
+        ]
+      },
+      "note": "After the mini question was answered wrong: the same row's action (transcriber's reading)."
+    },
+    {
+      "row": 6,
+      "at": {
+        "step": "2a/s10",
+        "trigger": "wrong",
+        "occurrence": 1
+      },
+      "preferred": {
+        "kinds": [
+          "continue",
+          "numeric_check",
+          "variant"
+        ]
+      },
+      "note": "Updated (brief wins): authored feedback + numeric check when the value is known + optional repair offer when the misconception has one."
+    },
+    {
+      "row": 7,
+      "at": {
+        "step": "2a/s10",
+        "trigger": "not_sure",
+        "occurrence": 1
+      },
+      "preferred": {
+        "kinds": [
+          "deep_dive",
+          "variant",
+          "show_component"
+        ],
+        "representations": [
+          "text+EventPicker",
+          "EventPicker"
+        ]
+      },
+      "note": "Updated: an interactive (EventPicker) deep dive or alternative would satisfy it; product_zero is still text only."
+    },
+    {
+      "row": 8,
+      "at": {
+        "step": "2a/s10",
+        "trigger": "wrong",
+        "occurrence": 2
+      },
+      "preferred": {
+        "kinds": [
+          "ask_clarify"
+        ]
+      },
+      "note": "After 2 wrong: what's unclear? counting / why 0 / link to B."
+    },
+    {
+      "row": 8,
+      "at": {
+        "step": "2a/s10",
+        "trigger": "correct",
+        "occurrence": 1
+      },
+      "preferred": {
+        "kinds": [
+          "self_report"
+        ]
+      },
+      "note": "After the correct answer: self_report, then a transfer (tr-2a-s10-urn: X = 0 with another urn)."
+    },
+    {
+      "row": 9,
+      "at": {
+        "step": "2a/s15",
+        "trigger": "not_sure",
+        "occurrence": 1
+      },
+      "preferred": {
+        "kinds": [
+          "variant",
+          "show_component"
+        ],
+        "representations": [
+          "LawBuilder"
+        ]
+      },
+      "note": "Third time the same representation: LawBuilder partially filled. q7 -> 2a/s15 is a guess of the legacy step map."
+    }
+  ]
+}

@@ -1,0 +1,5092 @@
+{
+  "id": "bac2022c-ex2",
+  "contentVersion": "ex2-0.5.0",
+  "reviewed": false,
+  "title": {
+    "fr": "Exercice 2 : probabilités",
+    "ar": [
+      {
+        "ar": "تمرين الاحتمالات"
+      }
+    ]
+  },
+  "statement": {
+    "fr": "Une urne contient cinq boules indiscernables au toucher, numérotées −1, 0, 0, 1 et 2. On tire simultanément deux boules de l'urne. On note B l'événement « au moins une des deux boules tirées porte le numéro 0 »."
+  },
+  "experiment": {
+    "urn": [
+      {
+        "id": "a",
+        "value": -1
+      },
+      {
+        "id": "b",
+        "value": 0
+      },
+      {
+        "id": "c",
+        "value": 0
+      },
+      {
+        "id": "d",
+        "value": 1
+      },
+      {
+        "id": "e",
+        "value": 2
+      }
+    ],
+    "draw": "simultaneous",
+    "k": 2
+  },
+  "values": {
+    "nTotal": {
+      "fn": "outcomeCount",
+      "args": {}
+    },
+    "nNoZero": {
+      "fn": "count",
+      "args": {
+        "event": {
+          "id": "not",
+          "args": {
+            "event": {
+              "id": "any_value",
+              "args": {
+                "value": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "pNotB": {
+      "fn": "probability",
+      "args": {
+        "event": {
+          "id": "not",
+          "args": {
+            "event": {
+              "id": "any_value",
+              "args": {
+                "value": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "pB": {
+      "fn": "probability",
+      "args": {
+        "event": {
+          "id": "any_value",
+          "args": {
+            "value": 0
+          }
+        }
+      }
+    },
+    "pA": {
+      "fn": "probability",
+      "args": {
+        "event": {
+          "id": "all_equal"
+        }
+      }
+    },
+    "c42": {
+      "fn": "choose",
+      "args": {
+        "n": 4,
+        "k": 2
+      }
+    },
+    "nX0": {
+      "fn": "count",
+      "args": {
+        "event": {
+          "id": "value_eq",
+          "args": {
+            "value": 0
+          }
+        },
+        "valueFn": "product"
+      }
+    },
+    "pXm2": {
+      "fn": "probability",
+      "args": {
+        "event": {
+          "id": "value_eq",
+          "args": {
+            "value": -2
+          }
+        },
+        "valueFn": "product"
+      }
+    },
+    "pXm1": {
+      "fn": "probability",
+      "args": {
+        "event": {
+          "id": "value_eq",
+          "args": {
+            "value": -1
+          }
+        },
+        "valueFn": "product"
+      }
+    },
+    "pX0": {
+      "fn": "probability",
+      "args": {
+        "event": {
+          "id": "value_eq",
+          "args": {
+            "value": 0
+          }
+        },
+        "valueFn": "product"
+      }
+    },
+    "pX2": {
+      "fn": "probability",
+      "args": {
+        "event": {
+          "id": "value_eq",
+          "args": {
+            "value": 2
+          }
+        },
+        "valueFn": "product"
+      }
+    },
+    "pNo2": {
+      "fn": "probability",
+      "args": {
+        "event": {
+          "id": "not",
+          "args": {
+            "event": {
+              "id": "any_value",
+              "args": {
+                "value": 2
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "results": [
+    {
+      "id": "p_A_1_10",
+      "statement": {
+        "math": "p(A) = \\val{pA}"
+      }
+    },
+    {
+      "id": "p_B_7_10",
+      "statement": {
+        "math": "p(B) = \\val{pB}"
+      }
+    },
+    {
+      "id": "law_X",
+      "statement": {
+        "fr": "Loi de probabilité de X"
+      }
+    }
+  ],
+  "deepDives": [
+    {
+      "id": "au_moins_contraire",
+      "blockId": "dd-amc",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.5.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "blocks": [
+        {
+          "type": "tutor_text",
+          "blockId": "dd-amc-1",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "text": {
+            "ar": [
+              {
+                "fr": "au moins une"
+              },
+              {
+                "ar": " معناها وحدة ولا أكثر من وحدة."
+              }
+            ]
+          }
+        },
+        {
+          "type": "tutor_text",
+          "blockId": "dd-amc-2",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.5.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "text": {
+            "ar": [
+              {
+                "ar": "العكس متاعها: ولا وحدة، بالفرنسي "
+              },
+              {
+                "fr": "aucune"
+              },
+              {
+                "ar": "."
+              }
+            ]
+          },
+          "asks": {
+            "example": [
+              {
+                "ar": [
+                  {
+                    "ar": "مثال من الحياة: العكس متاع «على الأقل نهار واحد صبّت فيه المطر في الجمعة» هو «حتى نهار ما صبّت فيه المطر»."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "type": "component",
+          "blockId": "dd-amc-cv",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.5.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "ComplementView",
+            "props": {
+              "event": {
+                "id": "any_value",
+                "args": {
+                  "value": 0
+                }
+              },
+              "direction": "from_complement",
+              "labels": {
+                "event": "B",
+                "complement": "\\bar{B}"
+              }
+            }
+          }
+        }
+      ],
+      "mini": {
+        "id": "mini",
+        "blockId": "dd-amc-mini",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "complement-event",
+          "au-moins-un"
+        ],
+        "kind": "choice",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "شنوّة العكس متاع "
+            },
+            {
+              "fr": "« au moins un garçon »"
+            },
+            {
+              "ar": "؟"
+            }
+          ]
+        },
+        "options": [
+          {
+            "id": "aucun",
+            "label": {
+              "fr": "aucun garçon"
+            }
+          },
+          {
+            "id": "un",
+            "label": {
+              "fr": "exactement un garçon"
+            },
+            "feedback": {
+              "ar": [
+                {
+                  "ar": "وحدة فيها زوز أولاد: وين تحطّها؟ هي زادة فيها "
+                },
+                {
+                  "fr": "au moins un"
+                },
+                {
+                  "ar": "."
+                }
+              ]
+            }
+          },
+          {
+            "id": "tous",
+            "label": {
+              "fr": "que des garçons"
+            },
+            "feedback": {
+              "ar": [
+                {
+                  "ar": "هذي تحقّق "
+                },
+                {
+                  "fr": "au moins un"
+                },
+                {
+                  "ar": "، موش العكس متاعها."
+                }
+              ]
+            }
+          }
+        ],
+        "answer": {
+          "type": "option",
+          "id": "aucun"
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "العكس هو كي الحدث ما يصيرش بالكل."
+              }
+            ]
+          }
+        ],
+        "deepDiveId": "contraire_sens"
+      }
+    },
+    {
+      "id": "contraire_sens",
+      "blockId": "dd-cs",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.3.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "blocks": [
+        {
+          "type": "tutor_text",
+          "blockId": "dd-cs-1",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "text": {
+            "ar": [
+              {
+                "ar": "الحدث العكسي فيه الحالات الكل اللي موش في الحدث."
+              }
+            ]
+          }
+        },
+        {
+          "type": "tutor_text",
+          "blockId": "dd-cs-2",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "text": {
+            "ar": [
+              {
+                "ar": "الحدث والعكس متاعو مع بعضهم يغطّيو الحالات الكل، إذن:"
+              }
+            ]
+          }
+        },
+        {
+          "type": "math",
+          "blockId": "dd-cs-3",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "latex": "p(\\bar{A}) = 1 - p(A)"
+        }
+      ],
+      "mini": {
+        "id": "mini",
+        "blockId": "dd-cs-mini",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.3.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "complement-event"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "إذا كان:"
+            }
+          ],
+          "math": "p(A) = \\frac{2}{5} \\quad p(\\bar{A}) = ?"
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "oneMinus",
+            "args": {
+              "p": [
+                2,
+                5
+              ]
+            }
+          }
+        },
+        "wrongAnswers": [
+          {
+            "value": "2/5",
+            "feedback": {
+              "ar": [
+                {
+                  "ar": "هذا احتمال الحدث، موش احتمال العكس متاعو."
+                }
+              ]
+            }
+          }
+        ],
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "استعمل القاعدة اللي فوق:"
+              }
+            ],
+            "math": "p(\\bar{A}) = 1 - p(A)"
+          },
+          {
+            "ar": [
+              {
+                "ar": "عوّض:"
+              }
+            ],
+            "math": "p(\\bar{A}) = 1 - \\frac{2}{5}"
+          }
+        ],
+        "deepDiveId": "total_one"
+      }
+    },
+    {
+      "id": "total_one",
+      "blockId": "dd-t1",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.3.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "blocks": [
+        {
+          "type": "tutor_text",
+          "blockId": "dd-t1-1",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "text": {
+            "ar": [
+              {
+                "ar": "الحدث والعكس متاعو مع بعضهم يغطّيو الحالات الكل."
+              }
+            ]
+          }
+        },
+        {
+          "type": "tutor_text",
+          "blockId": "dd-t1-2",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "text": {
+            "ar": [
+              {
+                "ar": "والحالات الكل مع بعضها حاجة متأكّدين منها: لازم تصير."
+              }
+            ]
+          }
+        }
+      ],
+      "mini": {
+        "id": "mini",
+        "blockId": "dd-t1-mini",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.3.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "probability-sure-event"
+        ],
+        "kind": "choice",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "حاجة متأكّدين منها، احتمالها قدّاش؟"
+            }
+          ],
+          "math": "p(A) + p(\\bar{A}) = ?"
+        },
+        "options": [
+          {
+            "id": "zero",
+            "value": "0"
+          },
+          {
+            "id": "half",
+            "value": "1/2"
+          },
+          {
+            "id": "one",
+            "value": "1"
+          }
+        ],
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "probability",
+            "args": {
+              "event": {
+                "id": "or",
+                "args": {
+                  "events": [
+                    {
+                      "id": "any_value",
+                      "args": {
+                        "value": 0
+                      }
+                    },
+                    {
+                      "id": "not",
+                      "args": {
+                        "event": {
+                          "id": "any_value",
+                          "args": {
+                            "value": 0
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "الاحتمال ديما بين الصفر والواحد. حاجة لازم تصير تاخو أكبر قيمة."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "pairs_listing",
+      "blockId": "dd-pl",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.5.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "blocks": [
+        {
+          "type": "tutor_text",
+          "blockId": "dd-pl-1",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.5.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "text": {
+            "ar": [
+              {
+                "ar": "في تيراج "
+              },
+              {
+                "fr": "simultané"
+              },
+              {
+                "ar": " نجبدو زوز كور مع بعض: الترتيب ما يهمّش."
+              }
+            ]
+          },
+          "asks": {
+            "example": [
+              {
+                "ar": [
+                  {
+                    "ar": "مثال: من أربعة حروف، نكتبو الأزواج الكل، كل زوج مرّة برك:"
+                  }
+                ]
+              },
+              {
+                "math": "\\{a ; b\\},\\ \\{a ; c\\},\\ \\{a ; d\\}"
+              },
+              {
+                "math": "\\{b ; c\\},\\ \\{b ; d\\},\\ \\{c ; d\\}"
+              }
+            ]
+          }
+        },
+        {
+          "type": "math",
+          "blockId": "dd-pl-2",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "latex": "\\{a ; b\\} = \\{b ; a\\}"
+        },
+        {
+          "type": "component",
+          "blockId": "dd-pl-os",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.5.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "OutcomeSpace",
+            "props": {
+              "layout": "list",
+              "showCount": false
+            }
+          }
+        }
+      ],
+      "mini": {
+        "id": "mini",
+        "blockId": "dd-pl-mini",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.5.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "counting-pairs"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "هاو التيراجات الكل بثلاثة كور. قدّاش من تيراج؟"
+            }
+          ]
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "outcomeCount",
+            "args": {}
+          }
+        },
+        "wrongAnswers": [
+          {
+            "value": "6",
+            "misconceptionId": "counts_ordered_pairs",
+            "feedback": {
+              "ar": [
+                {
+                  "ar": "عدّيت كل زوج مرّتين: الترتيب ما يهمّش."
+                }
+              ]
+            }
+          }
+        ],
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "عدّ الأسطر في القائمة الفوق: كل سطر تيراج."
+              }
+            ]
+          },
+          {
+            "ar": [
+              {
+                "ar": "الكورة الأولى مع الزوز الأخرين، والثانية مع الثالثة."
+              }
+            ]
+          }
+        ]
+      },
+      "experiment": {
+        "urn": [
+          {
+            "id": "p",
+            "value": 1
+          },
+          {
+            "id": "q",
+            "value": 2
+          },
+          {
+            "id": "r",
+            "value": 3
+          }
+        ],
+        "draw": "simultaneous",
+        "k": 2
+      }
+    },
+    {
+      "id": "product_zero",
+      "blockId": "dd-pz",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.3.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "blocks": [
+        {
+          "type": "tutor_text",
+          "blockId": "dd-pz-1",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "text": {
+            "ar": [
+              {
+                "ar": "جداء يساوي صفر كي يكون على الأقل واحد من العوامل يساوي صفر."
+              }
+            ]
+          }
+        },
+        {
+          "type": "math",
+          "blockId": "dd-pz-2",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "latex": "a \\times b = 0 \\iff a = 0 \\text{ ou } b = 0"
+        },
+        {
+          "type": "tutor_text",
+          "blockId": "dd-pz-3",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "text": {
+            "ar": [
+              {
+                "ar": "أمثلة:"
+              }
+            ]
+          }
+        },
+        {
+          "type": "math",
+          "blockId": "dd-pz-4",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "latex": "0 \\times 2 = 0,\\quad (-1) \\times 0 = 0,\\quad 0 \\times 0 = 0"
+        }
+      ],
+      "mini": {
+        "id": "mini",
+        "blockId": "dd-pz-mini",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.3.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "product-zero"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "احسب:"
+            }
+          ],
+          "math": "(-1) \\times 0 = ?"
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "product",
+            "args": {
+              "factors": [
+                -1,
+                0
+              ]
+            }
+          }
+        },
+        "wrongAnswers": [
+          {
+            "value": "-1",
+            "feedback": {
+              "ar": [
+                {
+                  "ar": "أي عدد ضرب صفر يعطي صفر."
+                }
+              ]
+            }
+          }
+        ],
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "أي عدد ضرب صفر يعطي صفر."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "parts": [
+    {
+      "id": "1b",
+      "goal": {
+        "fr": "Montrer que",
+        "math": "p(B) = \\val{pB}"
+      },
+      "expected": "p_B_7_10",
+      "uses": [],
+      "methodId": "au_moins_complement",
+      "askChips": [
+        {
+          "id": "why_complement",
+          "label": {
+            "ar": [
+              {
+                "ar": "علاش نحسبو العكس؟"
+              }
+            ]
+          },
+          "answer": [
+            {
+              "ar": [
+                {
+                  "fr": "au moins une"
+                },
+                {
+                  "ar": " فيها برشا حالات: وحدة ولا زوز. العكس متاعها حالة وحدة، أسهل باش نعدّوها."
+                }
+              ]
+            },
+            {
+              "math": "p(B) = 1 - p(\\bar{B})"
+            }
+          ]
+        },
+        {
+          "id": "what_simultane",
+          "label": {
+            "ar": [
+              {
+                "ar": "شنوّة معناها "
+              },
+              {
+                "fr": "simultanément"
+              },
+              {
+                "ar": "؟"
+              }
+            ]
+          },
+          "answer": [
+            {
+              "ar": [
+                {
+                  "ar": "معناها نجبدو الزوز كور مع بعض في نفس الوقت، إذن الترتيب ما يهمّش:"
+                }
+              ]
+            },
+            {
+              "math": "\\{-1 ; 2\\} = \\{2 ; -1\\}"
+            }
+          ]
+        },
+        {
+          "id": "what_bar",
+          "label": {
+            "ar": [
+              {
+                "ar": "شنوّة العلامة اللي فوق الحرف؟"
+              }
+            ]
+          },
+          "answer": [
+            {
+              "math": "\\bar{B}"
+            },
+            {
+              "ar": [
+                {
+                  "ar": "هو الحدث العكسي متاع "
+                },
+                {
+                  "fr": "B"
+                },
+                {
+                  "ar": ": يصير كي "
+                },
+                {
+                  "fr": "B"
+                },
+                {
+                  "ar": " ما يصيرش."
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "groups": [
+        {
+          "id": "complement",
+          "steps": [
+            {
+              "id": "s1",
+              "blockId": "q1b-s1",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "au-moins-un"
+              ],
+              "kind": "text",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "الحدث "
+                  },
+                  {
+                    "fr": "B"
+                  },
+                  {
+                    "ar": " معناه "
+                  },
+                  {
+                    "fr": "au moins une"
+                  },
+                  {
+                    "ar": " كورة من الزوز عليها صفر: يعني وحدة ولا زوز."
+                  }
+                ]
+              },
+              "asks": {
+                "explain": [
+                  {
+                    "ar": [
+                      {
+                        "fr": "au moins une"
+                      },
+                      {
+                        "ar": " معناها على الأقل وحدة: وحدة، ولا أكثر من وحدة."
+                      }
+                    ]
+                  }
+                ],
+                "why": [
+                  {
+                    "ar": [
+                      {
+                        "ar": "كلمة "
+                      },
+                      {
+                        "fr": "au moins"
+                      },
+                      {
+                        "ar": " هي اللي تقلّنا شنوّة الطريقة: كي نلقاوها، نفكّرو في العكس."
+                      }
+                    ]
+                  }
+                ],
+                "example": [
+                  {
+                    "ar": [
+                      {
+                        "ar": "مثال: التيراج هذا فيه كورة عليها صفر، إذن يحقّق "
+                      },
+                      {
+                        "fr": "B"
+                      },
+                      {
+                        "ar": ":"
+                      }
+                    ]
+                  },
+                  {
+                    "math": "\\{0 ; 2\\}"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "s2",
+              "blockId": "q1b-s2",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "complement-event"
+              ],
+              "kind": "text",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "عوض ما نعدّو الحالات الكل اللي فيها صفر، فمّا طريق أقصر: نخدمو بالحدث العكسي."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "s3",
+              "blockId": "q1b-s3",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "complement-event",
+                "au-moins-un"
+              ],
+              "kind": "choice",
+              "prompt": {
+                "ar": [
+                  {
+                    "ar": "شنوّة الحدث العكسي متاع "
+                  },
+                  {
+                    "fr": "B"
+                  },
+                  {
+                    "ar": "؟"
+                  }
+                ]
+              },
+              "options": [
+                {
+                  "id": "none",
+                  "label": {
+                    "fr": "aucune des deux boules ne porte le numéro 0"
+                  }
+                },
+                {
+                  "id": "one",
+                  "label": {
+                    "fr": "exactement une boule porte le numéro 0"
+                  },
+                  "misconceptionId": "au_moins_direct_miscount",
+                  "feedback": {
+                    "ar": [
+                      {
+                        "ar": "والتيراج اللي فيه زوز كور عليهم صفر، وين تحطّو؟ هو زادة من "
+                      },
+                      {
+                        "fr": "B"
+                      },
+                      {
+                        "ar": "، إذن موش من العكس."
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "two",
+                  "label": {
+                    "fr": "les deux boules portent le numéro 0"
+                  },
+                  "misconceptionId": "complement_partial_event",
+                  "feedback": {
+                    "ar": [
+                      {
+                        "ar": "زوز كور عليهم صفر: هذي حالة من "
+                      },
+                      {
+                        "fr": "B"
+                      },
+                      {
+                        "ar": "، موش العكس متاعو."
+                      }
+                    ]
+                  }
+                }
+              ],
+              "answer": {
+                "type": "option",
+                "id": "none"
+              },
+              "hints": [
+                {
+                  "ar": [
+                    {
+                      "ar": "العكس فيه الحالات الكل اللي "
+                    },
+                    {
+                      "fr": "B"
+                    },
+                    {
+                      "ar": " ما يصيرش فيها."
+                    }
+                  ]
+                },
+                {
+                  "ar": [
+                    {
+                      "ar": "كي "
+                    },
+                    {
+                      "fr": "B"
+                    },
+                    {
+                      "ar": " ما يصيرش، قدّاش من كورة عليها صفر تنجم تكون في يدّك؟"
+                    }
+                  ]
+                },
+                {
+                  "ar": [
+                    {
+                      "ar": "كمّل الجملة:"
+                    }
+                  ],
+                  "fr": "contraire de B : « … des deux boules ne porte le numéro 0 »"
+                }
+              ],
+              "deepDiveId": "au_moins_contraire"
+            },
+            {
+              "id": "s4",
+              "blockId": "q1b-s4",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "counting-pairs"
+              ],
+              "kind": "text",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "توّا نعدّو التيراجات اللي ما فيهم حتى كورة عليها صفر."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "s5",
+              "blockId": "q1b-s5",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "counting-pairs",
+                "simultaneous-draw"
+              ],
+              "kind": "typed",
+              "prompt": {
+                "ar": [
+                  {
+                    "ar": "قدّاش من تيراج ما فيه حتى كورة عليها صفر؟"
+                  }
+                ]
+              },
+              "answer": {
+                "type": "fraction",
+                "compute": {
+                  "fn": "count",
+                  "args": {
+                    "event": {
+                      "id": "not",
+                      "args": {
+                        "event": {
+                          "id": "any_value",
+                          "args": {
+                            "value": 0
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "wrongAnswers": [
+                {
+                  "value": "6",
+                  "misconceptionId": "complement_ordered",
+                  "feedback": {
+                    "ar": [
+                      {
+                        "ar": "التيراج "
+                      },
+                      {
+                        "fr": "simultané"
+                      },
+                      {
+                        "ar": ": الزوجين هاذوما هوما نفس التيراج."
+                      }
+                    ],
+                    "math": "\\{-1 ; 1\\} = \\{1 ; -1\\}"
+                  }
+                },
+                {
+                  "value": "10",
+                  "misconceptionId": "counts_all_outcomes",
+                  "feedback": {
+                    "ar": [
+                      {
+                        "ar": "هذا عدد التيراجات الكل. أحنا نحبّو كان اللي ما فيهمش صفر."
+                      }
+                    ]
+                  }
+                },
+                {
+                  "value": "5",
+                  "misconceptionId": "counts_balls_not_pairs",
+                  "feedback": {
+                    "ar": [
+                      {
+                        "ar": "نعدّو التيراجات، يعني الأزواج، موش الكور."
+                      }
+                    ]
+                  }
+                }
+              ],
+              "hints": [
+                {
+                  "ar": [
+                    {
+                      "ar": "الكور اللي ما عليهمش صفر هوما:"
+                    }
+                  ],
+                  "math": "-1,\\ 1,\\ 2"
+                },
+                {
+                  "ar": [
+                    {
+                      "ar": "نختارو زوز كور منهم، والترتيب ما يهمّش:"
+                    }
+                  ],
+                  "math": "\\binom{3}{2}"
+                },
+                {
+                  "ar": [
+                    {
+                      "ar": "كمّل القائمة:"
+                    }
+                  ],
+                  "math": "\\{-1 ; 1\\},\\ \\{-1 ; 2\\},\\ \\ldots"
+                }
+              ],
+              "deepDiveId": "pairs_listing"
+            },
+            {
+              "id": "s6",
+              "blockId": "q1b-s6",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "equiprobability"
+              ],
+              "kind": "text",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "عدد التيراجات الكل، والكل عندهم نفس الاحتمال:"
+                  }
+                ],
+                "math": "\\binom{5}{2} = \\val{nTotal}"
+              }
+            },
+            {
+              "id": "s7",
+              "blockId": "q1b-s7",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "equiprobability",
+                "complement-event"
+              ],
+              "kind": "choice",
+              "prompt": {
+                "ar": [
+                  {
+                    "ar": "إذن قدّاش احتمال العكس؟"
+                  }
+                ],
+                "math": "p(\\bar{B}) = ?"
+              },
+              "options": [
+                {
+                  "id": "p3_10",
+                  "value": "3/10"
+                },
+                {
+                  "id": "p3_5",
+                  "value": "3/5",
+                  "misconceptionId": "counts_balls_not_pairs",
+                  "feedback": {
+                    "ar": [
+                      {
+                        "ar": "قسمت على عدد الكور. نقسمو على عدد التيراجات الكل."
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "p7_10",
+                  "value": "7/10",
+                  "misconceptionId": "confuses_event_and_complement",
+                  "feedback": {
+                    "ar": [
+                      {
+                        "ar": "هذا احتمال "
+                      },
+                      {
+                        "fr": "B"
+                      },
+                      {
+                        "ar": " هو بيدو. السؤال على العكس متاعو."
+                      }
+                    ]
+                  }
+                }
+              ],
+              "answer": {
+                "type": "fraction",
+                "compute": {
+                  "fn": "probability",
+                  "args": {
+                    "event": {
+                      "id": "not",
+                      "args": {
+                        "event": {
+                          "id": "any_value",
+                          "args": {
+                            "value": 0
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "hints": [
+                {
+                  "ar": [
+                    {
+                      "ar": "الاحتمال هو عدد الحالات الملائمة مقسوم على عدد الحالات الكل."
+                    }
+                  ]
+                },
+                {
+                  "ar": [
+                    {
+                      "ar": "الحالات الملائمة هوما التيراجات اللي ما فيهمش صفر: لقيتهم قبل."
+                    }
+                  ]
+                },
+                {
+                  "ar": [
+                    {
+                      "ar": "كمّل:"
+                    }
+                  ],
+                  "math": "p(\\bar{B}) = \\frac{\\val{nNoZero}}{\\ldots}"
+                }
+              ]
+            },
+            {
+              "id": "s8",
+              "blockId": "q1b-s8",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "complement-event"
+              ],
+              "kind": "typed",
+              "prompt": {
+                "ar": [
+                  {
+                    "ar": "توّا كمّل:"
+                  }
+                ],
+                "math": "p(B) = ?"
+              },
+              "answer": {
+                "type": "fraction",
+                "compute": {
+                  "fn": "probability",
+                  "args": {
+                    "event": {
+                      "id": "any_value",
+                      "args": {
+                        "value": 0
+                      }
+                    }
+                  }
+                }
+              },
+              "wrongAnswers": [
+                {
+                  "value": "3/10",
+                  "misconceptionId": "confuses_event_and_complement",
+                  "feedback": {
+                    "ar": [
+                      {
+                        "ar": "هذا احتمال العكس. باقي خطوة وحدة."
+                      }
+                    ]
+                  }
+                },
+                {
+                  "value": "6/10",
+                  "misconceptionId": "au_moins_direct_miscount",
+                  "feedback": {
+                    "ar": [
+                      {
+                        "ar": "ثبّت في التيراج اللي فيه الزوز كور عليهم صفر."
+                      }
+                    ]
+                  }
+                }
+              ],
+              "hints": [
+                {
+                  "ar": [
+                    {
+                      "ar": "استعمل القاعدة متاع الحدث العكسي:"
+                    }
+                  ],
+                  "math": "p(B) = 1 - p(\\bar{B})"
+                },
+                {
+                  "ar": [
+                    {
+                      "ar": "عوّض باحتمال العكس اللي لقيتو:"
+                    }
+                  ],
+                  "math": "p(B) = 1 - \\val{pNotB}"
+                }
+              ],
+              "deepDiveId": "au_moins_contraire",
+              "check": {
+                "kind": "complement_sum",
+                "known": "pNotB",
+                "text": {
+                  "ar": [
+                    {
+                      "ar": "ثبّت بالقيمة متاعك: الحدث والعكس متاعو، مجموع احتمالاتهم لازم يساوي واحد."
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "writeup": {
+        "elements": [
+          "define_complement",
+          "count_complement",
+          "count_total",
+          "equiprobable",
+          "conclusion"
+        ],
+        "modelFr": [
+          "Notons B̄ l'événement contraire de B : « aucune des deux boules tirées ne porte le numéro 0 ».",
+          "Un tirage qui réalise B̄ est formé de deux boules parmi −1, 1 et 2 : il y en a C(3,2) = \\val{nNoZero}.",
+          "Il y a C(5,2) = \\val{nTotal} tirages possibles, tous équiprobables, donc p(B̄) = \\val{pNotB}.",
+          "Par conséquent p(B) = 1 − p(B̄) = 1 − \\val{pNotB} = \\val{pB}."
+        ]
+      }
+    },
+    {
+      "id": "2a",
+      "goal": {
+        "fr": "X est la variable aléatoire égale au produit des numéros des deux boules tirées. Déterminer la loi de probabilité de X."
+      },
+      "expected": "law_X",
+      "uses": [
+        "p_B_7_10"
+      ],
+      "methodId": "law_of_random_variable",
+      "groups": [
+        {
+          "id": "space",
+          "steps": [
+            {
+              "id": "s1",
+              "blockId": "q2a-s1",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [],
+              "kind": "text",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "المتغيّر "
+                  },
+                  {
+                    "fr": "X"
+                  },
+                  {
+                    "ar": " يساوي "
+                  },
+                  {
+                    "fr": "le produit"
+                  },
+                  {
+                    "ar": " متاع الرقمين اللي على الكورتين المجبودين."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "s2",
+              "blockId": "q2a-s2",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [],
+              "kind": "text",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "جرّب: اضغط على زوز كور وشوف الجداء متاعهم."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "s3",
+              "blockId": "q2a-s3",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "sample-space"
+              ],
+              "kind": "component",
+              "component": {
+                "component": "Urn",
+                "props": {
+                  "mode": "select",
+                  "valueFn": "product"
+                }
+              }
+            },
+            {
+              "id": "s4",
+              "blockId": "q2a-s4",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [],
+              "kind": "text",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "باش نلقاو القيم الكل، نكتبو التيراجات الكل:"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "s5",
+              "blockId": "q2a-s5",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "counting-pairs"
+              ],
+              "kind": "component",
+              "component": {
+                "component": "OutcomeSpace",
+                "props": {
+                  "showCount": false
+                }
+              }
+            },
+            {
+              "id": "s6",
+              "blockId": "q2a-s6",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "counting-pairs",
+                "simultaneous-draw"
+              ],
+              "kind": "typed",
+              "prompt": {
+                "ar": [
+                  {
+                    "ar": "قدّاش من تيراج ممكن؟"
+                  }
+                ]
+              },
+              "answer": {
+                "type": "fraction",
+                "compute": {
+                  "fn": "outcomeCount",
+                  "args": {}
+                }
+              },
+              "wrongAnswers": [
+                {
+                  "value": "20",
+                  "misconceptionId": "counts_ordered_pairs",
+                  "feedback": {
+                    "ar": [
+                      {
+                        "ar": "التيراج "
+                      },
+                      {
+                        "fr": "simultané"
+                      },
+                      {
+                        "ar": ": كل زوج تعدّى مرّة برك."
+                      }
+                    ],
+                    "math": "\\{-1 ; 2\\} = \\{2 ; -1\\}"
+                  }
+                },
+                {
+                  "value": "5",
+                  "misconceptionId": "counts_balls_not_pairs",
+                  "feedback": {
+                    "ar": [
+                      {
+                        "ar": "نعدّو التيراجات، يعني الأزواج، موش الكور."
+                      }
+                    ]
+                  }
+                }
+              ],
+              "hints": [
+                {
+                  "ar": [
+                    {
+                      "ar": "كل تيراج هو زوز كور مع بعض، والترتيب ما يهمّش."
+                    }
+                  ]
+                },
+                {
+                  "ar": [
+                    {
+                      "ar": "نختارو زوز كور من خمسة:"
+                    }
+                  ],
+                  "math": "\\binom{5}{2}"
+                },
+                {
+                  "ar": [
+                    {
+                      "ar": "عدّ الخانات اللي في القائمة الفوق."
+                    }
+                  ]
+                }
+              ],
+              "deepDiveId": "pairs_listing"
+            }
+          ]
+        },
+        {
+          "id": "values",
+          "steps": [
+            {
+              "id": "s7",
+              "blockId": "q2a-s7",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [],
+              "kind": "text",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "توّا نحسبو "
+                  },
+                  {
+                    "fr": "X"
+                  },
+                  {
+                    "ar": " لكل تيراج. اضغط على تيراج باش تشوف الجداء متاعو."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "s8",
+              "blockId": "q2a-s8",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "random-variable-values"
+              ],
+              "kind": "component",
+              "component": {
+                "component": "OutcomeSpace",
+                "props": {
+                  "valueFn": "product",
+                  "colorBy": "value",
+                  "showCount": false
+                }
+              }
+            },
+            {
+              "id": "s9",
+              "blockId": "q2a-s9",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "random-variable-values"
+              ],
+              "kind": "choice",
+              "prompt": {
+                "ar": [
+                  {
+                    "ar": "شنوّة القيم اللي ياخذها "
+                  },
+                  {
+                    "fr": "X"
+                  },
+                  {
+                    "ar": "؟"
+                  }
+                ]
+              },
+              "options": [
+                {
+                  "id": "ok",
+                  "set": [
+                    -2,
+                    -1,
+                    0,
+                    2
+                  ]
+                },
+                {
+                  "id": "balls",
+                  "set": [
+                    -1,
+                    0,
+                    1,
+                    2
+                  ],
+                  "misconceptionId": "lists_ball_values_not_products",
+                  "feedback": {
+                    "ar": [
+                      {
+                        "ar": "هاذوما الأرقام اللي على الكور. "
+                      },
+                      {
+                        "fr": "X"
+                      },
+                      {
+                        "ar": " هو الجداء متاع زوز كور."
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "with1",
+                  "set": [
+                    -2,
+                    -1,
+                    0,
+                    1,
+                    2
+                  ],
+                  "misconceptionId": "values_include_product_1",
+                  "feedback": {
+                    "ar": [
+                      {
+                        "ar": "حتى تيراج ما يعطي جداء يساوي واحد: الكورة اللي عليها واحد موجودة مرّة برك، واللي عليها ناقص واحد زادة."
+                      }
+                    ],
+                    "math": "1 \\times 1 \\quad (-1) \\times (-1)"
+                  }
+                }
+              ],
+              "answer": {
+                "type": "set",
+                "compute": {
+                  "fn": "lawValues",
+                  "args": {
+                    "valueFn": "product"
+                  }
+                }
+              },
+              "hints": [
+                {
+                  "ar": [
+                    {
+                      "ar": "شوف القيم اللي تحت كل تيراج في القائمة الفوق."
+                    }
+                  ]
+                },
+                {
+                  "ar": [
+                    {
+                      "ar": "الجداء يولّي صفر كي تكون وحدة من الكورتين عليها صفر."
+                    }
+                  ]
+                },
+                {
+                  "ar": [
+                    {
+                      "ar": "التيراجات اللي ما فيهمش صفر:"
+                    }
+                  ],
+                  "math": "(-1) \\times 1,\\ (-1) \\times 2,\\ 1 \\times 2"
+                }
+              ]
+            },
+            {
+              "id": "law_intro",
+              "blockId": "q2a-law-intro",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [],
+              "kind": "text",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "هاو جدول القانون متاع "
+                  },
+                  {
+                    "fr": "X"
+                  },
+                  {
+                    "ar": ". كل ما تلقى التيراجات متاع قيمة، الخانة متاعها تتعمّر."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "law",
+              "blockId": "q2a-law",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "random-variable-law"
+              ],
+              "kind": "component",
+              "component": {
+                "component": "LawBuilder",
+                "props": {
+                  "valueFn": "product",
+                  "mode": "progressive"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "zero",
+          "steps": [
+            {
+              "id": "s10",
+              "blockId": "q2a-s10",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "event-as-set",
+                "random-variable-law"
+              ],
+              "kind": "component",
+              "component": {
+                "component": "EventPicker",
+                "props": {
+                  "valueFn": "product",
+                  "event": {
+                    "id": "value_eq",
+                    "args": {
+                      "value": 0
+                    }
+                  },
+                  "reveal": "live",
+                  "showFraction": true
+                }
+              },
+              "prompt": {
+                "ar": [
+                  {
+                    "ar": "اختار التيراجات الكل اللي فيهم الجداء يساوي صفر:"
+                  }
+                ],
+                "math": "X = 0"
+              },
+              "hints": [
+                {
+                  "ar": [
+                    {
+                      "ar": "الجداء يساوي صفر كي تكون على الأقل كورة وحدة عليها صفر."
+                    }
+                  ]
+                },
+                {
+                  "ar": [
+                    {
+                      "ar": "ما تنساش التيراج اللي فيه الزوز كور اللي عليهم صفر:"
+                    }
+                  ],
+                  "math": "\\{0 ; 0'\\}"
+                },
+                {
+                  "ar": [
+                    {
+                      "ar": "عدد التيراجات اللي فيهم صفر:"
+                    }
+                  ],
+                  "math": "\\val{nX0}"
+                }
+              ],
+              "diagnoses": [
+                {
+                  "misconceptionId": "misses_duplicate_value_pair",
+                  "feedback": {
+                    "ar": [
+                      {
+                        "ar": "نسيت التيراج اللي فيه الزوز صفر:"
+                      }
+                    ],
+                    "math": "0 \\times 0' = 0"
+                  }
+                },
+                {
+                  "misconceptionId": "selects_complement",
+                  "feedback": {
+                    "ar": [
+                      {
+                        "ar": "اخترت العكس: هاذوما التيراجات اللي ما فيهمش صفر."
+                      }
+                    ]
+                  }
+                },
+                {
+                  "misconceptionId": "selects_all",
+                  "feedback": {
+                    "ar": [
+                      {
+                        "ar": "موش الكل: كي ما فمّاش صفر، الجداء ما يساويش صفر."
+                      }
+                    ]
+                  }
+                }
+              ],
+              "deepDiveId": "product_zero",
+              "fillsLaw": "q2a-law"
+            },
+            {
+              "id": "s11",
+              "blockId": "q2a-s11",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [],
+              "kind": "text",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "لاحظ: الجداء يساوي صفر كي تكون فمّا على الأقل كورة عليها صفر. يعني هو بيدو الحدث "
+                  },
+                  {
+                    "fr": "B"
+                  },
+                  {
+                    "ar": "."
+                  }
+                ],
+                "math": "\\{X = 0\\} = B"
+              }
+            },
+            {
+              "id": "s12",
+              "blockId": "q2a-s12",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [],
+              "kind": "text",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "وعلى خاطر "
+                  },
+                  {
+                    "fr": "B"
+                  },
+                  {
+                    "ar": " نعرفو احتمالو بالعكس متاعو. اضغط على علامة الاستفهام:"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "s13",
+              "blockId": "q2a-s13",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "complement-event",
+                "au-moins-un"
+              ],
+              "kind": "component",
+              "component": {
+                "component": "ComplementView",
+                "props": {
+                  "event": {
+                    "id": "any_value",
+                    "args": {
+                      "value": 0
+                    }
+                  },
+                  "direction": "from_complement",
+                  "labels": {
+                    "event": "B",
+                    "complement": "\\bar{B}"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "law",
+          "steps": [
+            {
+              "id": "s14",
+              "blockId": "q2a-s14",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [],
+              "kind": "text",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "توّا نعملو نفس الشي للقيم الأخرين."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "s15",
+              "blockId": "q2a-s15",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "event-as-set",
+                "random-variable-law"
+              ],
+              "kind": "component",
+              "component": {
+                "component": "EventPicker",
+                "props": {
+                  "valueFn": "product",
+                  "event": {
+                    "id": "value_eq",
+                    "args": {
+                      "value": -2
+                    }
+                  },
+                  "reveal": "on_submit",
+                  "showFraction": true
+                }
+              },
+              "prompt": {
+                "ar": [
+                  {
+                    "ar": "اختار التيراجات اللي فيهم:"
+                  }
+                ],
+                "math": "X = -2"
+              },
+              "hints": [
+                {
+                  "ar": [
+                    {
+                      "ar": "الجداء سالب كي تكون كورة وحدة برك عليها رقم سالب."
+                    }
+                  ]
+                },
+                {
+                  "ar": [
+                    {
+                      "ar": "أي زوز أرقام يعطيو الجداء هذا؟"
+                    }
+                  ],
+                  "math": "(-1) \\times 2"
+                }
+              ],
+              "fillsLaw": "q2a-law"
+            },
+            {
+              "id": "s16",
+              "blockId": "q2a-s16",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "event-as-set",
+                "random-variable-law"
+              ],
+              "kind": "component",
+              "component": {
+                "component": "EventPicker",
+                "props": {
+                  "valueFn": "product",
+                  "event": {
+                    "id": "value_eq",
+                    "args": {
+                      "value": -1
+                    }
+                  },
+                  "reveal": "on_submit",
+                  "showFraction": true
+                }
+              },
+              "prompt": {
+                "ar": [
+                  {
+                    "ar": "اختار التيراجات اللي فيهم:"
+                  }
+                ],
+                "math": "X = -1"
+              },
+              "hints": [
+                {
+                  "ar": [
+                    {
+                      "ar": "الكورة الوحيدة السالبة عليها ناقص واحد."
+                    }
+                  ]
+                },
+                {
+                  "ar": [
+                    {
+                      "ar": "أي زوز أرقام يعطيو الجداء هذا؟"
+                    }
+                  ],
+                  "math": "(-1) \\times 1"
+                }
+              ],
+              "fillsLaw": "q2a-law"
+            },
+            {
+              "id": "s17",
+              "blockId": "q2a-s17",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "event-as-set",
+                "random-variable-law"
+              ],
+              "kind": "component",
+              "component": {
+                "component": "EventPicker",
+                "props": {
+                  "valueFn": "product",
+                  "event": {
+                    "id": "value_eq",
+                    "args": {
+                      "value": 2
+                    }
+                  },
+                  "reveal": "on_submit",
+                  "showFraction": true
+                }
+              },
+              "prompt": {
+                "ar": [
+                  {
+                    "ar": "اختار التيراجات اللي فيهم:"
+                  }
+                ],
+                "math": "X = 2"
+              },
+              "hints": [
+                {
+                  "ar": [
+                    {
+                      "ar": "الجداء موجب وما يساويش صفر: الزوز كور موجبين."
+                    }
+                  ]
+                },
+                {
+                  "ar": [
+                    {
+                      "ar": "أي زوز أرقام يعطيو الجداء هذا؟"
+                    }
+                  ],
+                  "math": "1 \\times 2"
+                }
+              ],
+              "fillsLaw": "q2a-law"
+            },
+            {
+              "id": "sum",
+              "blockId": "q2a-sum",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "law-sum-one"
+              ],
+              "kind": "typed",
+              "prompt": {
+                "ar": [
+                  {
+                    "ar": "الجدول كمل. قدّاش مجموع الاحتمالات؟"
+                  }
+                ],
+                "math": "p(X = -2) + p(X = -1) + p(X = 0) + p(X = 2) = ?"
+              },
+              "answer": {
+                "type": "fraction",
+                "compute": {
+                  "fn": "lawSum",
+                  "args": {
+                    "valueFn": "product"
+                  }
+                }
+              },
+              "wrongAnswers": [
+                {
+                  "value": "9/10",
+                  "misconceptionId": "law_sum_not_one",
+                  "feedback": {
+                    "ar": [
+                      {
+                        "ar": "عاود اجمع الخانات الأربعة الكل."
+                      }
+                    ]
+                  }
+                }
+              ],
+              "hints": [
+                {
+                  "ar": [
+                    {
+                      "ar": "اجمع الخانات:"
+                    }
+                  ],
+                  "math": "\\val{pXm2} + \\val{pXm1} + \\val{pX0} + \\val{pX2}"
+                },
+                {
+                  "ar": [
+                    {
+                      "ar": "كل تيراج موجود في خانة وحدة برك، والتيراجات الكل مع بعضهم حاجة متأكّدين منها."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "s18",
+              "blockId": "q2a-s18",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "random-variable-law",
+                "law-sum-one"
+              ],
+              "kind": "component",
+              "component": {
+                "component": "LawBuilder",
+                "props": {
+                  "valueFn": "product",
+                  "mode": "fill_probabilities",
+                  "showSumCheck": true
+                }
+              },
+              "prompt": {
+                "ar": [
+                  {
+                    "ar": "تمرين اختياري: عمّر الجدول وحدك، من غير ما تشوف الفوق."
+                  }
+                ]
+              },
+              "hints": [
+                {
+                  "ar": [
+                    {
+                      "ar": "احتمال كل قيمة هو عدد التيراجات متاعها على عدد التيراجات الكل:"
+                    }
+                  ],
+                  "math": "p(X = x) = \\frac{\\text{tirages favorables}}{\\val{nTotal}}"
+                },
+                {
+                  "ar": [
+                    {
+                      "ar": "المجموع لازم يساوي واحد. إذا ما يساويش، فمّا خانة غالطة."
+                    }
+                  ]
+                },
+                {
+                  "ar": [
+                    {
+                      "ar": "الحدث "
+                    },
+                    {
+                      "fr": "X = 0"
+                    },
+                    {
+                      "ar": " هو "
+                    },
+                    {
+                      "fr": "B"
+                    },
+                    {
+                      "ar": ":"
+                    }
+                  ],
+                  "math": "p(X = 0) = p(B) = \\val{pB}"
+                }
+              ],
+              "diagnoses": [
+                {
+                  "misconceptionId": "law_sum_not_one",
+                  "feedback": {
+                    "ar": [
+                      {
+                        "ar": "المجموع موش واحد: يعني فمّا تيراجات ناقصين ولا زايدين في خانة."
+                      }
+                    ]
+                  }
+                }
+              ],
+              "optional": true
+            },
+            {
+              "id": "s19",
+              "blockId": "q2a-s19",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [],
+              "kind": "text",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "هاو القانون في رسم. اضغط على عمود باش تشوف التيراجات متاعو."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "s20",
+              "blockId": "q2a-s20",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "random-variable-law"
+              ],
+              "kind": "component",
+              "component": {
+                "component": "LawChart",
+                "props": {
+                  "valueFn": "product"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "writeup": {
+        "elements": [
+          "count_total",
+          "values",
+          "count_each",
+          "link_B",
+          "sum_check"
+        ],
+        "modelFr": [
+          "Les tirages sont simultanés et équiprobables : il y en a C(5,2) = \\val{nTotal}.",
+          "X prend les valeurs −2, −1, 0 et 2 (le produit 1 est impossible : une seule boule porte 1 et une seule porte −1).",
+          "p(X = −2) = \\val{pXm2} (tirage {−1 ; 2}), p(X = −1) = \\val{pXm1} (tirage {−1 ; 1}), p(X = 2) = \\val{pX2} (tirage {1 ; 2}).",
+          "X = 0 si et seulement si au moins une boule porte 0 : p(X = 0) = p(B) = \\val{pX0}.",
+          "Vérification : \\val{pXm2} + \\val{pXm1} + \\val{pX0} + \\val{pX2} = 1."
+        ]
+      },
+      "askChips": [
+        {
+          "id": "why_no_1",
+          "label": {
+            "ar": [
+              {
+                "ar": "علاش "
+              },
+              {
+                "fr": "X"
+              },
+              {
+                "ar": " ما ياخذش واحد؟"
+              }
+            ]
+          },
+          "answer": [
+            {
+              "ar": [
+                {
+                  "ar": "باش يكون الجداء واحد يلزم زوز كور عليهم واحد، ولا زوز عليهم ناقص واحد. في الصندوق فمّا كان كورة وحدة من كل نوع."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "why_sum_1",
+          "label": {
+            "ar": [
+              {
+                "ar": "علاش المجموع لازم يساوي واحد؟"
+              }
+            ]
+          },
+          "answer": [
+            {
+              "ar": [
+                {
+                  "ar": "كل تيراج يعطي قيمة وحدة برك، والتيراجات الكل مع بعضهم حاجة متأكّدين منها."
+                }
+              ]
+            },
+            {
+              "math": "\\sum p(X = x_i) = 1"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variants": [
+    {
+      "id": "alt-1b-s3-pick",
+      "blockId": "var-alt-1b-s3-pick",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "alternative",
+      "forSteps": [
+        "1b/s3"
+      ],
+      "representation": "EventPicker",
+      "intro": [
+        {
+          "type": "tutor_text",
+          "blockId": "var-alt-1b-s3-pick-i1",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.4.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "text": {
+            "ar": [
+              {
+                "ar": "نجرّبو بطريقة أخرى: باليد، موش بالكلام."
+              }
+            ]
+          }
+        }
+      ],
+      "step": {
+        "id": "pick",
+        "blockId": "var-alt-1b-s3-pick-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "complement-event",
+          "event-as-set"
+        ],
+        "kind": "component",
+        "component": {
+          "component": "EventPicker",
+          "props": {
+            "event": {
+              "id": "not",
+              "args": {
+                "event": {
+                  "id": "any_value",
+                  "args": {
+                    "value": 0
+                  }
+                }
+              }
+            },
+            "reveal": "live",
+            "showFraction": false
+          }
+        },
+        "prompt": {
+          "ar": [
+            {
+              "ar": "قبل ما نسمّيوه، نلقاوه: اختار التيراجات الكل اللي "
+            },
+            {
+              "fr": "B"
+            },
+            {
+              "ar": " ما يصيرش فيهم."
+            }
+          ]
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "اختار التيراجات اللي ما فيهم حتى كورة عليها صفر."
+              }
+            ]
+          },
+          {
+            "ar": [
+              {
+                "ar": "الكور اللي ما عليهمش صفر:"
+              }
+            ],
+            "math": "-1,\\ 1,\\ 2"
+          }
+        ]
+      },
+      "addresses": [
+        "why",
+        "counting"
+      ]
+    },
+    {
+      "id": "alt-1b-s3-outcomes",
+      "blockId": "var-alt-1b-s3-outcomes",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "alternative",
+      "forSteps": [
+        "1b/s3"
+      ],
+      "representation": "OutcomeSpace",
+      "intro": [
+        {
+          "type": "component",
+          "blockId": "var-alt-1b-s3-outcomes-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.4.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "OutcomeSpace",
+            "props": {
+              "colorBy": "event",
+              "event": {
+                "id": "any_value",
+                "args": {
+                  "value": 0
+                }
+              },
+              "layout": "list",
+              "showCount": false
+            }
+          }
+        }
+      ],
+      "step": {
+        "id": "look",
+        "blockId": "var-alt-1b-s3-outcomes-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "complement-event"
+        ],
+        "kind": "choice",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "التيراجات اللي موش ملوّنين: قدّاش من كورة عليها صفر فيهم؟"
+            }
+          ]
+        },
+        "options": [
+          {
+            "id": "aucune",
+            "label": {
+              "fr": "aucune"
+            }
+          },
+          {
+            "id": "une",
+            "label": {
+              "fr": "une"
+            },
+            "misconceptionId": "au_moins_direct_miscount"
+          },
+          {
+            "id": "deux",
+            "label": {
+              "fr": "deux"
+            },
+            "misconceptionId": "complement_partial_event"
+          }
+        ],
+        "answer": {
+          "type": "option",
+          "id": "aucune"
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "ثبّت في تيراج واحد موش ملوّن، واقرا الأرقام اللي عليه."
+              }
+            ]
+          }
+        ]
+      },
+      "addresses": [
+        "counting"
+      ]
+    },
+    {
+      "id": "alt-1b-s5-pick",
+      "blockId": "var-alt-1b-s5-pick",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "alternative",
+      "forSteps": [
+        "1b/s5"
+      ],
+      "representation": "EventPicker",
+      "intro": [
+        {
+          "type": "tutor_text",
+          "blockId": "var-alt-1b-s5-pick-i1",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.4.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "text": {
+            "ar": [
+              {
+                "ar": "عوض ما نحسبو في الراس، نلقاو التيراجات باليد."
+              }
+            ]
+          }
+        }
+      ],
+      "step": {
+        "id": "pick",
+        "blockId": "var-alt-1b-s5-pick-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "counting-pairs",
+          "event-as-set"
+        ],
+        "kind": "component",
+        "component": {
+          "component": "EventPicker",
+          "props": {
+            "event": {
+              "id": "not",
+              "args": {
+                "event": {
+                  "id": "any_value",
+                  "args": {
+                    "value": 0
+                  }
+                }
+              }
+            },
+            "reveal": "live",
+            "showFraction": false
+          }
+        },
+        "prompt": {
+          "ar": [
+            {
+              "ar": "اضغط على كل تيراج ما فيه حتى صفر. بعد نرجعو نعدّوهم."
+            }
+          ]
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "الكور اللي ما عليهمش صفر:"
+              }
+            ],
+            "math": "-1,\\ 1,\\ 2"
+          },
+          {
+            "ar": [
+              {
+                "ar": "كل تيراج زوز كور منهم، والترتيب ما يهمّش."
+              }
+            ]
+          }
+        ]
+      },
+      "addresses": [
+        "counting"
+      ]
+    },
+    {
+      "id": "alt-1b-s8-complement",
+      "blockId": "var-alt-1b-s8-complement",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "alternative",
+      "forSteps": [
+        "1b/s8",
+        "1b/s7"
+      ],
+      "representation": "ComplementView",
+      "intro": [
+        {
+          "type": "component",
+          "blockId": "var-alt-1b-s8-complement-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.4.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "ComplementView",
+            "props": {
+              "event": {
+                "id": "any_value",
+                "args": {
+                  "value": 0
+                }
+              },
+              "direction": "from_complement",
+              "labels": {
+                "event": "B",
+                "complement": "\\bar{B}"
+              }
+            }
+          }
+        }
+      ],
+      "step": {
+        "id": "name",
+        "blockId": "var-alt-1b-s8-complement-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "complement-event"
+        ],
+        "kind": "choice",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "في الصورة: الجزء اللي ما فيهش صفر، شنوّة اسمو؟"
+            }
+          ]
+        },
+        "options": [
+          {
+            "id": "bbar",
+            "label": {
+              "math": "\\bar{B}"
+            }
+          },
+          {
+            "id": "b",
+            "label": {
+              "math": "B"
+            },
+            "misconceptionId": "confuses_event_and_complement"
+          }
+        ],
+        "answer": {
+          "type": "option",
+          "id": "bbar"
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "الحدث "
+              },
+              {
+                "fr": "B"
+              },
+              {
+                "ar": " فيه التيراجات اللي فيهم صفر على الأقل."
+              }
+            ]
+          }
+        ]
+      },
+      "addresses": [
+        "why",
+        "link"
+      ]
+    },
+    {
+      "id": "alt-1b-s8-bar",
+      "blockId": "var-alt-1b-s8-bar",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "alternative",
+      "forSteps": [
+        "1b/s8",
+        "1b/s7"
+      ],
+      "representation": "OutcomeSpace",
+      "intro": [
+        {
+          "type": "component",
+          "blockId": "var-alt-1b-s8-bar-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.4.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "OutcomeSpace",
+            "props": {
+              "colorBy": "event",
+              "event": {
+                "id": "not",
+                "args": {
+                  "event": {
+                    "id": "any_value",
+                    "args": {
+                      "value": 0
+                    }
+                  }
+                }
+              },
+              "layout": "list",
+              "showCount": false
+            }
+          }
+        }
+      ],
+      "step": {
+        "id": "count",
+        "blockId": "var-alt-1b-s8-bar-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "complement-event",
+          "equiprobability"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "قدّاش من تيراج ملوّن، يعني ما فيهش صفر؟"
+            }
+          ]
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "count",
+            "args": {
+              "event": {
+                "id": "not",
+                "args": {
+                  "event": {
+                    "id": "any_value",
+                    "args": {
+                      "value": 0
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "عدّ الخانات الملوّنة في القائمة."
+              }
+            ]
+          },
+          {
+            "ar": [
+              {
+                "ar": "الكور اللي ما عليهمش صفر:"
+              }
+            ],
+            "math": "-1,\\ 1,\\ 2"
+          }
+        ]
+      },
+      "addresses": [
+        "counting"
+      ]
+    },
+    {
+      "id": "alt-2a-s6-list",
+      "blockId": "var-alt-2a-s6-list",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "alternative",
+      "forSteps": [
+        "2a/s6",
+        "1b/s5"
+      ],
+      "representation": "OutcomeSpace",
+      "intro": [
+        {
+          "type": "component",
+          "blockId": "var-alt-2a-s6-list-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.4.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "OutcomeSpace",
+            "props": {
+              "layout": "list",
+              "showCount": false
+            }
+          }
+        }
+      ],
+      "step": {
+        "id": "count",
+        "blockId": "var-alt-2a-s6-list-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "counting-pairs"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "قبل الكل، عدّ كان التيراجات اللي فيهم الكورة هاذي:"
+            }
+          ],
+          "math": "-1"
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "count",
+            "args": {
+              "event": {
+                "id": "any_value",
+                "args": {
+                  "value": -1
+                }
+              }
+            }
+          }
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "الكورة هاذي تتلمّ مع كل كورة أخرى مرّة برك."
+              }
+            ]
+          }
+        ]
+      },
+      "addresses": [
+        "counting"
+      ]
+    },
+    {
+      "id": "alt-2a-s9-products",
+      "blockId": "var-alt-2a-s9-products",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "alternative",
+      "forSteps": [
+        "2a/s9"
+      ],
+      "representation": "OutcomeSpace",
+      "intro": [
+        {
+          "type": "component",
+          "blockId": "var-alt-2a-s9-products-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.4.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "OutcomeSpace",
+            "props": {
+              "valueFn": "product",
+              "colorBy": "value",
+              "layout": "list"
+            }
+          }
+        }
+      ],
+      "step": {
+        "id": "one",
+        "blockId": "var-alt-2a-s9-products-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "random-variable-values"
+        ],
+        "kind": "choice",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "نبداو بتيراج واحد. قدّاش قيمة "
+            },
+            {
+              "fr": "X"
+            },
+            {
+              "ar": " هنا؟"
+            }
+          ],
+          "math": "\\{-1 ; 2\\}"
+        },
+        "options": [
+          {
+            "id": "m2",
+            "value": "-2"
+          },
+          {
+            "id": "p1",
+            "value": "1",
+            "misconceptionId": "lists_ball_values_not_products"
+          },
+          {
+            "id": "p2",
+            "value": "2",
+            "misconceptionId": "lists_ball_values_not_products"
+          }
+        ],
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "product",
+            "args": {
+              "factors": [
+                -1,
+                2
+              ]
+            }
+          }
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "الحدث "
+              },
+              {
+                "fr": "X"
+              },
+              {
+                "ar": " هو الجداء متاع الرقمين."
+              }
+            ]
+          }
+        ]
+      },
+      "addresses": [
+        "why"
+      ]
+    },
+    {
+      "id": "alt-2a-s10-complement",
+      "blockId": "var-alt-2a-s10-complement",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "alternative",
+      "forSteps": [
+        "2a/s10"
+      ],
+      "representation": "ComplementView",
+      "intro": [
+        {
+          "type": "component",
+          "blockId": "var-alt-2a-s10-complement-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.4.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "ComplementView",
+            "props": {
+              "event": {
+                "id": "value_eq",
+                "args": {
+                  "value": 0
+                }
+              },
+              "valueFn": "product",
+              "direction": "to_complement"
+            }
+          }
+        }
+      ],
+      "step": {
+        "id": "pick",
+        "blockId": "var-alt-2a-s10-complement-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "event-as-set"
+        ],
+        "kind": "component",
+        "component": {
+          "component": "EventPicker",
+          "props": {
+            "valueFn": "product",
+            "event": {
+              "id": "not",
+              "args": {
+                "event": {
+                  "id": "value_eq",
+                  "args": {
+                    "value": 0
+                  }
+                }
+              }
+            },
+            "reveal": "live",
+            "showFraction": false,
+            "showValues": true
+          }
+        },
+        "prompt": {
+          "ar": [
+            {
+              "ar": "بالعكس: اختار التيراجات اللي الجداء متاعهم موش صفر."
+            }
+          ]
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "الجداء موش صفر كي ما تكون حتى كورة عليها صفر."
+              }
+            ]
+          }
+        ]
+      },
+      "addresses": [
+        "why",
+        "link"
+      ]
+    },
+    {
+      "id": "alt-2a-s10-twin",
+      "blockId": "var-alt-2a-s10-twin",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "alternative",
+      "forSteps": [
+        "2a/s10"
+      ],
+      "representation": "numeric_twin",
+      "intro": [],
+      "step": {
+        "id": "twin",
+        "blockId": "var-alt-2a-s10-twin-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "product-zero"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "التيراج اللي فيه الزوز كور اللي عليهم صفر: قدّاش الجداء متاعو؟"
+            }
+          ],
+          "math": "0 \\times 0' = ?"
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "product",
+            "args": {
+              "factors": [
+                0,
+                0
+              ]
+            }
+          }
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "أي عدد ضرب صفر يعطي صفر، حتى الصفر بيدو."
+              }
+            ]
+          }
+        ]
+      },
+      "addresses": [
+        "why"
+      ]
+    },
+    {
+      "id": "alt-2a-law-assign",
+      "blockId": "var-alt-2a-law-assign",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "alternative",
+      "forSteps": [
+        "2a/s10",
+        "2a/s15",
+        "2a/s16",
+        "2a/s17"
+      ],
+      "representation": "LawBuilder",
+      "intro": [],
+      "step": {
+        "id": "assign",
+        "blockId": "var-alt-2a-law-assign-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "random-variable-law",
+          "event-as-set"
+        ],
+        "kind": "component",
+        "component": {
+          "component": "LawBuilder",
+          "props": {
+            "valueFn": "product",
+            "mode": "assign_outcomes"
+          }
+        },
+        "prompt": {
+          "ar": [
+            {
+              "ar": "حط كل تيراج في الخانة متاع الجداء متاعو."
+            }
+          ]
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "ابدا بالتيراجات اللي فيهم صفر: الجداء متاعهم صفر."
+              }
+            ]
+          },
+          {
+            "ar": [
+              {
+                "ar": "كل تيراج يمشي لخانة وحدة برك."
+              }
+            ]
+          }
+        ]
+      },
+      "addresses": [
+        "counting",
+        "link"
+      ]
+    },
+    {
+      "id": "alt-2a-sum-partial",
+      "blockId": "var-alt-2a-sum-partial",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "alternative",
+      "forSteps": [
+        "2a/sum"
+      ],
+      "representation": "numeric_twin",
+      "intro": [],
+      "step": {
+        "id": "partial",
+        "blockId": "var-alt-2a-sum-partial-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "law-sum-one"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "نجمعو خانتين برك:"
+            }
+          ],
+          "math": "p(X = -2) + p(X = -1) = ?"
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "probability",
+            "args": {
+              "event": {
+                "id": "or",
+                "args": {
+                  "events": [
+                    {
+                      "id": "value_eq",
+                      "args": {
+                        "value": -2
+                      }
+                    },
+                    {
+                      "id": "value_eq",
+                      "args": {
+                        "value": -1
+                      }
+                    }
+                  ]
+                }
+              },
+              "valueFn": "product"
+            }
+          }
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "اقرا الخانتين من الجدول، وبعد اجمعهم:"
+              }
+            ],
+            "math": "\\val{pXm2} + \\val{pXm1}"
+          }
+        ]
+      },
+      "addresses": [
+        "counting"
+      ]
+    },
+    {
+      "id": "sim-complement-1",
+      "blockId": "var-sim-complement-1",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "simpler",
+      "forSteps": [
+        "1b/s8",
+        "1b/s3"
+      ],
+      "representation": "numeric_twin",
+      "intro": [],
+      "step": {
+        "id": "twin",
+        "blockId": "var-sim-complement-1-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "complement-event"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "مثال أسهل: كان نعرفو احتمال العكس، قدّاش احتمال الحدث؟"
+            }
+          ],
+          "math": "p(\\bar{A}) = \\frac{1}{4} \\qquad p(A) = ?"
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "oneMinus",
+            "args": {
+              "p": [
+                1,
+                4
+              ]
+            }
+          }
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "الحدث والعكس متاعو مجموعهم يساوي واحد:"
+              }
+            ],
+            "math": "p(A) = 1 - p(\\bar{A})"
+          }
+        ]
+      },
+      "round": 1
+    },
+    {
+      "id": "sim-complement-2",
+      "blockId": "var-sim-complement-2",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "simpler",
+      "forSteps": [
+        "1b/s8",
+        "1b/s3"
+      ],
+      "representation": "numeric_twin",
+      "intro": [],
+      "step": {
+        "id": "twin",
+        "blockId": "var-sim-complement-2-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "complement-event"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "أسهل زادة:"
+            }
+          ],
+          "math": "p(\\bar{A}) = \\frac{1}{2} \\qquad p(A) = ?"
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "oneMinus",
+            "args": {
+              "p": [
+                1,
+                2
+              ]
+            }
+          }
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "نص ونص يعطيو واحد."
+              }
+            ]
+          }
+        ]
+      },
+      "round": 2
+    },
+    {
+      "id": "sim-complement-3",
+      "blockId": "var-sim-complement-3",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "simpler",
+      "forSteps": [
+        "1b/s8",
+        "1b/s3"
+      ],
+      "representation": "text",
+      "intro": [],
+      "step": {
+        "id": "rule",
+        "blockId": "var-sim-complement-3-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "complement-event",
+          "probability-sure-event"
+        ],
+        "kind": "choice",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "القاعدة وحدها:"
+            }
+          ],
+          "math": "p(A) + p(\\bar{A}) = ?"
+        },
+        "options": [
+          {
+            "id": "one",
+            "value": "1"
+          },
+          {
+            "id": "zero",
+            "value": "0"
+          },
+          {
+            "id": "half",
+            "value": "1/2"
+          }
+        ],
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "probability",
+            "args": {
+              "event": {
+                "id": "or",
+                "args": {
+                  "events": [
+                    {
+                      "id": "any_value",
+                      "args": {
+                        "value": 0
+                      }
+                    },
+                    {
+                      "id": "not",
+                      "args": {
+                        "event": {
+                          "id": "any_value",
+                          "args": {
+                            "value": 0
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "الحدث والعكس متاعو مع بعضهم يعطيو الحالات الكل."
+              }
+            ]
+          }
+        ]
+      },
+      "round": 3
+    },
+    {
+      "id": "sim-pairs-1",
+      "blockId": "var-sim-pairs-1",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "simpler",
+      "forSteps": [
+        "1b/s5",
+        "2a/s6"
+      ],
+      "representation": "Urn",
+      "intro": [
+        {
+          "type": "component",
+          "blockId": "var-sim-pairs-1-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.4.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "Urn",
+            "props": {}
+          }
+        }
+      ],
+      "step": {
+        "id": "count",
+        "blockId": "var-sim-pairs-1-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "counting-pairs"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "مثال أصغر: أربعة كور، ناخذو زوز مع بعض. قدّاش من تيراج؟"
+            }
+          ]
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "outcomeCount",
+            "args": {}
+          }
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "الكورة الأولى تتلمّ مع الثلاثة الأخرين، الثانية مع زوز جدد، والثالثة مع وحدة."
+              }
+            ]
+          }
+        ]
+      },
+      "round": 1,
+      "experiment": {
+        "urn": [
+          {
+            "id": "p",
+            "value": 1
+          },
+          {
+            "id": "q",
+            "value": 2
+          },
+          {
+            "id": "r",
+            "value": 3
+          },
+          {
+            "id": "s",
+            "value": 4
+          }
+        ],
+        "draw": "simultaneous",
+        "k": 2
+      }
+    },
+    {
+      "id": "sim-pairs-2",
+      "blockId": "var-sim-pairs-2",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "simpler",
+      "forSteps": [
+        "1b/s5",
+        "2a/s6"
+      ],
+      "representation": "OutcomeSpace",
+      "intro": [
+        {
+          "type": "component",
+          "blockId": "var-sim-pairs-2-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.4.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "OutcomeSpace",
+            "props": {
+              "layout": "list",
+              "showCount": false
+            }
+          }
+        }
+      ],
+      "step": {
+        "id": "count",
+        "blockId": "var-sim-pairs-2-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "counting-pairs"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "أصغر زادة: ثلاثة كور. عدّ التيراجات في القائمة."
+            }
+          ]
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "outcomeCount",
+            "args": {}
+          }
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "عدّ الأسطر."
+              }
+            ]
+          }
+        ]
+      },
+      "round": 2,
+      "experiment": {
+        "urn": [
+          {
+            "id": "p",
+            "value": 1
+          },
+          {
+            "id": "q",
+            "value": 2
+          },
+          {
+            "id": "r",
+            "value": 3
+          }
+        ],
+        "draw": "simultaneous",
+        "k": 2
+      }
+    },
+    {
+      "id": "sim-product-zero-1",
+      "blockId": "var-sim-product-zero-1",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "simpler",
+      "forSteps": [
+        "2a/s10"
+      ],
+      "representation": "EventPicker",
+      "intro": [],
+      "step": {
+        "id": "pick",
+        "blockId": "var-sim-product-zero-1-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "event-as-set",
+          "product-zero"
+        ],
+        "kind": "component",
+        "component": {
+          "component": "EventPicker",
+          "props": {
+            "valueFn": "product",
+            "event": {
+              "id": "value_eq",
+              "args": {
+                "value": 0
+              }
+            },
+            "reveal": "live",
+            "showFraction": false,
+            "showValues": true
+          }
+        },
+        "prompt": {
+          "ar": [
+            {
+              "ar": "مثال أصغر بثلاثة كور: اختار التيراجات اللي الجداء متاعهم صفر."
+            }
+          ]
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "الجداء صفر كي تكون كورة عليها صفر."
+              }
+            ]
+          }
+        ]
+      },
+      "round": 1,
+      "experiment": {
+        "urn": [
+          {
+            "id": "p",
+            "value": 0
+          },
+          {
+            "id": "q",
+            "value": 1
+          },
+          {
+            "id": "r",
+            "value": 2
+          }
+        ],
+        "draw": "simultaneous",
+        "k": 2
+      }
+    },
+    {
+      "id": "tr-1b-aumoins2",
+      "blockId": "var-tr-1b-aumoins2",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "transfer",
+      "forSteps": [
+        "1b/s8"
+      ],
+      "representation": "text",
+      "intro": [],
+      "step": {
+        "id": "p",
+        "blockId": "var-tr-1b-aumoins2-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "complement-event",
+          "au-moins-un"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "نفس الطريقة على حدث آخر. قدّاش احتمال "
+            },
+            {
+              "fr": "C"
+            },
+            {
+              "ar": "؟"
+            }
+          ],
+          "fr": "C : « au moins une des deux boules porte le numéro 2 »",
+          "math": "p(C) = ?"
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "probability",
+            "args": {
+              "event": {
+                "id": "any_value",
+                "args": {
+                  "value": 2
+                }
+              }
+            }
+          }
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "العكس متاع "
+              },
+              {
+                "fr": "C"
+              },
+              {
+                "ar": ": ولا كورة عليها الرقم اثنين."
+              }
+            ]
+          },
+          {
+            "ar": [
+              {
+                "ar": "استعمل:"
+              }
+            ],
+            "math": "p(C) = 1 - p(\\bar{C})"
+          }
+        ],
+        "check": {
+          "kind": "complement_sum",
+          "known": "pNo2",
+          "text": {
+            "ar": [
+              {
+                "ar": "ثبّت بالقيمة متاعك: الحدث والعكس متاعو، مجموع احتمالاتهم لازم يساوي واحد."
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "tr-1b-s5-noneg",
+      "blockId": "var-tr-1b-s5-noneg",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "transfer",
+      "forSteps": [
+        "1b/s5"
+      ],
+      "representation": "text",
+      "intro": [],
+      "step": {
+        "id": "count",
+        "blockId": "var-tr-1b-s5-noneg-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "counting-pairs"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "بدّلنا السؤال: قدّاش من تيراج ما فيه حتى رقم سالب؟"
+            }
+          ]
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "count",
+            "args": {
+              "event": {
+                "id": "not",
+                "args": {
+                  "event": {
+                    "id": "any_value",
+                    "args": {
+                      "value": -1
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "نحّي الكورة اللي عليها رقم سالب، وعدّ الأزواج من الكور اللي بقاو."
+              }
+            ]
+          },
+          {
+            "ar": [
+              {
+                "ar": "الترتيب ما يهمّش، والزوز كور اللي عليهم صفر زوز كور مختلفين."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "tr-2a-s6-six",
+      "blockId": "var-tr-2a-s6-six",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "transfer",
+      "forSteps": [
+        "2a/s6"
+      ],
+      "representation": "text",
+      "intro": [],
+      "step": {
+        "id": "count",
+        "blockId": "var-tr-2a-s6-six-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "counting-pairs",
+          "simultaneous-draw"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "صندوق آخر فيه ستّة كور. ناخذو زوز مع بعض. قدّاش من تيراج ممكن؟"
+            }
+          ]
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "outcomeCount",
+            "args": {}
+          }
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "نفس الحساب:"
+              }
+            ],
+            "math": "\\binom{n}{2}"
+          },
+          {
+            "ar": [
+              {
+                "ar": "الترتيب ما يهمّش: كل زوج يتعدّ مرّة برك."
+              }
+            ]
+          }
+        ]
+      },
+      "experiment": {
+        "urn": [
+          {
+            "id": "p",
+            "value": 1
+          },
+          {
+            "id": "q",
+            "value": 2
+          },
+          {
+            "id": "r",
+            "value": 3
+          },
+          {
+            "id": "s",
+            "value": 4
+          },
+          {
+            "id": "t",
+            "value": 5
+          },
+          {
+            "id": "u",
+            "value": 6
+          }
+        ],
+        "draw": "simultaneous",
+        "k": 2
+      }
+    },
+    {
+      "id": "tr-2a-s9-values",
+      "blockId": "var-tr-2a-s9-values",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "transfer",
+      "forSteps": [
+        "2a/s9"
+      ],
+      "representation": "text",
+      "intro": [
+        {
+          "type": "component",
+          "blockId": "var-tr-2a-s9-values-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.4.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "Urn",
+            "props": {}
+          }
+        }
+      ],
+      "step": {
+        "id": "values",
+        "blockId": "var-tr-2a-s9-values-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "random-variable-values"
+        ],
+        "kind": "choice",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "صندوق آخر، ونفس "
+            },
+            {
+              "fr": "X"
+            },
+            {
+              "ar": ": الجداء متاع زوز كور. شنوّة القيم متاعو؟"
+            }
+          ]
+        },
+        "options": [
+          {
+            "id": "ok",
+            "set": [
+              -3,
+              -2,
+              0,
+              6
+            ]
+          },
+          {
+            "id": "balls",
+            "set": [
+              -1,
+              0,
+              2,
+              3
+            ],
+            "misconceptionId": "lists_ball_values_not_products"
+          },
+          {
+            "id": "extra",
+            "set": [
+              -3,
+              -2,
+              0,
+              1,
+              6
+            ],
+            "misconceptionId": "values_include_product_1"
+          }
+        ],
+        "answer": {
+          "type": "set",
+          "compute": {
+            "fn": "lawValues",
+            "args": {
+              "valueFn": "product"
+            }
+          }
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "احسب الجداء متاع كل زوج."
+              }
+            ]
+          },
+          {
+            "ar": [
+              {
+                "ar": "كي فمّا صفر، الجداء صفر."
+              }
+            ]
+          }
+        ]
+      },
+      "experiment": {
+        "urn": [
+          {
+            "id": "p",
+            "value": -1
+          },
+          {
+            "id": "q",
+            "value": 0
+          },
+          {
+            "id": "r",
+            "value": 2
+          },
+          {
+            "id": "s",
+            "value": 3
+          }
+        ],
+        "draw": "simultaneous",
+        "k": 2
+      }
+    },
+    {
+      "id": "tr-2a-s10-urn",
+      "blockId": "var-tr-2a-s10-urn",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "transfer",
+      "forSteps": [
+        "2a/s10",
+        "2a/s15"
+      ],
+      "representation": "EventPicker",
+      "intro": [
+        {
+          "type": "component",
+          "blockId": "var-tr-2a-s10-urn-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.4.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "Urn",
+            "props": {}
+          }
+        }
+      ],
+      "step": {
+        "id": "pick",
+        "blockId": "var-tr-2a-s10-urn-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "event-as-set",
+          "random-variable-law"
+        ],
+        "kind": "component",
+        "component": {
+          "component": "EventPicker",
+          "props": {
+            "valueFn": "product",
+            "event": {
+              "id": "value_eq",
+              "args": {
+                "value": 0
+              }
+            },
+            "reveal": "on_submit",
+            "showFraction": true
+          }
+        },
+        "prompt": {
+          "ar": [
+            {
+              "ar": "صندوق آخر. اختار التيراجات اللي فيهم:"
+            }
+          ],
+          "math": "X = 0"
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "الجداء صفر كي تكون على الأقل كورة وحدة عليها صفر."
+              }
+            ]
+          },
+          {
+            "ar": [
+              {
+                "ar": "ثبّت في كل زوج فيه الكورة اللي عليها صفر."
+              }
+            ]
+          }
+        ]
+      },
+      "experiment": {
+        "urn": [
+          {
+            "id": "p",
+            "value": -1
+          },
+          {
+            "id": "q",
+            "value": 0
+          },
+          {
+            "id": "r",
+            "value": 1
+          },
+          {
+            "id": "s",
+            "value": 3
+          }
+        ],
+        "draw": "simultaneous",
+        "k": 2
+      }
+    },
+    {
+      "id": "pre-simultaneous",
+      "blockId": "var-pre-simultaneous",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "prerequisite",
+      "forSteps": [],
+      "representation": "Urn",
+      "intro": [
+        {
+          "type": "component",
+          "blockId": "var-pre-simultaneous-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.4.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "Urn",
+            "props": {
+              "mode": "select"
+            }
+          }
+        }
+      ],
+      "step": {
+        "id": "same",
+        "blockId": "var-pre-simultaneous-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "simultaneous-draw"
+        ],
+        "kind": "choice",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "ناخذو زوز كور مع بعض. التيراجين هاذوما:"
+            }
+          ],
+          "math": "\\{1 ; 2\\} \\quad \\{2 ; 1\\}"
+        },
+        "options": [
+          {
+            "id": "same",
+            "label": {
+              "fr": "le même tirage"
+            }
+          },
+          {
+            "id": "two",
+            "label": {
+              "fr": "deux tirages différents"
+            },
+            "misconceptionId": "counts_ordered_pairs"
+          }
+        ],
+        "answer": {
+          "type": "option",
+          "id": "same"
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "كي ناخذو الزوز مع بعض، ما فمّاش كورة أولى وكورة ثانية."
+              }
+            ]
+          }
+        ]
+      },
+      "experiment": {
+        "urn": [
+          {
+            "id": "p",
+            "value": 1
+          },
+          {
+            "id": "q",
+            "value": 2
+          },
+          {
+            "id": "r",
+            "value": 3
+          }
+        ],
+        "draw": "simultaneous",
+        "k": 2
+      }
+    },
+    {
+      "id": "pre-sample-space",
+      "blockId": "var-pre-sample-space",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "prerequisite",
+      "forSteps": [],
+      "representation": "OutcomeSpace",
+      "intro": [
+        {
+          "type": "component",
+          "blockId": "var-pre-sample-space-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.4.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "OutcomeSpace",
+            "props": {
+              "layout": "list",
+              "showCount": false
+            }
+          }
+        }
+      ],
+      "step": {
+        "id": "count",
+        "blockId": "var-pre-sample-space-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "sample-space"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "ثلاثة كور، ناخذو زوز مع بعض. هاو التيراجات الكل. قدّاش؟"
+            }
+          ]
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "outcomeCount",
+            "args": {}
+          }
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "عدّ الأسطر في القائمة."
+              }
+            ]
+          }
+        ]
+      },
+      "experiment": {
+        "urn": [
+          {
+            "id": "p",
+            "value": 1
+          },
+          {
+            "id": "q",
+            "value": 2
+          },
+          {
+            "id": "r",
+            "value": 3
+          }
+        ],
+        "draw": "simultaneous",
+        "k": 2
+      }
+    },
+    {
+      "id": "pre-event-as-set",
+      "blockId": "var-pre-event-as-set",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "prerequisite",
+      "forSteps": [],
+      "representation": "EventPicker",
+      "intro": [],
+      "step": {
+        "id": "pick",
+        "blockId": "var-pre-event-as-set-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "event-as-set"
+        ],
+        "kind": "component",
+        "component": {
+          "component": "EventPicker",
+          "props": {
+            "event": {
+              "id": "any_value",
+              "args": {
+                "value": 2
+              }
+            },
+            "reveal": "live",
+            "showFraction": false
+          }
+        },
+        "prompt": {
+          "ar": [
+            {
+              "ar": "الحدث هو مجموعة تيراجات. اختار التيراجات اللي فيهم الكورة هاذي:"
+            }
+          ],
+          "math": "2"
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "ثبّت في كل تيراج: فيه الكورة هاذي ولا لا؟"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "pre-sure-event",
+      "blockId": "var-pre-sure-event",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "prerequisite",
+      "forSteps": [],
+      "representation": "text",
+      "intro": [],
+      "step": {
+        "id": "sure",
+        "blockId": "var-pre-sure-event-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "probability-sure-event"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "التيراجات الكل مع بعضهم: قدّاش احتمالهم؟"
+            }
+          ],
+          "math": "p(\\text{univers}) = ?"
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "probability",
+            "args": {
+              "event": {
+                "id": "or",
+                "args": {
+                  "events": [
+                    {
+                      "id": "any_value",
+                      "args": {
+                        "value": 0
+                      }
+                    },
+                    {
+                      "id": "not",
+                      "args": {
+                        "event": {
+                          "id": "any_value",
+                          "args": {
+                            "value": 0
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "حاجة متأكّدين منها مية بالمية."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "pre-product-zero",
+      "blockId": "var-pre-product-zero",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "prerequisite",
+      "forSteps": [],
+      "representation": "numeric_twin",
+      "intro": [],
+      "step": {
+        "id": "twin",
+        "blockId": "var-pre-product-zero-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "product-zero"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "حساب صغير:"
+            }
+          ],
+          "math": "0 \\times 2 = ?"
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "product",
+            "args": {
+              "factors": [
+                0,
+                2
+              ]
+            }
+          }
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "أي عدد ضرب صفر يعطي صفر."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "pre-complement",
+      "blockId": "var-pre-complement",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "prerequisite",
+      "forSteps": [],
+      "representation": "ComplementView",
+      "intro": [
+        {
+          "type": "component",
+          "blockId": "var-pre-complement-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.4.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "ComplementView",
+            "props": {
+              "event": {
+                "id": "any_value",
+                "args": {
+                  "value": 2
+                }
+              },
+              "direction": "to_complement",
+              "labels": {
+                "event": "C",
+                "complement": "\\bar{C}"
+              }
+            }
+          }
+        }
+      ],
+      "step": {
+        "id": "p",
+        "blockId": "var-pre-complement-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "complement-event"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "حدث آخر: فمّا الكورة اللي عليها اثنين. قدّاش احتمال العكس متاعو؟"
+            }
+          ],
+          "math": "p(\\bar{C}) = ?"
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "probability",
+            "args": {
+              "event": {
+                "id": "not",
+                "args": {
+                  "event": {
+                    "id": "any_value",
+                    "args": {
+                      "value": 2
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "عدّ التيراجات اللي ما فيهمش الكورة هاذي، وقسم على التيراجات الكل."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

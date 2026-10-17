@@ -1,0 +1,440 @@
+{
+  "note": "Converted from the prototype-3 log. The step map is a GUESS (see the map file). Fields listed as unknown are absent from the old log; nothing was invented.",
+  "global": {
+    "ts": "unknown (synthetic, order only)",
+    "durationMs": "unknown for every event",
+    "studentId": "unknown",
+    "contentVersion": "legacy-proto3: steps mapped by a guess onto ex2-0.5.0",
+    "componentEvents": "unknown (the prototype did not log them)",
+    "selfReport": "never asked in the prototype"
+  },
+  "events": [
+    {
+      "index": 0,
+      "legacyLine": 1,
+      "unknown": [
+        "result"
+      ],
+      "derived": [
+        "questionId (from the next event)"
+      ]
+    },
+    {
+      "index": 1,
+      "legacyLine": 2,
+      "unknown": [
+        "value",
+        "durationMs",
+        "misconceptionId",
+        "kind"
+      ],
+      "derived": [
+        "attempt (counted)",
+        "stepId (guessed map)"
+      ]
+    },
+    {
+      "index": 2,
+      "legacyLine": 3,
+      "unknown": [
+        "value",
+        "durationMs",
+        "misconceptionId",
+        "kind"
+      ],
+      "derived": [
+        "attempt (counted)",
+        "stepId (guessed map)"
+      ]
+    },
+    {
+      "index": 3,
+      "legacyLine": 4,
+      "unknown": [
+        "value",
+        "durationMs",
+        "misconceptionId"
+      ],
+      "derived": [
+        "attempt (counted)",
+        "kind (GUESSED map)",
+        "stepId (guessed map)"
+      ]
+    },
+    {
+      "index": 4,
+      "legacyLine": 5,
+      "unknown": [
+        "result"
+      ],
+      "derived": [
+        "questionId (from the next event)"
+      ]
+    },
+    {
+      "index": 5,
+      "legacyLine": 6,
+      "unknown": [
+        "durationMs"
+      ],
+      "derived": [
+        "attempt (counted)",
+        "stepId (guessed map)"
+      ]
+    },
+    {
+      "index": 6,
+      "legacyLine": 6,
+      "unknown": [],
+      "derived": [
+        "whole event (the old log implies the deep dive opened)"
+      ]
+    },
+    {
+      "index": 7,
+      "legacyLine": 7,
+      "unknown": [
+        "value",
+        "durationMs"
+      ],
+      "derived": [
+        "t (old \"transfer_ok\" = mini answered right)",
+        "kind (from current content)"
+      ]
+    },
+    {
+      "index": 8,
+      "legacyLine": 7,
+      "unknown": [],
+      "derived": [
+        "outcome",
+        "miniCorrect"
+      ]
+    },
+    {
+      "index": 9,
+      "legacyLine": 8,
+      "unknown": [
+        "value",
+        "durationMs",
+        "misconceptionId"
+      ],
+      "derived": [
+        "attempt (counted)",
+        "kind (from current content)",
+        "stepId (guessed map)"
+      ]
+    },
+    {
+      "index": 10,
+      "legacyLine": 9,
+      "unknown": [
+        "value",
+        "durationMs",
+        "misconceptionId"
+      ],
+      "derived": [
+        "attempt (counted)",
+        "kind (from current content)",
+        "stepId (guessed map)"
+      ]
+    },
+    {
+      "index": 11,
+      "legacyLine": 10,
+      "unknown": [
+        "value",
+        "durationMs",
+        "misconceptionId"
+      ],
+      "derived": [
+        "attempt (counted)",
+        "kind (from current content)",
+        "stepId (guessed map)"
+      ]
+    },
+    {
+      "index": 12,
+      "legacyLine": 11,
+      "unknown": [
+        "durationMs"
+      ],
+      "derived": [
+        "attempt (counted)",
+        "stepId (guessed map)"
+      ]
+    },
+    {
+      "index": 13,
+      "legacyLine": 11,
+      "unknown": [],
+      "derived": [
+        "whole event (the old log implies the deep dive opened)"
+      ]
+    },
+    {
+      "index": 14,
+      "legacyLine": 12,
+      "unknown": [
+        "value",
+        "durationMs"
+      ],
+      "derived": [
+        "t (old \"transfer_ok\" = mini answered right)",
+        "kind (from current content)"
+      ]
+    },
+    {
+      "index": 15,
+      "legacyLine": 12,
+      "unknown": [],
+      "derived": [
+        "outcome",
+        "miniCorrect"
+      ]
+    },
+    {
+      "index": 16,
+      "legacyLine": 13,
+      "unknown": [],
+      "derived": [
+        "stepId (guessed map)"
+      ]
+    },
+    {
+      "index": 17,
+      "legacyLine": 14,
+      "unknown": [
+        "value",
+        "durationMs",
+        "misconceptionId"
+      ],
+      "derived": [
+        "attempt (counted)",
+        "kind (from current content)",
+        "stepId (guessed map)"
+      ]
+    },
+    {
+      "index": 18,
+      "legacyLine": 15,
+      "unknown": [
+        "result"
+      ],
+      "derived": [
+        "questionId (from the next event)"
+      ]
+    },
+    {
+      "index": 19,
+      "legacyLine": 16,
+      "unknown": [
+        "durationMs"
+      ],
+      "derived": [
+        "attempt (counted)",
+        "stepId (guessed map)"
+      ]
+    },
+    {
+      "index": 20,
+      "legacyLine": 16,
+      "unknown": [],
+      "derived": [
+        "whole event (the old log implies the deep dive opened)"
+      ]
+    },
+    {
+      "index": 21,
+      "legacyLine": 17,
+      "unknown": [
+        "value",
+        "durationMs",
+        "misconceptionId"
+      ],
+      "derived": [
+        "kind (from current content)",
+        "attempt (counted)"
+      ]
+    },
+    {
+      "index": 22,
+      "legacyLine": 18,
+      "unknown": [
+        "value",
+        "durationMs"
+      ],
+      "derived": [
+        "t (old \"transfer_ok\" = mini answered right)",
+        "kind (from current content)"
+      ]
+    },
+    {
+      "index": 23,
+      "legacyLine": 18,
+      "unknown": [],
+      "derived": [
+        "outcome",
+        "miniCorrect"
+      ]
+    },
+    {
+      "index": 24,
+      "legacyLine": 19,
+      "unknown": [],
+      "derived": [
+        "stepId (guessed map)"
+      ]
+    },
+    {
+      "index": 25,
+      "legacyLine": 20,
+      "unknown": [
+        "value",
+        "durationMs",
+        "misconceptionId"
+      ],
+      "derived": [
+        "attempt (counted)",
+        "kind (from current content)",
+        "stepId (guessed map)"
+      ]
+    },
+    {
+      "index": 26,
+      "legacyLine": 21,
+      "unknown": [
+        "value",
+        "durationMs",
+        "misconceptionId"
+      ],
+      "derived": [
+        "attempt (counted)",
+        "kind (from current content)",
+        "stepId (guessed map)"
+      ]
+    },
+    {
+      "index": 27,
+      "legacyLine": 22,
+      "unknown": [
+        "durationMs"
+      ],
+      "derived": [
+        "attempt (counted)",
+        "stepId (guessed map)"
+      ]
+    },
+    {
+      "index": 28,
+      "legacyLine": 22,
+      "unknown": [],
+      "derived": [
+        "whole event (the old log implies the deep dive opened)"
+      ]
+    },
+    {
+      "index": 29,
+      "legacyLine": 23,
+      "unknown": [
+        "value",
+        "durationMs"
+      ],
+      "derived": [
+        "t (old \"transfer_ok\" = mini answered right)",
+        "kind (from current content)"
+      ]
+    },
+    {
+      "index": 30,
+      "legacyLine": 23,
+      "unknown": [],
+      "derived": [
+        "outcome",
+        "miniCorrect"
+      ]
+    },
+    {
+      "index": 31,
+      "legacyLine": 24,
+      "unknown": [
+        "value",
+        "durationMs",
+        "misconceptionId"
+      ],
+      "derived": [
+        "attempt (counted)",
+        "kind (from current content)",
+        "stepId (guessed map)"
+      ]
+    },
+    {
+      "index": 32,
+      "legacyLine": 25,
+      "unknown": [
+        "value",
+        "durationMs",
+        "misconceptionId"
+      ],
+      "derived": [
+        "attempt (counted)",
+        "kind (from current content)",
+        "stepId (guessed map)"
+      ]
+    },
+    {
+      "index": 33,
+      "legacyLine": 26,
+      "unknown": [
+        "durationMs"
+      ],
+      "derived": [
+        "attempt (counted)",
+        "stepId (guessed map)"
+      ]
+    },
+    {
+      "index": 34,
+      "legacyLine": 26,
+      "unknown": [],
+      "derived": [
+        "whole event (the old log implies the deep dive opened)"
+      ]
+    },
+    {
+      "index": 35,
+      "legacyLine": 27,
+      "unknown": [
+        "value",
+        "durationMs"
+      ],
+      "derived": [
+        "t (old \"transfer_ok\" = mini answered right)",
+        "kind (from current content)"
+      ]
+    },
+    {
+      "index": 36,
+      "legacyLine": 27,
+      "unknown": [],
+      "derived": [
+        "outcome",
+        "miniCorrect"
+      ]
+    },
+    {
+      "index": 37,
+      "legacyLine": 28,
+      "unknown": [
+        "value",
+        "durationMs",
+        "misconceptionId"
+      ],
+      "derived": [
+        "attempt (counted)",
+        "kind (from current content)",
+        "stepId (guessed map)"
+      ]
+    }
+  ]
+}

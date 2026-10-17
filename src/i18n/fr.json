@@ -1,0 +1,179 @@
+{
+  "bidiTest": {
+    "title": "Test : arabe, termes français et maths",
+    "unreviewed": "Contenu de test, non relu par un enseignant.",
+    "switchLocale": "دارجة",
+    "deviceInfo": "{{os}} {{version}} · I18nManager.isRTL={{rtl}}",
+    "sectionFeed": "Exemple de fil de leçon",
+    "sectionSentences": "Phrases : 4 stratégies d'isolation",
+    "sectionMath": "Blocs de maths : natif vs KaTeX",
+    "sectionStress": "Test de charge (20 blocs)",
+    "strategy": {
+      "none": "aucune isolation (référence)",
+      "unicode": "caractères Unicode (RLM + LRI…PDI)",
+      "nested": "<Text> imbriqué, writingDirection ltr",
+      "both": "Unicode + <Text> imbriqué (recommandé)"
+    },
+    "renderMs": "{{renderer}} : {{ms}} ms",
+    "renderPending": "{{renderer}} : …",
+    "renderError": "{{renderer}} : erreur, texte brut affiché",
+    "stressRun": "20 × {{renderer}}",
+    "stressResult": "{{renderer}} : {{count}} blocs en {{ms}} ms",
+    "stressRunning": "{{renderer}} : en cours…",
+    "stressClear": "Effacer",
+    "tab": {
+      "feed": "Fil",
+      "sentences": "Phrases",
+      "math": "Maths",
+      "stress": "Charge"
+    }
+  },
+  "app": {
+    "tab": {
+      "lesson": "Leçon",
+      "demo": "Composants",
+      "bidi": "Test bidi",
+      "proba": "Proba"
+    }
+  },
+  "lesson": {
+    "title": "Exercice 2 : probabilités",
+    "unreviewed": "Brouillon : contenu non relu par un enseignant.",
+    "correct": "C'est juste.",
+    "wrong": "Pas tout à fait. Regarde encore.",
+    "invalidInput": "L'écriture est incomplète. Vérifie et réessaie.",
+    "notSure": "Je ne sais pas",
+    "ladderEnd": "Tu as vu tous les indices. Tu peux voir la réponse.",
+    "revealed": "Voici la réponse :",
+    "noCannedAnswer": "Pas encore de réponse prête pour ça. Ta question est enregistrée.",
+    "deepDiveTitle": "Pas à pas",
+    "returnToQuestion": "On revient à la question ↓",
+    "askMode": {
+      "explain": "Explique-moi",
+      "why": "Pourquoi ?",
+      "example": "Un exemple"
+    },
+    "componentFallback": "Cette partie n'est pas encore prête.",
+    "writeupTitle": "Sur ta copie",
+    "done": "Question terminée.",
+    "hint": "Indice",
+    "showAnswer": "Montre-moi la réponse",
+    "back": "Retour à la question",
+    "check": "Vérifier",
+    "clear": "Effacer tout",
+    "backspace": "Effacer un caractère",
+    "askPlaceholder": "Pose ta question…",
+    "askSend": "Envoyer",
+    "menuTitle": "Que veux-tu ?",
+    "cancel": "Annuler",
+    "fromLesson": "Du cours",
+    "draft": "brouillon",
+    "events": "Événements",
+    "loadError": "Contenu invalide :",
+    "longPressHint": "Appui long pour demander une explication",
+    "part": "Question",
+    "showKeys": "Afficher les touches",
+    "hideKeys": "Masquer les touches",
+    "skip": "Passer",
+    "skipKnows": "Je sais faire",
+    "skipNotNow": "Pas maintenant",
+    "skipped": "Exercice passé.",
+    "askMore": "Demander",
+    "tableUpdated": "Tableau complété ↓",
+    "lawSolved": "trouvé",
+    "lawRevealed": "montré",
+    "changeMethod": "Essayer une autre façon",
+    "simpler": "Quelque chose de plus simple",
+    "teacherNoteSaved": "Note gardée pour ton enseignant.",
+    "compressOn": "D'accord : on passe les explications, on garde les questions.",
+    "clarify": {
+      "counting": "Le comptage",
+      "why": "Le pourquoi",
+      "link": "Le lien avec le résultat d'avant"
+    },
+    "selfReport": {
+      "understood": "J'ai compris pourquoi",
+      "guessed": "J'ai deviné",
+      "dismissed": "Pas maintenant"
+    },
+    "card": {
+      "clarify": {
+        "title": "Qu'est-ce qui n'est pas clair ?"
+      },
+      "self_report": {
+        "title": "Tu as compris pourquoi, ou tu as deviné ?"
+      },
+      "compress": {
+        "title": "Ça va bien. On raccourcit les explications ?",
+        "yes": "Oui, plus court",
+        "no": "Non, pas à pas"
+      },
+      "repair": {
+        "title": "Tu veux voir ça autrement ?",
+        "yes": "Oui, montre-moi",
+        "no": "Non, je réessaie"
+      },
+      "teacher_note": {
+        "title": "On garde une note pour ton enseignant et on continue ?",
+        "yes": "Oui",
+        "no": "Non"
+      },
+      "closed": "Passé"
+    },
+    "variantStart": {
+      "alternative": "Autrement",
+      "transfer": "Même idée, question changée",
+      "simpler": "Un exemple plus simple",
+      "prerequisite": "D'abord une base"
+    },
+    "jumpToCurrent": "Revenir à la question ↓"
+  },
+  "proba": {
+    "urn": {
+      "pick": "Choisis les boules tirées.",
+      "draw": "Tirage :"
+    },
+    "outcomes": {
+      "count": "Nombre de tirages :",
+      "tapHint": "Touche un tirage pour voir sa valeur.",
+      "showAll": "Tout afficher",
+      "showLess": "Réduire",
+      "legend": "Touche une valeur pour voir ses tirages."
+    },
+    "picker": {
+      "hint": "Touche tous les tirages qui réalisent l'événement, puis vérifie.",
+      "selected": "Choisis :",
+      "check": "Vérifier",
+      "correct": "Juste : ce sont tous les tirages.",
+      "extra": "Les tirages marqués ne réalisent pas l'événement.",
+      "missed": "Il manque des tirages :",
+      "probability": "Probabilité :",
+      "exhausted": "Utilise un indice ou pose une question.",
+      "solution": "Les tirages qui réalisent l'événement :"
+    },
+    "complement": {
+      "hint": "Touche la partie marquée « ? ».",
+      "showOutcomes": "Montrer les tirages",
+      "hideOutcomes": "Cacher les tirages"
+    },
+    "law": {
+      "fillHint": "Choisis une case et écris sa probabilité.",
+      "assignHint": "Choisis un tirage, puis touche sa valeur.",
+      "wrongAssign": "Ce n'est pas la valeur de ce tirage. Recalcule.",
+      "sum": "Somme :",
+      "sumOk": "La somme vaut 1 : la loi est complète.",
+      "sumNotOne": "La somme doit valoir 1. Vérifie les cases marquées.",
+      "wrongCells": "Certaines cases sont fausses : corrige-les.",
+      "done": "Juste : la loi est complète.",
+      "unassigned": "Tirages restants :"
+    },
+    "chart": {
+      "tapBar": "Touche une barre pour voir ses tirages.",
+      "compute": "Calculer"
+    },
+    "perf": {
+      "title": "Mesure des rendus",
+      "reset": "Effacer"
+    }
+  }
+}

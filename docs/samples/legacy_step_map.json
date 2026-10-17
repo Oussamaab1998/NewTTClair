@@ -1,0 +1,36 @@
+{
+  "note": "GUESS by the dev team, not verified: the prototype-3 step ids mapped onto the current Exercise 2 content. Prototype 'q' steps were choices and 'in' steps typed inputs; the current steps differ (2a/s10 is now an EventPicker). q1, q2, in1 belong to 1.a, which is not in our content (null = unknown step). 'kinds' gives GUESSED answer kinds for steps not in our content: in1 was an 'in' (typed input) step in the prototype.",
+  "guess": true,
+  "contentVersion": "legacy-proto3",
+  "questions": {
+    "q1": "1a",
+    "q2": "1a",
+    "in1": "1a",
+    "q3": "1b",
+    "q4": "1b",
+    "in2": "1b",
+    "q5": "2a",
+    "mini": "2a",
+    "q6": "2a",
+    "q7": "2a"
+  },
+  "steps": {
+    "q1": null,
+    "q2": null,
+    "in1": null,
+    "q3": "s3",
+    "q4": "s7",
+    "in2": "s8",
+    "q5": "s6",
+    "q6": "s10",
+    "q7": "s15"
+  },
+  "deepDives": {
+    "compl": "au_moins_contraire",
+    "pairs": "pairs_listing",
+    "prod0": "product_zero"
+  },
+  "kinds": {
+    "in1": "typed"
+  }
+}

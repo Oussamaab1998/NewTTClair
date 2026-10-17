@@ -1,0 +1,1700 @@
+/**
+ * Lesson state machine: a pure reducer from student actions to feed items and
+ * event drafts. No React, no clock, no storage: the caller passes `at`
+ * (monotonic ms) and stamps the events. Same actions => same feed, which is
+ * what replay relies on (see replay.ts).
+ *
+ * The reducer shows authored content and applies decisions; it does not choose
+ * reactions. At a decision point (wrong answer, "ما نعرفش", a detour ending, a
+ * correct main answer, a request button, a card answer) it sets `pending`; the
+ * planner (src/planner, via orchestrate.ts) decides, and `apply_plan` applies
+ * the validated decision, logged as a `plan` event.
+ *
+ * Rules kept here (content and hard rules, not choices):
+ * - Wrong answer: feedback from the option / known wrong value; the question stays active and last.
+ * - Deep dives and variants nest (max depth 3) and end by re-asking the question below them.
+ * - The answer is revealed only after the whole hint ladder (CLAUDE.md rule 6).
+ * - Task components (EventPicker, LawBuilder) block the path like a question.
+ */
+import { add, equals } from '../../engine/rational';
+import { fractionToLatex, parseNumeric } from '../../engine/format';
+import { componentKind } from '../../components/registry';
+import type { ComponentSpec, JsonObject } from '../../components/contract';
+import {
+  deepDiveContext,
+  deepDiveRepresentation,
+  isTaskStep,
+  stepKey,
+  variantContext,
+  type AskedStep,
+  type LoadedExercise,
+  type ResolvedAnswer,
+  type TaskStep,
+} from '../../content/loader';
+import type {
+  Asks,
+  Block,
+  ClarifyChoice,
+  Exercise,
+  Question,
+  Rich,
+  Step,
+  Variant,
+} from '../../content/schema';
+import type { Experiment } from '../../engine/calls';
+import {
+  buildMenu,
+  rejectAction,
+  validateDecision,
+  type PlannerMenu,
+} from '../../planner/planner';
+import type { Action, Decision } from '../../planner/schema';
+import { catalogFor, type Catalog } from '../../state/catalog';
+import type {
+  AskRef,
+  CardPurpose,
+  EventDraft,
+  FeedItem,
+  Frame,
+  LessonAction,
+  LessonState,
+  Reaction,
+  StepResult,
+  UiMessage,
+} from './types';
+
+export const MAX_DEPTH = 3;
+/** A task mini question with this many wrong tries "did not help" (product owner, Phase 3). */
+export const TASK_MINI_WRONG_TRIES_NOT_HELPED = 2;
+const SHORT_TEXT = 500;
+
+type DeepDive = Exercise['deepDives'][number];
+
+/** A step that gets a card: a question, or a task component. */
+export type FrameStep = AskedStep | TaskStep;
+
+export interface LessonContent {
+  loaded: LoadedExercise;
+  question: Question;
+  steps: Map<string, FrameStep>;
+  deepDives: Map<string, DeepDive>;
+  variants: Map<string, Variant>;
+  /** Long-press targets: blockId -> verified answers. */
+  asksByBlock: Map<string, Asks | undefined>;
+  /** What the planner may choose from, and how logged steps map to skills. */
+  menu: PlannerMenu;
+  catalog: Catalog;
+}
+
+export function buildContent(
+  loaded: LoadedExercise,
+  questionId: string,
+): LessonContent {
+  const question = loaded.exercise.parts.find(q => q.id === questionId);
+  if (!question) {
+    throw new Error(`unknown question ${questionId}`);
+  }
+  const steps = new Map<string, FrameStep>();
+  const asksByBlock = new Map<string, Asks | undefined>();
+  for (const g of question.groups) {
+    for (const s of g.steps) {
+      if (s.kind === 'choice' || s.kind === 'typed' || isTaskStep(s)) {
+        steps.set(stepKey.main(question.id, s.id), s as FrameStep);
+      }
+      if (s.kind === 'text') {
+        asksByBlock.set(s.blockId, s.asks);
+      }
+    }
+  }
+  const deepDives = new Map<string, DeepDive>();
+  const indexBlocks = (blocks: readonly Block[]) => {
+    for (const b of blocks) {
+      if (b.type === 'tutor_text') {
+        asksByBlock.set(b.blockId, b.asks);
+      } else if (b.type === 'deep_dive') {
+        indexBlocks(b.blocks);
+      }
+    }
+  };
+  for (const d of loaded.exercise.deepDives) {
+    deepDives.set(d.id, d);
+    indexBlocks(d.blocks);
+    if (d.mini) {
+      steps.set(stepKey.mini(d.id), d.mini);
+    }
+  }
+  const variants = new Map<string, Variant>();
+  for (const v of loaded.exercise.variants) {
+    variants.set(v.id, v);
+    indexBlocks(v.intro);
+    steps.set(stepKey.variant(v.id), v.step as FrameStep);
+  }
+  return {
+    loaded,
+    question,
+    steps,
+    deepDives,
+    variants,
+    asksByBlock,
+    menu: buildMenu(loaded),
+    catalog: catalogFor(loaded),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Draft helpers (the reducer copies state once, then mutates the copy).
+
+interface Draft {
+  c: LessonContent;
+  s: LessonState;
+  events: EventDraft[];
+  at: number;
+}
+
+function nextKey(d: Draft, prefix: string): string {
+  d.s.seq += 1;
+  return `${prefix}-${d.s.seq}`;
+}
+
+type NewItem = FeedItem extends infer T
+  ? T extends FeedItem
+    ? Omit<T, 'key'>
+    : never
+  : never;
+
+function top(d: Draft): Frame | undefined {
+  return d.s.stack[d.s.stack.length - 1];
+}
+
+/** Appends items; if a question is active its card stays last. */
+function append(d: Draft, ...items: NewItem[]) {
+  const frame = top(d);
+  const last = d.s.items[d.s.items.length - 1];
+  const keepLast =
+    frame !== undefined && last?.key === frame.cardKey ? last : undefined;
+  if (keepLast) {
+    d.s.items.pop();
+  }
+  for (const item of items) {
+    d.s.items.push({ ...item, key: nextKey(d, item.kind) } as FeedItem);
+  }
+  if (keepLast) {
+    d.s.items.push(keepLast);
+  }
+}
+
+function updateCard(
+  d: Draft,
+  key: string,
+  patch: Partial<Extract<FeedItem, { kind: 'question' }>>,
+) {
+  d.s.items = d.s.items.map(item =>
+    item.key === key && item.kind === 'question' ? { ...item, ...patch } : item,
+  );
+}
+
+function stepOf(d: Draft, frame: Frame): FrameStep {
+  const step = d.c.steps.get(frame.stepKey);
+  if (!step) {
+    throw new Error(`missing step ${frame.stepKey}`);
+  }
+  return step;
+}
+
+function answerOf(d: Draft, frame: Frame): ResolvedAnswer {
+  const a = d.c.loaded.answers.get(frame.stepKey);
+  if (!a) {
+    throw new Error(`missing answer ${frame.stepKey}`);
+  }
+  return a;
+}
+
+function eventBase(d: Draft, frame: Frame | undefined) {
+  return {
+    questionId: d.s.questionId,
+    stepId: frame?.stepId ?? 'none',
+  };
+}
+
+function duration(d: Draft, frame: Frame) {
+  return { durationMs: Math.max(0, Math.round(d.at - frame.shownAt)) };
+}
+
+const withReaction = (reaction: Reaction | undefined) =>
+  reaction ? { reaction } : {};
+
+function showCard(d: Draft, frame: Frame) {
+  const step = stepOf(d, frame);
+  frame.cardKey = nextKey(d, 'question');
+  frame.shownAt = d.at;
+  d.s.items.push({
+    key: frame.cardKey,
+    kind: 'question',
+    depth: frame.depth,
+    ref: frame.ref,
+    status: 'active',
+    attempts: frame.attempts,
+    hintLevel: frame.hintLevel,
+    hintCount: step.hints?.length ?? 0,
+    canGoBack: frame.ref.scope !== 'main',
+    ...(step.kind === 'component' && step.optional && { optional: true }),
+  });
+  if (step.kind === 'component') {
+    logShown(d, step.component, step.blockId, frame.stepId);
+  }
+}
+
+/** Which representation the student saw (derived state builds representationsTried from it). */
+function logShown(
+  d: Draft,
+  spec: ComponentSpec,
+  blockId: string,
+  stepId: string,
+) {
+  d.events.push({
+    questionId: d.s.questionId,
+    stepId,
+    t: 'component_event',
+    component: spec.component,
+    name: 'shown',
+    payload: { blockId },
+  });
+}
+
+function pushFrame(d: Draft, ref: AskRef, depth: number, reaction?: Reaction) {
+  const key =
+    ref.scope === 'main'
+      ? stepKey.main(ref.questionId, ref.stepId)
+      : ref.scope === 'mini'
+      ? stepKey.mini(ref.deepDiveId)
+      : stepKey.variant(ref.variantId);
+  const frame: Frame = {
+    ref,
+    stepKey: key,
+    stepId: ref.scope === 'main' ? ref.stepId : key,
+    depth,
+    attempts: 0,
+    hintLevel: 0,
+    cardKey: '',
+    shownAt: d.at,
+    ...(reaction && { reaction }),
+  };
+  d.s.stack.push(frame);
+  showCard(d, frame);
+}
+
+/** Copies the frame being changed so earlier states stay untouched. */
+function editTop(d: Draft): Frame | undefined {
+  const frame = top(d);
+  if (!frame) {
+    return undefined;
+  }
+  const copy = { ...frame };
+  d.s.stack[d.s.stack.length - 1] = copy;
+  return copy;
+}
+
+function setPending(
+  d: Draft,
+  trigger: NonNullable<LessonState['pending']>['trigger'],
+  stepId: string,
+) {
+  d.s.pending = { trigger, questionId: d.s.questionId, stepId };
+}
+
+/** Open non-blocking cards close when the student moves on without answering them. */
+function closeOpenCards(d: Draft) {
+  if (!d.s.items.some(i => i.kind === 'choice_card' && i.status === 'open')) {
+    return;
+  }
+  d.s.items = d.s.items.map(i =>
+    i.kind === 'choice_card' && i.status === 'open' && !i.blocking
+      ? { ...i, status: 'closed' }
+      : i,
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Content -> feed items.
+
+function blockItems(
+  d: Draft,
+  blocks: readonly Block[],
+  depth: number,
+  experiment?: Experiment,
+) {
+  for (const b of blocks) {
+    switch (b.type) {
+      case 'tutor_text':
+        append(d, {
+          kind: 'tutor',
+          depth,
+          rich: b.text,
+          blockId: b.blockId,
+          longPress: b.longPress ?? true,
+          ...(b.asks && { asks: b.asks }),
+        });
+        break;
+      case 'math':
+        append(d, { kind: 'math', depth, latex: b.latex, blockId: b.blockId });
+        break;
+      case 'feedback':
+        append(d, { kind: 'feedback', depth, tone: b.kind, rich: b.text });
+        break;
+      case 'student_bubble':
+        append(d, {
+          kind: 'student',
+          depth,
+          content: { kind: 'rich', rich: b.text },
+        });
+        break;
+      case 'component':
+        // Tasks inside deep dives and intros are rejected by the loader.
+        if (componentKind(b.spec) === 'visual') {
+          appendComponent(d, b.spec, b.blockId, depth, undefined, experiment);
+        } else {
+          componentFallback(d, b.spec.component, depth);
+        }
+        break;
+      default:
+        // recap / self_report / skip_choice / nested blocks: not in Phase 1b.
+        componentFallback(d, `block:${b.type}`, depth);
+    }
+  }
+}
+
+function appendComponent(
+  d: Draft,
+  spec: ComponentSpec,
+  blockId: string,
+  depth: number,
+  stepId?: string,
+  experiment?: Experiment,
+) {
+  const id = stepId ?? top(d)?.stepId ?? 'none';
+  append(d, {
+    kind: 'component',
+    depth,
+    spec,
+    blockId,
+    stepId: id,
+    ...(experiment && { experiment }),
+  });
+  logShown(d, spec, blockId, id);
+}
+
+/**
+ * A solved (or revealed) EventPicker fills its value's cell in the progressive
+ * law table: an updated copy is appended, the older one shrinks to one line.
+ * The source says whether the student found it or was shown it.
+ */
+function fillLaw(d: Draft, step: TaskStep, source: 'solved' | 'revealed') {
+  if (step.fillsLaw === undefined) {
+    return;
+  }
+  const event = step.component.props.event as { args?: { value?: unknown } };
+  const value = event.args?.value;
+  let index = d.s.items.length - 1;
+  while (index >= 0) {
+    const i = d.s.items[index]!;
+    if (i.kind === 'component' && i.blockId === step.fillsLaw) {
+      break;
+    }
+    index -= 1;
+  }
+  const table = d.s.items[index];
+  if (typeof value !== 'number' || table?.kind !== 'component') {
+    return;
+  }
+  const filled = [
+    ...((table.lessonState?.filled as JsonObject[] | undefined) ?? []),
+    { value, source },
+  ];
+  d.s.items[index] = { ...table, superseded: true };
+  d.s.items.push({
+    key: nextKey(d, 'component'),
+    kind: 'component',
+    depth: table.depth,
+    spec: table.spec,
+    blockId: table.blockId,
+    stepId: table.stepId,
+    lessonState: { filled },
+  });
+  d.events.push({
+    questionId: d.s.questionId,
+    stepId: step.id,
+    t: 'component_event',
+    component: table.spec.component,
+    name: 'cell_filled_by_lesson',
+    payload: { blockId: table.blockId, value, source },
+  });
+}
+
+function componentFallback(d: Draft, component: string, depth: number) {
+  append(d, { kind: 'component_fallback', depth, component });
+  d.events.push({
+    ...eventBase(d, top(d)),
+    t: 'component_error',
+    component,
+    reason: 'unknown_component',
+    detail: 'not in the Phase 1b registry',
+  });
+}
+
+/** Appends main-path steps from the cursor until the next asked step (or the end). */
+function advance(d: Draft) {
+  const groups = d.c.question.groups;
+  for (;;) {
+    const group = groups[d.s.cursor.group];
+    if (!group) {
+      finish(d);
+      return;
+    }
+    const step: Step | undefined = group.steps[d.s.cursor.step];
+    if (!step) {
+      d.s.cursor = { group: d.s.cursor.group + 1, step: 0 };
+      continue;
+    }
+    d.s.cursor = { ...d.s.cursor, step: d.s.cursor.step + 1 };
+    switch (step.kind) {
+      case 'text':
+        // Compressed (opt-in): explanation blocks are skipped, questions stay.
+        if (!d.s.compressed) {
+          append(d, {
+            kind: 'tutor',
+            depth: 0,
+            rich: step.text,
+            blockId: step.blockId,
+            longPress: true,
+            ...(step.asks && { asks: step.asks }),
+          });
+        }
+        break;
+      case 'math':
+        if (!d.s.compressed) {
+          append(d, {
+            kind: 'math',
+            depth: 0,
+            latex: step.latex,
+            blockId: step.blockId,
+          });
+        }
+        break;
+      case 'choice':
+      case 'typed':
+        pushFrame(
+          d,
+          { scope: 'main', questionId: d.c.question.id, stepId: step.id },
+          0,
+        );
+        return;
+      case 'component':
+        if (isTaskStep(step)) {
+          pushFrame(
+            d,
+            { scope: 'main', questionId: d.c.question.id, stepId: step.id },
+            0,
+          );
+          return;
+        }
+        if (componentKind(step.component)) {
+          appendComponent(d, step.component, step.blockId, 0, step.id);
+        } else {
+          componentFallback(d, step.component.component, 0);
+        }
+        break;
+      default:
+        componentFallback(d, `step:${step.kind}`, 0);
+    }
+  }
+}
+
+function finish(d: Draft) {
+  append(d, {
+    kind: 'writeup',
+    depth: 0,
+    lines: d.c.question.writeup.modelFr,
+  });
+  append(d, { kind: 'done', depth: 0 });
+  d.s.finished = true;
+}
+
+// ---------------------------------------------------------------------------
+// Detours: deep dives and variants. They pause the card below and re-ask it after.
+
+/** The step's deep dive id when one could open now (exists, below the depth cap). */
+function availableDeepDive(d: Draft, frame: Frame): string | undefined {
+  const id = stepOf(d, frame).deepDiveId;
+  if (
+    id === undefined ||
+    frame.depth >= MAX_DEPTH ||
+    d.s.shownDeepDives.includes(id) ||
+    !d.c.deepDives.has(id)
+  ) {
+    return undefined;
+  }
+  return id;
+}
+
+function openDeepDive(d: Draft, parent: Frame, id: string, reaction: Reaction) {
+  const dive = d.c.deepDives.get(id)!;
+  const depth = parent.depth + 1;
+  d.s.shownDeepDives = [...d.s.shownDeepDives, id];
+  updateCard(d, parent.cardKey, { status: 'paused' });
+  d.events.push({
+    ...eventBase(d, parent),
+    t: 'component_event',
+    component: 'DeepDive',
+    name: 'shown',
+    payload: { deepDiveId: id, representation: deepDiveRepresentation(dive) },
+    reaction,
+  });
+  // Pushed directly: the paused card is no longer kept last, deep-dive content goes after it.
+  d.s.items.push({
+    key: nextKey(d, 'deep_dive_start'),
+    kind: 'deep_dive_start',
+    depth,
+    deepDiveId: id,
+  });
+  // A deep dive with its own small urn: its components use it.
+  const own = dive.experiment
+    ? deepDiveContext(d.c.loaded.exercise, dive).experiment
+    : undefined;
+  blockItems(d, dive.blocks, depth, own);
+  if (dive.mini) {
+    pushFrame(d, { scope: 'mini', deepDiveId: id }, depth, reaction);
+  } else {
+    // No mini question: the deep dive ends at once (still logged as completed).
+    d.events.push({
+      ...eventBase(d, parent),
+      t: 'deepdive',
+      deepDiveId: id,
+      outcome: 'completed',
+      reaction,
+    });
+    setPending(d, 'detour_closed', parent.stepId);
+  }
+}
+
+function experimentOf(d: Draft, v: Variant): Experiment | undefined {
+  return variantContext(d.c.loaded.exercise, v).experiment;
+}
+
+/** Opens an authored variant over the current card (or alone, after a solved step). */
+function openVariant(d: Draft, v: Variant, reaction: Reaction) {
+  const parent = top(d);
+  const depth = parent ? parent.depth + 1 : 0;
+  d.s.shownVariants = [...d.s.shownVariants, v.id];
+  const stepId = parent?.stepId ?? stepKey.variant(v.id);
+  d.events.push({
+    questionId: d.s.questionId,
+    stepId,
+    t: 'component_event',
+    component: 'Variant',
+    name: 'shown',
+    payload: {
+      variantId: v.id,
+      kind: v.kind,
+      representation: v.representation,
+      ...(v.round !== undefined && { round: v.round }),
+    },
+    reaction,
+  });
+  if (parent) {
+    updateCard(d, parent.cardKey, { status: 'paused' });
+  }
+  // Pushed directly (like deep dives): the paused card stays where it is.
+  d.s.items.push({
+    key: nextKey(d, 'variant_start'),
+    kind: 'variant_start',
+    depth,
+    variantKind: v.kind,
+  });
+  // The intro belongs to the variant; its frame is pushed after so the card stays last.
+  const experiment = v.experiment ? experimentOf(d, v) : undefined;
+  for (const b of v.intro) {
+    if (b.type === 'component' && componentKind(b.spec) === 'visual') {
+      d.s.items.push({
+        key: nextKey(d, 'component'),
+        kind: 'component',
+        depth,
+        spec: b.spec,
+        blockId: b.blockId,
+        stepId: stepKey.variant(v.id),
+        ...(experiment && { experiment }),
+      });
+      logShown(d, b.spec, b.blockId, stepKey.variant(v.id));
+    } else {
+      blockItems(d, [b], depth, experiment);
+    }
+  }
+  pushFrame(d, { scope: 'variant', variantId: v.id }, depth, reaction);
+}
+
+function closeVariant(
+  d: Draft,
+  outcome: 'correct' | 'wrong' | 'revealed' | 'abandoned',
+) {
+  const frame = d.s.stack.pop()!;
+  if (frame.ref.scope !== 'variant') {
+    throw new Error('closeVariant without a variant');
+  }
+  const v = d.c.variants.get(frame.ref.variantId)!;
+  const parent = top(d);
+  const reaction = withReaction(frame.reaction);
+  if (v.kind === 'transfer' && outcome !== 'abandoned') {
+    // The only source of transfer events: a changed version of a solved task.
+    for (const skillId of v.step.skills.slice(0, 3)) {
+      d.events.push({
+        ...eventBase(d, frame),
+        t: 'transfer',
+        skillId,
+        correct: outcome === 'correct',
+        variantId: v.id,
+        hintsUsed: Math.min(3, frame.hintLevel),
+        ...reaction,
+      });
+    }
+  }
+  if (v.kind === 'simpler' && v.round !== undefined) {
+    d.events.push({
+      ...eventBase(d, frame),
+      t: 'example_round',
+      templateId: v.id,
+      round: v.round,
+      outcome:
+        outcome === 'correct'
+          ? 'correct'
+          : outcome === 'abandoned'
+          ? 'skipped'
+          : 'wrong',
+      ...reaction,
+    });
+  }
+  const stepId = parent?.stepId ?? frame.stepId;
+  d.events.push({
+    questionId: d.s.questionId,
+    stepId,
+    t: 'component_event',
+    component: 'Variant',
+    name: 'closed',
+    payload: { variantId: v.id, kind: v.kind, outcome },
+    ...reaction,
+  });
+  setPending(d, 'detour_closed', stepId);
+}
+
+function returnTo(d: Draft, parent: Frame) {
+  append(d, { kind: 'return', depth: parent.depth });
+  const copy = { ...parent };
+  d.s.stack[d.s.stack.length - 1] = copy;
+  showCard(d, copy);
+}
+
+/** Closes the deep dive whose mini frame is on top; the planner decides what follows. */
+function closeDeepDive(
+  d: Draft,
+  outcome: 'completed' | 'abandoned',
+  miniCorrect?: boolean,
+  helped?: boolean,
+) {
+  const mini = d.s.stack.pop()!;
+  const parent = top(d)!;
+  if (mini.ref.scope !== 'mini') {
+    throw new Error('closeDeepDive without a deep dive');
+  }
+  d.events.push({
+    ...eventBase(d, parent),
+    t: 'deepdive',
+    deepDiveId: mini.ref.deepDiveId,
+    outcome,
+    ...(miniCorrect !== undefined && { miniCorrect }),
+    ...(helped !== undefined && { helped }),
+    ...withReaction(mini.reaction),
+  });
+  setPending(d, 'detour_closed', parent.stepId);
+}
+
+// ---------------------------------------------------------------------------
+// Hints.
+
+function giveHint(d: Draft, frame: Frame, reaction: Reaction | null): boolean {
+  const hints = stepOf(d, frame).hints ?? [];
+  const next = hints[frame.hintLevel];
+  if (!next) {
+    return false;
+  }
+  frame.hintLevel += 1;
+  const level = frame.hintLevel as 1 | 2 | 3;
+  d.events.push({
+    ...eventBase(d, frame),
+    t: 'hint',
+    level,
+    ...(reaction && { reaction }),
+  });
+  updateCard(d, frame.cardKey, { hintLevel: frame.hintLevel });
+  append(d, {
+    kind: 'hint',
+    depth: frame.depth,
+    level,
+    total: hints.length,
+    rich: next,
+  });
+  return true;
+}
+
+// ---------------------------------------------------------------------------
+// Step completion.
+
+function completeStep(d: Draft, frame: Frame, correct: boolean) {
+  if (frame.ref.scope === 'mini') {
+    const first = correct && frame.attempts === 0;
+    // Task minis: revealed, or 2 wrong tries, means the deep dive did not help.
+    const helped =
+      stepOf(d, frame).kind === 'component'
+        ? correct && frame.attempts < TASK_MINI_WRONG_TRIES_NOT_HELPED
+        : first;
+    closeDeepDive(d, 'completed', first, helped);
+    return;
+  }
+  if (frame.ref.scope === 'variant') {
+    closeVariant(
+      d,
+      !correct ? 'revealed' : frame.attempts === 0 ? 'correct' : 'wrong',
+    );
+    return;
+  }
+  d.s.stack.pop();
+  if (correct) {
+    // The planner may add a self-report, a transfer or an offer before moving on.
+    setPending(d, 'correct', frame.stepId);
+  } else {
+    advance(d);
+  }
+}
+
+function correctAnswerRich(d: Draft, frame: Frame): Rich {
+  const answer = answerOf(d, frame);
+  if (answer.kind === 'number') {
+    return { math: fractionToLatex(answer.value) };
+  }
+  const step = stepOf(d, frame);
+  const option =
+    step.kind === 'choice'
+      ? step.options.find(o => o.id === answer.optionId)
+      : undefined;
+  return option?.label ?? { math: '?' };
+}
+
+// ---------------------------------------------------------------------------
+// Student actions.
+
+function onAnswer(d: Draft, action: Extract<LessonAction, { type: 'answer' }>) {
+  const frame = editTop(d);
+  if (!frame) {
+    return;
+  }
+  const step = stepOf(d, frame);
+  if (step.kind === 'component') {
+    return; // Task components answer through component_result.
+  }
+  const answer = answerOf(d, frame);
+  const base = eventBase(d, frame);
+
+  let correct: boolean;
+  let misconceptionId: string | undefined;
+  let feedback: Rich | undefined;
+  let value: string;
+  let numeric: string | undefined;
+
+  if (step.kind === 'choice') {
+    if (!('optionId' in action.value)) {
+      return;
+    }
+    const option = step.options.find(
+      o => 'optionId' in action.value && o.id === action.value.optionId,
+    );
+    if (!option || answer.kind !== 'option') {
+      return;
+    }
+    closeOpenCards(d);
+    value = option.id;
+    numeric = option.value;
+    correct = option.id === answer.optionId;
+    misconceptionId = option.misconceptionId;
+    feedback = option.feedback;
+    append(d, {
+      kind: 'student',
+      depth: frame.depth,
+      content: { kind: 'rich', rich: option.label ?? { math: '?' } },
+    });
+  } else {
+    if (!('raw' in action.value) || answer.kind !== 'number') {
+      return;
+    }
+    closeOpenCards(d);
+    const raw = action.value.raw.slice(0, SHORT_TEXT);
+    if (action.keys) {
+      d.events.push({
+        ...base,
+        t: 'component_event',
+        component: 'NumericKeypad',
+        name: 'input_trace',
+        payload: { keys: action.keys.slice(0, 100) },
+      });
+    }
+    const parsed = parseNumeric(raw);
+    if (!parsed.ok) {
+      d.events.push({
+        ...base,
+        t: 'component_event',
+        component: 'NumericKeypad',
+        name: 'invalid_input',
+        payload: { raw, reason: parsed.reason },
+      });
+      append(d, {
+        kind: 'feedback',
+        depth: frame.depth,
+        tone: 'info',
+        message: 'invalidInput',
+      });
+      return;
+    }
+    value = raw;
+    numeric = raw;
+    correct = equals(parsed.value, answer.value);
+    const known = step.wrongAnswers?.find(w => {
+      const v = parseNumeric(w.value);
+      return v.ok && equals(v.value, parsed.value);
+    });
+    misconceptionId = known?.misconceptionId;
+    feedback = known?.feedback;
+    append(d, {
+      kind: 'student',
+      depth: frame.depth,
+      content: { kind: 'typed', raw },
+    });
+  }
+
+  d.events.push({
+    ...base,
+    ...duration(d, frame),
+    t: 'answer',
+    kind: step.kind,
+    value,
+    correct,
+    ...(!correct && misconceptionId !== undefined && { misconceptionId }),
+    attempt: frame.attempts + 1,
+  });
+
+  if (correct) {
+    updateCard(d, frame.cardKey, {
+      status: 'done',
+      result: { ...action.value, correct: true },
+    });
+    d.s.items.push({
+      key: nextKey(d, 'feedback'),
+      kind: 'feedback',
+      depth: frame.depth,
+      tone: 'success',
+      message: 'correct',
+    });
+    completeStep(d, frame, true);
+    return;
+  }
+
+  frame.attempts += 1;
+  if (numeric !== undefined) {
+    frame.lastRaw = numeric;
+  } else {
+    delete frame.lastRaw;
+  }
+  d.s.compressed = false;
+  updateCard(d, frame.cardKey, { attempts: frame.attempts });
+  append(d, {
+    kind: 'feedback',
+    depth: frame.depth,
+    tone: 'warning',
+    ...(feedback ? { rich: feedback } : { message: 'wrong' as UiMessage }),
+  });
+  setPending(d, 'wrong', frame.stepId);
+}
+
+function onNotSure(d: Draft) {
+  const frame = editTop(d);
+  if (!frame) {
+    return;
+  }
+  closeOpenCards(d);
+  // deepDiveId: the step's deep dive when it could open (the planner decides whether it does).
+  const id = availableDeepDive(d, frame);
+  d.events.push({
+    ...eventBase(d, frame),
+    ...duration(d, frame),
+    t: 'not_sure',
+    ...(id !== undefined && { deepDiveId: id }),
+    attempt: frame.attempts + 1,
+  });
+  d.s.compressed = false;
+  append(d, {
+    kind: 'student',
+    depth: frame.depth,
+    content: { kind: 'message', message: 'notSure' },
+  });
+  setPending(d, 'not_sure', frame.stepId);
+}
+
+function onReveal(d: Draft) {
+  const frame = editTop(d);
+  if (!frame) {
+    return;
+  }
+  const hints = stepOf(d, frame).hints ?? [];
+  if (frame.hintLevel < hints.length) {
+    return; // Rule 6: never before the end of the ladder.
+  }
+  closeOpenCards(d);
+  d.events.push({
+    ...eventBase(d, frame),
+    ...duration(d, frame),
+    t: 'reveal',
+    hintsUsed: frame.hintLevel,
+    attempt: frame.attempts + 1,
+  });
+  const step = stepOf(d, frame);
+  if (step.kind === 'component') {
+    // The component shows the engine's answer itself.
+    updateCard(d, frame.cardKey, { status: 'done', revealed: true });
+    fillLaw(d, step, 'revealed');
+  } else {
+    updateCard(d, frame.cardKey, { status: 'done' });
+    d.s.items.push({
+      key: nextKey(d, 'answer'),
+      kind: 'answer',
+      depth: frame.depth,
+      rich: correctAnswerRich(d, frame),
+    });
+  }
+  completeStep(d, frame, false);
+}
+
+/** Optional tasks only. Logged with a reason; neither a pass nor a fail. */
+function onSkip(d: Draft, action: Extract<LessonAction, { type: 'skip' }>) {
+  const frame = editTop(d);
+  if (!frame) {
+    return;
+  }
+  const step = stepOf(d, frame);
+  if (step.kind !== 'component' || !step.optional) {
+    return;
+  }
+  closeOpenCards(d);
+  d.events.push({
+    ...eventBase(d, frame),
+    ...duration(d, frame),
+    t: 'skip',
+    reason: action.reason,
+  });
+  updateCard(d, frame.cardKey, { status: 'done', skipped: true });
+  completeStep(d, frame, false);
+}
+
+function onComponentResult(
+  d: Draft,
+  action: Extract<LessonAction, { type: 'component_result' }>,
+) {
+  const frame = editTop(d);
+  if (!frame) {
+    return;
+  }
+  const step = stepOf(d, frame);
+  if (step.kind !== 'component') {
+    return;
+  }
+  closeOpenCards(d);
+  const hints = action.misconceptionHints ?? [];
+  const known = hints.find(h => d.c.loaded.misconceptionIds.has(h));
+  d.events.push({
+    ...eventBase(d, frame),
+    ...duration(d, frame),
+    t: 'answer',
+    kind: 'task',
+    value: {
+      component: step.component.component,
+      ...action.details,
+      misconceptionHints: hints,
+    },
+    correct: action.correct,
+    ...(!action.correct && known !== undefined && { misconceptionId: known }),
+    attempt: frame.attempts + 1,
+  });
+  if (action.correct) {
+    updateCard(d, frame.cardKey, { status: 'done', result: { correct: true } });
+    d.s.items.push({
+      key: nextKey(d, 'feedback'),
+      kind: 'feedback',
+      depth: frame.depth,
+      tone: 'success',
+      message: 'correct',
+    });
+    fillLaw(d, step, 'solved');
+    completeStep(d, frame, true);
+    return;
+  }
+  frame.attempts += 1;
+  delete frame.lastRaw;
+  d.s.compressed = false;
+  updateCard(d, frame.cardKey, { attempts: frame.attempts });
+  // The component marks what is wrong; content can add words for a known pattern.
+  const diagnosis = step.diagnoses?.find(x =>
+    hints.includes(x.misconceptionId),
+  );
+  if (diagnosis) {
+    append(d, {
+      kind: 'feedback',
+      depth: frame.depth,
+      tone: 'warning',
+      rich: diagnosis.feedback,
+    });
+  }
+  setPending(d, 'wrong', frame.stepId);
+}
+
+function onLeave(d: Draft) {
+  const frame = top(d);
+  if (frame?.ref.scope !== 'mini' && frame?.ref.scope !== 'variant') {
+    return;
+  }
+  closeOpenCards(d);
+  updateCard(d, frame.cardKey, { status: 'paused' });
+  if (frame.ref.scope === 'mini') {
+    closeDeepDive(d, 'abandoned');
+  } else {
+    closeVariant(d, 'abandoned');
+  }
+}
+
+/** "غيّر الطريقة" / "حاجة أسهل" on the active card. */
+function onRequest(
+  d: Draft,
+  action: Extract<LessonAction, { type: 'request' }>,
+) {
+  const frame = top(d);
+  if (!frame || frame.ref.scope === 'mini') {
+    return;
+  }
+  closeOpenCards(d);
+  d.events.push({
+    ...eventBase(d, frame),
+    ...duration(d, frame),
+    t: 'request',
+    kind: action.kind,
+  });
+  append(d, {
+    kind: 'student',
+    depth: frame.depth,
+    content: {
+      kind: 'message',
+      message: action.kind === 'change_method' ? 'changeMethod' : 'simpler',
+    },
+  });
+  setPending(d, 'request', frame.stepId);
+}
+
+const CARD_CHOICES: Record<CardPurpose, readonly string[]> = {
+  clarify: ['counting', 'why', 'link'],
+  self_report: ['understood', 'guessed', 'dismissed'],
+  compress: ['yes', 'no'],
+  repair: ['yes', 'no'],
+  teacher_note: ['yes', 'no'],
+};
+
+function addCard(
+  d: Draft,
+  purpose: CardPurpose,
+  decision: Decision,
+  stepId: string,
+  extra: { choices?: string[]; variantId?: string } = {},
+) {
+  const blocking = top(d) === undefined;
+  const card: NewItem = {
+    kind: 'choice_card',
+    depth: top(d)?.depth ?? 0,
+    purpose,
+    choices: extra.choices ?? [...CARD_CHOICES[purpose]],
+    status: 'open',
+    blocking,
+    stepId,
+    ruleId: decision.ruleId,
+    ...(extra.variantId !== undefined && { variantId: extra.variantId }),
+    ...(purpose === 'teacher_note' && {
+      skillIds: decision.diagnosis.skillIds.slice(0, 10),
+      misconceptionIds: decision.diagnosis.misconceptionIds.slice(0, 10),
+    }),
+  };
+  append(d, card);
+}
+
+function onCardChoice(
+  d: Draft,
+  action: Extract<LessonAction, { type: 'card_choice' }>,
+) {
+  let index = d.s.items.length - 1;
+  while (index >= 0) {
+    const i = d.s.items[index]!;
+    if (
+      i.kind === 'choice_card' &&
+      i.purpose === action.purpose &&
+      i.status === 'open'
+    ) {
+      break;
+    }
+    index -= 1;
+  }
+  const card = d.s.items[index];
+  if (card?.kind !== 'choice_card' || !card.choices.includes(action.choice)) {
+    return;
+  }
+  d.s.items[index] = { ...card, status: 'answered', choice: action.choice };
+  const base = { questionId: d.s.questionId, stepId: card.stepId };
+  const yes = action.choice === 'yes';
+  const depth = card.depth;
+  switch (card.purpose) {
+    case 'clarify':
+      d.events.push({
+        ...base,
+        t: 'clarify',
+        choice: action.choice as ClarifyChoice,
+      });
+      append(d, {
+        kind: 'student',
+        depth,
+        content: {
+          kind: 'message',
+          message: `clarify.${action.choice}` as UiMessage,
+        },
+      });
+      setPending(d, 'clarify', card.stepId);
+      return;
+    case 'self_report':
+      d.events.push({
+        ...base,
+        t: 'self_report',
+        value: action.choice as 'understood' | 'guessed' | 'dismissed',
+      });
+      append(d, {
+        kind: 'student',
+        depth,
+        content: {
+          kind: 'message',
+          message: `selfReport.${action.choice}` as UiMessage,
+        },
+      });
+      setPending(d, 'self_report', card.stepId);
+      return;
+    case 'compress':
+      d.events.push({
+        ...base,
+        t: 'offer_response',
+        offer: 'compress',
+        accepted: yes,
+      });
+      if (yes) {
+        d.s.compressed = true;
+        append(d, {
+          kind: 'feedback',
+          depth,
+          tone: 'info',
+          message: 'compressOn',
+        });
+      }
+      break;
+    case 'repair': {
+      d.events.push({
+        ...base,
+        t: 'offer_response',
+        offer: 'repair',
+        accepted: yes,
+      });
+      const v = card.variantId ? d.c.variants.get(card.variantId) : undefined;
+      if (yes && v && top(d)) {
+        openVariant(d, v, {
+          reactionId: card.ruleId,
+          representation: v.representation,
+        });
+      }
+      break;
+    }
+    case 'teacher_note':
+      d.events.push({
+        ...base,
+        t: 'offer_response',
+        offer: 'teacher_note',
+        accepted: yes,
+      });
+      if (yes) {
+        d.events.push({
+          ...base,
+          t: 'teacher_note',
+          noteId: `note-${d.s.seq + 1}`,
+          skillIds: card.skillIds ?? [],
+          misconceptionIds: card.misconceptionIds ?? [],
+          ruleId: card.ruleId,
+        });
+        append(d, {
+          kind: 'feedback',
+          depth,
+          tone: 'info',
+          message: 'teacherNoteSaved',
+        });
+      }
+      break;
+  }
+  if (card.blocking && top(d) === undefined && !d.s.finished) {
+    advance(d);
+  }
+}
+
+function askSnapshot(d: Draft) {
+  const frame = top(d);
+  return frame
+    ? {
+        stepKey: frame.stepKey,
+        depth: frame.depth,
+        attempts: frame.attempts,
+        hintLevel: frame.hintLevel,
+      }
+    : { stepKey: 'none', depth: 0, attempts: 0, hintLevel: 0 };
+}
+
+function onAskLongPress(
+  d: Draft,
+  action: Extract<LessonAction, { type: 'ask_longpress' }>,
+) {
+  if (!d.c.asksByBlock.has(action.blockId)) {
+    return;
+  }
+  const answer = d.c.asksByBlock.get(action.blockId)?.[action.mode];
+  const frame = top(d);
+  const quoted = action.quoted.slice(0, SHORT_TEXT);
+  d.events.push({
+    ...eventBase(d, frame),
+    t: 'ask',
+    via: 'longpress',
+    mode: action.mode,
+    quoted,
+    source: 'local',
+    snapshot: { ...askSnapshot(d), blockId: action.blockId },
+  });
+  const depth = frame?.depth ?? 0;
+  append(d, {
+    kind: 'student',
+    depth,
+    content: { kind: 'quote', mode: action.mode, quoted },
+  });
+  append(
+    d,
+    answer
+      ? { kind: 'ask_answer', depth, parts: answer }
+      : { kind: 'feedback', depth, tone: 'info', message: 'noCannedAnswer' },
+  );
+}
+
+function onAskField(
+  d: Draft,
+  action: Extract<LessonAction, { type: 'ask_field' }>,
+) {
+  const chip = action.chipId
+    ? d.c.question.askChips?.find(c => c.id === action.chipId)
+    : undefined;
+  const text = action.text?.trim().slice(0, SHORT_TEXT);
+  if (!chip && !text) {
+    return;
+  }
+  const frame = top(d);
+  d.events.push({
+    ...eventBase(d, frame),
+    t: 'ask',
+    via: 'field',
+    ...(text && { text }),
+    source: 'local',
+    snapshot: { ...askSnapshot(d), ...(chip && { chipId: chip.id }) },
+  });
+  const depth = frame?.depth ?? 0;
+  append(d, {
+    kind: 'student',
+    depth,
+    content: chip
+      ? { kind: 'rich', rich: chip.label }
+      : { kind: 'text', text: text! },
+  });
+  append(
+    d,
+    chip
+      ? { kind: 'ask_answer', depth, parts: chip.answer }
+      : { kind: 'feedback', depth, tone: 'info', message: 'noCannedAnswer' },
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Applying a planner decision.
+
+/** Why this action cannot run in the current lesson state, or null. */
+function stateRejects(d: Draft, a: Action): string | null {
+  const frame = top(d);
+  switch (a.kind) {
+    case 'hint':
+      return frame && frame.hintLevel < (stepOf(d, frame).hints?.length ?? 0)
+        ? null
+        : 'no hint left';
+    case 'deep_dive':
+      return frame && frame.depth < MAX_DEPTH && d.c.deepDives.has(a.deepDiveId)
+        ? null
+        : 'deep dive not possible here';
+    case 'variant':
+    case 'quiz':
+    case 'revisit_prerequisite':
+      return (frame?.depth ?? -1) < MAX_DEPTH ? null : 'depth cap';
+    case 'numeric_check':
+      return frame?.lastRaw !== undefined && numericCheck(d, frame) !== null
+        ? null
+        : 'no numeric value to check';
+    case 'ask_clarify':
+    case 'show_component':
+    case 'explain':
+    case 'example':
+      return frame ? null : 'needs an active card';
+    default:
+      return null;
+  }
+}
+
+/** "your value + known = sum", every number from the engine (CLAUDE.md rule 1). */
+function numericCheck(d: Draft, frame: Frame): Rich | null {
+  const step = stepOf(d, frame);
+  const check = 'check' in step ? step.check : undefined;
+  const known = check ? d.c.loaded.values.get(check.known) : undefined;
+  const v = frame.lastRaw === undefined ? null : parseNumeric(frame.lastRaw);
+  if (!check || !known || !v?.ok) {
+    return null;
+  }
+  const sum = add(v.value, known);
+  return {
+    ...check.text,
+    math: `${fractionToLatex(v.value)} + ${fractionToLatex(
+      known,
+    )} = ${fractionToLatex(sum)}`,
+  };
+}
+
+function applyAction(
+  d: Draft,
+  a: Action,
+  decision: Decision,
+  trigger: NonNullable<LessonState['pending']>['trigger'],
+  pendingStepId: string,
+) {
+  const reaction: Reaction = {
+    reactionId: decision.ruleId,
+    representation: decision.representation ?? a.kind,
+  };
+  const frame = editTop(d);
+  switch (a.kind) {
+    case 'continue':
+      if (
+        trigger === 'detour_closed' ||
+        trigger === 'correct' ||
+        trigger === 'self_report'
+      ) {
+        if (frame) {
+          returnTo(d, frame);
+        } else if (!d.s.finished) {
+          advance(d);
+        }
+      } else if (trigger === 'not_sure' && frame) {
+        const left = frame.hintLevel < (stepOf(d, frame).hints?.length ?? 0);
+        if (!left) {
+          append(d, {
+            kind: 'feedback',
+            depth: frame.depth,
+            tone: 'info',
+            message: 'ladderEnd',
+          });
+        }
+      }
+      return;
+    case 'hint':
+      giveHint(d, frame!, reaction);
+      return;
+    case 'deep_dive':
+      openDeepDive(d, frame!, a.deepDiveId, {
+        ...reaction,
+        representation: deepDiveRepresentation(
+          d.c.deepDives.get(a.deepDiveId)!,
+        ),
+      });
+      return;
+    case 'variant':
+    case 'quiz': {
+      const v = d.c.variants.get(a.variantId!)!;
+      if (a.kind === 'variant' && a.offer && frame) {
+        addCard(d, 'repair', decision, frame.stepId, { variantId: v.id });
+        return;
+      }
+      openVariant(d, v, { ...reaction, representation: v.representation });
+      return;
+    }
+    case 'revisit_prerequisite': {
+      const v =
+        d.c.menu
+          .prerequisitesFor(a.skillId)
+          .find(x => !d.s.shownVariants.includes(x.id)) ??
+        d.c.menu.prerequisitesFor(a.skillId)[0]!;
+      openVariant(d, v, { ...reaction, representation: v.representation });
+      return;
+    }
+    case 'numeric_check':
+      append(d, {
+        kind: 'feedback',
+        depth: frame!.depth,
+        tone: 'info',
+        rich: numericCheck(d, frame!)!,
+      });
+      return;
+    case 'ask_clarify':
+      addCard(d, 'clarify', decision, frame!.stepId, {
+        choices: a.choices ?? ['counting', 'why', 'link'],
+      });
+      return;
+    case 'self_report':
+      addCard(d, 'self_report', decision, pendingStepId);
+      return;
+    case 'compress_steps':
+      if (!frame && !d.s.finished) {
+        // Opt-in: the next step comes first, the offer sits just above its card.
+        advance(d);
+      }
+      addCard(d, 'compress', decision, pendingStepId);
+      return;
+    case 'teacher_note':
+      if (!frame && !d.s.finished) {
+        advance(d);
+      }
+      addCard(d, 'teacher_note', decision, top(d)?.stepId ?? pendingStepId);
+      return;
+    case 'show_component':
+      append(d, {
+        kind: 'tutor',
+        depth: frame!.depth,
+        rich: a.instruction,
+        longPress: false,
+      });
+      appendComponent(d, a.component, `plan-${d.s.seq + 1}`, frame!.depth);
+      return;
+    case 'explain':
+    case 'example':
+      for (const b of a.blocks) {
+        if (b.type === 'tutor_text') {
+          append(d, {
+            kind: 'tutor',
+            depth: frame!.depth,
+            rich: b.text,
+            longPress: false,
+          });
+        } else if (b.type === 'math') {
+          append(d, { kind: 'math', depth: frame!.depth, latex: b.latex });
+        } else if (b.type === 'component') {
+          appendComponent(d, b.spec, `plan-${d.s.seq + 1}`, frame!.depth);
+        } else {
+          for (const item of b.items) {
+            append(d, {
+              kind: 'tutor',
+              depth: frame!.depth,
+              rich: item,
+              longPress: false,
+            });
+          }
+        }
+      }
+      return;
+  }
+}
+
+function onApplyPlan(
+  d: Draft,
+  action: Extract<LessonAction, { type: 'apply_plan' }>,
+) {
+  const pending = d.s.pending;
+  if (!pending) {
+    return;
+  }
+  delete d.s.pending;
+  // Validated again here: replay and LLM output go through the same gate.
+  let decision = validateDecision(
+    action.decision,
+    d.c.menu,
+    action.decision.source,
+  );
+  const actions = [
+    decision.next,
+    ...(decision.followUp ? [decision.followUp] : []),
+  ];
+  if (actions.some(a => rejectAction(a, d.c.menu) ?? stateRejects(d, a))) {
+    decision = {
+      ...decision,
+      next: { kind: 'continue' },
+      ruleId: 'fallback.not_applicable',
+      source: 'fallback',
+    };
+    delete decision.followUp;
+    delete decision.representation;
+  }
+  d.events.push({
+    questionId: pending.questionId,
+    stepId: pending.stepId,
+    t: 'plan',
+    trigger: pending.trigger,
+    decision,
+  });
+  applyAction(d, decision.next, decision, pending.trigger, pending.stepId);
+  if (decision.followUp) {
+    applyAction(
+      d,
+      decision.followUp,
+      decision,
+      pending.trigger,
+      pending.stepId,
+    );
+  }
+  // A closed detour always ends by re-asking the question below it.
+  const frame = top(d);
+  const card = frame && d.s.items.find(i => i.key === frame.cardKey);
+  if (card?.kind === 'question' && card.status === 'paused' && !d.s.pending) {
+    returnTo(d, frame!);
+  }
+}
+
+// ---------------------------------------------------------------------------
+
+export function startLesson(content: LessonContent, at = 0): StepResult {
+  const d: Draft = {
+    c: content,
+    s: {
+      questionId: content.question.id,
+      items: [],
+      stack: [],
+      cursor: { group: 0, step: 0 },
+      shownDeepDives: [],
+      shownVariants: [],
+      seq: 0,
+      finished: false,
+      compressed: false,
+    },
+    events: [],
+    at,
+  };
+  append(d, {
+    kind: 'statement',
+    depth: 0,
+    rich: content.loaded.exercise.statement,
+  });
+  append(d, { kind: 'statement', depth: 0, rich: content.question.goal });
+  advance(d);
+  return { state: d.s, events: d.events };
+}
+
+export function reduce(
+  content: LessonContent,
+  state: LessonState,
+  action: LessonAction,
+): StepResult {
+  const d: Draft = {
+    c: content,
+    s: { ...state, items: [...state.items], stack: [...state.stack] },
+    events: [],
+    at: action.at,
+  };
+  // While a decision is pending only the decision itself is accepted.
+  if (state.pending && action.type !== 'apply_plan') {
+    return { state, events: [] };
+  }
+  switch (action.type) {
+    case 'answer':
+      onAnswer(d, action);
+      break;
+    case 'not_sure':
+      onNotSure(d);
+      break;
+    case 'hint': {
+      const frame = editTop(d);
+      if (frame) {
+        closeOpenCards(d);
+        giveHint(d, frame, null);
+      }
+      break;
+    }
+    case 'reveal':
+      onReveal(d);
+      break;
+    case 'leave_deep_dive':
+      onLeave(d);
+      break;
+    case 'ask_longpress':
+      onAskLongPress(d, action);
+      break;
+    case 'ask_field':
+      onAskField(d, action);
+      break;
+    case 'component_result':
+      onComponentResult(d, action);
+      break;
+    case 'skip':
+      onSkip(d, action);
+      break;
+    case 'request':
+      onRequest(d, action);
+      break;
+    case 'card_choice':
+      onCardChoice(d, action);
+      break;
+    case 'apply_plan':
+      onApplyPlan(d, action);
+      break;
+  }
+  return { state: d.s, events: d.events };
+}
+
+/** The active asked step, for rendering its card. */
+export function stepForRef(content: LessonContent, ref: AskRef): FrameStep {
+  const key =
+    ref.scope === 'main'
+      ? stepKey.main(ref.questionId, ref.stepId)
+      : ref.scope === 'mini'
+      ? stepKey.mini(ref.deepDiveId)
+      : stepKey.variant(ref.variantId);
+  const step = content.steps.get(key);
+  if (!step) {
+    throw new Error(`missing step ${key}`);
+  }
+  return step;
+}
+
+/** The urn a card's components use: a variant's own experiment, else the exercise's. */
+export function experimentForRef(
+  content: LessonContent,
+  ref: AskRef,
+): Experiment | undefined {
+  if (ref.scope === 'variant') {
+    const v = content.variants.get(ref.variantId);
+    if (v) {
+      return variantContext(content.loaded.exercise, v).experiment;
+    }
+  }
+  if (ref.scope === 'mini') {
+    const dive = content.deepDives.get(ref.deepDiveId);
+    if (dive) {
+      return deepDiveContext(content.loaded.exercise, dive).experiment;
+    }
+  }
+  return content.loaded.exercise.experiment;
+}

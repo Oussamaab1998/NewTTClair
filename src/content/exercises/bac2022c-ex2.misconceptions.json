@@ -1,0 +1,169 @@
+[
+  {
+    "id": "counts_balls_not_pairs",
+    "skillId": "counting-pairs",
+    "description": "Counts balls instead of draws (pairs).",
+    "signature": "answers 5 pairs, or divides by 5",
+    "repairComponent": "OutcomeSpace",
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "counts_ordered_pairs",
+    "skillId": "simultaneous-draw",
+    "description": "Counts ordered pairs in a simultaneous draw.",
+    "signature": "answers 20 for C(5,2)",
+    "repairComponent": "OutcomeSpace",
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "au_moins_direct_miscount",
+    "skillId": "au-moins-un",
+    "description": "Reads 'au moins un' as 'exactly one' and forgets the pair {0;0'}.",
+    "signature": "6 outcomes with a 0, p(B)=6/10",
+    "repairComponent": "EventPicker",
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "complement_ordered",
+    "skillId": "simultaneous-draw",
+    "description": "Counts ordered pairs when listing the complement.",
+    "signature": "answers 6 pairs without 0",
+    "repairComponent": "OutcomeSpace",
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "complement_partial_event",
+    "skillId": "complement-event",
+    "description": "Takes a sub-case of the event as its complement.",
+    "signature": "complement of 'au moins un 0' = 'two 0'",
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "confuses_event_and_complement",
+    "skillId": "complement-event",
+    "description": "Gives p of the event when the complement is asked, or the reverse.",
+    "signature": "p(not B)=7/10 or p(B)=3/10",
+    "repairComponent": "ComplementView",
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "counts_all_outcomes",
+    "skillId": "counting-pairs",
+    "description": "Counts all outcomes instead of the favourable ones.",
+    "signature": "answers 10 for the complement count",
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "lists_ball_values_not_products",
+    "skillId": "random-variable-values",
+    "description": "Lists the numbers on the balls instead of the products.",
+    "signature": "answers {-1, 0, 1, 2} for the values of X",
+    "repairComponent": "OutcomeSpace",
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "values_include_product_1",
+    "skillId": "random-variable-values",
+    "description": "Thinks the product 1 is possible (needs two balls 1 or two balls -1).",
+    "signature": "lists 1 as a value of X",
+    "repairComponent": "OutcomeSpace",
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "misses_duplicate_value_pair",
+    "skillId": "event-as-set",
+    "description": "Forgets the draw of the two balls with the same value ({0;0'}).",
+    "signature": "EventPicker: only {0;0'} missing",
+    "repairComponent": "EventPicker",
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "selects_complement",
+    "skillId": "event-as-set",
+    "description": "Selects the outcomes of the complement instead of the event.",
+    "signature": "EventPicker: selection equals the complement",
+    "repairComponent": "ComplementView",
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "selects_all",
+    "skillId": "event-as-set",
+    "description": "Selects every outcome.",
+    "signature": "EventPicker: all outcomes selected",
+    "repairComponent": "EventPicker",
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "law_sum_not_one",
+    "skillId": "law-sum-one",
+    "description": "Fills a law whose probabilities do not sum to 1.",
+    "signature": "LawBuilder: complete table, sum != 1",
+    "repairComponent": "LawBuilder",
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  }
+]
