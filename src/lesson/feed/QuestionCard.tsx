@@ -18,11 +18,15 @@ import type {
   ComponentHandle,
   ComponentResult,
 } from '../../components/contract';
-import { keypadFor, stepKey } from '../../content/loader';
+import { keypadFor, linesSpecOf, stepKey } from '../../content/loader';
+import type { JsonObject } from '../../components/contract';
+import { LinesCard, LinesSnapshotSchema } from '../lines/LinesCard';
+import { HelpContext } from './help';
 import type { Experiment } from '../../engine/calls';
 import type { FrameStep } from '../session/lesson';
 import type { FeedItemOf, RequestKind, SkipReason } from '../session/types';
 import { CardMemoryContext } from './cardMemory';
+import { SnapshotContext } from './snapshots';
 import { LevelLabel } from './Bubbles';
 import { NumericKeypad } from './NumericKeypad';
 import { OptionsQuestion } from './OptionsQuestion';
@@ -32,6 +36,10 @@ import { theme } from '../../theme';
 export interface QuestionHandlers {
   onSelect: (optionId: string) => void;
   onSubmitTyped: (raw: string, keys: string[]) => void;
+  /** Lines steps: one checked line (the reducer re-checks and logs it). */
+  onSubmitLine: (line: string, keys: string[]) => void;
+  /** Lines steps: an editor input logged on its own (a copied line). */
+  onLinesInput: (stepId: string, name: string, payload: JsonObject) => void;
   onNotSure: () => void;
   onHint: () => void;
   onReveal: () => void;
@@ -93,7 +101,10 @@ export const QuestionCard = memo(function QuestionCardImpl({
       : item.ref.scope === 'mini'
       ? stepKey.mini(item.ref.deepDiveId)
       : stepKey.variant(item.ref.variantId);
+  const help = useContext(HelpContext);
   const canRequest = item.ref.scope !== 'mini';
+  const canChange = canRequest && help?.changeMethod === true;
+  const canSimpler = canRequest && help?.simpler === true;
   const handle = useRef<ComponentHandle>(null);
   const [restored] = useState(() =>
     active ? memory?.restore(memoryKey, item.key) : undefined,
@@ -102,6 +113,14 @@ export const QuestionCard = memo(function QuestionCardImpl({
     memory?.register(memoryKey, item.key, handle);
     return () => memory?.unregister(memoryKey, item.key);
   }, [memory, memoryKey, item.key]);
+  // Ask / long-press / report attach this card's state (snapshots.ts).
+  const snapshots = useContext(SnapshotContext);
+  const snapshotName =
+    step.kind === 'component' ? step.component.component : step.kind;
+  useEffect(() => {
+    snapshots?.register(item.key, snapshotName, handle);
+    return () => snapshots?.unregister(item.key, handle);
+  }, [snapshots, item.key, snapshotName]);
   const [skipOpen, setSkipOpen] = useState(false);
   const restoredRaw =
     typeof restored?.raw === 'string' ? restored.raw : undefined;
@@ -135,6 +154,19 @@ export const QuestionCard = memo(function QuestionCardImpl({
           readonly={!active}
           {...(item.result && { result: item.result })}
           onSelect={h.onSelect}
+        />
+      ) : step.kind === 'lines' ? (
+        <LinesCard
+          spec={linesSpecOf(step)}
+          {...(step.lhs !== undefined && { lhs: step.lhs })}
+          {...(step.goalLatex !== undefined && { goalLatex: step.goalLatex })}
+          {...(step.keys && { keys: step.keys })}
+          readonly={!active}
+          initial={linesInitial(restored, item.lines, item.status === 'done')}
+          onLine={(line, keys) => h.onSubmitLine(line, keys)}
+          onInput={(name, payload) => h.onLinesInput(step.id, name, payload)}
+          testID={`lines-${item.status}`}
+          ref={handle}
         />
       ) : (
         <NumericKeypad
@@ -219,27 +251,25 @@ export const QuestionCard = memo(function QuestionCardImpl({
               <Text style={styles.buttonText}>{t('lesson.showAnswer')}</Text>
             </Pressable>
           )}
-          {canRequest && (
-            <>
-              <Pressable
-                onPress={() => h.onRequest('change_method')}
-                style={styles.button}
-                accessibilityRole="button"
-                testID="request-change-method"
-              >
-                <Text style={styles.buttonText}>
-                  {t('lesson.changeMethod')}
-                </Text>
-              </Pressable>
-              <Pressable
-                onPress={() => h.onRequest('simpler')}
-                style={styles.button}
-                accessibilityRole="button"
-                testID="request-simpler"
-              >
-                <Text style={styles.buttonText}>{t('lesson.simpler')}</Text>
-              </Pressable>
-            </>
+          {canChange && (
+            <Pressable
+              onPress={() => h.onRequest('change_method')}
+              style={styles.button}
+              accessibilityRole="button"
+              testID="request-change-method"
+            >
+              <Text style={styles.buttonText}>{t('lesson.changeMethod')}</Text>
+            </Pressable>
+          )}
+          {canSimpler && (
+            <Pressable
+              onPress={() => h.onRequest('simpler')}
+              style={styles.button}
+              accessibilityRole="button"
+              testID="request-simpler"
+            >
+              <Text style={styles.buttonText}>{t('lesson.simpler')}</Text>
+            </Pressable>
           )}
           {item.canGoBack && (
             <Pressable
@@ -256,6 +286,25 @@ export const QuestionCard = memo(function QuestionCardImpl({
     </View>
   );
 });
+
+/** A lines card restored after a deep dive, or rebuilt from the reducer's lines. */
+function linesInitial(
+  restored: unknown,
+  lines: string[] | undefined,
+  done: boolean,
+) {
+  const r = LinesSnapshotSchema.safeParse(restored);
+  if (r.success) {
+    return r.data;
+  }
+  return {
+    accepted: lines ?? [],
+    editor: { root: [], cursor: { path: [], at: 0 } },
+    collapsed: false,
+    last: null,
+    done,
+  };
+}
 
 const styles = StyleSheet.create({
   card: {

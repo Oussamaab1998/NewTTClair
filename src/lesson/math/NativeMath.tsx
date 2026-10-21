@@ -9,7 +9,7 @@ import {
 
 import type { MathNode } from './latexSubset';
 
-const MATH_FONT = Platform.select({ ios: 'Times New Roman', default: 'serif' });
+export const MATH_FONT = Platform.select({ ios: 'Times New Roman', default: 'serif' });
 // Typesetting rules, not theme values: script/inner scales (0.7, 0.9), line
 // ratio 1.25, script offsets 0.45, operator scale 1.2 and the small glyph
 // spacings in `styles` below. They keep formulas proportional at any size, so

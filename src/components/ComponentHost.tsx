@@ -1,4 +1,4 @@
-import React, { Profiler, useEffect, useMemo } from 'react';
+import React, { Profiler, useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { Experiment } from '../engine/calls';
@@ -13,7 +13,14 @@ import type {
   ComponentSpec,
   JsonObject,
 } from './contract';
-import type { ViewProps } from './host';
+import type { RenderInner, ViewProps } from './host';
+import { FoldSymmetry } from './analysis/FoldSymmetry';
+import { FunctionPlot } from './analysis/FunctionPlot';
+import { LimitExplorer } from './analysis/LimitExplorer';
+import { PointOnCurve } from './analysis/PointOnCurve';
+import { SecantToTangent } from './analysis/SecantToTangent';
+import { TangentSlope } from './analysis/TangentSlope';
+import { VariationTableBuilder } from './analysis/VariationTableBuilder';
 import { ComplementView } from './probability/ComplementView';
 import { EventPicker } from './probability/EventPicker';
 import { LawBuilder } from './probability/LawBuilder';
@@ -21,6 +28,11 @@ import { LawChart } from './probability/LawChart';
 import { OutcomeSpace } from './probability/OutcomeSpace';
 import { Urn } from './probability/Urn';
 import { resolveSpec } from './registry';
+import { CompareTwo } from './shared/CompareTwo';
+import { ExampleGenerator } from './shared/ExampleGenerator';
+import { NumericTwin } from './shared/NumericTwin';
+import { PredictReveal } from './shared/PredictReveal';
+import { StepThrough } from './shared/StepThrough';
 
 type AnyView = (p: ViewProps<never>) => React.ReactNode;
 
@@ -32,6 +44,18 @@ export const VIEWS: Partial<Record<ComponentName, AnyView>> = {
   ComplementView: ComplementView as AnyView,
   LawBuilder: LawBuilder as AnyView,
   LawChart: LawChart as AnyView,
+  FunctionPlot: FunctionPlot as AnyView,
+  PointOnCurve: PointOnCurve as AnyView,
+  FoldSymmetry: FoldSymmetry as AnyView,
+  LimitExplorer: LimitExplorer as AnyView,
+  SecantToTangent: SecantToTangent as AnyView,
+  TangentSlope: TangentSlope as AnyView,
+  VariationTableBuilder: VariationTableBuilder as AnyView,
+  PredictReveal: PredictReveal as AnyView,
+  CompareTwo: CompareTwo as AnyView,
+  ExampleGenerator: ExampleGenerator as AnyView,
+  NumericTwin: NumericTwin as AnyView,
+  StepThrough: StepThrough as AnyView,
 };
 
 export type ComponentErrorReason =
@@ -71,6 +95,23 @@ export function ComponentHost(p: ComponentHostProps) {
     [spec, experiment],
   );
   const View = resolved.ok ? VIEWS[resolved.name] : undefined;
+  const instanceId = spec.instanceId ?? p.defaultInstanceId;
+  const { mode, onEvent } = p;
+  const renderInner = useCallback<RenderInner>(
+    (inner, slot, opts) => (
+      <ComponentHost
+        spec={inner}
+        defaultInstanceId={`${instanceId}:${slot}`}
+        mode={mode}
+        {...(experiment && { experiment })}
+        onEvent={onEvent}
+        onError={onError}
+        {...(opts.snapshot && { snapshot: opts.snapshot })}
+        {...(opts.ref && { handleRef: opts.ref })}
+      />
+    ),
+    [experiment, instanceId, mode, onError, onEvent],
+  );
 
   useEffect(() => {
     if (!resolved.ok) {
@@ -95,8 +136,9 @@ export function ComponentHost(p: ComponentHostProps) {
           props={resolved.props as never}
           mode={p.mode}
           locale={locale}
-          instanceId={spec.instanceId ?? p.defaultInstanceId}
+          instanceId={instanceId}
           onEvent={p.onEvent}
+          renderInner={renderInner}
           {...(p.onResult && { onResult: p.onResult })}
           {...(p.snapshot && { snapshot: p.snapshot })}
           {...(p.showSolution !== undefined && {

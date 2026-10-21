@@ -73,10 +73,25 @@ export type StudentContent =
   | { kind: 'quote'; mode: AskMode; quoted: string }
   | { kind: 'text'; text: string };
 
+/** docs/FEEDBACK_AND_TRUST.md trust labels; never "verified". */
+export type TrustLabel =
+  | 'lesson_reviewed'
+  | 'lesson_unreviewed'
+  | 'ai_generated'
+  | 'engine_computed';
+
 interface ItemBase {
   key: string;
   /** 0 on the main path, 1-3 inside deep dives. */
   depth: number;
+  /**
+   * Set when the item is not plain lesson content: engine values (numeric check,
+   * revealed answer, filled law cells) or LLM output. Unset = the lesson's own
+   * label (reviewed or not), derived in the UI from the content.
+   */
+  trust?: 'ai_generated' | 'engine_computed';
+  /** AI items: the LLM request that produced them (reports point to it). */
+  llmRequestId?: string;
 }
 
 export type FeedItem = ItemBase &
@@ -118,6 +133,8 @@ export type FeedItem = ItemBase &
         skipped?: boolean;
         /** Optional task: the card offers "skip". */
         optional?: boolean;
+        /** Lines steps: accepted lines (the card's notebook, readonly and replay). */
+        lines?: string[];
       }
     | {
         /** A visual component (tasks are question cards). */
@@ -155,6 +172,8 @@ export type FeedItem = ItemBase &
     | { kind: 'component_fallback'; component: string }
     | { kind: 'writeup'; lines: string[] }
     | { kind: 'done' }
+    /** UI only: a provisional answer may still change ("..."); never in the reducer's state. */
+    | { kind: 'thinking' }
   );
 
 export type FeedItemOf<K extends FeedItem['kind']> = Extract<
@@ -178,6 +197,10 @@ export interface Frame {
   reaction?: Reaction;
   /** Last wrong value as typed (or the chosen option's value): numeric checks. */
   lastRaw?: string;
+  /** Lines steps: the lines accepted so far. */
+  lines?: string[];
+  /** Misconceptions whose message this card already showed (each once). */
+  misconceptionsShown?: string[];
 }
 
 export interface LessonState {
@@ -194,9 +217,15 @@ export interface LessonState {
   pending?: { trigger: Trigger; questionId: string; stepId: string };
   /** The student accepted "compress": explanation blocks are skipped until the next struggle. */
   compressed: boolean;
+  /** A main-path visual (PredictReveal) waits for one tap before the lesson goes on. */
+  gate?: { stepId: string };
 }
 
-export type AnswerValue = { optionId: string } | { raw: string };
+export type AnswerValue =
+  | { optionId: string }
+  | { raw: string }
+  /** One typed line of a lines step (safe-parser syntax). */
+  | { line: string };
 
 export type LessonAction =
   | { type: 'answer'; value: AnswerValue; keys?: string[]; at: number }
@@ -209,15 +238,31 @@ export type LessonAction =
       blockId: string;
       mode: AskMode;
       quoted: string;
+      /** Mounted components' state, collected by the UI and capped (feed/snapshots.ts). */
+      components?: JsonObject;
       at: number;
     }
-  | { type: 'ask_field'; chipId?: string; text?: string; at: number }
+  | {
+      type: 'ask_field';
+      chipId?: string;
+      text?: string;
+      components?: JsonObject;
+      at: number;
+    }
   | { type: 'skip'; reason: SkipReason; at: number }
+  /** The gating component of this step got its tap (ungraded). */
+  | { type: 'gate_passed'; stepId: string; at: number }
   | { type: 'request'; kind: RequestKind; at: number }
   /** A tap on a planner card (the latest open card of that purpose). */
   | { type: 'card_choice'; purpose: CardPurpose; choice: string; at: number }
   /** The planner's decision for the pending decision point. */
-  | { type: 'apply_plan'; decision: Decision; at: number }
+  | {
+      type: 'apply_plan';
+      decision: Decision;
+      /** Provisional flow: what the student ended up seeing. */
+      shownSource?: 'rules' | 'llm';
+      at: number;
+    }
   | {
       /** A task component reported a result (EventPicker submit, LawBuilder complete). */
       type: 'component_result';

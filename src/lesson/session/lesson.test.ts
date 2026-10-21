@@ -725,14 +725,15 @@ describe('fallbacks', () => {
       trust: steps[0]!.trust,
       skills: [],
       kind: 'component',
-      component: { component: 'FunctionPlot', props: {} },
+      // A contract name with no registered view yet.
+      component: { component: 'BinomialExplorer', props: {} },
     });
     const s = new Session(loaded);
     expect(s.items.some(i => i.kind === 'component_fallback')).toBe(true);
     expect(s.log.all()).toMatchObject([
       {
         t: 'component_error',
-        component: 'FunctionPlot',
+        component: 'BinomialExplorer',
         reason: 'unknown_component',
       },
     ]);

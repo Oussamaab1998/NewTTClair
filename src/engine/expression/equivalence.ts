@@ -16,6 +16,8 @@ export interface EquivalenceOptions {
   /** Minimum number of points where both sides are defined. */
   minPoints?: number;
   seed?: number;
+  /** Sample points to ignore (e.g. too close to a singularity). */
+  skip?: (scope: Record<string, number>) => boolean;
 }
 
 export type EquivalenceResult =
@@ -36,7 +38,7 @@ const NICE_POINTS = [1, 2, -1, 0.5, 3, -2, 1.5, -0.5, 0, 4, -3, 0.25];
 
 /** Small deterministic PRNG (mulberry32). */
 /* eslint-disable no-bitwise -- integer hashing is the point here */
-function rng(seed: number): () => number {
+export function rng(seed: number): () => number {
   let s = seed >>> 0;
   return () => {
     s = (s + 0x6d2b79f5) >>> 0;
@@ -84,6 +86,7 @@ export function checkEquivalence(
     absTol = 1e-12,
     minPoints = 6,
     seed = 20221,
+    skip,
   } = options;
 
   // Two constant rationals: compare exactly (0.3333333333 is not 1/3).
@@ -101,6 +104,9 @@ export function checkEquivalence(
   let checked = 0;
   let domainDiffers = false;
   for (const scope of samplePoints(variables, randomSamples, seed)) {
+    if (skip?.(scope)) {
+      continue;
+    }
     const va = evaluateReal(a, scope);
     const vb = evaluateReal(b, scope);
     const fa = Number.isFinite(va);

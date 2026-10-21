@@ -71,7 +71,13 @@ export function LessonUiDemoScreen() {
         <StudentBubble content={{ kind: 'typed', raw: '7/10' }} />
         <StudentBubble content={{ kind: 'message', message: 'notSure' }} />
         <StudentBubble
-          content={{ kind: 'quote', mode: 'why', quoted: 'الحدث B' }}
+          content={{
+            kind: 'quote',
+            mode: 'why',
+            // An A1 sentence: math inside a quote must stay in LTR order.
+            quoted:
+              'والصورة متاع \u2212x هي نفس الصورة متاع x. وصلنا لـ f(\u2212x) = f(x)',
+          }}
         />
       </Section>
       <Section title="feedback">

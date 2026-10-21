@@ -36,7 +36,8 @@ type AnswerSpec =
   | { type: "fraction"; compute: EngineCall }     // e.g. P(B) = 7/10
   | { type: "expression"; equivalentTo: string }  // numeric-sample equivalence
   | { type: "option"; id: string }
-  | { type: "set"; compute: EngineCall };         // e.g. outcomes satisfying an event
+  | { type: "set"; compute: EngineCall }          // e.g. outcomes satisfying an event
+  | { type: "parity"; fn: FnId };                 // correct option = the one whose `parity` (even|odd|neither) the engine finds for fn (sampled)
 type EngineCall = { fn: string; args: Record<string, unknown> };
 type Rich = { ar?: string; fr?: string; math?: string };   // math in a separate field
 ```
@@ -72,9 +73,23 @@ Additions in Phase 3 (planner):
 - `plan { trigger, decision }`: the validated planner decision at a decision point (rule id, source `rules|llm|fallback`, action, representation). Replay re-applies it, so an LLM session replays the same.
 - `request { kind: "change_method" | "simpler" }` (card buttons), `clarify { choice: "counting" | "why" | "link" }` (answer to ask_clarify), `offer_response { offer: "compress" | "repair" | "teacher_note", accepted }`.
 - `teacher_note { noteId, skillIds, misconceptionIds, ruleId }`: ids only, no free text; collected by `src/telemetry/notes.ts` (local queue, exportable).
+- Phase 4: `plan.shownSource: "rules" | "llm"` (what the student ended up seeing in the provisional flow; `plan.decision.llmRequestId` on LLM decisions).
+- `llm_call { requestId, purpose: "plan" | "tutor", model, outcome, statusClass: "none" | "2xx" | "4xx" | "5xx", latencyMs, inputTokens?, cachedInputTokens?, outputTokens?, costUsd?, reasons? }`: one per LLM call or skipped call (`disabled`, `capped`) or late answer (`stale`). Outcome is our own class (`ok`, `rejected`, `timeout`, `network`, `rate_limited`, `no_credit`, `spend_limit`, `auth`, `provider`, `refused`, `incomplete`, `invalid`, `config`); `reasons` are our own guard / schema codes. Never prompt, answer or provider text. Not written when there is no key.
+- `tutor_answer { source: "verified" | "ai" | "saved", requestId?, blocks, mathVerified, mathUnverified, mathDropped }`: what the tutor drawer answered (counts only). The drawer's question is the preceding `ask { via: "field", text, source, snapshot.drawer: true }`; drawer choices are `component_event { component: "TutorDrawer", name: "understood" | "still_unclear" | "back" }`.
+- `ask.snapshot.components`: on ask and long-press, the active card's component state and the last visual component's state (`{ active?, lastVisual? }`), capped at 2,048 characters.
+- `feedback { choice: "disliked" | "ok" | "liked", text? }`: the end-of-question card (DECISIONS D19), stepId "none"; queued with the reports.
+- `report` (FEEDBACK_AND_TRUST.md) is now written by the Report sheet; the queue entry (`src/telemetry/reports.ts`, MMKV) adds device, last 20 events without free text, component spec and the LLM request id.
 - `component_event` names: `shown` with component `DeepDive` (payload `deepDiveId`, `representation: "text"`) when a deep dive opens; `Variant` `shown` / `closed` (payload `variantId`, `kind`, `representation`, `round`, `outcome`).
 - `self_report.value` may be `"dismissed"` ("not now"): never evidence. `deepdive.helped`: did the deep dive help (choice / typed minis: right first try; task minis: right with at most one wrong try).
 - `transfer` is emitted only when a `transfer` variant (a changed version of a solved step) is answered. `example_round` when a simpler twin ends.
+
+Additions in Phase 5 (Exercise 4):
+- `answer.kind: "lines"` (line-by-line writing): a wrong line is an `answer` with `correct: false`, `value` = the line (safe-parser syntax) and the `misconceptionId` the checker found (known wrong line, or `missing_parentheses_fraction`); the line in the goal's written form is the correct `answer`, `value` = all accepted lines. `jumped: true` when that was the first line (the goal written at once, no reasoning shown): the planner treats it like "right answer, no reasoning shown" (`rule.jumped_to_goal`: self-report, then the transfer).
+- `component_event` from `PredictReveal`: `predicted { optionId }` / `revealed {}`: the first one opens the step's gate (the lesson goes on; not graded; replay turns it into `gate_passed`).
+- `component_event` from `LinesEditor`: `input_trace { keys }`, `line_accepted { index, raw }` (intermediate lines, not answers), `line_wrong { raw, where: numerator|denominator|both|whole, parentheses?, at? { x, student, expected } }`, `line_copied { from: last_line | start }` (the copy key: an input), `unchanged_line { raw }` (a line written exactly like the previous one: not an answer, not a hint), `invalid_input { raw, reason }` (not an answer; reason: `empty_slot`, `double_operator`, `operator_at_start`, `operator_at_end`, `power_without_base` for editor lines the card names and marks, else the parser's code or `undetermined`).
+- `component_event` names of the analysis components and primitives: `x_changed`, `compare_toggled`, `fold_changed`, `fold_complete { overlap }`, `zoom_toggled`, `h_changed { h, secantSlope, tangentSlope }`, `region_visited { region, sign }`, `cell_changed`, `submitted`, `attempts_exhausted`, `expanded_toggled { expanded }`, `predicted { optionId }`, `revealed`, `example_generated`, `value_changed`, `step_revealed`, `why_opened`.
+
+Content additions (Phase 5): step kind `lines` (`variables`, `lhs`, `start` + `startIs`, `goal` + `goalIs`, `goalLatex`, `knownWrong[] { expr, misconceptionId, meant? }`, `keys`); `startIs` / `goalIs` are engine references (`{ fn, transform: id | neg | derivative }`) the loader checks by numeric samples, so no written expression is trusted. Misconception `feedback` (optional): shown once, on the first wrong answer of a step, when the option has no feedback of its own.
 
 Content additions (Phase 3): `Exercise.variants[]` (`alternative | transfer | simpler | prerequisite`, `forSteps`, `representation`, `addresses`, `round`, optional own `experiment`, `intro` blocks, an asked or task `step`; answers computed by the engine with the variant's urn); `check` on asked steps (numeric check with the student's value); misconception `category: "math" | "writing"`; deep dives may have their own `experiment` and a task as their mini question (one interactive component max, loader-checked); `src/content/skillMap.json` (skill -> prerequisites, math vs writing; reviewed: false).
 
@@ -101,4 +116,4 @@ Initial rules (configurable, tune with real data; thresholds are guesses):
 - Separate **math gaps** from **writing habits** (parentheses on fractions, missing conclusion, missing domain check, no "Interpréter").
 
 ## 4. Storage
-Offline-first local store (SQLite or MMKV; decide in phase 0). Sync to a server later. Content ships as versioned JSON bundles per exercise, downloaded on demand.
+Offline-first local store. Events: append-only `EventStore` (`src/telemetry/eventStore.ts`), MMKV now (own instance, 50-event JSONL chunks, at most 40 chunks, chunks older than 90 days deleted on open), SQLite later behind the same interface (DECISIONS.md D2). Earlier sessions feed the derived student state. Settings, the LLM cap and the report / question queue: MMKV (`tteclair` instance). Sync to a server later. Content ships as versioned JSON bundles per exercise, downloaded on demand.

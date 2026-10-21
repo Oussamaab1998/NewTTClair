@@ -486,6 +486,24 @@ describe('correct answers', () => {
     }
   });
 
+  it('lines written straight in the goal form: self-report, then (if asked already) the transfer', () => {
+    const jumped = {
+      last: { correct: true, value: null, attempt: 1, jumped: true },
+    };
+    expect(
+      decide(sit('correct', '1b/s5', { step: jumped }), RULES.jumpedToGoal).next
+        .kind,
+    ).toBe('self_report');
+    const d = decide(
+      sit('correct', '1b/s5', {
+        step: jumped,
+        question: { selfReportsAsked: 1 },
+      }),
+      RULES.jumpedToGoal,
+    );
+    expect(d.next).toEqual({ kind: 'variant', variantId: 'tr-1b-s5-noneg' });
+  });
+
   it('self-report already asked in this question: a transfer variant instead', () => {
     const d = decide(
       sit('correct', '1b/s5', {
@@ -611,24 +629,44 @@ describe('buttons on the card', () => {
     expect(d.representation).toBe('OutcomeSpace');
   });
 
-  it('"change method" with nothing left: a hint, then a teacher note', () => {
+  it('"change method" with nothing left: never a hint (a teacher note; the button is hidden then)', () => {
+    // Changed (Group 4a): this used to answer with the next hint.
+    const nothingLeft = sit('request', 'dd:pairs_listing', {
+      requests: [{ kind: 'change_method' }],
+    });
+    expect(decide(nothingLeft, RULES.changeMethod).next.kind).toBe(
+      'teacher_note',
+    );
+    expect(planner.helpTargets(nothingLeft).changeMethod).toBe(false);
+  });
+
+  it('"something simpler" with nothing authored: the first answer is not the teacher note', () => {
+    const first = planner.decideSync(
+      sit('request', 'dd:pairs_listing', { requests: [{ kind: 'simpler' }] }),
+    );
+    expect(first.next.kind).not.toBe('teacher_note');
+    const again = planner.decideSync(
+      sit('request', 'dd:pairs_listing', {
+        requests: [{ kind: 'simpler' }, { kind: 'simpler' }],
+      }),
+    );
+    expect(again.next.kind).toBe('teacher_note');
+  });
+
+  it('helpTargets: true only when an authored answer exists', () => {
     expect(
-      decide(
-        sit('request', 'dd:pairs_listing', {
-          requests: [{ kind: 'change_method' }],
-        }),
-        RULES.changeMethod,
-      ).next.kind,
-    ).toBe('hint');
+      planner.helpTargets(
+        sit('request', '1b/s5', { requests: [{ kind: 'change_method' }] }),
+      ).changeMethod,
+    ).toBe(true);
     expect(
-      decide(
-        sit('request', 'dd:pairs_listing', {
-          requests: [{ kind: 'change_method' }],
-          step: { hintsUsed: 3 },
+      planner.helpTargets(
+        sit('request', '1b/s8', {
+          requests: [{ kind: 'simpler' }],
+          step: { skills: ['complement-event'] },
         }),
-        RULES.changeMethod,
-      ).next.kind,
-    ).toBe('teacher_note');
+      ).simpler,
+    ).toBe(true);
   });
 
   it('"something simpler": one prerequisite level down via the map', () => {

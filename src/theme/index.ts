@@ -8,14 +8,18 @@ import {
   chart,
   color,
   dataSeries,
+  editor,
+  feed,
   feedback,
   font,
   katex,
   offset,
   opacity,
+  plot,
   radius,
   shadow,
   size,
+  slider,
   space,
 } from './tokens';
 
@@ -23,6 +27,7 @@ export type { FeedbackTone } from './tokens';
 
 export const theme = {
   color,
+  feed,
   feedback,
   dataSeries,
   space,
@@ -34,5 +39,8 @@ export const theme = {
   size,
   offset,
   chart,
+  plot,
+  slider,
   katex,
+  editor,
 } as const;

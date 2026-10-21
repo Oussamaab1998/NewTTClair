@@ -9,6 +9,7 @@ import {
   ComponentNameSchema,
   ComponentSpecSchema,
 } from '../components/contract';
+import { FN_IDS } from '../engine/analysis';
 import { ExperimentSchema } from '../engine/calls';
 import { parseExpression } from '../engine/expression';
 import { ArRunsSchema, findRunIssues } from '../lesson/rich/runs';
@@ -86,6 +87,8 @@ export const AnswerSpecSchema = z.discriminatedUnion('type', [
   z.strictObject({ type: z.literal('option'), id: Id }),
   z.strictObject({ type: z.literal('set'), compute: EngineCallSchema }),
   z.strictObject({ type: z.literal('order'), ids: z.array(Id).min(2) }),
+  /** The correct option is the one whose `parity` the engine finds for `fn`. */
+  z.strictObject({ type: z.literal('parity'), fn: z.enum(FN_IDS) }),
 ]);
 export type AnswerSpec = z.infer<typeof AnswerSpecSchema>;
 
@@ -107,6 +110,8 @@ export const OptionSchema = z
     value: NumericValue.optional(),
     /** A set of integers (answers of type `set`); the label is derived when absent. */
     set: z.array(z.number().int()).min(1).optional(),
+    /** Answers of type `parity`: the conclusion this option states. */
+    parity: z.enum(['even', 'odd', 'neither']).optional(),
     misconceptionId: Id.optional(),
     feedback: RichSchema.optional(),
   })
@@ -185,6 +190,72 @@ const TypedStep = z.strictObject({
   keypad: KeypadKindSchema.optional(),
 });
 
+/** An expression in the safe parser's syntax, in the step's variables. */
+const LineExpr = z.string().min(1).max(200);
+
+/**
+ * Engine reference of a written expression: the loader checks by numeric
+ * samples that the expression is this registry function (id), its value at
+ * −x (neg) or its derivative. Expressions in content are never trusted.
+ */
+export const EngineFnRefSchema = z.strictObject({
+  fn: z.enum(FN_IDS),
+  transform: z.enum(['id', 'neg', 'derivative']).default('id'),
+});
+export type EngineFnRef = z.infer<typeof EngineFnRefSchema>;
+
+/** Keys of the structured editor (contextual: content narrows them). */
+export const LineKeySchema = z.enum([
+  '0',
+  '1',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+  '8',
+  '9',
+  'x',
+  't',
+  'e',
+  '+',
+  '-',
+  '*',
+  'frac',
+  'pow',
+  'group',
+]);
+
+/** Line-by-line writing (docs: Step 4): each line equals the previous one. */
+const LinesStep = z.strictObject({
+  ...stepBase,
+  ...asked,
+  kind: z.literal('lines'),
+  variables: z.array(z.string().regex(/^[a-z]$/)).min(1).default(['x']),
+  /** LaTeX written before the first line ("f(-x)"). */
+  lhs: z.string().min(1).optional(),
+  /** Where the student starts (shown); absent: every line is compared with the goal. */
+  start: LineExpr.optional(),
+  startIs: EngineFnRefSchema.optional(),
+  /** The goal's written form; the step ends on a line in this form. */
+  goal: LineExpr,
+  goalIs: EngineFnRefSchema,
+  /** LaTeX of the target shown on top (default: the goal expression). */
+  goalLatex: z.string().min(1).optional(),
+  knownWrong: z
+    .array(
+      z.strictObject({
+        expr: LineExpr,
+        misconceptionId: Id,
+        /** The line the student meant (localizes the error). */
+        meant: LineExpr.optional(),
+      }),
+    )
+    .default([]),
+  keys: z.array(LineKeySchema).min(1).optional(),
+});
+
 // Task components (registry kind "task") block the path like a question and
 // use prompt / hints / deepDiveId / diagnoses; visual components ignore them.
 const ComponentStep = z.strictObject({
@@ -218,6 +289,7 @@ export const StepSchema = z
     ComponentStep,
     ChoiceStep,
     TypedStep,
+    LinesStep,
     z.strictObject({
       ...stepBase,
       ...asked,
@@ -259,6 +331,13 @@ export const StepSchema = z
         code: 'custom',
         path: ['answer'],
         message: 'choice cannot have an order answer',
+      });
+    }
+    if (step.kind !== 'choice' && a.type === 'parity') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['answer'],
+        message: 'a parity answer needs a choice step',
       });
     }
     if (a.type === 'option' && !ids.includes(a.id)) {
@@ -397,6 +476,11 @@ export const MisconceptionSchema = z.strictObject({
   description: z.string().min(1),
   signature: z.string().min(1),
   repairComponent: ComponentNameSchema.optional(),
+  /**
+   * Shown once, on the first wrong answer of a step (product owner,
+   * 2026-10-18): uses the student's value when possible, ends with an action.
+   */
+  feedback: RichSchema.optional(),
   trust: TrustSchema,
 });
 export const MisconceptionLibrarySchema = z.array(MisconceptionSchema);
@@ -443,11 +527,11 @@ export const VariantSchema = z
     step: StepSchema,
   })
   .superRefine((v, ctx) => {
-    if (!['choice', 'typed', 'component'].includes(v.step.kind)) {
+    if (!['choice', 'typed', 'lines', 'component'].includes(v.step.kind)) {
       ctx.addIssue({
         code: 'custom',
         path: ['step'],
-        message: 'variant step must be asked (choice, typed) or a task',
+        message: 'variant step must be asked (choice, typed, lines) or a task',
       });
     }
     if ((v.kind === 'prerequisite') !== (v.forSteps.length === 0)) {

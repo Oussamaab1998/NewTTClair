@@ -1,0 +1,536 @@
+[
+  {
+    "id": "value_at_0_vs_limit",
+    "skillId": "limit-at-infinity",
+    "category": "math",
+    "description": "Uses the value at x = 0 (e^0 = 1) where the question is x -> +infinity.",
+    "signature": "writes 1 for e^x, or f(0) for the limit",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "هنا "
+        },
+        {
+          "fr": "x"
+        },
+        {
+          "ar": " يكبر برشا، موش "
+        },
+        {
+          "fr": "x = 0"
+        },
+        {
+          "ar": ". جرّب بقيم كبار وعاود اختار."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex4-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    },
+    "repairComponent": "LimitExplorer"
+  },
+  {
+    "id": "exp_neg_limit_wrong",
+    "skillId": "exp-limits",
+    "category": "math",
+    "description": "Thinks e^{-x} -> -infinity or -> 1 as x -> +infinity.",
+    "signature": "answers -infinity or 1 for lim e^{-x}",
+    "feedback": {
+      "ar": [
+        {
+          "fr": "e⁻ˣ = 1/eˣ"
+        },
+        {
+          "ar": ": ديما موجب، ويصغر كي "
+        },
+        {
+          "fr": "x"
+        },
+        {
+          "ar": " يكبر. شوف القيم وعاود اختار."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex4-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    },
+    "repairComponent": "LimitExplorer"
+  },
+  {
+    "id": "cancel_leaves_zero",
+    "skillId": "exp-rules",
+    "category": "math",
+    "description": "After cancelling a common factor writes 0 instead of 1.",
+    "signature": "numerator becomes 0 after cancelling e^x",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "كي نحذفو عامل من الفوق واللوطة، يبقى "
+        },
+        {
+          "fr": "1"
+        },
+        {
+          "ar": " موش "
+        },
+        {
+          "fr": "0"
+        },
+        {
+          "ar": ". عدّل السطر وعاود ثبّت."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex4-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    },
+    "repairComponent": "NumericTwin"
+  },
+  {
+    "id": "missing_parentheses_fraction",
+    "skillId": "writing-parentheses",
+    "category": "writing",
+    "description": "Writes a/b + c for a/(b + c): the fraction bar does not cover the whole denominator.",
+    "signature": "e^-x/1+e^-2x",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "خط الكسر لازم يغطّي الـ "
+        },
+        {
+          "fr": "dénominateur"
+        },
+        {
+          "ar": " الكل. حطّو الكل في الخانة وعاود ثبّت."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex4-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "domain_vs_target_confusion",
+    "skillId": "function-parity",
+    "category": "math",
+    "description": "Does not know the goal of the simplification (what the line should become).",
+    "signature": "random transformations, no comparison with the target",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "حطّ الهدف قدّامك: شنوّة المختلف بين السطر متاعك والهدف؟ اختار الخطوة اللي تقرّبك ليه."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex4-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "prime_notation_unknown",
+    "skillId": "derivative-meaning",
+    "category": "math",
+    "description": "Does not know what f' means.",
+    "signature": "asks what the prime means",
+    "feedback": {
+      "ar": [
+        {
+          "fr": "f′(x)"
+        },
+        {
+          "ar": " هو الميل متاع المماس في النقطة. حرّك النقطة في الرسم وعاود جاوب."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex4-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    },
+    "repairComponent": "SecantToTangent"
+  },
+  {
+    "id": "exponent_rules_gap",
+    "skillId": "exp-rules",
+    "category": "math",
+    "description": "e^a · e^b and e^{-a} rules not applied (multiplies exponents, loses a sign).",
+    "signature": "e^{-x}·e^{2x} written e^{-2x} or e^{-2x²}",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "كي نضربو "
+        },
+        {
+          "fr": "puissances"
+        },
+        {
+          "ar": " متاع "
+        },
+        {
+          "fr": "e"
+        },
+        {
+          "ar": "، نجمعو الأسس، ما نضربوهمش. احسب "
+        },
+        {
+          "fr": "−x + 2x"
+        },
+        {
+          "ar": " وعاود اكتب السطر."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex4-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    },
+    "repairComponent": "NumericTwin"
+  },
+  {
+    "id": "interpretation_misplaced",
+    "skillId": "writing-interpretation",
+    "category": "writing",
+    "description": "Writes 'au voisinage de y = 0' instead of '+infinity': the line is y = 0, the neighbourhood is +infinity.",
+    "signature": "au voisinage de y = 0",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "الخط هو "
+        },
+        {
+          "fr": "y = 0"
+        },
+        {
+          "ar": "، أما الـ "
+        },
+        {
+          "fr": "voisinage"
+        },
+        {
+          "ar": " هو وين "
+        },
+        {
+          "fr": "x"
+        },
+        {
+          "ar": " يمشي: "
+        },
+        {
+          "fr": "+∞"
+        },
+        {
+          "ar": ". عاود اختار."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex4-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "sign_arrow_mismatch",
+    "skillId": "variation-table",
+    "category": "math",
+    "description": "Arrow direction does not match the sign of f' in the same interval.",
+    "signature": "f' negative with an increasing arrow",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "الإشارة "
+        },
+        {
+          "fr": "+"
+        },
+        {
+          "ar": " تعطي سهم طالع، والإشارة "
+        },
+        {
+          "fr": "−"
+        },
+        {
+          "ar": " تعطي سهم هابط. بدّل السهم وعاود ثبّت."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex4-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    },
+    "repairComponent": "TangentSlope"
+  },
+  {
+    "id": "extremum_without_sign_change",
+    "skillId": "variation-table",
+    "category": "math",
+    "description": "Marks a maximum or minimum where f' does not change sign.",
+    "signature": "max where the signs are + and +",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "فمّا "
+        },
+        {
+          "fr": "extremum"
+        },
+        {
+          "ar": " كان كي الإشارة متاع "
+        },
+        {
+          "fr": "f′"
+        },
+        {
+          "ar": " تتبدّل. ثبّت في الإشارات وعاود اختار."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex4-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    },
+    "repairComponent": "TangentSlope"
+  },
+  {
+    "id": "distribution_partial",
+    "skillId": "exp-rules",
+    "category": "math",
+    "description": "(1 + a)·b written as 1 + a·b: multiplies only one term of the sum.",
+    "signature": "(1 + e^{-2x})·e^{2x} written 1 + 1 = 2",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "الضرب يمشي على الزوز: "
+        },
+        {
+          "fr": "1 × e²ˣ"
+        },
+        {
+          "ar": " و "
+        },
+        {
+          "fr": "e⁻²ˣ × e²ˣ"
+        },
+        {
+          "ar": ". اضرب الزوز وعاود اكتب الـ "
+        },
+        {
+          "fr": "dénominateur"
+        },
+        {
+          "ar": "."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex4-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "domain_symmetry_meaning",
+    "skillId": "domain-symmetric",
+    "category": "math",
+    "description": "Thinks 'symmetric' means 'positive' or does not check -x.",
+    "signature": "says R is not symmetric because it has negative numbers",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "متناظر معناها: كل ما "
+        },
+        {
+          "fr": "x"
+        },
+        {
+          "ar": " فيه، "
+        },
+        {
+          "fr": "−x"
+        },
+        {
+          "ar": " زادة فيه. ثبّت في "
+        },
+        {
+          "fr": "ℝ"
+        },
+        {
+          "ar": " وعاود اختار."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex4-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "domain_check_skipped",
+    "skillId": "writing-domain-check",
+    "category": "writing",
+    "description": "Skips the symmetric-domain line on the exam paper.",
+    "signature": "starts directly with f(-x)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "في الورقة، السطر الأوّل هو الـ "
+        },
+        {
+          "fr": "domaine"
+        },
+        {
+          "ar": ": من غيرو البرهان ناقص. اختار من جديد."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex4-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "parity_odd_even_confusion",
+    "skillId": "function-parity",
+    "category": "math",
+    "description": "Confuses paire (f(-x) = f(x)) and impaire (f(-x) = -f(x)).",
+    "signature": "answers impaire after f(-x) = f(x)",
+    "feedback": {
+      "ar": [
+        {
+          "fr": "paire"
+        },
+        {
+          "ar": ": "
+        },
+        {
+          "fr": "f(−x) = f(x)"
+        },
+        {
+          "ar": "، و "
+        },
+        {
+          "fr": "impaire"
+        },
+        {
+          "ar": ": "
+        },
+        {
+          "fr": "f(−x) = −f(x)"
+        },
+        {
+          "ar": ". شوف شنوّة لقيت وعاود اختار."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex4-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    },
+    "repairComponent": "FoldSymmetry"
+  },
+  {
+    "id": "conclusion_missing",
+    "skillId": "writing-conclusion",
+    "category": "writing",
+    "description": "Computes but does not write the conclusion sentence.",
+    "signature": "stops after f(-x) = f(x)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "حسبت كل شي: الخطوة الأخيرة هي الجملة اللي تقول النتيجة. اختارها."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex4-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "complex_fraction_gap",
+    "skillId": "exp-rules",
+    "category": "math",
+    "description": "Simplifies a fraction of fractions wrongly.",
+    "signature": "(1/u)/(1 + 1/u²) written 1/(u + u²)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "اضرب الفوق واللوطة في نفس العدد "
+        },
+        {
+          "fr": "u²"
+        },
+        {
+          "ar": "، وجرّب بـ "
+        },
+        {
+          "fr": "u = 2"
+        },
+        {
+          "ar": " باش تثبّت. عاود اختار."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex4-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "exp_negative_sign",
+    "skillId": "exp-rules",
+    "category": "math",
+    "description": "Reads e^{-x} as a negative number (-e^x).",
+    "signature": "e^{-x} = -e^x",
+    "feedback": {
+      "ar": [
+        {
+          "fr": "e⁻ˣ"
+        },
+        {
+          "ar": " ديما موجب: الأس السالب يعطي مقلوب، موش عدد سالب. اختار من جديد."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex4-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  }
+]

@@ -1,6 +1,16 @@
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { ComponentHost } from '../../components/ComponentHost';
-import type { ComponentEvent } from '../../components/contract';
+import type {
+  ComponentEvent,
+  ComponentHandle,
+} from '../../components/contract';
 import type { Experiment } from '../../engine/calls';
 import { probe } from '../../perf/probe';
 import {
@@ -34,17 +44,25 @@ import {
 import { ChoiceCard } from './ChoiceCard';
 import { isAway } from './jump';
 import { CardMemory, CardMemoryContext } from './cardMemory';
+import { SnapshotContext, type SnapshotRegistry } from './snapshots';
 import { QuestionCard, type QuestionHandlers } from './QuestionCard';
 import type { ComponentErrorReason } from '../../components/ComponentHost';
 import { RichView } from './RichView';
 import { TutorText } from './TutorText';
+import { BlockActions } from './BlockActions';
+import { reportTarget, type ReportTarget } from './reportTarget';
 import { theme } from '../../theme';
 
 const DONE_MARK = '✓';
+const THINKING_MARK = '…';
 
 export interface FeedHandlers extends QuestionHandlers {
   onLongPress: (blockId: string, quoted: string) => void;
   onCardChoice: (purpose: CardPurpose, choice: string) => void;
+  /** "..." on a block: the menu with its trust label and Report. */
+  onBlockMenu: (target: ReportTarget) => void;
+  /** The visible Report button (AI blocks, active question). */
+  onReport: (target: ReportTarget) => void;
 }
 
 interface FeedItemViewProps {
@@ -159,6 +177,18 @@ const FeedItemView = memo(function FeedItemViewImpl({
     case 'writeup':
       body = <Writeup lines={item.lines} />;
       break;
+    case 'thinking':
+      // A provisional answer is on screen; it may still change.
+      body = (
+        <Text
+          style={styles.thinking}
+          accessibilityLabel={t('lesson.thinking')}
+          testID="feed-thinking"
+        >
+          {THINKING_MARK}
+        </Text>
+      );
+      break;
     case 'done': {
       const doneLabel = `${DONE_MARK} ${t('lesson.done')}`;
       body = (
@@ -171,6 +201,7 @@ const FeedItemView = memo(function FeedItemViewImpl({
   }
   return (
     <View
+      testID={`feed-item-${item.key}`}
       onLayout={(e: LayoutChangeEvent) =>
         onLayoutKey(
           item.key,
@@ -185,7 +216,13 @@ const FeedItemView = memo(function FeedItemViewImpl({
         ]
       }
     >
-      {body}
+      <BlockActions
+        target={reportTarget(item, content)}
+        onMenu={handlers.onBlockMenu}
+        onReport={handlers.onReport}
+      >
+        {body}
+      </BlockActions>
     </View>
   );
 });
@@ -212,6 +249,12 @@ function VisualComponent({
       onComponentError(stepId, component, reason, detail),
     [onComponentError, stepId],
   );
+  const snapshots = useContext(SnapshotContext);
+  const handle = useRef<ComponentHandle>(null);
+  useEffect(() => {
+    snapshots?.register(item.blockId, item.spec.component, handle);
+    return () => snapshots?.unregister(item.blockId, handle);
+  }, [snapshots, item.blockId, item.spec.component]);
   if (item.superseded) {
     // A newer copy (e.g. the law table with one more cell) is further down.
     return (
@@ -229,6 +272,7 @@ function VisualComponent({
       {...(item.lessonState && { lessonState: item.lessonState })}
       onEvent={onEvent}
       onError={onError}
+      handleRef={handle}
     />
   );
 }
@@ -237,6 +281,12 @@ interface LessonFeedProps {
   items: readonly FeedItem[];
   content: LessonContent;
   handlers: FeedHandlers;
+  /** Mounted components' snapshots (ask, long-press, report). */
+  snapshots: SnapshotRegistry;
+  /** The student started dragging the feed (not programmatic scrolls). */
+  onUserScroll?: () => void;
+  /** Rendered after the last item (the end-of-question feedback card). */
+  endCard?: React.ReactNode;
 }
 
 /**
@@ -250,6 +300,9 @@ export const LessonFeed = memo(function LessonFeedImpl({
   items,
   content,
   handlers,
+  snapshots,
+  onUserScroll,
+  endCard,
 }: LessonFeedProps) {
   probe.count('LessonFeed');
   const { t } = useTranslation();
@@ -260,6 +313,17 @@ export const LessonFeed = memo(function LessonFeedImpl({
   const scrollTarget = useRef<string | null>(null);
   const view = useRef({ offset: 0, height: 0 });
   const [away, setAway] = useState(false);
+  // The button shows only once the card has been out of view for a while:
+  // a quick look back at the statement does not cover it with a button.
+  const [showJump, setShowJump] = useState(false);
+  useEffect(() => {
+    if (!away) {
+      setShowJump(false);
+      return;
+    }
+    const timer = setTimeout(() => setShowJump(true), theme.feed.jumpDelayMs);
+    return () => clearTimeout(timer);
+  }, [away]);
   /** The current card: the last item (an active question or a card waiting for a tap). */
   const currentKey = items[items.length - 1]?.key;
   const currentRef = useRef(currentKey);
@@ -321,37 +385,41 @@ export const LessonFeed = memo(function LessonFeedImpl({
 
   return (
     <CardMemoryContext.Provider value={memory}>
-      <View style={styles.wrap}>
-        <ScrollView
-          ref={scroll}
-          style={styles.feed}
-          contentContainerStyle={styles.content}
-          keyboardShouldPersistTaps="handled"
-          onScroll={onScroll}
-          scrollEventThrottle={SCROLL_THROTTLE_MS}
-          testID="lesson-feed"
-        >
-          {items.map(item => (
-            <FeedItemView
-              key={item.key}
-              item={item}
-              content={content}
-              handlers={handlers}
-              onLayoutKey={onLayoutKey}
-            />
-          ))}
-        </ScrollView>
-        {away && currentKey !== undefined && (
-          <Pressable
-            onPress={() => scrollToKey(currentKey)}
-            style={styles.jump}
-            accessibilityRole="button"
-            testID="jump-to-current"
+      <SnapshotContext.Provider value={snapshots}>
+        <View style={styles.wrap}>
+          <ScrollView
+            ref={scroll}
+            style={styles.feed}
+            contentContainerStyle={styles.content}
+            keyboardShouldPersistTaps="handled"
+            onScroll={onScroll}
+            onScrollBeginDrag={onUserScroll}
+            scrollEventThrottle={SCROLL_THROTTLE_MS}
+            testID="lesson-feed"
           >
-            <Text style={styles.jumpText}>{t('lesson.jumpToCurrent')}</Text>
-          </Pressable>
-        )}
-      </View>
+            {items.map(item => (
+              <FeedItemView
+                key={item.key}
+                item={item}
+                content={content}
+                handlers={handlers}
+                onLayoutKey={onLayoutKey}
+              />
+            ))}
+            {endCard}
+          </ScrollView>
+          {showJump && currentKey !== undefined && (
+            <Pressable
+              onPress={() => scrollToKey(currentKey)}
+              style={styles.jump}
+              accessibilityRole="button"
+              testID="jump-to-current"
+            >
+              <Text style={styles.jumpText}>{t('lesson.jumpToCurrent')}</Text>
+            </Pressable>
+          )}
+        </View>
+      </SnapshotContext.Provider>
     </CardMemoryContext.Provider>
   );
 });
@@ -361,19 +429,21 @@ const SCROLL_THROTTLE_MS = 100;
 
 const styles = StyleSheet.create({
   wrap: { flex: 1 },
+  // Small, in the bottom-left corner over the "⋯" gutter (Arabic lines start
+  // on the right), just above the ask bar.
   jump: {
     position: 'absolute',
-    bottom: theme.space.lg,
-    alignSelf: 'center',
+    bottom: theme.space.xs,
+    left: theme.space.xs,
     minHeight: theme.size.touch,
-    paddingHorizontal: theme.space.xxl,
+    paddingHorizontal: theme.space.md,
     borderRadius: theme.radius.pill,
     backgroundColor: theme.color.actionPrimary,
     justifyContent: 'center',
   },
   jumpText: {
     color: theme.color.textOnAccent,
-    fontSize: theme.font.size.callout,
+    fontSize: theme.font.size.footnote,
     fontWeight: theme.font.weight.semibold,
     writingDirection: 'rtl',
   },
@@ -398,6 +468,12 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     writingDirection: 'rtl',
     marginVertical: theme.space.xxxs,
+  },
+  thinking: {
+    fontSize: theme.font.size.reading,
+    color: theme.color.textSecondary,
+    textAlign: 'right',
+    marginVertical: theme.space.xxs,
   },
   done: {
     textAlign: 'center',

@@ -68,10 +68,11 @@ describe('ComponentHost', () => {
     expect(Object.keys(VIEWS).sort()).toEqual(Object.keys(REGISTRY).sort());
   });
   it('falls back and reports unknown components and invalid props', async () => {
-    const a = await host({ component: 'FunctionPlot', props: {} });
+    // A contract name with no registered view yet.
+    const a = await host({ component: 'BinomialExplorer', props: {} });
     expect(screen.getByTestId('component-fallback')).toBeOnTheScreen();
     expect(a.errors[0]?.slice(0, 2)).toEqual([
-      'FunctionPlot',
+      'BinomialExplorer',
       'unknown_component',
     ]);
 

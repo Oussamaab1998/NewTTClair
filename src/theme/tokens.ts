@@ -125,6 +125,8 @@ export const font = {
   secondaryRunDelta: 1,
   /** A formula is one step larger than the text around it. */
   mathRunDelta: 1,
+  /** Smallest scale a one-line button label may shrink to before it would clip. */
+  minScale: 0.8,
 } as const;
 
 export const opacity = {
@@ -151,6 +153,13 @@ export const size = {
   assignColumnMinHeight: 96,
   divider: 1,
   eventPanelMaxHeight: 220,
+  /** Width of the "..." block-menu gutter (touch area extended by hitSlop). */
+  blockGutter: 28,
+  /** Extra touch area around the small "..." button, each side. */
+  blockMenuSlop: 8,
+  reportInputMinHeight: 64,
+  /** Dev screen: raw LLM outputs panel. */
+  rawPanelMaxHeight: 420,
 } as const;
 
 /** Small position offsets of marks and badges. */
@@ -177,6 +186,99 @@ export const chart = {
   axisLabelWidth: 40,
   axisThickness: 1.5,
   footerHeight: 56,
+} as const;
+
+/** Function plots (analysis components, react-native-svg). */
+export const plot = {
+  /** Collapsed height of a plot (COMPONENTS_CONTRACT.md rule 5: 180-260 pt). */
+  height: 200,
+  /** Width used until the first layout pass (and in tests). */
+  defaultWidth: 320,
+  /** Collapsed component: plot height, and plot : readouts width ratio. */
+  compactHeight: 150,
+  compactPlotFlex: 3,
+  compactReadoutFlex: 2,
+  /** Full-screen (expanded) plot height. */
+  expandedHeight: 300,
+  /** Collapsed readouts shrink down to this scale instead of wrapping. */
+  readoutMinScale: 0.75,
+  pad: 12,
+  curveWidth: 2.5,
+  secondCurveWidth: 2,
+  axisWidth: 1,
+  guideWidth: 1,
+  markerRadius: 5,
+  labelSize: 12,
+  /** Dash pattern of guides and of the negative part of a sign-colored curve. */
+  dash: '6 4',
+  shadeOpacity: 0.35,
+  color: {
+    curve: p.series1,
+    secondCurve: p.series2,
+    tangent: p.series4,
+    axis: p.neutral600,
+    guide: p.neutral600,
+    marker: p.neutral900,
+    /** Inside of a hollow marker (the mirror point). */
+    surface: p.neutral0,
+    positive: p.positive600,
+    negative: p.critical600,
+    shadePositive: p.positive600,
+    shadeNegative: p.critical600,
+  },
+} as const;
+
+/** Slider of the analysis components (local state, snapped to steps). */
+export const slider = {
+  trackHeight: 4,
+  thumb: 24,
+  /** Touch height of the whole slider (rule 7: >= 44 pt). */
+  touchHeight: 44,
+  color: { track: p.neutral200, fill: p.brand500, thumb: p.brand500 },
+} as const;
+
+/** Structured math editor (typed lines). */
+export const editor = {
+  /** Font size by nesting depth (root, first slot level, deeper). */
+  fontSizes: [20, 16, 13] as readonly number[],
+  cursorWidth: 2,
+  /** Cursor height as a ratio of the font size. */
+  cursorRatio: 1.2,
+  /** Empty slot box, as a ratio of the font size. */
+  slotRatio: 0.9,
+  barHeight: 1.5,
+  /** Exponent lift, as a ratio of the base font size. */
+  liftRatio: 0.45,
+  minHeight: 56,
+  /** Keys per row before the card width is measured. */
+  keysPerRow: 6,
+  /** Between keys: six 44 pt keys + gaps fit a 280 pt card. */
+  keyGap: 2,
+  /** Space each side of + − × in the line. */
+  operatorSpace: 3,
+  /** Extra touch area around a symbol of the line (tap = cursor after it). */
+  tapSlop: { top: 8, bottom: 8, left: 3, right: 3 },
+  /** How long a wrapped part stays outlined (ms); kept until the next key with reduce motion. */
+  flashMs: 800,
+  /** How long the "<change> · تراجع" chip stays after a structural change (ms). */
+  undoChipMs: 4000,
+  color: {
+    cursor: p.brand500,
+    slot: p.neutral200,
+    activeSlot: p.brand500,
+    /** The slot the cursor is in (exponent, numerator...). */
+    activeSlotBackground: p.brand50,
+    /** The atoms selected by widen. */
+    selection: p.brand100,
+    /** The numerator / denominator a wrong line is localized to. */
+    faultySlot: p.caution50,
+  },
+} as const;
+
+/** Lesson feed timing. */
+export const feed = {
+  /** The current card must be out of view this long (ms) before "back to the question" shows. */
+  jumpDelayMs: 2000,
 } as const;
 
 /** Inline KaTeX page (WebView fallback renderer). */

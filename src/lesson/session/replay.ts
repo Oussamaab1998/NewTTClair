@@ -5,6 +5,7 @@
  * event is re-applied as logged (so an LLM decision replays the same).
  */
 import type { JsonObject } from '../../components/contract';
+import { opensGate } from '../../components/registry';
 import type { Event } from '../../telemetry/events';
 import type { AskMode, LessonAction } from './types';
 
@@ -47,7 +48,10 @@ export function actionsFromEvents(events: readonly Event[]): LessonAction[] {
         keys = undefined;
         break;
       case 'component_event':
-        if (
+        if (opensGate(e.component, e.name)) {
+          // A no-op when that step is not waiting (later taps on the same component).
+          actions.push({ type: 'gate_passed', stepId: e.stepId, at });
+        } else if (
           e.component === 'Variant' &&
           e.name === 'closed' &&
           e.payload.outcome === 'abandoned'

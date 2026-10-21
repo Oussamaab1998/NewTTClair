@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { AskMode } from '../session/types';
 import { theme } from '../../theme';
+import { isolateInline } from '../rich/runs';
 
 export const ASK_MODES: readonly AskMode[] = ['explain', 'why', 'example'];
 
@@ -36,8 +37,12 @@ export function LongPressMenu({
         <View style={styles.sheet} testID="longpress-menu">
           <Text style={styles.title}>{t('lesson.menuTitle')}</Text>
           {quoted !== null && (
-            <Text style={styles.quote} numberOfLines={3}>
-              {quoted}
+            <Text
+              style={styles.quote}
+              numberOfLines={3}
+              testID="longpress-quote"
+            >
+              {isolateInline(quoted)}
             </Text>
           )}
           {ASK_MODES.map(mode => (

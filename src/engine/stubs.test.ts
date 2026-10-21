@@ -1,10 +1,5 @@
 // TODO lists from docs/CHAPTERS.md. Implement with the module's phase; facts must be confirmed by a teacher.
-describe('analysis (Phase 5)', () => {
-  test.todo('numeric derivative matches the exact derivative on sample points');
-  test.todo('integrate (Simpson) on a polynomial is exact');
-  test.todo('limitProbe on a forme indéterminée from EX4_ANALYSIS.md');
-  test.todo('signChange finds the zeros used in the tableau de variation');
-});
+// analysis: implemented in Phase 5 (analysis.test.ts).
 
 describe('sequences', () => {
   test.todo('iterate u(n+1) = f(u(n)) for n steps');

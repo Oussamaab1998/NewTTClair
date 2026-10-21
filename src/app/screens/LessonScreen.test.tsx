@@ -188,17 +188,22 @@ describe('LessonScreen (Exercise 2, 1.b)', () => {
     expect(log.all()[1]).toMatchObject({ name: 'dismissed' });
   });
 
-  it('answers ask-field chips and free text (canned for now)', async () => {
+  it('answers ask-field chips in the feed; free text opens the tutor drawer (no LLM: saved, neutral line)', async () => {
     await renderLesson();
     await tap('ask-chip-why_complement');
     expect(screen.getByTestId('ask-answer')).toBeOnTheScreen();
     await fireEvent.changeText(screen.getByTestId('ask-input'), 'علاش؟');
     await tap('ask-send');
-    expect(screen.getByTestId('feedback-info')).toBeOnTheScreen();
+    expect(await screen.findByTestId('tutor-saved')).toHaveTextContent(
+      'سؤالك تسجّل.',
+    );
     expect(log.all()).toMatchObject([
       { t: 'ask', via: 'field', snapshot: { chipId: 'why_complement' } },
-      { t: 'ask', via: 'field', text: 'علاش؟' },
+      { t: 'ask', via: 'field', text: 'علاش؟', source: 'local' },
+      { t: 'tutor_answer', source: 'saved', blocks: 0 },
     ]);
+    await tap('tutor-back');
+    expect(screen.queryByTestId('tutor-drawer')).toBeNull();
   });
 
   it('writes at least one event for every interaction', async () => {

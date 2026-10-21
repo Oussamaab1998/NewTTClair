@@ -21,3 +21,14 @@ export {
 export type { NumberSystem } from './evaluate';
 export { checkEquivalence } from './equivalence';
 export type { EquivalenceOptions, EquivalenceResult } from './equivalence';
+export {
+  toLatex,
+  splitFraction,
+  locateDifference,
+  missingParentheses,
+  valueAt,
+  canonical,
+  sameForm,
+  precedence,
+} from './structure';
+export type { Difference } from './structure';

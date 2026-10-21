@@ -5,5 +5,9 @@ module.exports = {
   transformIgnorePatterns: [
     'node_modules/(?!((jest-)?react-native[^/]*|@react-native(-community)?|@testing-library)/)',
   ],
+  // Tests never load the real LLM key (src/config/llmLocal.generated.ts is gitignored).
+  moduleNameMapper: {
+    'llmLocal\\.generated$': '<rootDir>/src/config/llmLocal.stub.ts',
+  },
   testPathIgnorePatterns: ['/node_modules/', '/ios/', '/android/', '/vendor/'],
 };

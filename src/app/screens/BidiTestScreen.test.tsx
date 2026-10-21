@@ -40,9 +40,12 @@ describe('BidiTestScreen', () => {
     await fireEvent.press(screen.getByTestId('tab-sentences'));
     const both = screen.getByTestId('sentence-S1-both');
     const none = screen.getByTestId('sentence-S1-none');
-    expect(both).toHaveTextContent(`${BIDI.LRI}domaine${BIDI.PDI}`, {
-      exact: false,
-    });
+    expect(both).toHaveTextContent(
+      `${BIDI.LRI}${BIDI.LRM}domaine${BIDI.LRM}${BIDI.PDI}`,
+      {
+        exact: false,
+      },
+    );
     expect(none).not.toHaveTextContent(BIDI.LRI, { exact: false });
   });
 

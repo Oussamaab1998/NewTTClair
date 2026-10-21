@@ -7,6 +7,7 @@ import type { Rich, VariantKind } from '../../content/schema';
 import type { StudentContent, UiMessage } from '../session/types';
 import { RichView } from './RichView';
 import { theme, type FeedbackTone } from '../../theme';
+import { isolateInline } from '../rich/runs';
 
 export const StudentBubble = memo(function StudentBubbleImpl({
   content,
@@ -29,14 +30,14 @@ export const StudentBubble = memo(function StudentBubbleImpl({
       body = (
         <>
           <Text style={[styles.rtl, styles.quote]} numberOfLines={3}>
-            {content.quoted}
+            {isolateInline(content.quoted)}
           </Text>
           <Text style={styles.rtl}>{t(`lesson.askMode.${content.mode}`)}</Text>
         </>
       );
       break;
     case 'text':
-      body = <Text style={styles.rtl}>{content.text}</Text>;
+      body = <Text style={styles.rtl}>{isolateInline(content.text)}</Text>;
       break;
   }
   return (

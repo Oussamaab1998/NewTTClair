@@ -38,11 +38,14 @@ export const EventSchema = z.discriminatedUnion('t', [
     ...base,
     t: z.literal('answer'),
     // 'task': the result of a task component (EventPicker, LawBuilder); value = its details.
-    kind: z.enum(['choice', 'typed', 'ordering', 'task']),
+    // 'lines': line-by-line writing; value = the line (wrong) or all lines (done).
+    kind: z.enum(['choice', 'typed', 'ordering', 'task', 'lines']),
     value: z.json(),
     correct: z.boolean(),
     misconceptionId: Id.optional(),
     attempt,
+    /** Lines: the goal form typed as the first line (no reasoning shown). */
+    jumped: z.literal(true).optional(),
   }),
   z.strictObject({
     ...base,
@@ -171,6 +174,62 @@ export const EventSchema = z.discriminatedUnion('t', [
     t: z.literal('plan'),
     trigger: TriggerSchema,
     decision: DecisionSchema,
+    /** What the student ended up seeing (provisional rules, swapped for the LLM or not). */
+    shownSource: z.enum(['rules', 'llm']).optional(),
+  }),
+  // One LLM call (or one skipped call): outcome and status class only, never
+  // prompt, answer or provider text (docs/PLANNER.md measurement plan).
+  z.strictObject({
+    ...base,
+    t: z.literal('llm_call'),
+    requestId: Id,
+    purpose: z.enum(['plan', 'tutor']),
+    model: Id,
+    outcome: z.enum([
+      'ok',
+      'rejected',
+      'stale',
+      'timeout',
+      'network',
+      'rate_limited',
+      'no_credit',
+      'spend_limit',
+      'auth',
+      'provider',
+      'refused',
+      'incomplete',
+      'invalid',
+      'disabled',
+      'capped',
+      'config',
+    ]),
+    statusClass: z.enum(['none', '2xx', '4xx', '5xx']),
+    latencyMs: z.number().nonnegative(),
+    inputTokens: z.number().int().nonnegative().optional(),
+    cachedInputTokens: z.number().int().nonnegative().optional(),
+    outputTokens: z.number().int().nonnegative().optional(),
+    /** List-price estimate (models.ts). */
+    costUsd: z.number().nonnegative().optional(),
+    /** Our own codes: guard / schema reasons, never model text. */
+    reasons: z.array(z.string().max(80)).max(10).optional(),
+  }),
+  // End-of-question feedback card (D19): one tap on a face, optional short note.
+  z.strictObject({
+    ...base,
+    t: z.literal('feedback'),
+    choice: z.enum(['disliked', 'ok', 'liked']),
+    text: z.string().max(300).optional(),
+  }),
+  // What the tutor drawer answered with (no text: counts and source only).
+  z.strictObject({
+    ...base,
+    t: z.literal('tutor_answer'),
+    source: z.enum(['verified', 'ai', 'saved']),
+    requestId: Id.optional(),
+    blocks: z.number().int().nonnegative(),
+    mathVerified: z.number().int().nonnegative(),
+    mathUnverified: z.number().int().nonnegative(),
+    mathDropped: z.number().int().nonnegative(),
   }),
   // A note queued for the teacher: ids only, no free text (CLAUDE.md rule 8).
   z.strictObject({

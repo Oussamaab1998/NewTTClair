@@ -73,3 +73,11 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# LLM test-build secrets (docs/DECISIONS.md): never commit
+.env.llm.local
+.env*.local
+src/config/llmLocal.generated.ts
+
+# Simulator screenshots for check-ins (local only).
+docs/screens/

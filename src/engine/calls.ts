@@ -5,6 +5,7 @@
  */
 import { z } from 'zod';
 
+import { FN_IDS, evalFn, limitProbe, toRational } from './analysis';
 import {
   BallSchema,
   DrawSchema,
@@ -115,7 +116,34 @@ export const ENGINE_CALLS = {
     args: z.strictObject({ factors: z.array(z.number().int()).min(1) }),
     run: a => a.factors.reduce<Fraction>((p, f) => mul(p, frac(f)), [1, 1]),
   }),
+  /** f(x) of a registry function, only when it is a small exact fraction (f(0) = 1/2). */
+  fnAt: def({
+    args: z.strictObject({ fn: z.enum(FN_IDS), x: z.number() }),
+    run: a => exactOrThrow(evalFn(a.fn, a.x), 1e-12, `${a.fn}(${a.x})`),
+  }),
+  /** Limit at ±infinity by probing, only when it converges to a small fraction. */
+  limitAt: def({
+    args: z.strictObject({
+      fn: z.enum(FN_IDS),
+      direction: z.enum(['+inf', '-inf']),
+    }),
+    run: a => {
+      const p = limitProbe(a.fn, a.direction);
+      if (!p.converges) {
+        throw new EngineError(`${a.fn} does not converge at ${a.direction}`);
+      }
+      return exactOrThrow(p.estimate, 1e-8, `lim ${a.fn}`);
+    },
+  }),
 } satisfies Record<string, CallDef<unknown>>;
+
+function exactOrThrow(x: number, tol: number, what: string): Fraction {
+  const q = toRational(x, { tol });
+  if (!q) {
+    throw new EngineError(`${what} is not a small exact fraction`);
+  }
+  return q;
+}
 export type EngineCallName = keyof typeof ENGINE_CALLS;
 
 export function isEngineCallName(name: string): name is EngineCallName {

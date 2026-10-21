@@ -18,7 +18,9 @@
  */
 import { add, equals } from '../../engine/rational';
 import { fractionToLatex, parseNumeric } from '../../engine/format';
-import { componentKind } from '../../components/registry';
+import { parseExpression, toLatex } from '../../engine/expression';
+import { checkLine } from '../lines/check';
+import { componentKind, isGate } from '../../components/registry';
 import type { ComponentSpec, JsonObject } from '../../components/contract';
 import {
   deepDiveContext,
@@ -67,6 +69,8 @@ export const MAX_DEPTH = 3;
 /** A task mini question with this many wrong tries "did not help" (product owner, Phase 3). */
 export const TASK_MINI_WRONG_TRIES_NOT_HELPED = 2;
 const SHORT_TEXT = 500;
+/** Same cap as the safe parser's input. */
+const LINE_MAX = 200;
 
 type DeepDive = Exercise['deepDives'][number];
 
@@ -98,7 +102,12 @@ export function buildContent(
   const asksByBlock = new Map<string, Asks | undefined>();
   for (const g of question.groups) {
     for (const s of g.steps) {
-      if (s.kind === 'choice' || s.kind === 'typed' || isTaskStep(s)) {
+      if (
+        s.kind === 'choice' ||
+        s.kind === 'typed' ||
+        s.kind === 'lines' ||
+        isTaskStep(s)
+      ) {
         steps.set(stepKey.main(question.id, s.id), s as FrameStep);
       }
       if (s.kind === 'text') {
@@ -370,6 +379,7 @@ function appendComponent(
   depth: number,
   stepId?: string,
   experiment?: Experiment,
+  ai?: { trust?: NonNullable<FeedItem['trust']>; llmRequestId?: string },
 ) {
   const id = stepId ?? top(d)?.stepId ?? 'none';
   append(d, {
@@ -379,6 +389,7 @@ function appendComponent(
     blockId,
     stepId: id,
     ...(experiment && { experiment }),
+    ...ai,
   });
   logShown(d, spec, blockId, id);
 }
@@ -419,6 +430,7 @@ function fillLaw(d: Draft, step: TaskStep, source: 'solved' | 'revealed') {
     blockId: table.blockId,
     stepId: table.stepId,
     lessonState: { filled },
+    trust: 'engine_computed',
   });
   d.events.push({
     questionId: d.s.questionId,
@@ -482,6 +494,7 @@ function advance(d: Draft) {
         break;
       case 'choice':
       case 'typed':
+      case 'lines':
         pushFrame(
           d,
           { scope: 'main', questionId: d.c.question.id, stepId: step.id },
@@ -499,6 +512,11 @@ function advance(d: Draft) {
         }
         if (componentKind(step.component)) {
           appendComponent(d, step.component, step.blockId, 0, step.id);
+          if (isGate(step.component.component)) {
+            // Nothing after it appears before the student's tap.
+            d.s.gate = { stepId: step.id };
+            return;
+          }
         } else {
           componentFallback(d, step.component.component, 0);
         }
@@ -779,11 +797,201 @@ function correctAnswerRich(d: Draft, frame: Frame): Rich {
     return { math: fractionToLatex(answer.value) };
   }
   const step = stepOf(d, frame);
+  if (answer.kind === 'lines') {
+    // The goal's written form (engine-checked by the loader).
+    const goal =
+      step.kind === 'lines' && step.goalLatex !== undefined
+        ? step.goalLatex
+        : latexOfLine(answer.spec.goal, answer.spec.variables);
+    const lhs = step.kind === 'lines' && step.lhs ? `${step.lhs}=` : '';
+    return { math: `${lhs}${goal}` };
+  }
   const option =
     step.kind === 'choice'
-      ? step.options.find(o => o.id === answer.optionId)
+      ? step.options.find(
+          o => answer.kind === 'option' && o.id === answer.optionId,
+        )
       : undefined;
   return option?.label ?? { math: '?' };
+}
+
+function latexOfLine(src: string, variables: readonly string[]): string {
+  const r = parseExpression(src, { variables });
+  return r.ok ? toLatex(r.ast) : src;
+}
+
+/**
+ * The misconception's own message, on the first wrong answer of a step only
+ * (product owner, 2026-10-18): never repeated on a second wrong answer.
+ */
+/**
+ * The message of a known mistake, once per misconception and card: a second,
+ * different mistake gets its own message (not the generic "try again"); the
+ * same mistake again does not repeat it.
+ */
+function misconceptionFeedback(
+  d: Draft,
+  frame: Frame,
+  misconceptionId: string | undefined,
+): Rich | undefined {
+  if (
+    misconceptionId === undefined ||
+    frame.misconceptionsShown?.includes(misconceptionId)
+  ) {
+    return undefined;
+  }
+  const feedback = d.c.loaded.misconceptions.get(misconceptionId)?.feedback;
+  if (feedback) {
+    frame.misconceptionsShown = [
+      ...(frame.misconceptionsShown ?? []),
+      misconceptionId,
+    ];
+  }
+  return feedback;
+}
+
+/**
+ * One typed line of a lines step. The reducer re-checks it (the card's own
+ * check is display only): an accepted line is logged as a component event,
+ * a wrong line is a wrong answer (planner ladder), the goal form ends the step.
+ */
+function onLine(
+  d: Draft,
+  frame: Frame,
+  step: Extract<FrameStep, { kind: 'lines' }>,
+  rawLine: string,
+  keys: string[] | undefined,
+) {
+  const answer = answerOf(d, frame);
+  if (answer.kind !== 'lines') {
+    return;
+  }
+  closeOpenCards(d);
+  const base = eventBase(d, frame);
+  const raw = rawLine.slice(0, LINE_MAX);
+  if (keys) {
+    d.events.push({
+      ...base,
+      t: 'component_event',
+      component: 'LinesEditor',
+      name: 'input_trace',
+      payload: { keys: keys.slice(0, 100) },
+    });
+  }
+  const accepted = frame.lines ?? [];
+  const v = checkLine(answer.spec, accepted, raw);
+  if (v.kind === 'unchanged') {
+    // Neither right nor wrong, not a hint: the card asks for a change.
+    d.events.push({
+      ...base,
+      t: 'component_event',
+      component: 'LinesEditor',
+      name: 'unchanged_line',
+      payload: { raw },
+    });
+    return;
+  }
+  if (
+    v.kind === 'unreadable' ||
+    v.kind === 'parse_error' ||
+    v.kind === 'undetermined'
+  ) {
+    d.events.push({
+      ...base,
+      t: 'component_event',
+      component: 'LinesEditor',
+      name: 'invalid_input',
+      payload: {
+        raw,
+        reason:
+          v.kind === 'unreadable'
+            ? v.issue.kind
+            : v.kind === 'parse_error'
+            ? v.code
+            : 'undetermined',
+      },
+    });
+    return;
+  }
+  if (v.kind === 'accepted') {
+    const lines = [...accepted, raw];
+    frame.lines = lines;
+    updateCard(d, frame.cardKey, { lines });
+    if (!v.final) {
+      d.events.push({
+        ...base,
+        t: 'component_event',
+        component: 'LinesEditor',
+        name: 'line_accepted',
+        payload: { index: lines.length - 1, raw },
+      });
+      return;
+    }
+    d.events.push({
+      ...base,
+      ...duration(d, frame),
+      t: 'answer',
+      kind: 'lines',
+      value: lines,
+      correct: true,
+      attempt: frame.attempts + 1,
+      ...(v.jumped && { jumped: true as const }),
+    });
+    updateCard(d, frame.cardKey, {
+      status: 'done',
+      result: { raw, correct: true },
+    });
+    d.s.items.push({
+      key: nextKey(d, 'feedback'),
+      kind: 'feedback',
+      depth: frame.depth,
+      tone: 'success',
+      message: 'correct',
+    });
+    completeStep(d, frame, true);
+    return;
+  }
+  // Wrong line: localized by the card; the misconception message once.
+  d.events.push({
+    ...base,
+    t: 'component_event',
+    component: 'LinesEditor',
+    name: 'line_wrong',
+    payload: {
+      raw,
+      where: v.where,
+      ...(v.parentheses && { parentheses: v.parentheses }),
+      ...(v.at && {
+        at: { x: v.at.x, student: v.at.student, expected: v.at.expected },
+      }),
+    },
+  });
+  d.events.push({
+    ...base,
+    ...duration(d, frame),
+    t: 'answer',
+    kind: 'lines',
+    value: raw,
+    correct: false,
+    ...(v.misconceptionId !== undefined && {
+      misconceptionId: v.misconceptionId,
+    }),
+    attempt: frame.attempts + 1,
+  });
+  const feedback = misconceptionFeedback(d, frame, v.misconceptionId);
+  frame.attempts += 1;
+  delete frame.lastRaw;
+  d.s.compressed = false;
+  updateCard(d, frame.cardKey, { attempts: frame.attempts });
+  if (feedback) {
+    append(d, {
+      kind: 'feedback',
+      depth: frame.depth,
+      tone: 'warning',
+      rich: feedback,
+    });
+  }
+  setPending(d, 'wrong', frame.stepId);
 }
 
 // ---------------------------------------------------------------------------
@@ -797,6 +1005,12 @@ function onAnswer(d: Draft, action: Extract<LessonAction, { type: 'answer' }>) {
   const step = stepOf(d, frame);
   if (step.kind === 'component') {
     return; // Task components answer through component_result.
+  }
+  if (step.kind === 'lines') {
+    if ('line' in action.value) {
+      onLine(d, frame, step, action.value.line, action.keys);
+    }
+    return;
   }
   const answer = answerOf(d, frame);
   const base = eventBase(d, frame);
@@ -822,7 +1036,9 @@ function onAnswer(d: Draft, action: Extract<LessonAction, { type: 'answer' }>) {
     numeric = option.value;
     correct = option.id === answer.optionId;
     misconceptionId = option.misconceptionId;
-    feedback = option.feedback;
+    // Authored option feedback, else the misconception's (once per mistake).
+    feedback =
+      option.feedback ?? misconceptionFeedback(d, frame, misconceptionId);
     append(d, {
       kind: 'student',
       depth: frame.depth,
@@ -868,7 +1084,8 @@ function onAnswer(d: Draft, action: Extract<LessonAction, { type: 'answer' }>) {
       return v.ok && equals(v.value, parsed.value);
     });
     misconceptionId = known?.misconceptionId;
-    feedback = known?.feedback;
+    feedback =
+      known?.feedback ?? misconceptionFeedback(d, frame, misconceptionId);
     append(d, {
       kind: 'student',
       depth: frame.depth,
@@ -911,12 +1128,16 @@ function onAnswer(d: Draft, action: Extract<LessonAction, { type: 'answer' }>) {
   }
   d.s.compressed = false;
   updateCard(d, frame.cardKey, { attempts: frame.attempts });
-  append(d, {
-    kind: 'feedback',
-    depth: frame.depth,
-    tone: 'warning',
-    ...(feedback ? { rich: feedback } : { message: 'wrong' as UiMessage }),
-  });
+  // A known mistake already explained on this card gets no new message (the
+  // planner's reaction follows); the generic one is only for unknown mistakes.
+  if (feedback || misconceptionId === undefined) {
+    append(d, {
+      kind: 'feedback',
+      depth: frame.depth,
+      tone: 'warning',
+      ...(feedback ? { rich: feedback } : { message: 'wrong' as UiMessage }),
+    });
+  }
   setPending(d, 'wrong', frame.stepId);
 }
 
@@ -973,6 +1194,7 @@ function onReveal(d: Draft) {
       kind: 'answer',
       depth: frame.depth,
       rich: correctAnswerRich(d, frame),
+      trust: 'engine_computed',
     });
   }
   completeStep(d, frame, false);
@@ -1284,7 +1506,11 @@ function onAskLongPress(
     mode: action.mode,
     quoted,
     source: 'local',
-    snapshot: { ...askSnapshot(d), blockId: action.blockId },
+    snapshot: {
+      ...askSnapshot(d),
+      blockId: action.blockId,
+      ...(action.components && { components: action.components }),
+    },
   });
   const depth = frame?.depth ?? 0;
   append(d, {
@@ -1318,7 +1544,11 @@ function onAskField(
     via: 'field',
     ...(text && { text }),
     source: 'local',
-    snapshot: { ...askSnapshot(d), ...(chip && { chipId: chip.id }) },
+    snapshot: {
+      ...askSnapshot(d),
+      ...(chip && { chipId: chip.id }),
+      ...(action.components && { components: action.components }),
+    },
   });
   const depth = frame?.depth ?? 0;
   append(d, {
@@ -1399,6 +1629,16 @@ function applyAction(
     representation: decision.representation ?? a.kind,
   };
   const frame = editTop(d);
+  // Blocks written by the LLM (a component it chose included) are labelled as such.
+  const ai: { trust?: 'ai_generated'; llmRequestId?: string } =
+    decision.source === 'llm'
+      ? {
+          trust: 'ai_generated',
+          ...(decision.llmRequestId !== undefined && {
+            llmRequestId: decision.llmRequestId,
+          }),
+        }
+      : {};
   switch (a.kind) {
     case 'continue':
       if (
@@ -1459,6 +1699,7 @@ function applyAction(
         depth: frame!.depth,
         tone: 'info',
         rich: numericCheck(d, frame!)!,
+        trust: 'engine_computed',
       });
       return;
     case 'ask_clarify':
@@ -1488,8 +1729,17 @@ function applyAction(
         depth: frame!.depth,
         rich: a.instruction,
         longPress: false,
+        ...ai,
       });
-      appendComponent(d, a.component, `plan-${d.s.seq + 1}`, frame!.depth);
+      appendComponent(
+        d,
+        a.component,
+        `plan-${d.s.seq + 1}`,
+        frame!.depth,
+        undefined,
+        undefined,
+        ai,
+      );
       return;
     case 'explain':
     case 'example':
@@ -1500,11 +1750,25 @@ function applyAction(
             depth: frame!.depth,
             rich: b.text,
             longPress: false,
+            ...ai,
           });
         } else if (b.type === 'math') {
-          append(d, { kind: 'math', depth: frame!.depth, latex: b.latex });
+          append(d, {
+            kind: 'math',
+            depth: frame!.depth,
+            latex: b.latex,
+            ...ai,
+          });
         } else if (b.type === 'component') {
-          appendComponent(d, b.spec, `plan-${d.s.seq + 1}`, frame!.depth);
+          appendComponent(
+            d,
+            b.spec,
+            `plan-${d.s.seq + 1}`,
+            frame!.depth,
+            undefined,
+            undefined,
+            ai,
+          );
         } else {
           for (const item of b.items) {
             append(d, {
@@ -1512,6 +1776,7 @@ function applyAction(
               depth: frame!.depth,
               rich: item,
               longPress: false,
+              ...ai,
             });
           }
         }
@@ -1555,6 +1820,7 @@ function onApplyPlan(
     t: 'plan',
     trigger: pending.trigger,
     decision,
+    ...(action.shownSource && { shownSource: action.shownSource }),
   });
   applyAction(d, decision.next, decision, pending.trigger, pending.stepId);
   if (decision.followUp) {
@@ -1650,6 +1916,12 @@ export function reduce(
       break;
     case 'skip':
       onSkip(d, action);
+      break;
+    case 'gate_passed':
+      if (d.s.gate?.stepId === action.stepId) {
+        delete d.s.gate;
+        advance(d);
+      }
       break;
     case 'request':
       onRequest(d, action);

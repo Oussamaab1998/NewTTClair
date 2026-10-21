@@ -18,6 +18,9 @@ function flatten(tree: Tree, prefix = ''): Record<string, string> {
 const ARABIC = /[؀-ۿ]/;
 // Latin letters or digits, ignoring {{placeholders}}.
 const LATIN_OR_DIGIT = /[A-Za-z0-9]/;
+/** Same signs as the content check (lesson/rich/runs.ts), arrows excluded (UI icons). */
+const MATH_SIGN =
+  /[=+^<>≤≥∞√∫\u2212×÷·±≠≈∈∉⊂ℝℕℤℚℂ⇒⇔′″\u2070-\u209F\u00B2\u00B3\u00B9]/;
 
 describe('i18n files', () => {
   const ar = flatten(arTN);
@@ -36,5 +39,13 @@ describe('i18n files', () => {
       );
     });
     expect(mixed).toEqual([]);
+  });
+
+  it('never put math signs inside an Arabic ar-TN string (formulas are LTR runs)', () => {
+    const withMath = Object.entries(ar)
+      .filter(([, text]) => ARABIC.test(text) && MATH_SIGN.test(text))
+      .map(([key]) => key);
+    // A shape cue beside the words (not colour alone), not a formula.
+    expect(withMath).toEqual(['analysis.fold.noOverlapShort']);
   });
 });

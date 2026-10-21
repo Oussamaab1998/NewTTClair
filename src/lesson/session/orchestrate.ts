@@ -6,7 +6,7 @@
  * without touching the lesson (rules stay its fallback).
  */
 import { continueDecision, type Planner } from '../../planner/planner';
-import type { RulesPlanner } from '../../planner/rules';
+import type { HelpTargets, RulesPlanner } from '../../planner/rules';
 import type { Decision } from '../../planner/schema';
 import { buildSituation } from '../../planner/situation';
 import type { Event, EventDraft } from '../../telemetry/events';
@@ -16,6 +16,53 @@ import type { LessonAction, LessonState } from './types';
 export interface LogLike {
   append(drafts: readonly EventDraft[]): Event[];
   all(): readonly Event[];
+}
+
+/**
+ * A log view with earlier sessions' events in front (cross-session student
+ * state). Appends go to the current log only.
+ */
+export function withHistory(history: readonly Event[], log: LogLike): LogLike {
+  if (history.length === 0) {
+    return log;
+  }
+  return {
+    append: drafts => log.append(drafts),
+    all: () => [...history, ...log.all()],
+  };
+}
+
+/**
+ * What "change method" and "easier" would get on the active card right now:
+ * the planner reads a hypothetical request on that step (never logged). The
+ * card shows a help button only when it would get an authored answer.
+ */
+export function helpTargetsAt(
+  content: LessonContent,
+  state: LessonState,
+  log: LogLike,
+  planner: RulesPlanner,
+): HelpTargets | null {
+  const frame = state.stack[state.stack.length - 1];
+  const events = log.all();
+  const last = events[events.length - 1];
+  if (!frame || frame.ref.scope === 'mini' || !last) {
+    return null;
+  }
+  const probe: Event = {
+    id: 'help-probe',
+    ts: last.ts,
+    sessionId: last.sessionId,
+    studentId: last.studentId,
+    exerciseId: last.exerciseId,
+    contentVersion: last.contentVersion,
+    questionId: state.questionId,
+    stepId: frame.stepId,
+    t: 'request',
+    kind: 'simpler',
+  };
+  const situation = buildSituation([...events, probe], content.catalog);
+  return situation ? planner.helpTargets(situation) : null;
 }
 
 /** The rules planner's decision for the log's last decision point. */

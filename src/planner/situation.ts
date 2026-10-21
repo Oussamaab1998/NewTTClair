@@ -57,6 +57,8 @@ export interface Situation {
       value: string | null;
       attempt: number;
       durationMs?: number;
+      /** Lines: the goal form typed as the first line (no reasoning shown). */
+      jumped?: boolean;
     };
     timeOnStepMs?: number;
     revealed: boolean;
@@ -321,7 +323,10 @@ export function buildSituation(
           cleanStreak = clean ? cleanStreak + 1 : 0;
           cleanStreakActed =
             clean &&
-            (cleanStreakActed || e.kind === 'typed' || e.kind === 'task');
+            (cleanStreakActed ||
+              e.kind === 'typed' ||
+              e.kind === 'lines' ||
+              e.kind === 'task');
         } else if (!e.correct) {
           cleanStreak = 0;
           cleanStreakActed = false;
@@ -447,6 +452,7 @@ export function buildSituation(
           ...(lastAnswer.durationMs !== undefined && {
             durationMs: lastAnswer.durationMs,
           }),
+          ...(lastAnswer.jumped && { jumped: true }),
         },
       }),
       ...(onStep[0] && {

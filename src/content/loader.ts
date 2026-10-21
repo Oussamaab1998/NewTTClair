@@ -3,13 +3,17 @@
  * from the engine (CLAUDE.md hard rule 1).
  * - `\val{id}` in math / latex / writeup strings -> the engine value of `values[id]`.
  * - Numeric options get their label from `value`; the correct option is found by engine value.
+ * - Parity answers: the correct option is the one stating the engine's parity of the function.
  * - Typed answers resolve to an exact fraction.
  * - Every formula must parse with the native math renderer (no raw-LaTeX fallback in lessons).
  * Never throws on bad content: returns the list of problems.
  */
 import { componentKind, resolveSpec } from '../components/registry';
 import type { ComponentSpec } from '../components/contract';
+import { matchesFn, parity } from '../engine/analysis';
 import { runEngineCall, runSetCall, type CallContext } from '../engine/calls';
+import { parseExpression } from '../engine/expression';
+import type { LinesSpec } from '../lesson/lines/check';
 import {
   fractionToLatex,
   fractionToPlain,
@@ -21,6 +25,7 @@ import {
   ExerciseSchema,
   MisconceptionLibrarySchema,
   type AnswerSpec,
+  type EngineFnRef,
   type Block,
   type Exercise,
   type KeypadKind,
@@ -31,9 +36,14 @@ import {
 
 export type ResolvedAnswer =
   | { kind: 'option'; optionId: string }
-  | { kind: 'number'; value: Fraction };
+  | { kind: 'number'; value: Fraction }
+  /** Line-by-line writing: the engine-checked spec the reducer checks lines with. */
+  | { kind: 'lines'; spec: LinesSpec };
 
-export type AskedStep = Extract<Step, { kind: 'choice' | 'typed' }>;
+export type AskedStep = Extract<Step, { kind: 'choice' | 'typed' | 'lines' }>;
+export type LinesStep = Extract<Step, { kind: 'lines' }>;
+const isAsked = (s: Step): s is AskedStep =>
+  s.kind === 'choice' || s.kind === 'typed' || s.kind === 'lines';
 /** A component step whose registry kind is "task": it blocks the path like a question. */
 export type TaskStep = Extract<Step, { kind: 'component' }>;
 
@@ -167,14 +177,14 @@ function askedSteps(
   for (const q of ex.parts) {
     for (const g of q.groups) {
       for (const s of g.steps) {
-        if (s.kind === 'choice' || s.kind === 'typed') {
+        if (isAsked(s)) {
           out.push({ key: stepKey.main(q.id, s.id), step: s });
         }
       }
     }
   }
   for (const d of ex.deepDives) {
-    if (d.mini && (d.mini.kind === 'choice' || d.mini.kind === 'typed')) {
+    if (d.mini && isAsked(d.mini)) {
       out.push({
         key: stepKey.mini(d.id),
         step: d.mini,
@@ -183,7 +193,7 @@ function askedSteps(
     }
   }
   for (const v of ex.variants) {
-    if (v.step.kind === 'choice' || v.step.kind === 'typed') {
+    if (isAsked(v.step)) {
       out.push({
         key: stepKey.variant(v.id),
         step: v.step,
@@ -194,13 +204,86 @@ function askedSteps(
   return out;
 }
 
+/**
+ * A lines step: every written expression is checked against the engine
+ * (start, goal, what a wrong line meant); known wrong lines must really be
+ * wrong. Returns the spec the reducer checks lines with.
+ */
+function resolveLines(
+  step: LinesStep,
+  errors: string[],
+  where: string,
+): ResolvedAnswer | null {
+  const vars = step.variables;
+  const before = errors.length;
+  const parses = (src: string, what: string) => {
+    const r = parseExpression(src, { variables: vars });
+    if (!r.ok) {
+      errors.push(`${where}: ${what} does not parse (${r.error.code})`);
+    }
+    return r.ok;
+  };
+  const engine = (src: string, ref: EngineFnRef, what: string) => {
+    const m = matchesFn(src, ref, vars[0]);
+    if (!m.ok) {
+      errors.push(
+        `${where}: ${what} is not ${ref.fn} (${ref.transform}) by the engine${
+          m.at !== undefined ? ` (differs at x = ${m.at})` : ''
+        }`,
+      );
+    }
+  };
+  if (parses(step.goal, 'goal')) {
+    engine(step.goal, step.goalIs, 'goal');
+  }
+  if (step.start !== undefined) {
+    if (!step.startIs) {
+      errors.push(`${where}: start needs startIs (engine reference)`);
+    } else if (parses(step.start, 'start')) {
+      engine(step.start, step.startIs, 'start');
+    }
+  }
+  for (const w of step.knownWrong) {
+    if (parses(w.expr, `known wrong ${w.expr}`)) {
+      const ok = matchesFn(w.expr, step.goalIs, vars[0]);
+      if (ok.ok) {
+        errors.push(`${where}: known wrong ${w.expr} equals the goal`);
+      }
+    }
+    if (w.meant !== undefined && parses(w.meant, `meant ${w.meant}`)) {
+      engine(w.meant, step.goalIs, `meant ${w.meant}`);
+    }
+  }
+  if (errors.length > before) {
+    return null;
+  }
+  return { kind: 'lines', spec: linesSpecOf(step) };
+}
+
+/** What a lines step is checked with (loader, reducer and card share it). */
+export function linesSpecOf(step: LinesStep): LinesSpec {
+  return {
+    variables: step.variables,
+    ...(step.start !== undefined && { start: step.start }),
+    goal: step.goal,
+    knownWrong: step.knownWrong.map(w => ({
+      expr: w.expr,
+      misconceptionId: w.misconceptionId,
+      ...(w.meant !== undefined && { meant: w.meant }),
+    })),
+  };
+}
+
 function resolveAnswer(
   step: AskedStep,
-  answer: AnswerSpec,
+  answer: AnswerSpec | undefined,
   ctx: CallContext,
   errors: string[],
   where: string,
 ): ResolvedAnswer | null {
+  if (step.kind === 'lines' || answer === undefined) {
+    return step.kind === 'lines' ? resolveLines(step, errors, where) : null;
+  }
   if (step.kind === 'choice' && answer.type === 'set') {
     const computed = runSetCall(answer.compute, ctx);
     if (!computed.ok) {
@@ -214,6 +297,23 @@ function resolveAnswer(
     if (matches.length !== 1) {
       errors.push(
         `${where}: ${matches.length} options equal the engine set {${key}}`,
+      );
+      return null;
+    }
+    return { kind: 'option', optionId: matches[0]!.id };
+  }
+  if (step.kind === 'choice' && answer.type === 'parity') {
+    let computed: ReturnType<typeof parity>;
+    try {
+      computed = parity(answer.fn);
+    } catch (e) {
+      errors.push(`${where}: ${(e as Error).message}`);
+      return null;
+    }
+    const matches = step.options.filter(o => o.parity === computed);
+    if (matches.length !== 1) {
+      errors.push(
+        `${where}: ${matches.length} options state the engine parity ${computed} of ${answer.fn}`,
       );
       return null;
     }
@@ -576,7 +676,7 @@ export function loadExercise(
   for (const { key, step, ctx: stepCtx } of askedSteps(exercise)) {
     const resolved = resolveAnswer(
       step,
-      step.answer,
+      'answer' in step ? step.answer : undefined,
       stepCtx ?? ctx,
       errors,
       key,
@@ -585,7 +685,11 @@ export function loadExercise(
       answers.set(key, resolved);
     }
     const refs = [
-      ...(step.kind === 'choice' ? step.options : step.wrongAnswers ?? []),
+      ...(step.kind === 'choice'
+        ? step.options
+        : step.kind === 'lines'
+        ? step.knownWrong
+        : step.wrongAnswers ?? []),
     ]
       .map(o => o.misconceptionId)
       .filter((id): id is string => id !== undefined);
@@ -600,7 +704,7 @@ export function loadExercise(
     ) {
       errors.push(`${key}: unknown deep dive ${step.deepDiveId}`);
     }
-    if (step.check && !values.has(step.check.known)) {
+    if ('check' in step && step.check && !values.has(step.check.known)) {
       errors.push(
         `${key}: numeric check uses unknown value ${step.check.known}`,
       );

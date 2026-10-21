@@ -110,6 +110,8 @@ export const DecisionSchema = PlannerOutputSchema.extend({
   source: z.enum(['rules', 'llm', 'fallback']),
   /** Representation the decision shows, if any (for representationsTried / reaction). */
   representation: Id.optional(),
+  /** LLM decisions: the request that produced it (reports on AI blocks point here). */
+  llmRequestId: Id.optional(),
 });
 export type Decision = z.infer<typeof DecisionSchema>;
 

@@ -2,6 +2,14 @@
 
 Facts and engine checks: see `docs/COMPONENTS_ANALYSIS.md`. Do not copy the official correction wording.
 
+## Exam wording (question text = the part's `goal`; explanations stay ours)
+Transcribed from the PDF by the product owner (2026-10-20), **to verify against the PDF**.
+- Statement: « Soit f la fonction définie sur ℝ par f(x) = eˣ / (1 + e²ˣ). On note (ζ) sa courbe représentative dans un repère orthonormé (O, i⃗, j⃗). »
+- A1 (1): « Montrer que f est paire. » (in the content)
+- A2 (2): « Montrer que \lim_{x\to+\infty} f(x) = 0. Interpréter. » Goal to author: `{"fr": "Montrer que", "math": "\\lim_{x\\to+\\infty} f(x) = 0"}` then « Interpréter. » as its own sentence.
+- A3 (3): « a) Montrer que f'(x) = (1 − e^{2x}) e^x / (1 + e^{2x})², pour tout réel x. b) Dresser le tableau de variation de f. » Goal to author: `{"fr": "a) Montrer que, pour tout réel x,", "math": "f'(x)=\\frac{(1-e^{2x})e^{x}}{(1+e^{2x})^{2}}"}`, then « b) Dresser le tableau de variation de f. »
+- A4 (4): « Tracer (ζ). » (not in this phase's scope)
+
 ## Checkpoint map (each ~5 minutes, one goal, one result)
 | Part | Checkpoint | Result | Components |
 |---|---|---|---|

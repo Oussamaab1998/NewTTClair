@@ -33,8 +33,13 @@
       "lesson": "Leçon",
       "demo": "Composants",
       "bidi": "Test bidi",
-      "proba": "Proba"
+      "proba": "Proba",
+      "analyse": "Analyse"
     }
+  },
+  "picker": {
+    "title": "Exercices",
+    "back": "Retour aux exercices"
   },
   "lesson": {
     "title": "Exercice 2 : probabilités",
@@ -126,7 +131,51 @@
       "simpler": "Un exemple plus simple",
       "prerequisite": "D'abord une base"
     },
-    "jumpToCurrent": "Revenir à la question ↓"
+    "jumpToCurrent": "Revenir à la question ↓",
+    "report": {
+      "menu": "Options",
+      "button": "Signaler une erreur",
+      "title": "Qu’est-ce qui ne va pas ?",
+      "reasons": {
+        "wrong_math": "Erreur de maths",
+        "unclear": "Explication pas claire",
+        "wording": "Mal formulé",
+        "bug": "Problème d’affichage ou de geste",
+        "other": "Autre chose"
+      },
+      "textPlaceholder": "Tu veux préciser ? (facultatif)",
+      "send": "Envoyer",
+      "thanks": "Merci, c’est noté. Continue.",
+      "continue": "Continuer"
+    },
+    "trust": {
+      "lesson_reviewed": "Du cours (relu par un prof)",
+      "lesson_unreviewed": "Brouillon : pas encore relu par un prof",
+      "ai_generated": "Généré par IA, peut contenir des erreurs",
+      "engine_computed": "Calculé par le programme"
+    },
+    "exportQueue": "Exporter",
+    "thinking": "Un instant, on prépare la suite",
+    "devLlm": {
+      "mode": "Mode",
+      "last": "Dernier appel",
+      "cap": "Plafond du jour",
+      "tapKill": "Toucher pour couper / rétablir",
+      "rawTitle": "Sorties brutes du modèle",
+      "rawEmpty": "Aucune sortie",
+      "stored": "Événements stockés"
+    },
+    "exportEvents": "Exporter les événements",
+    "feedbackCard": {
+      "title": "Comment as-tu trouvé cette question ?",
+      "disliked": "Pas aimé",
+      "ok": "Moyen",
+      "liked": "Aimé",
+      "notePlaceholder": "Un mot à ajouter ? (facultatif)",
+      "send": "Envoyer",
+      "noNote": "Sans note",
+      "thanks": "Merci !"
+    }
   },
   "proba": {
     "urn": {
@@ -175,5 +224,143 @@
       "title": "Mesure des rendus",
       "reset": "Effacer"
     }
+  },
+  "tutor": {
+    "title": "Ta question",
+    "loading": "Un instant, je prépare une réponse",
+    "saved": "Ta question est enregistrée.",
+    "maybeWrong": "Peut contenir une erreur",
+    "understood": "J’ai compris",
+    "stillUnclear": "Toujours pas clair",
+    "back": "Retour à la question"
+  },
+  "primitives": {
+    "predict": {
+      "reveal": "Je ne sais pas, montre-moi"
+    },
+    "twin": {
+      "tryValue": "Essaie une valeur :",
+      "equal": "Même valeur.",
+      "different": "Valeurs différentes."
+    },
+    "steps": {
+      "next": "Étape suivante",
+      "why": "Pourquoi ?",
+      "hideWhy": "Masquer"
+    },
+    "example": {
+      "another": "Un autre exemple"
+    }
+  },
+  "analysis": {
+    "plot": {
+      "a11y": "Courbe de la fonction"
+    },
+    "point": {
+      "slider": "Fais glisser pour changer x",
+      "same": "Même hauteur des deux côtés.",
+      "different": "Les hauteurs sont différentes.",
+      "compare": "Comparer avec une autre fonction",
+      "back": "Revenir à la première fonction",
+      "sameShort": "même hauteur",
+      "differentShort": "hauteurs différentes"
+    },
+    "fold": {
+      "slider": "Fais glisser pour plier la moitié gauche",
+      "hint": "Plie la moitié gauche sur l'axe des ordonnées.",
+      "overlap": "La moitié gauche tombe exactement sur la moitié droite.",
+      "noOverlap": "La moitié gauche ne tombe pas sur la moitié droite.",
+      "hintShort": "↔ plie",
+      "overlapShort": "✓ superposées",
+      "noOverlapShort": "≠ pas superposées"
+    },
+    "limit": {
+      "slider": "Fais grandir x",
+      "zoom": "Zoomer près de l'asymptote",
+      "unzoom": "Revenir à la vue complète"
+    },
+    "secant": {
+      "slider": "Fais glisser pour rapprocher le second point"
+    },
+    "tangent": {
+      "up": "↗ La tangente monte : la fonction croît ici.",
+      "down": "↘ La tangente descend : la fonction décroît ici.",
+      "flat": "→ La tangente est horizontale ici.",
+      "upShort": "↗ croît",
+      "downShort": "↘ décroît",
+      "flatShort": "→ horizontale"
+    },
+    "table": {
+      "hint": "Touche chaque case pour choisir, puis vérifie.",
+      "fillAll": "Remplis toutes les cases avant de vérifier.",
+      "correct": "Correct : le tableau est complet.",
+      "wrong": "Les cases marquées sont fausses : change-les."
+    },
+    "expand": "Agrandir",
+    "collapse": "✕ Fermer",
+    "expandIcon": "⤢"
+  },
+  "lines": {
+    "goal": "Objectif :",
+    "done": "Objectif atteint.",
+    "invalid": "Cette ligne ne se lit pas. Vérifie-la.",
+    "undetermined": "Impossible de vérifier cette ligne par des exemples. Essaie une autre écriture.",
+    "errorIn": "L'erreur est dans le",
+    "errorWhole": "Cette ligne n'est pas égale à la précédente.",
+    "parenthesesBefore": "La barre de fraction doit couvrir tout",
+    "parenthesesAfter": ": mets tout dans la case.",
+    "tryValue": "Essaie avec :",
+    "yours": "Ta ligne donne :",
+    "shouldGive": "Il faut :",
+    "term": {
+      "numerator": "numérateur",
+      "denominator": "dénominateur"
+    },
+    "key": {
+      "frac": "fraction",
+      "pow": "exposant",
+      "group": "parenthèses",
+      "left": "gauche",
+      "right": "droite",
+      "back": "effacer",
+      "clear": "vider",
+      "x": "x",
+      "e": "e",
+      "+": "+",
+      "-": "−",
+      "*": "×",
+      "close": "Fermer la parenthèse",
+      "up": "Monter",
+      "down": "Descendre",
+      "undo": "Annuler",
+      "redo": "Rétablir",
+      "widen": "Élargir la sélection"
+    },
+    "fixBefore": "Corrige",
+    "fixAfter": "et vérifie à nouveau.",
+    "fixWhole": "Corrige la ligne et vérifie à nouveau.",
+    "termArticle": {
+      "numerator": "le numérateur",
+      "denominator": "le dénominateur"
+    },
+    "issue": {
+      "empty_slot": "Une case est vide (marquée) : remplis-la ou efface-la.",
+      "double_operator": "Deux signes se suivent (marqués) : efface-en un, ou mets le second entre parenthèses.",
+      "operator_at_start": "Cette case commence par un signe (marqué) : écris quelque chose avant ou efface-le.",
+      "operator_at_end": "Un signe termine la ligne sans rien après (marqué) : complète ou efface-le.",
+      "power_without_base": "Cet exposant (marqué) n'est posé sur rien : écris la base avant."
+    },
+    "widen": "Élargir",
+    "undo": "Annuler",
+    "change": {
+      "fraction": "Fraction ajoutée",
+      "power": "Exposant ajouté",
+      "group": "Parenthèses ajoutées",
+      "remove_fraction": "Fraction retirée",
+      "remove_power": "Exposant retiré",
+      "remove_group": "Parenthèses retirées"
+    },
+    "copyPrevious": "⧉ Copier la ligne précédente",
+    "unchanged": "C'est la même ligne : change quelque chose."
   }
 }

@@ -2,14 +2,25 @@
  * What the host hands to every registered view, on top of the contract's
  * ComponentHostProps (docs/COMPONENTS_CONTRACT.md).
  */
-import { useCallback, type Ref } from 'react';
+import { useCallback, type ReactNode, type Ref } from 'react';
 
 import type {
   ComponentHandle,
   ComponentHostProps,
   ComponentName,
+  ComponentSpec,
   JsonObject,
 } from './contract';
+
+/**
+ * Containers (PredictReveal, CompareTwo) render their inner specs through the
+ * host: same validation, fallback, events and mode; instance id `<id>:<slot>`.
+ */
+export type RenderInner = (
+  spec: ComponentSpec,
+  slot: string,
+  opts: { ref?: Ref<ComponentHandle>; snapshot?: JsonObject },
+) => ReactNode;
 
 export interface ViewProps<P> extends ComponentHostProps<P> {
   instanceId: string;
@@ -20,6 +31,7 @@ export interface ViewProps<P> extends ComponentHostProps<P> {
   /** State supplied by the lesson (progressive LawBuilder: cells filled by solved EventPickers). */
   lessonState?: JsonObject;
   ref?: Ref<ComponentHandle>;
+  renderInner?: RenderInner;
 }
 
 export type Emit = (name: string, payload: JsonObject) => void;

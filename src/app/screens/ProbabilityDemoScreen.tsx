@@ -13,6 +13,7 @@ import { ActionButton } from '../../components/probability/ui';
 import type { Experiment } from '../../engine/calls';
 import { probe } from '../../perf/probe';
 import { theme } from '../../theme';
+import type * as DevOnly from '../dev';
 
 // Demo-only sample data (Exercise 2 urn); specs list only the props they change.
 const EXPERIMENT: Experiment = {
@@ -29,14 +30,22 @@ const EXPERIMENT: Experiment = {
 const X0 = { id: 'value_eq', args: { value: 0 } };
 const B = { id: 'any_value', args: { value: 0 } };
 
-interface DemoCase {
+export interface DemoCase {
   title: string;
-  spec: ComponentSpec;
+  /** A registered component; or `key` + `render` for a non-registry view (editor). */
+  spec?: ComponentSpec;
+  key?: string;
+  render?: () => React.ReactNode;
   /** A replay of a recorded state next to the live one. */
   replay?: { snapshot?: JsonObject; showSolution?: boolean };
   /** Intentional: shows the fallback; its component_error is expected. */
   expectError?: boolean;
 }
+
+/** Debug builds only; `__DEV__` is false in release, so Metro drops the require. */
+const devOnly: typeof DevOnly | null = __DEV__
+  ? (require('../dev') as typeof DevOnly)
+  : null;
 
 const CASES: DemoCase[] = [
   {
@@ -111,7 +120,39 @@ const CASES: DemoCase[] = [
  * (interactive) and, when useful, as a replay of a recorded state. The perf
  * panel shows React commit times per component, to read on a real device.
  */
+export const PROBABILITY_DEMO_COMPONENTS: readonly string[] = [
+  ...new Set(CASES.map(c => c.spec?.component ?? c.key ?? '')),
+];
+
 export function ProbabilityDemoScreen() {
+  return (
+    <ComponentDemo
+      cases={CASES}
+      experiment={EXPERIMENT}
+      testID="probability-demo"
+    />
+  );
+}
+
+/** Live + replay rendering of demo cases, with the event log and perf panel. */
+export function ComponentDemo({
+  cases,
+  experiment,
+  testID,
+}: {
+  cases: readonly DemoCase[];
+  experiment?: Experiment;
+  testID: string;
+}) {
+  // `-devComponent X`: only X's cases; `X#n`: only X's n-th case (from 0).
+  // All cases if nothing matches.
+  const [only, nth] = (devOnly?.devComponentAtLaunch() ?? '').split('#');
+  const matching = cases.filter(c => (c.spec?.component ?? c.key) === only);
+  const picked =
+    nth !== undefined && matching[Number(nth)]
+      ? [matching[Number(nth)]!]
+      : matching;
+  const shownCases = picked.length > 0 ? picked : cases;
   const [log, setLog] = useState<string[]>([]);
   const push = useCallback(
     (line: string) => setLog(l => [line, ...l].slice(0, 8)),
@@ -146,7 +187,8 @@ export function ProbabilityDemoScreen() {
     <ScrollView
       style={styles.root}
       contentContainerStyle={styles.content}
-      testID="probability-demo"
+      contentOffset={{ x: 0, y: devOnly?.devScrollAtLaunch() ?? 0 }}
+      testID={testID}
     >
       <PerfPanel />
       <Section title="log">
@@ -156,25 +198,28 @@ export function ProbabilityDemoScreen() {
           </Text>
         ))}
       </Section>
-      {CASES.map((c, i) => (
+      {shownCases.map((c, i) => (
         <Section key={i} title={c.title}>
-          <ComponentHost
-            spec={c.spec}
-            defaultInstanceId={`demo-${i}`}
-            mode="interactive"
-            experiment={EXPERIMENT}
-            onEvent={onEvent}
-            onResult={onResult}
-            onError={c.expectError ? onExpectedError : onError}
-          />
-          {c.replay && (
+          {c.render?.()}
+          {c.spec && (
+            <ComponentHost
+              spec={c.spec}
+              defaultInstanceId={`demo-${i}`}
+              mode="interactive"
+              {...(experiment && { experiment })}
+              onEvent={onEvent}
+              onResult={onResult}
+              onError={c.expectError ? onExpectedError : onError}
+            />
+          )}
+          {c.spec && c.replay && (
             <>
               <Text style={styles.sub}>{REPLAY_LABEL}</Text>
               <ComponentHost
                 spec={c.spec}
                 defaultInstanceId={`demo-${i}-replay`}
                 mode="replay"
-                experiment={EXPERIMENT}
+                {...(experiment && { experiment })}
                 onEvent={onEvent}
                 onError={onError}
                 {...(c.replay.snapshot && { snapshot: c.replay.snapshot })}

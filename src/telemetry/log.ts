@@ -2,7 +2,7 @@
  * Append-only event log (docs/DATA.md §2). Every event is stamped with the
  * base fields (id, ts, session, pseudonymous student, exercise) and validated
  * against EventSchema before it is stored; stored events are frozen.
- * In memory for now: storage (SQLite vs MMKV) is still Proposed (DECISIONS.md D2).
+ * Persisted through an optional append-only sink (eventStore.ts, DECISIONS.md D2).
  */
 import { EventSchema, type Event, type EventDraft } from './events';
 
@@ -37,6 +37,8 @@ export class EventLog {
   constructor(
     private readonly session: SessionInfo,
     private readonly clock: LogClock = defaultClock,
+    /** Persistent append-only copy (eventStore.ts); optional. */
+    private readonly sink?: { append(events: readonly Event[]): void },
   ) {}
 
   /** Stamps, validates and appends. Throws on an invalid event: that is a bug, not user input. */
@@ -55,6 +57,11 @@ export class EventLog {
       ),
     );
     this.events.push(...added);
+    try {
+      this.sink?.append(added);
+    } catch {
+      // Storage trouble must never break the lesson; the in-memory log stays whole.
+    }
     for (const l of this.listeners) {
       l(this.events);
     }

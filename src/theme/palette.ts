@@ -21,6 +21,7 @@ export const palette = {
 
   brand500: '#0a66c2',
   brand50: '#e8f0fe',
+  brand100: '#c6dbf7',
   violet500: '#7b5ea7',
 
   positive600: '#1e7d32',

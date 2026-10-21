@@ -15,12 +15,40 @@ import {
   OutcomeSpacePropsSchema,
   UrnPropsSchema,
 } from './probability/schemas';
+import {
+  FoldSymmetryPropsSchema,
+  FunctionPlotPropsSchema,
+  LimitExplorerPropsSchema,
+  PointOnCurvePropsSchema,
+  SecantToTangentPropsSchema,
+  TangentSlopePropsSchema,
+  VariationTableBuilderPropsSchema,
+} from './analysis/schemas';
+import {
+  CompareTwoPropsSchema,
+  ExampleGeneratorPropsSchema,
+  NumericTwinPropsSchema,
+  PredictRevealPropsSchema,
+  StepThroughPropsSchema,
+  type CompareTwoProps,
+  type PredictRevealProps,
+} from './shared/schemas';
 
 interface Entry extends RegistryEntry<unknown> {
   /** Missing `balls` / `draw` / `k` are taken from the exercise experiment. */
   usesExperiment: boolean;
   /** A task component that is only a visual with these props (e.g. a readonly table). */
   visualIf?: (props: Record<string, unknown>) => boolean;
+  /**
+   * A visual component the student must act on before the lesson goes on:
+   * the first of these events opens the gate (it is not graded).
+   */
+  gate?: readonly string[];
+  /** Containers: inner specs (by slot), each resolved with its own schema. */
+  nested?: (props: Record<string, unknown>) => {
+    slot: string;
+    spec: ComponentSpec;
+  }[];
 }
 
 const entry = <S extends z.ZodType>(
@@ -72,6 +100,105 @@ export const REGISTRY: Partial<Record<ComponentName, Entry>> = {
     teaches: ['random-variable-law', 'expectation', 'variance'],
     usesExperiment: true,
   }),
+  // Analysis (COMPONENTS_ANALYSIS.md).
+  FunctionPlot: entry({
+    schema: FunctionPlotPropsSchema,
+    kind: 'visual',
+    weight: 'light',
+    teaches: ['function-parity', 'limit-at-infinity', 'variation-table'],
+    usesExperiment: false,
+  }),
+  PointOnCurve: entry({
+    schema: PointOnCurvePropsSchema,
+    kind: 'visual',
+    weight: 'light',
+    teaches: ['function-parity'],
+    usesExperiment: false,
+  }),
+  FoldSymmetry: entry({
+    schema: FoldSymmetryPropsSchema,
+    kind: 'visual',
+    weight: 'light',
+    teaches: ['function-parity'],
+    usesExperiment: false,
+  }),
+  LimitExplorer: entry({
+    schema: LimitExplorerPropsSchema,
+    kind: 'visual',
+    weight: 'light',
+    teaches: [
+      'limit-at-infinity',
+      'forme-indeterminee',
+      'exp-limits',
+      'asymptote-interpretation',
+    ],
+    usesExperiment: false,
+  }),
+  SecantToTangent: entry({
+    schema: SecantToTangentPropsSchema,
+    kind: 'visual',
+    weight: 'light',
+    teaches: ['derivative-meaning'],
+    usesExperiment: false,
+  }),
+  TangentSlope: entry({
+    schema: TangentSlopePropsSchema,
+    kind: 'visual',
+    weight: 'light',
+    teaches: ['derivative-meaning', 'variation-table'],
+    usesExperiment: false,
+  }),
+  VariationTableBuilder: entry({
+    schema: VariationTableBuilderPropsSchema,
+    kind: 'task',
+    weight: 'light',
+    teaches: ['variation-table'],
+    usesExperiment: false,
+  }),
+  // Generic primitives (COMPONENT_CATALOG.md). Containers teach what their
+  // inner component teaches; their own list stays empty.
+  PredictReveal: entry({
+    schema: PredictRevealPropsSchema,
+    kind: 'visual',
+    weight: 'light',
+    teaches: [],
+    usesExperiment: false,
+    // One tap (a prediction or "show me") before the computation appears.
+    gate: ['predicted', 'revealed'],
+    nested: p => [{ slot: 'reveal', spec: (p as PredictRevealProps).reveal }],
+  }),
+  CompareTwo: entry({
+    schema: CompareTwoPropsSchema,
+    kind: 'visual',
+    weight: 'light',
+    teaches: [],
+    usesExperiment: false,
+    nested: p => [
+      { slot: 'left', spec: (p as CompareTwoProps).left },
+      { slot: 'right', spec: (p as CompareTwoProps).right },
+    ],
+  }),
+  ExampleGenerator: entry({
+    schema: ExampleGeneratorPropsSchema,
+    kind: 'visual',
+    weight: 'light',
+    teaches: ['quotient-rule', 'function-parity'],
+    usesExperiment: false,
+  }),
+  NumericTwin: entry({
+    schema: NumericTwinPropsSchema,
+    kind: 'visual',
+    weight: 'light',
+    teaches: ['exp-rules'],
+    usesExperiment: false,
+  }),
+  StepThrough: entry({
+    schema: StepThroughPropsSchema,
+    kind: 'visual',
+    weight: 'light',
+    teaches: [],
+    usesExperiment: false,
+  }),
 };
 
 export function componentMeta(name: string): Entry | undefined {
@@ -81,6 +208,14 @@ export function componentMeta(name: string): Entry | undefined {
 }
 
 /** "task" blocks the lesson path like a question; "visual" is a feed block. */
+/** The component holds the lesson until one of its gate events. */
+export const isGate = (component: string): boolean =>
+  (componentMeta(component)?.gate?.length ?? 0) > 0;
+
+/** This event of this component opens its gate. */
+export const opensGate = (component: string, name: string): boolean =>
+  componentMeta(component)?.gate?.includes(name) ?? false;
+
 export function componentKind(
   spec: Pick<ComponentSpec, 'component' | 'props'>,
 ): 'visual' | 'task' | undefined {
@@ -134,6 +269,21 @@ export function resolveSpec(
         .join('; ')
         .slice(0, 480),
     };
+  }
+  for (const inner of e.nested?.(r.data as Record<string, unknown>) ?? []) {
+    const ir = resolveSpec(inner.spec, experiment);
+    const problem = !ir.ok
+      ? ir.detail
+      : componentKind(inner.spec) === 'task'
+      ? 'task components cannot be nested'
+      : null;
+    if (problem !== null) {
+      return {
+        ok: false,
+        reason: 'invalid_props',
+        detail: `${inner.slot}: ${problem}`.slice(0, 480),
+      };
+    }
   }
   return { ok: true, name: spec.component, entry: e, props: r.data };
 }

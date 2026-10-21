@@ -1,0 +1,2370 @@
+{
+  "id": "bac2022c-ex4",
+  "contentVersion": "ex4-0.1.0",
+  "reviewed": false,
+  "title": {
+    "fr": "Exercice 4 : étude d'une fonction",
+    "ar": [
+      {
+        "ar": "تمرين دراسة الدالة"
+      }
+    ]
+  },
+  "statement": {
+    "fr": "Soit f la fonction définie sur ℝ par f(x) = eˣ / (1 + e²ˣ). On note (ζ) sa courbe représentative dans un repère orthonormé (O, i⃗, j⃗).",
+    "math": "f(x)=\\frac{e^{x}}{1+e^{2x}}"
+  },
+  "results": [
+    {
+      "id": "f_even",
+      "statement": {
+        "fr": "f est paire"
+      }
+    }
+  ],
+  "deepDives": [
+    {
+      "id": "exp_product",
+      "blockId": "dd-a1-exp",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex4-0.1.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "blocks": [
+        {
+          "type": "tutor_text",
+          "blockId": "dd-a1-exp-1",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex4-0.1.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "text": {
+            "ar": [
+              {
+                "ar": "كي نضربو "
+              },
+              {
+                "fr": "puissances"
+              },
+              {
+                "ar": " متاع "
+              },
+              {
+                "fr": "e"
+              },
+              {
+                "ar": "، نجمعو الأسس:"
+              }
+            ]
+          }
+        },
+        {
+          "type": "math",
+          "blockId": "dd-a1-exp-2",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex4-0.1.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "latex": "e^{a} \\times e^{b} = e^{a+b}"
+        },
+        {
+          "type": "component",
+          "blockId": "dd-a1-exp-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex4-0.1.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "NumericTwin",
+            "props": {
+              "symbol": "u",
+              "template": "e^(-u)*e^(2u)",
+              "compare": "e^u",
+              "values": [
+                1,
+                2,
+                3
+              ],
+              "label": {
+                "ar": [
+                  {
+                    "ar": "جرّب بأعداد: الزوز يعطيو نفس القيمة؟"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "mini": {
+        "id": "mini",
+        "blockId": "dd-a1-exp-mini",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex4-0.1.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "exp-rules"
+        ],
+        "kind": "choice",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "قدّاش يعطي الجداء هذا؟"
+            }
+          ],
+          "math": "e^{-x} \\times e^{2x}"
+        },
+        "options": [
+          {
+            "id": "ex",
+            "label": {
+              "math": "e^{x}"
+            }
+          },
+          {
+            "id": "e2x2",
+            "label": {
+              "math": "e^{-2x^{2}}"
+            },
+            "misconceptionId": "exponent_rules_gap"
+          },
+          {
+            "id": "em2x",
+            "label": {
+              "math": "e^{-2x}"
+            },
+            "misconceptionId": "exponent_rules_gap"
+          }
+        ],
+        "answer": {
+          "type": "option",
+          "id": "ex"
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "اجمع الأسس:"
+              }
+            ],
+            "math": "-x + 2x"
+          }
+        ]
+      }
+    },
+    {
+      "id": "parity_meaning",
+      "blockId": "dd-a1-par",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex4-0.1.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "blocks": [
+        {
+          "type": "tutor_text",
+          "blockId": "dd-a1-par-1",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex4-0.1.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "text": {
+            "ar": [
+              {
+                "ar": "دالة "
+              },
+              {
+                "fr": "paire"
+              },
+              {
+                "ar": ": كي تطوي الرسم على المحور العمودي، النصين يجيو فوق بعضهم."
+              }
+            ]
+          }
+        },
+        {
+          "type": "component",
+          "blockId": "dd-a1-par-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex4-0.1.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "FoldSymmetry",
+            "props": {
+              "fn": "f_ex4",
+              "compareFn": "sigmoid_demo"
+            }
+          }
+        }
+      ],
+      "mini": {
+        "id": "mini",
+        "blockId": "dd-a1-par-mini",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex4-0.1.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "function-parity"
+        ],
+        "kind": "choice",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "دالة منحناها متناظر بالنسبة للمحور العمودي، هي:"
+            }
+          ]
+        },
+        "options": [
+          {
+            "id": "paire",
+            "label": {
+              "fr": "paire"
+            }
+          },
+          {
+            "id": "impaire",
+            "label": {
+              "fr": "impaire"
+            },
+            "misconceptionId": "parity_odd_even_confusion"
+          }
+        ],
+        "answer": {
+          "type": "option",
+          "id": "paire"
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "فكّر في "
+              },
+              {
+                "fr": "x²"
+              },
+              {
+                "ar": ": نفس القيمة في "
+              },
+              {
+                "fr": "2"
+              },
+              {
+                "ar": " و "
+              },
+              {
+                "fr": "−2"
+              },
+              {
+                "ar": "."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "domain_symmetric",
+      "blockId": "dd-a1-dom",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex4-0.1.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "blocks": [
+        {
+          "type": "tutor_text",
+          "blockId": "dd-a1-dom-1",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex4-0.1.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "text": {
+            "ar": [
+              {
+                "ar": "مجموعة متناظرة حول الصفر معناها: كل عدد فيها، المقابل متاعو زادة فيها. الأعداد السالبة ما تمنعش، المهمّ يجيو بالزوز."
+              }
+            ]
+          }
+        },
+        {
+          "type": "math",
+          "blockId": "dd-a1-dom-2",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex4-0.1.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "latex": "x \\in D \\Rightarrow -x \\in D"
+        }
+      ],
+      "mini": {
+        "id": "mini",
+        "blockId": "dd-a1-dom-mini",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex4-0.1.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "domain-symmetric"
+        ],
+        "kind": "choice",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "المجال هذا متناظر حول الصفر؟"
+            }
+          ],
+          "math": "D = [-2\\,;\\,5]"
+        },
+        "options": [
+          {
+            "id": "no",
+            "label": {
+              "ar": [
+                {
+                  "ar": "لا: فيه "
+                },
+                {
+                  "fr": "5"
+                },
+                {
+                  "ar": " أما موش فيه "
+                },
+                {
+                  "fr": "−5"
+                },
+                {
+                  "ar": "."
+                }
+              ]
+            }
+          },
+          {
+            "id": "yes",
+            "label": {
+              "ar": [
+                {
+                  "ar": "إيه: فيها أعداد سالبة وموجبة."
+                }
+              ]
+            },
+            "misconceptionId": "domain_symmetry_meaning"
+          }
+        ],
+        "answer": {
+          "type": "option",
+          "id": "no"
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "خوذ "
+              },
+              {
+                "fr": "x = 5"
+              },
+              {
+                "ar": ": هو في "
+              },
+              {
+                "fr": "D"
+              },
+              {
+                "ar": "؟ والمقابل متاعو؟"
+              }
+            ]
+          },
+          {
+            "ar": [
+              {
+                "ar": "المقابل متاع "
+              },
+              {
+                "fr": "5"
+              },
+              {
+                "ar": " هو "
+              },
+              {
+                "fr": "−5"
+              },
+              {
+                "ar": "، و "
+              },
+              {
+                "fr": "−5"
+              },
+              {
+                "ar": " موش في "
+              },
+              {
+                "fr": "D"
+              },
+              {
+                "ar": "."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "parts": [
+    {
+      "id": "A1",
+      "goal": {
+        "fr": "Montrer que f est paire."
+      },
+      "expected": "f_even",
+      "uses": [],
+      "methodId": "parity",
+      "groups": [
+        {
+          "id": "domain",
+          "steps": [
+            {
+              "id": "s1",
+              "blockId": "a1-s1",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex4-0.1.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "function-parity"
+              ],
+              "kind": "text",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "دالة "
+                  },
+                  {
+                    "fr": "paire"
+                  },
+                  {
+                    "ar": " معناها زوز حاجات: الـ "
+                  },
+                  {
+                    "fr": "domaine"
+                  },
+                  {
+                    "ar": " متاعها متناظر حول الصفر، والصورة متاع "
+                  },
+                  {
+                    "fr": "−x"
+                  },
+                  {
+                    "ar": " هي نفس الصورة متاع "
+                  },
+                  {
+                    "fr": "x"
+                  },
+                  {
+                    "ar": "."
+                  }
+                ]
+              },
+              "asks": {
+                "explain": [
+                  {
+                    "ar": [
+                      {
+                        "ar": "كي تطوي الرسم على المحور العمودي، النص الأيسر يجي فوق النص الأيمن بالضبط."
+                      }
+                    ]
+                  }
+                ],
+                "example": [
+                  {
+                    "ar": [
+                      {
+                        "ar": "مثال معروف: المربّع."
+                      }
+                    ],
+                    "math": "(-x)^{2} = x^{2}"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "s2",
+              "blockId": "a1-s2",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex4-0.1.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "domain-symmetric"
+              ],
+              "kind": "math",
+              "latex": "x \\in \\mathbb{R} \\Rightarrow -x \\in \\mathbb{R}"
+            },
+            {
+              "id": "s3",
+              "blockId": "a1-s3",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex4-0.1.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "domain-symmetric",
+                "writing-domain-check"
+              ],
+              "kind": "choice",
+              "prompt": {
+                "ar": [
+                  {
+                    "ar": "أوّل حاجة: الـ "
+                  },
+                  {
+                    "fr": "domaine"
+                  },
+                  {
+                    "ar": " متاع "
+                  },
+                  {
+                    "fr": "f"
+                  },
+                  {
+                    "ar": " متناظر؟"
+                  }
+                ]
+              },
+              "options": [
+                {
+                  "id": "yes",
+                  "label": {
+                    "ar": [
+                      {
+                        "ar": "إيه: كل عدد حقيقي، المقابل متاعو زادة عدد حقيقي."
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "no_negative",
+                  "label": {
+                    "ar": [
+                      {
+                        "ar": "لا: خاطر فيه أعداد سالبة."
+                      }
+                    ]
+                  },
+                  "misconceptionId": "domain_symmetry_meaning"
+                },
+                {
+                  "id": "not_needed",
+                  "label": {
+                    "ar": [
+                      {
+                        "ar": "موش لازم نثبّتو فيه."
+                      }
+                    ]
+                  },
+                  "misconceptionId": "domain_check_skipped"
+                }
+              ],
+              "answer": {
+                "type": "option",
+                "id": "yes"
+              },
+              "hints": [
+                {
+                  "ar": [
+                    {
+                      "ar": "متناظر حول الصفر معناها: كل ما "
+                    },
+                    {
+                      "fr": "x"
+                    },
+                    {
+                      "ar": " فيه، "
+                    },
+                    {
+                      "fr": "−x"
+                    },
+                    {
+                      "ar": " زادة فيه."
+                    }
+                  ]
+                },
+                {
+                  "ar": [
+                    {
+                      "ar": "الـ "
+                    },
+                    {
+                      "fr": "domaine"
+                    },
+                    {
+                      "ar": " هنا هو الأعداد الحقيقية الكل."
+                    }
+                  ],
+                  "math": "D_f = \\mathbb{R}"
+                }
+              ],
+              "deepDiveId": "domain_symmetric"
+            }
+          ]
+        },
+        {
+          "id": "picture",
+          "steps": [
+            {
+              "id": "s4",
+              "blockId": "a1-s4",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex4-0.1.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "function-parity"
+              ],
+              "kind": "component",
+              "component": {
+                "component": "PredictReveal",
+                "props": {
+                  "prompt": {
+                    "ar": [
+                      {
+                        "ar": "قبل ما نحسبو: كي نبدّلو "
+                      },
+                      {
+                        "fr": "x"
+                      },
+                      {
+                        "ar": " بـ "
+                      },
+                      {
+                        "fr": "−x"
+                      },
+                      {
+                        "ar": "، الصورة شنوّة يصيرلها؟"
+                      }
+                    ]
+                  },
+                  "options": [
+                    {
+                      "id": "same",
+                      "label": {
+                        "math": "f(-x) = f(x)"
+                      }
+                    },
+                    {
+                      "id": "opposite",
+                      "label": {
+                        "math": "f(-x) = -f(x)"
+                      }
+                    },
+                    {
+                      "id": "none",
+                      "label": {
+                        "ar": [
+                          {
+                            "ar": "ما فمّا حتى علاقة"
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "reveal": {
+                    "component": "PointOnCurve",
+                    "props": {
+                      "fn": "f_ex4",
+                      "compareFn": "sigmoid_demo"
+                    }
+                  },
+                  "insight": {
+                    "ar": [
+                      {
+                        "ar": "في الرسم النقطتين عندهم نفس الارتفاع. أما الرسم موش برهان: نحسبو "
+                      },
+                      {
+                        "fr": "f(−x)"
+                      },
+                      {
+                        "ar": " باش نثبّتو."
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "compute",
+          "steps": [
+            {
+              "id": "s5",
+              "blockId": "a1-s5",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex4-0.1.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "function-parity"
+              ],
+              "kind": "text",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "نبدّلو كل "
+                  },
+                  {
+                    "fr": "x"
+                  },
+                  {
+                    "ar": " بـ "
+                  },
+                  {
+                    "fr": "(−x)"
+                  },
+                  {
+                    "ar": " في العبارة متاع "
+                  },
+                  {
+                    "fr": "f"
+                  },
+                  {
+                    "ar": ":"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "s6",
+              "blockId": "a1-s6",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex4-0.1.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "function-parity"
+              ],
+              "kind": "math",
+              "latex": "f(-x) = \\frac{e^{-x}}{1+e^{2(-x)}} = \\frac{e^{-x}}{1+e^{-2x}}"
+            },
+            {
+              "id": "s7",
+              "blockId": "a1-s7",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex4-0.1.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "function-parity"
+              ],
+              "kind": "text",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "حطّ الهدف قدّامك وسأل روحك: شنوّة المختلف؟ هوني الأسس سالبين، والهدف فيه أسس موجبين."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "s8",
+              "blockId": "a1-s8",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex4-0.1.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "function-parity",
+                "exp-rules",
+                "writing-parentheses"
+              ],
+              "kind": "lines",
+              "prompt": {
+                "ar": [
+                  {
+                    "ar": "بسّط "
+                  },
+                  {
+                    "fr": "f(−x)"
+                  },
+                  {
+                    "ar": " سطر بسطر حتى توصل للعبارة متاع "
+                  },
+                  {
+                    "fr": "f(x)"
+                  },
+                  {
+                    "ar": "."
+                  }
+                ]
+              },
+              "hints": [
+                {
+                  "ar": [
+                    {
+                      "ar": "قارن مع الهدف: نحبّو الأسس يوليو موجبين. بأشنوّة نضربو الـ "
+                    },
+                    {
+                      "fr": "numérateur"
+                    },
+                    {
+                      "ar": " والـ "
+                    },
+                    {
+                      "fr": "dénominateur"
+                    },
+                    {
+                      "ar": "؟"
+                    }
+                  ]
+                },
+                {
+                  "ar": [
+                    {
+                      "ar": "اضرب الـ "
+                    },
+                    {
+                      "fr": "numérateur"
+                    },
+                    {
+                      "ar": " والـ "
+                    },
+                    {
+                      "fr": "dénominateur"
+                    },
+                    {
+                      "ar": " في نفس العدد:"
+                    }
+                  ],
+                  "math": "e^{2x}"
+                },
+                {
+                  "ar": [
+                    {
+                      "ar": "القاعدة اللي تلزمك:"
+                    }
+                  ],
+                  "math": "e^{a} \\times e^{b} = e^{a+b}"
+                }
+              ],
+              "variables": [
+                "x"
+              ],
+              "goal": "(e^x)/(1+e^(2x))",
+              "goalIs": {
+                "fn": "f_ex4",
+                "transform": "id"
+              },
+              "start": "(e^(-x))/(1+e^(-2x))",
+              "startIs": {
+                "fn": "f_ex4",
+                "transform": "neg"
+              },
+              "lhs": "f(-x)",
+              "goalLatex": "f(x)=\\frac{e^{x}}{1+e^{2x}}",
+              "knownWrong": [
+                {
+                  "expr": "(e^(-2x))/(e^(2x)+1)",
+                  "misconceptionId": "exponent_rules_gap",
+                  "meant": "(e^x)/(e^(2x)+1)"
+                },
+                {
+                  "expr": "(e^x)/2",
+                  "misconceptionId": "distribution_partial",
+                  "meant": "(e^x)/(e^(2x)+1)"
+                }
+              ],
+              "keys": [
+                "x",
+                "e",
+                "frac",
+                "pow",
+                "group",
+                "+",
+                "-",
+                "*",
+                "1",
+                "2"
+              ],
+              "deepDiveId": "exp_product"
+            }
+          ]
+        },
+        {
+          "id": "conclude",
+          "steps": [
+            {
+              "id": "s9",
+              "blockId": "a1-s9",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex4-0.1.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "function-parity",
+                "writing-conclusion"
+              ],
+              "kind": "choice",
+              "prompt": {
+                "ar": [
+                  {
+                    "ar": "وصلنا لـ "
+                  },
+                  {
+                    "fr": "f(−x) = f(x)"
+                  },
+                  {
+                    "ar": " لكل "
+                  },
+                  {
+                    "fr": "x"
+                  },
+                  {
+                    "ar": " في "
+                  },
+                  {
+                    "fr": "ℝ"
+                  },
+                  {
+                    "ar": ". شنوّة نستنتجو؟"
+                  }
+                ]
+              },
+              "options": [
+                {
+                  "id": "paire",
+                  "parity": "even",
+                  "label": {
+                    "fr": "f est paire"
+                  }
+                },
+                {
+                  "id": "impaire",
+                  "parity": "odd",
+                  "label": {
+                    "fr": "f est impaire"
+                  },
+                  "misconceptionId": "parity_odd_even_confusion"
+                },
+                {
+                  "id": "nothing",
+                  "label": {
+                    "fr": "on ne peut rien conclure"
+                  },
+                  "misconceptionId": "conclusion_missing"
+                }
+              ],
+              "answer": {
+                "type": "parity",
+                "fn": "f_ex4"
+              },
+              "hints": [
+                {
+                  "ar": [
+                    {
+                      "ar": "دالة "
+                    },
+                    {
+                      "fr": "paire"
+                    },
+                    {
+                      "ar": ": "
+                    },
+                    {
+                      "fr": "f(−x) = f(x)"
+                    },
+                    {
+                      "ar": ". دالة "
+                    },
+                    {
+                      "fr": "impaire"
+                    },
+                    {
+                      "ar": ": "
+                    },
+                    {
+                      "fr": "f(−x) = −f(x)"
+                    },
+                    {
+                      "ar": "."
+                    }
+                  ]
+                }
+              ],
+              "deepDiveId": "parity_meaning"
+            },
+            {
+              "id": "s10",
+              "blockId": "a1-s10",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "ex4-0.1.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "function-parity"
+              ],
+              "kind": "text",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "المعنى في الرسم: المنحنى "
+                  },
+                  {
+                    "fr": "(ζ)"
+                  },
+                  {
+                    "ar": " متناظر بالنسبة للمحور العمودي."
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "writeup": {
+        "elements": [
+          "domain_symmetric",
+          "f_minus_x",
+          "simplify",
+          "conclusion"
+        ],
+        "modelFr": [
+          "L'ensemble de définition ℝ est symétrique par rapport à 0 : pour tout réel x, −x ∈ ℝ.",
+          "Pour tout réel x : f(−x) = e⁻ˣ / (1 + e⁻²ˣ).",
+          "En multipliant le numérateur et le dénominateur par e²ˣ : f(−x) = (e⁻ˣ · e²ˣ) / ((1 + e⁻²ˣ) · e²ˣ) = eˣ / (e²ˣ + 1) = f(x).",
+          "Donc f est paire."
+        ]
+      },
+      "askChips": [
+        {
+          "id": "why_e2x",
+          "label": {
+            "ar": [
+              {
+                "ar": "علاش نضربو في هذا؟"
+              }
+            ],
+            "math": "e^{2x}"
+          },
+          "answer": [
+            {
+              "ar": [
+                {
+                  "ar": "باش الأسس السالبين يوليو موجبين، كيف الهدف:"
+                }
+              ]
+            },
+            {
+              "math": "e^{-x} \\times e^{2x} = e^{x}"
+            }
+          ]
+        },
+        {
+          "id": "what_paire",
+          "label": {
+            "ar": [
+              {
+                "ar": "شنوّة معناها "
+              },
+              {
+                "fr": "paire"
+              },
+              {
+                "ar": "؟"
+              }
+            ]
+          },
+          "answer": [
+            {
+              "ar": [
+                {
+                  "ar": "الصورة متاع "
+                },
+                {
+                  "fr": "−x"
+                },
+                {
+                  "ar": " هي نفس الصورة متاع "
+                },
+                {
+                  "fr": "x"
+                },
+                {
+                  "ar": ":"
+                }
+              ]
+            },
+            {
+              "math": "f(-x) = f(x)"
+            }
+          ]
+        },
+        {
+          "id": "why_domain",
+          "label": {
+            "ar": [
+              {
+                "ar": "علاش نثبّتو في الـ "
+              },
+              {
+                "fr": "domaine"
+              },
+              {
+                "ar": "؟"
+              }
+            ]
+          },
+          "answer": [
+            {
+              "ar": [
+                {
+                  "ar": "كان الـ "
+                },
+                {
+                  "fr": "domaine"
+                },
+                {
+                  "ar": " موش متناظر، "
+                },
+                {
+                  "fr": "f(−x)"
+                },
+                {
+                  "ar": " ما يكونش معرّف لكل "
+                },
+                {
+                  "fr": "x"
+                },
+                {
+                  "ar": "، وما نجموش نقارنو."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variants": [
+    {
+      "id": "alt-A1-s8-twin",
+      "blockId": "var-alt-A1-s8-twin",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex4-0.1.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "alternative",
+      "forSteps": [
+        "A1/s8"
+      ],
+      "representation": "NumericTwin",
+      "intro": [
+        {
+          "type": "tutor_text",
+          "blockId": "var-alt-A1-s8-twin-t",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex4-0.1.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "text": {
+            "ar": [
+              {
+                "ar": "سمّي "
+              },
+              {
+                "fr": "u = eˣ"
+              },
+              {
+                "ar": ". إذن "
+              },
+              {
+                "fr": "e⁻ˣ = 1/u"
+              },
+              {
+                "ar": " و "
+              },
+              {
+                "fr": "e⁻²ˣ = 1/u²"
+              },
+              {
+                "ar": "."
+              }
+            ]
+          }
+        },
+        {
+          "type": "component",
+          "blockId": "var-alt-A1-s8-twin-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex4-0.1.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "NumericTwin",
+            "props": {
+              "symbol": "u",
+              "template": "(1/u)/(1+1/u^2)",
+              "compare": "u/(1+u^2)",
+              "values": [
+                1,
+                2,
+                5
+              ]
+            }
+          }
+        }
+      ],
+      "step": {
+        "id": "alt-A1-s8-twin-s",
+        "blockId": "var-alt-A1-s8-twin-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex4-0.1.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "exp-rules"
+        ],
+        "kind": "choice",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "بـ "
+            },
+            {
+              "fr": "u"
+            },
+            {
+              "ar": "، العبارة هذي تولّي:"
+            }
+          ],
+          "math": "\\frac{1/u}{1+1/u^{2}}"
+        },
+        "options": [
+          {
+            "id": "good",
+            "label": {
+              "math": "\\frac{u}{1+u^{2}}"
+            }
+          },
+          {
+            "id": "bad1",
+            "label": {
+              "math": "\\frac{1}{u+u^{2}}"
+            },
+            "misconceptionId": "complex_fraction_gap"
+          },
+          {
+            "id": "bad2",
+            "label": {
+              "math": "\\frac{u^{2}}{1+u}"
+            },
+            "misconceptionId": "complex_fraction_gap"
+          }
+        ],
+        "answer": {
+          "type": "option",
+          "id": "good"
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "اضرب الفوق واللوطة في "
+              },
+              {
+                "fr": "u²"
+              },
+              {
+                "ar": "."
+              }
+            ]
+          }
+        ]
+      },
+      "addresses": [
+        "why"
+      ]
+    },
+    {
+      "id": "alt-A1-s8-steps",
+      "blockId": "var-alt-A1-s8-steps",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex4-0.1.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "alternative",
+      "forSteps": [
+        "A1/s8"
+      ],
+      "representation": "worked_example",
+      "intro": [
+        {
+          "type": "component",
+          "blockId": "var-alt-A1-s8-steps-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex4-0.1.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "StepThrough",
+            "props": {
+              "steps": [
+                {
+                  "text": {
+                    "ar": [
+                      {
+                        "ar": "مثال آخر، أسهل:"
+                      }
+                    ]
+                  },
+                  "math": "k(x) = e^{x} + e^{-x}"
+                },
+                {
+                  "math": "k(-x) = e^{-x} + e^{x}",
+                  "why": {
+                    "ar": [
+                      {
+                        "ar": "بدّلنا كل "
+                      },
+                      {
+                        "fr": "x"
+                      },
+                      {
+                        "ar": " بـ "
+                      },
+                      {
+                        "fr": "−x"
+                      },
+                      {
+                        "ar": "."
+                      }
+                    ]
+                  }
+                },
+                {
+                  "math": "k(-x) = e^{x} + e^{-x} = k(x)",
+                  "why": {
+                    "ar": [
+                      {
+                        "ar": "في الجمع، الترتيب ما يهمّش."
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "step": {
+        "id": "alt-A1-s8-steps-s",
+        "blockId": "var-alt-A1-s8-steps-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex4-0.1.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "function-parity",
+          "exp-rules"
+        ],
+        "kind": "choice",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "باش نوصلو من "
+            },
+            {
+              "fr": "f(−x)"
+            },
+            {
+              "ar": " لـ "
+            },
+            {
+              "fr": "f(x)"
+            },
+            {
+              "ar": "، شنوّة نعملو؟"
+            }
+          ]
+        },
+        "options": [
+          {
+            "id": "multiply",
+            "label": {
+              "ar": [
+                {
+                  "ar": "نضربو الـ "
+                },
+                {
+                  "fr": "numérateur"
+                },
+                {
+                  "ar": " والـ "
+                },
+                {
+                  "fr": "dénominateur"
+                },
+                {
+                  "ar": " في "
+                },
+                {
+                  "fr": "e²ˣ"
+                },
+                {
+                  "ar": "."
+                }
+              ]
+            }
+          },
+          {
+            "id": "add",
+            "label": {
+              "ar": [
+                {
+                  "ar": "نزيدو "
+                },
+                {
+                  "fr": "e²ˣ"
+                },
+                {
+                  "ar": " للـ "
+                },
+                {
+                  "fr": "numérateur"
+                },
+                {
+                  "ar": " وبرّة."
+                }
+              ]
+            },
+            "misconceptionId": "domain_vs_target_confusion"
+          },
+          {
+            "id": "again",
+            "label": {
+              "ar": [
+                {
+                  "ar": "نبدّلو "
+                },
+                {
+                  "fr": "x"
+                },
+                {
+                  "ar": " بـ "
+                },
+                {
+                  "fr": "−x"
+                },
+                {
+                  "ar": " مرّة أخرى."
+                }
+              ]
+            },
+            "misconceptionId": "domain_vs_target_confusion"
+          }
+        ],
+        "answer": {
+          "type": "option",
+          "id": "multiply"
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "الهدف فيه أسس موجبين: أنهو عدد نضربو فيه باش "
+              },
+              {
+                "fr": "e⁻ˣ"
+              },
+              {
+                "ar": " يولّي "
+              },
+              {
+                "fr": "eˣ"
+              },
+              {
+                "ar": "؟"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "alt-A1-s9-fold",
+      "blockId": "var-alt-A1-s9-fold",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex4-0.1.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "alternative",
+      "forSteps": [
+        "A1/s9"
+      ],
+      "representation": "FoldSymmetry",
+      "intro": [
+        {
+          "type": "component",
+          "blockId": "var-alt-A1-s9-fold-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex4-0.1.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "FoldSymmetry",
+            "props": {
+              "fn": "f_ex4",
+              "compareFn": "sigmoid_demo"
+            }
+          }
+        }
+      ],
+      "step": {
+        "id": "alt-A1-s9-fold-s",
+        "blockId": "var-alt-A1-s9-fold-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex4-0.1.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "function-parity"
+        ],
+        "kind": "choice",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "كي طويت، النص الأيسر جا فوق النص الأيمن. شنوّة نقولو على "
+            },
+            {
+              "fr": "f"
+            },
+            {
+              "ar": "؟"
+            }
+          ]
+        },
+        "options": [
+          {
+            "id": "paire",
+            "parity": "even",
+            "label": {
+              "fr": "f est paire"
+            }
+          },
+          {
+            "id": "impaire",
+            "parity": "odd",
+            "label": {
+              "fr": "f est impaire"
+            },
+            "misconceptionId": "parity_odd_even_confusion"
+          }
+        ],
+        "answer": {
+          "type": "parity",
+          "fn": "f_ex4"
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "متناظر بالنسبة للمحور العمودي: "
+              },
+              {
+                "fr": "f(−x) = f(x)"
+              },
+              {
+                "ar": "."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "tr-A1-g",
+      "blockId": "var-tr-A1-g",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex4-0.1.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "transfer",
+      "forSteps": [
+        "A1/s8"
+      ],
+      "representation": "text",
+      "intro": [],
+      "step": {
+        "id": "tr-A1-g-s",
+        "blockId": "var-tr-A1-g-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex4-0.1.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "function-parity",
+          "exp-rules"
+        ],
+        "kind": "lines",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "بدّلنا الدالة: بيّن اللي "
+            },
+            {
+              "fr": "g(−x) = g(x)"
+            },
+            {
+              "ar": "."
+            }
+          ],
+          "math": "g(x) = \\frac{e^{2x}}{1+e^{4x}}"
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "نفس الطريقة: اضرب الـ "
+              },
+              {
+                "fr": "numérateur"
+              },
+              {
+                "ar": " والـ "
+              },
+              {
+                "fr": "dénominateur"
+              },
+              {
+                "ar": " في:"
+              }
+            ],
+            "math": "e^{4x}"
+          }
+        ],
+        "variables": [
+          "x"
+        ],
+        "goal": "(e^(2x))/(1+e^(4x))",
+        "goalIs": {
+          "fn": "g_ex4_transfer",
+          "transform": "id"
+        },
+        "start": "(e^(-2x))/(1+e^(-4x))",
+        "startIs": {
+          "fn": "g_ex4_transfer",
+          "transform": "neg"
+        },
+        "lhs": "g(-x)",
+        "goalLatex": "g(x)=\\frac{e^{2x}}{1+e^{4x}}",
+        "keys": [
+          "x",
+          "e",
+          "frac",
+          "pow",
+          "group",
+          "+",
+          "-",
+          "*",
+          "1",
+          "2",
+          "4"
+        ]
+      }
+    },
+    {
+      "id": "sim-A1-exp-1",
+      "blockId": "var-sim-A1-exp-1",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex4-0.1.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "simpler",
+      "forSteps": [
+        "A1/s8"
+      ],
+      "representation": "text",
+      "intro": [],
+      "step": {
+        "id": "sim-A1-exp-1-s",
+        "blockId": "var-sim-A1-exp-1-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex4-0.1.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "exp-rules"
+        ],
+        "kind": "lines",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "أسهل: بسّط الجداء هذا."
+            }
+          ]
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "اجمع الأسس:"
+              }
+            ],
+            "math": "-x + 2x"
+          }
+        ],
+        "variables": [
+          "x"
+        ],
+        "goal": "e^x",
+        "goalIs": {
+          "fn": "f_ex4_num",
+          "transform": "id"
+        },
+        "start": "e^(-x)*e^(2x)",
+        "startIs": {
+          "fn": "f_ex4_num",
+          "transform": "id"
+        },
+        "goalLatex": "e^{x}",
+        "knownWrong": [
+          {
+            "expr": "e^(-2x^2)",
+            "misconceptionId": "exponent_rules_gap",
+            "meant": "e^x"
+          }
+        ],
+        "keys": [
+          "x",
+          "e",
+          "pow",
+          "-",
+          "*",
+          "2"
+        ]
+      },
+      "round": 1
+    },
+    {
+      "id": "sim-A1-den-2",
+      "blockId": "var-sim-A1-den-2",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex4-0.1.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "simpler",
+      "forSteps": [
+        "A1/s8"
+      ],
+      "representation": "text",
+      "intro": [],
+      "step": {
+        "id": "sim-A1-den-2-s",
+        "blockId": "var-sim-A1-den-2-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex4-0.1.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "exp-rules"
+        ],
+        "kind": "lines",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "أسهل: انشر الجداء هذا."
+            }
+          ]
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "اضرب "
+              },
+              {
+                "fr": "e²ˣ"
+              },
+              {
+                "ar": " في الزوز: في "
+              },
+              {
+                "fr": "1"
+              },
+              {
+                "ar": " وفي "
+              },
+              {
+                "fr": "e⁻²ˣ"
+              },
+              {
+                "ar": "."
+              }
+            ]
+          }
+        ],
+        "variables": [
+          "x"
+        ],
+        "goal": "e^(2x)+1",
+        "goalIs": {
+          "fn": "f_ex4_den",
+          "transform": "id"
+        },
+        "start": "(1+e^(-2x))*e^(2x)",
+        "startIs": {
+          "fn": "f_ex4_den",
+          "transform": "id"
+        },
+        "goalLatex": "e^{2x}+1",
+        "knownWrong": [
+          {
+            "expr": "2",
+            "misconceptionId": "distribution_partial",
+            "meant": "e^(2x)+1"
+          }
+        ],
+        "keys": [
+          "x",
+          "e",
+          "pow",
+          "group",
+          "+",
+          "-",
+          "*",
+          "1",
+          "2"
+        ]
+      },
+      "round": 2
+    },
+    {
+      "id": "pre-exp-neg",
+      "blockId": "var-pre-exp-neg",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex4-0.1.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "prerequisite",
+      "forSteps": [],
+      "representation": "text",
+      "intro": [],
+      "step": {
+        "id": "pre-exp-neg-s",
+        "blockId": "var-pre-exp-neg-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex4-0.1.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "exp-rules"
+        ],
+        "kind": "choice",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "شنوّة تساوي العبارة هذي؟"
+            }
+          ],
+          "math": "e^{-x}"
+        },
+        "options": [
+          {
+            "id": "inv",
+            "label": {
+              "math": "\\frac{1}{e^{x}}"
+            }
+          },
+          {
+            "id": "neg",
+            "label": {
+              "math": "-e^{x}"
+            },
+            "misconceptionId": "exp_negative_sign"
+          }
+        ],
+        "answer": {
+          "type": "option",
+          "id": "inv"
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "الأس السالب يعطي مقلوب:"
+              }
+            ],
+            "math": "e^{-a} = \\frac{1}{e^{a}}"
+          }
+        ]
+      }
+    },
+    {
+      "id": "pre-domain-sym",
+      "blockId": "var-pre-domain-sym",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex4-0.1.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "prerequisite",
+      "forSteps": [],
+      "representation": "text",
+      "intro": [],
+      "step": {
+        "id": "pre-domain-sym-s",
+        "blockId": "var-pre-domain-sym-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex4-0.1.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "domain-symmetric"
+        ],
+        "kind": "choice",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "أنهي مجموعة متناظرة حول الصفر؟"
+            }
+          ]
+        },
+        "options": [
+          {
+            "id": "r",
+            "label": {
+              "math": "\\mathbb{R}"
+            }
+          },
+          {
+            "id": "pos",
+            "label": {
+              "math": "[0 ; +\\infty["
+            },
+            "misconceptionId": "domain_symmetry_meaning"
+          },
+          {
+            "id": "other",
+            "label": {
+              "math": "]-1 ; 2]"
+            },
+            "misconceptionId": "domain_symmetry_meaning"
+          }
+        ],
+        "answer": {
+          "type": "option",
+          "id": "r"
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "مجموعة متناظرة: كل عدد فيها، المقابل متاعو زادة فيها."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "pre-parity",
+      "blockId": "var-pre-parity",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex4-0.1.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "prerequisite",
+      "forSteps": [],
+      "representation": "text",
+      "intro": [],
+      "step": {
+        "id": "pre-parity-s",
+        "blockId": "var-pre-parity-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex4-0.1.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "function-parity"
+        ],
+        "kind": "choice",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "الدالة هذي "
+            },
+            {
+              "fr": "paire"
+            },
+            {
+              "ar": "؟"
+            }
+          ],
+          "math": "h(x) = x^{2}"
+        },
+        "options": [
+          {
+            "id": "yes",
+            "label": {
+              "ar": [
+                {
+                  "ar": "إيه"
+                }
+              ]
+            }
+          },
+          {
+            "id": "no",
+            "label": {
+              "ar": [
+                {
+                  "ar": "لا"
+                }
+              ]
+            },
+            "misconceptionId": "parity_odd_even_confusion"
+          }
+        ],
+        "answer": {
+          "type": "option",
+          "id": "yes"
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "احسب:"
+              }
+            ],
+            "math": "(-x)^{2}"
+          }
+        ]
+      }
+    },
+    {
+      "id": "alt-A1-s3-values",
+      "blockId": "var-alt-A1-s3-values",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex4-0.1.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "alternative",
+      "forSteps": [
+        "A1/s3"
+      ],
+      "representation": "NumericTwin",
+      "intro": [
+        {
+          "type": "tutor_text",
+          "blockId": "var-alt-A1-s3-values-t",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex4-0.1.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "text": {
+            "ar": [
+              {
+                "ar": "جرّب أعداد سالبة في "
+              },
+              {
+                "fr": "f"
+              },
+              {
+                "ar": ": كل عدد عندو صورة؟"
+              }
+            ]
+          }
+        },
+        {
+          "type": "component",
+          "blockId": "var-alt-A1-s3-values-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex4-0.1.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "NumericTwin",
+            "props": {
+              "symbol": "t",
+              "template": "e^t/(1+e^(2t))",
+              "values": [
+                -3,
+                -1,
+                1,
+                3
+              ]
+            }
+          }
+        }
+      ],
+      "step": {
+        "id": "alt-A1-s3-values-s",
+        "blockId": "var-alt-A1-s3-values-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex4-0.1.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "domain-symmetric"
+        ],
+        "kind": "choice",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "لقيت صورة لـ "
+            },
+            {
+              "fr": "−3"
+            },
+            {
+              "ar": " و لـ "
+            },
+            {
+              "fr": "3"
+            },
+            {
+              "ar": ". الـ "
+            },
+            {
+              "fr": "domaine"
+            },
+            {
+              "ar": " متاع "
+            },
+            {
+              "fr": "f"
+            },
+            {
+              "ar": " متناظر؟"
+            }
+          ]
+        },
+        "options": [
+          {
+            "id": "yes",
+            "label": {
+              "ar": [
+                {
+                  "ar": "إيه: كل عدد عندو صورة، والمقابل متاعو زادة."
+                }
+              ]
+            }
+          },
+          {
+            "id": "no_negative",
+            "label": {
+              "ar": [
+                {
+                  "ar": "لا: خاطر فيه أعداد سالبة."
+                }
+              ]
+            },
+            "misconceptionId": "domain_symmetry_meaning"
+          }
+        ],
+        "answer": {
+          "type": "option",
+          "id": "yes"
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "العبارة متاع "
+              },
+              {
+                "fr": "f"
+              },
+              {
+                "ar": " تتحسب لكل عدد حقيقي: المقام ديما موجب."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "sim-A1-s3-int-1",
+      "blockId": "var-sim-A1-s3-int-1",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex4-0.1.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "simpler",
+      "forSteps": [
+        "A1/s3"
+      ],
+      "representation": "text",
+      "intro": [],
+      "step": {
+        "id": "sim-A1-s3-int-1-s",
+        "blockId": "var-sim-A1-s3-int-1-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex4-0.1.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "domain-symmetric"
+        ],
+        "kind": "choice",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "أسهل: المجال هذا متناظر حول الصفر؟"
+            }
+          ],
+          "math": "[-3\\,;\\,3]"
+        },
+        "options": [
+          {
+            "id": "yes",
+            "label": {
+              "ar": [
+                {
+                  "ar": "إيه: كل عدد فيه، المقابل متاعو زادة فيه."
+                }
+              ]
+            }
+          },
+          {
+            "id": "no_negative",
+            "label": {
+              "ar": [
+                {
+                  "ar": "لا: خاطر فيه أعداد سالبة."
+                }
+              ]
+            },
+            "misconceptionId": "domain_symmetry_meaning"
+          }
+        ],
+        "answer": {
+          "type": "option",
+          "id": "yes"
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "خوذ "
+              },
+              {
+                "fr": "2"
+              },
+              {
+                "ar": ": هو في المجال؟ و "
+              },
+              {
+                "fr": "−2"
+              },
+              {
+                "ar": "؟"
+              }
+            ]
+          }
+        ]
+      },
+      "round": 1
+    }
+  ]
+}

@@ -40,3 +40,17 @@ Nothing is ever executed as code: no `eval`, no `new Function`, no property look
 - `e^-2x` parses as `e^(-2)·x`, and `2^3x` as `(2^3)·x` (same as most CAS). The math keyboard's exponent template avoids this; typed input should show the parsed preview.
 - No equations or inequalities (`=`, `<`), no `log` (ambiguous base), no absolute value bars `|x|` (use `abs(x)`), no `!`, no implicit function powers (`sin^2 x`).
 - Real numbers only for now; no complex `i` yet.
+
+## Typed lines (Phase 5, `structure.ts`)
+
+- `toLatex(ast)`: LaTeX for the native renderer (accepted lines in the notebook). `/` becomes `\frac`, implicit products stay juxtaposed, explicit `*` is `\times`, only meaning-changing parentheses are kept, `0.5` is shown `0{,}5`.
+- `splitFraction(ast)`: top-level numerator / denominator.
+- `locateDifference(student, expected)`: `numerator | denominator | both | whole`, plus the first disagreeing sample point with both values (nice points first, so feedback uses the student's value at x = 1).
+- `missingParentheses(student, target)`: regroups the top-level sum: `a/b + c` read as `a/(b + c)` (denominator) or `a + b/c` as `(a + b)/c` (numerator); returns which, if that reading equals the target.
+- `checkEquivalence` takes `skip(scope)` to ignore sample points (the analysis engine skips points within 1e-3 of a function's excluded points).
+
+Limits of typed-line checking:
+- Equivalence is numeric (above): a line equal to the previous one only on [−10, 10] samples passes.
+- `locateDifference` compares numerator and denominator **as written**: a correct line with both multiplied by the same factor is equivalent as a whole (never reported), but a wrong line written in a scaled form reports `both` even if only one part is wrong.
+- `missingParentheses` looks at the top-level sum only, not nested sums (`2·(a/b + c)`), and not `e^-2x` (parsed `e^(-2)·x`; the structured keyboard's exponent slot avoids it).
+- Large exponents overflow to `Infinity` (e.g. `e^(2x)` past x ≈ 355): those sample points are skipped as undefined.

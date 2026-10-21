@@ -6,6 +6,8 @@
  *                                               prototype log -> current format (+ .unknowns.json)
  *   agree   <log.jsonl> <labels.json> [--unknowns <file>]
  *                                               planner vs labels, per decision point
+ *   reports <queue.jsonl>                       exported report / question queue as a table
+ *   guard                                       output guard on the hand-written planner fixtures
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 
@@ -24,6 +26,12 @@ import {
   replayDecisions,
   type Unknowns,
 } from './lib';
+import { readQueueExport } from '../../src/telemetry/reports';
+import { formatReports } from './reports';
+import {
+  formatGuardRows,
+  runGuardFixtures,
+} from '../../src/planner/llm/fixtures/guardFixtures';
 
 function fail(message: string): never {
   process.stderr.write(`${message}\n`);
@@ -144,6 +152,23 @@ switch (command) {
     );
     break;
   }
+  case 'reports': {
+    const [input] = args;
+    if (!input) {
+      fail('usage: reports <queue.jsonl>');
+    }
+    const { entries, errors } = readQueueExport(readFileSync(input, 'utf8'));
+    process.stdout.write(`${formatReports(entries, errors)}\n`);
+    break;
+  }
+  case 'guard': {
+    runGuardFixtures().then(rows =>
+      process.stdout.write(`${formatGuardRows(rows)}\n`),
+    );
+    break;
+  }
   default:
-    fail('commands: table | convert | agree (see tools/replay/README.md)');
+    fail(
+      'commands: table | convert | agree | reports | guard (see tools/replay/README.md)',
+    );
 }

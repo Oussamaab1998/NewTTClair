@@ -8,11 +8,16 @@ afterEach(() => act(() => setDevTools(false)));
 
 test('hides the dev tools until a long press on the lesson title', async () => {
   await render(<App />);
+  // Normal start: the exercise picker.
+  expect(screen.getByTestId('exercise-picker')).toBeOnTheScreen();
+  await fireEvent.press(screen.getByTestId('open-2a'));
   expect(screen.getByTestId('lesson-screen')).toBeOnTheScreen();
   expect(screen.queryByTestId('tab-demo')).toBeNull();
   expect(screen.queryByTestId('toggle-events')).toBeNull();
+  expect(screen.queryByTestId('part-A1')).toBeNull();
 
   await fireEvent(screen.getByTestId('lesson-title'), 'longPress');
+  expect(screen.getByTestId('part-A1')).toBeOnTheScreen();
   expect(screen.getByTestId('toggle-events')).toBeOnTheScreen();
   await fireEvent.press(screen.getByTestId('tab-demo'));
   expect(screen.getByTestId('lesson-ui-demo')).toBeOnTheScreen();

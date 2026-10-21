@@ -30,6 +30,8 @@ export const RULES = {
   deepDiveFailed: 'rule.deep_dive_failed',
   correctAfterHelp: 'rule.correct_after_help',
   oddTiming: 'rule.odd_timing',
+  /** Lines: the goal written at once, no reasoning shown (product owner, 2026-10-18). */
+  jumpedToGoal: 'rule.jumped_to_goal',
   transferAfterHelp: 'rule.transfer_after_help',
   transferAfterSelfReport: 'rule.transfer_after_self_report',
   selfReportDismissed: 'rule.self_report_dismissed',
@@ -51,8 +53,16 @@ interface Pick {
   representation: string;
 }
 
+/** Whether "change method" / "easier" would get an authored answer now. */
+export interface HelpTargets {
+  changeMethod: boolean;
+  simpler: boolean;
+}
+
 export interface RulesPlanner extends Planner {
   decideSync(situation: Situation): Decision;
+  /** The help buttons are shown only when this is true for them. */
+  helpTargets(situation: Situation): HelpTargets;
 }
 
 export function createRulesPlanner(
@@ -63,7 +73,12 @@ export function createRulesPlanner(
   const skills = opts.skills ?? SKILLS;
   const r = new Rules(menu, th, skills);
   const decideSync = (s: Situation) => r.decide(s);
-  return { id: 'rules', decide: decideSync, decideSync };
+  return {
+    id: 'rules',
+    decide: decideSync,
+    decideSync,
+    helpTargets: s => r.helpTargets(s),
+  };
 }
 
 class Rules {
@@ -525,16 +540,24 @@ class Rules {
     const canAsk =
       s.question.selfReportsAsked < this.th.selfReportsPerQuestion &&
       s.session.selfReportsAsked < this.th.selfReportsPerSession;
-    if ((helped || odd) && canAsk) {
+    const jumped = !helped && last?.jumped === true;
+    if ((helped || odd || jumped) && canAsk) {
       return this.decision(
         s,
-        helped ? RULES.correctAfterHelp : RULES.oddTiming,
+        helped
+          ? RULES.correctAfterHelp
+          : jumped
+          ? RULES.jumpedToGoal
+          : RULES.oddTiming,
         { kind: 'self_report' },
         { representation: 'self_report' },
       );
     }
-    if (helped) {
-      const t = this.transfer(s, RULES.transferAfterHelp);
+    if (helped || jumped) {
+      const t = this.transfer(
+        s,
+        helped ? RULES.transferAfterHelp : RULES.jumpedToGoal,
+      );
       if (t) {
         return t;
       }
@@ -554,6 +577,13 @@ class Rules {
     return this.next(s);
   }
 
+  helpTargets(s: Situation): HelpTargets {
+    return {
+      changeMethod: this.change(s, { includeDeepDive: true }) !== null,
+      simpler: (this.prerequisite(s) ?? this.simplerTwin(s)) !== null,
+    };
+  }
+
   private onRequest(s: Situation): Decision {
     const last = [...s.requests].reverse().find(r => r.kind !== 'ask');
     if (last?.kind === 'simpler') {
@@ -561,10 +591,14 @@ class Rules {
       if (p) {
         return this.pickDecision(s, RULES.simpler, p);
       }
-      return this.teacherNote(s, RULES.simpler) ?? this.next(s);
+      // Never the teacher note as the first answer to "easier".
+      const first = s.requests.filter(r => r.kind === 'simpler').length <= 1;
+      return first
+        ? this.next(s)
+        : this.teacherNote(s, RULES.simpler) ?? this.next(s);
     }
-    // "Change method": a representation not yet tried for this skill.
-    const p = this.change(s, { includeDeepDive: true }) ?? this.hint(s);
+    // "Change method": another representation, never a hint.
+    const p = this.change(s, { includeDeepDive: true });
     if (p) {
       return this.pickDecision(s, RULES.changeMethod, p);
     }

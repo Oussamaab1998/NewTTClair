@@ -100,6 +100,28 @@ const samples: Record<EventType, Record<string, unknown>> = {
     misconceptionIds: ['counts_ordered_pairs'],
     ruleId: 'rule.example_loop.end',
   },
+  llm_call: {
+    t: 'llm_call',
+    requestId: 'llm-1',
+    purpose: 'plan',
+    model: 'gpt-6-luna',
+    outcome: 'ok',
+    statusClass: '2xx',
+    latencyMs: 1734,
+    inputTokens: 2404,
+    cachedInputTokens: 0,
+    outputTokens: 60,
+    costUsd: 0.00027,
+  },
+  feedback: { t: 'feedback', choice: 'liked', text: 'مليح' },
+  tutor_answer: {
+    t: 'tutor_answer',
+    source: 'saved',
+    blocks: 1,
+    mathVerified: 0,
+    mathUnverified: 0,
+    mathDropped: 0,
+  },
 };
 
 describe('EventSchema', () => {

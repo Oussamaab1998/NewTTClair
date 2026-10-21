@@ -4,16 +4,21 @@
   "private": true,
   "scripts": {
     "android": "react-native run-android",
+    "preios": "node tools/llm-config/gen.js",
     "ios": "react-native run-ios",
     "lint": "eslint .",
+    "prestart": "node tools/llm-config/gen.js",
     "start": "react-native start",
     "test": "jest",
+    "pretypecheck": "node tools/llm-config/gen.js",
     "typecheck": "tsc --noEmit",
     "test:watch": "jest --watch",
     "check": "npm run lint && npm run typecheck && npm test",
     "build:katex-css": "node tools/katex/build-katex-css.js",
     "pods": "cd ios && bundle exec pod install",
-    "replay": "tsx tools/replay/cli.ts"
+    "replay": "tsx tools/replay/cli.ts",
+    "postinstall": "node tools/llm-config/gen.js",
+    "check:release-key": "node tools/release-key-check/check.js"
   },
   "dependencies": {
     "@react-native/new-app-screen": "0.88.0",
@@ -23,6 +28,8 @@
     "react-i18next": "17.0.15",
     "react-native": "0.88.0",
     "react-native-gesture-handler": "3.3.0",
+    "react-native-mmkv": "4.3.2",
+    "react-native-nitro-modules": "0.37.1",
     "react-native-reanimated": "4.7.0",
     "react-native-safe-area-context": "^5.5.2",
     "react-native-svg": "15.15.5",
