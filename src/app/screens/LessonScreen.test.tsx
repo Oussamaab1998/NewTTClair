@@ -37,6 +37,9 @@ async function renderLesson(part: '1b' | '2a' = '1b') {
 
 const lastByTestId = (id: string) => screen.getAllByTestId(id).at(-1)!;
 const tap = (id: string) => fireEvent.press(lastByTestId(id));
+/** The active card's "⋯" menu (the last card in the feed, DESIGN.md §3). */
+const openCardMenu = () =>
+  fireEvent.press(screen.getAllByTestId(/^card-menu-/).at(-1)!);
 async function typeOnKeypad(raw: string) {
   for (const key of raw) {
     await tap(`keypad-key-${key}`);
@@ -119,6 +122,7 @@ describe('LessonScreen (Exercise 2, 1.b)', () => {
   it('can leave a deep dive with "back" (logged as abandoned)', async () => {
     await renderLesson();
     await tap('not-sure');
+    await openCardMenu();
     await tap('back-to-question');
     expect(lastOf('deepdive')).toMatchObject({
       t: 'deepdive',
@@ -190,6 +194,8 @@ describe('LessonScreen (Exercise 2, 1.b)', () => {
 
   it('answers ask-field chips in the feed; free text opens the tutor drawer (no LLM: saved, neutral line)', async () => {
     await renderLesson();
+    // Collapsed while the first card is on screen (DESIGN.md §3).
+    await tap('ask-chips-toggle');
     await tap('ask-chip-why_complement');
     expect(screen.getByTestId('ask-answer')).toBeOnTheScreen();
     await fireEvent.changeText(screen.getByTestId('ask-input'), 'علاش؟');
@@ -212,7 +218,11 @@ describe('LessonScreen (Exercise 2, 1.b)', () => {
       () => tap('option-two'),
       () => tap('hint'),
       () => tap('not-sure'),
-      () => tap('back-to-question'),
+      async () => {
+        // "back" is in the mini card's "⋯" menu (opening it is logged too).
+        await openCardMenu();
+        await tap('back-to-question');
+      },
       () => tap('option-none'),
       () => tap('card-self_report-understood'),
       () => tap('hint'),
@@ -384,9 +394,9 @@ describe('LessonScreen (Exercise 2, 2.a with probability components)', () => {
     await tap('ask-chips-toggle');
     expect(screen.getByTestId('ask-chip-why_no_1')).toBeOnTheScreen();
     await typeOnKeypad('10');
-    // Choice question: no keypad, chips back.
-    expect(screen.getByTestId('ask-chip-why_no_1')).toBeOnTheScreen();
-    expect(screen.queryByTestId('ask-chips-toggle')).toBeNull();
+    // The next card (a choice): collapsed again, the toggle is back.
+    expect(screen.queryByTestId('ask-chip-why_no_1')).toBeNull();
+    expect(screen.getByTestId('ask-chips-toggle')).toBeOnTheScreen();
   });
 
   it('skips the optional practice with a reason', async () => {

@@ -3,6 +3,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -25,11 +26,12 @@ import {
   type ScrollViewInstance,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 
 import type { LessonContent } from '../session/lesson';
 import { experimentForRef, stepForRef } from '../session/lesson';
 import type { CardPurpose, FeedItem, FeedItemOf } from '../session/types';
-import { MathBlock } from '../math/MathBlock';
+import { ScrollingMath } from '../math/ScrollingMath';
 import {
   AnswerBlock,
   AskAnswer,
@@ -47,22 +49,65 @@ import { CardMemory, CardMemoryContext } from './cardMemory';
 import { SnapshotContext, type SnapshotRegistry } from './snapshots';
 import { QuestionCard, type QuestionHandlers } from './QuestionCard';
 import type { ComponentErrorReason } from '../../components/ComponentHost';
-import { RichView } from './RichView';
+import { RichView, richToSpoken } from './RichView';
 import { TutorText } from './TutorText';
-import { BlockActions } from './BlockActions';
-import { reportTarget, type ReportTarget } from './reportTarget';
+import { BlockActions, type MenuVia } from './BlockActions';
+import {
+  reportPath,
+  reportTarget,
+  visualOwners,
+  type ReportTarget,
+} from './reportTarget';
+import { spokenMath } from '../math/spoken';
 import { theme } from '../../theme';
 
 const DONE_MARK = '✓';
+const NO_VISUALS: readonly ReportTarget[] = [];
 const THINKING_MARK = '…';
 
 export interface FeedHandlers extends QuestionHandlers {
-  onLongPress: (blockId: string, quoted: string) => void;
+  /** Tutor text long-press: the ask menu (with its block's trust label and Report). */
+  onLongPress: (
+    blockId: string,
+    quoted: string,
+    target: ReportTarget | null,
+  ) => void;
   onCardChoice: (purpose: CardPurpose, choice: string) => void;
-  /** "..." on a block: the menu with its trust label and Report. */
-  onBlockMenu: (target: ReportTarget) => void;
-  /** The visible Report button (AI blocks, active question). */
+  /** A block's menu (trust label + Report): long-press or screen-reader action. */
+  onBlockMenu: (target: ReportTarget, via?: MenuVia) => void;
+  /** The visible Report button (AI blocks). */
   onReport: (target: ReportTarget) => void;
+}
+
+/** A block as words: its accessibility label on the long-press path. */
+function blockLabel(item: FeedItem, t: TFunction): string {
+  switch (item.kind) {
+    case 'statement':
+    case 'tutor':
+      return richToSpoken(item.rich);
+    case 'math':
+      return spokenMath(item.latex);
+    case 'feedback':
+      return item.rich
+        ? richToSpoken(item.rich)
+        : item.message
+        ? t(`lesson.${item.message}`)
+        : '';
+    case 'hint':
+      return `${t('lesson.hint')} ${item.level}/${item.total}. ${richToSpoken(
+        item.rich,
+      )}`;
+    case 'answer':
+      return `${t('lesson.revealed')} ${richToSpoken(item.rich)}`;
+    case 'ask_answer':
+      return item.parts.map(richToSpoken).join(' ');
+    case 'writeup':
+      return [t('lesson.writeupTitle'), ...item.lines].join(' ');
+    case 'component_fallback':
+      return t('lesson.componentFallback');
+    default:
+      return '';
+  }
 }
 
 interface FeedItemViewProps {
@@ -70,6 +115,8 @@ interface FeedItemViewProps {
   content: LessonContent;
   handlers: FeedHandlers;
   onLayoutKey: (key: string, y: number, height: number) => void;
+  /** Question cards: the visuals whose Report sits in this card's "⋯". */
+  visuals?: readonly ReportTarget[] | undefined;
 }
 
 /** Items keep their identity across appends, so memo skips everything but changed cards. */
@@ -78,16 +125,20 @@ const FeedItemView = memo(function FeedItemViewImpl({
   content,
   handlers,
   onLayoutKey,
+  visuals,
 }: FeedItemViewProps) {
   probe.count('FeedItemView');
   const { t } = useTranslation();
   const experiment = content.loaded.exercise.experiment;
+  const target = reportTarget(item, content);
+  const path = reportPath(item);
   let body: React.ReactNode;
   switch (item.kind) {
     case 'statement':
+      // Exam wording: the French line in the paper face (DESIGN.md §3).
       body = (
         <View style={styles.statement}>
-          <RichView rich={item.rich} />
+          <RichView rich={item.rich} variant="paper" />
         </View>
       );
       break;
@@ -96,7 +147,12 @@ const FeedItemView = memo(function FeedItemViewImpl({
         <TutorText
           rich={item.rich}
           longPress={item.longPress}
-          onLongPress={handlers.onLongPress}
+          onLongPress={(blockId, quoted) =>
+            handlers.onLongPress(blockId, quoted, target)
+          }
+          {...(target && {
+            onReportAction: () => handlers.onBlockMenu(target, 'a11y'),
+          })}
           {...(item.blockId !== undefined && {
             blockId: item.blockId,
             testID: `tutor-${item.blockId}`,
@@ -105,7 +161,7 @@ const FeedItemView = memo(function FeedItemViewImpl({
       );
       break;
     case 'math':
-      body = <MathBlock latex={item.latex} />;
+      body = <ScrollingMath latex={item.latex} />;
       break;
     case 'student':
       body = <StudentBubble content={item.content} />;
@@ -137,6 +193,8 @@ const FeedItemView = memo(function FeedItemViewImpl({
           item={item}
           step={stepForRef(content, item.ref)}
           {...(own && { experiment: own })}
+          reportTarget={target}
+          visualTargets={visuals ?? NO_VISUALS}
           {...handlers}
         />
       );
@@ -154,7 +212,15 @@ const FeedItemView = memo(function FeedItemViewImpl({
       break;
     }
     case 'choice_card':
-      body = <ChoiceCard item={item} onChoose={handlers.onCardChoice} />;
+      body = (
+        <ChoiceCard
+          item={item}
+          onChoose={handlers.onCardChoice}
+          {...(target && {
+            onTitleMenu: (via: MenuVia) => handlers.onBlockMenu(target, via),
+          })}
+        />
+      );
       break;
     case 'variant_start':
       body = <VariantStart kind={item.variantKind} />;
@@ -209,15 +275,11 @@ const FeedItemView = memo(function FeedItemViewImpl({
           e.nativeEvent.layout.height,
         )
       }
-      style={
-        item.depth > 0 && [
-          styles.nested,
-          { marginRight: item.depth * theme.space.depthIndent },
-        ]
-      }
     >
       <BlockActions
-        target={reportTarget(item, content)}
+        target={target}
+        path={path}
+        label={path === 'longpress' ? blockLabel(item, t) : ''}
         onMenu={handlers.onBlockMenu}
         onReport={handlers.onReport}
       >
@@ -307,6 +369,20 @@ export const LessonFeed = memo(function LessonFeedImpl({
   probe.count('LessonFeed');
   const { t } = useTranslation();
   const [memory] = useState(() => new CardMemory());
+  // Interactive visuals have no long-press: their Report is a row in the
+  // "⋯" of the card that owns them (DESIGN.md §3).
+  const visualsByCard = useMemo(() => {
+    const byCard = new Map<string, ReportTarget[]>();
+    const owners = visualOwners(items);
+    for (const item of items) {
+      const card = owners.get(item.key);
+      const target = card && reportTarget(item, content);
+      if (card && target) {
+        byCard.set(card, [...(byCard.get(card) ?? []), target]);
+      }
+    }
+    return byCard;
+  }, [items, content]);
   const scroll = useRef<ScrollViewInstance>(null);
   const layouts = useRef(new Map<string, { y: number; height: number }>());
   const known = useRef(new Set<string>());
@@ -332,10 +408,9 @@ export const LessonFeed = memo(function LessonFeedImpl({
   const scrollToKey = useCallback((key: string) => {
     const l = layouts.current.get(key);
     if (l) {
-      scroll.current?.scrollTo({
-        y: Math.max(0, l.y - theme.space.lg),
-        animated: true,
-      });
+      // Exactly the item's top: a margin above it would show a slice of the
+      // previous block (a stray mark under the header).
+      scroll.current?.scrollTo({ y: Math.max(0, l.y), animated: true });
     }
   }, []);
 
@@ -397,15 +472,14 @@ export const LessonFeed = memo(function LessonFeedImpl({
             scrollEventThrottle={SCROLL_THROTTLE_MS}
             testID="lesson-feed"
           >
-            {items.map(item => (
-              <FeedItemView
-                key={item.key}
-                item={item}
-                content={content}
-                handlers={handlers}
-                onLayoutKey={onLayoutKey}
-              />
-            ))}
+            <FeedRun
+              items={items}
+              visualsByCard={visualsByCard}
+              depth={0}
+              content={content}
+              handlers={handlers}
+              onLayoutKey={onLayoutKey}
+            />
             {endCard}
           </ScrollView>
           {showJump && currentKey !== undefined && (
@@ -424,43 +498,137 @@ export const LessonFeed = memo(function LessonFeedImpl({
   );
 });
 
+interface FeedRunProps {
+  items: readonly FeedItem[];
+  depth: number;
+  content: LessonContent;
+  handlers: FeedHandlers;
+  onLayoutKey: (key: string, y: number, height: number) => void;
+  /** Card key -> the visuals reported from its "⋯" (visualOwners). */
+  visualsByCard: ReadonlyMap<string, readonly ReportTarget[]>;
+}
+
+/**
+ * Items at this depth in order; each run of deeper items (a deep dive or a
+ * variant, from its start item to the "return" divider) goes into one inset
+ * sheet (DESIGN.md §3). Nested detours nest.
+ */
+function FeedRun({ items, depth, visualsByCard, ...rest }: FeedRunProps) {
+  const out: React.ReactNode[] = [];
+  for (let i = 0; i < items.length; ) {
+    const item = items[i]!;
+    if (item.depth <= depth) {
+      out.push(
+        <FeedItemView
+          key={item.key}
+          item={item}
+          visuals={visualsByCard.get(item.key)}
+          {...rest}
+        />,
+      );
+      i += 1;
+      continue;
+    }
+    let j = i;
+    while (j < items.length && items[j]!.depth > depth) {
+      j += 1;
+    }
+    out.push(
+      <DetourSheet
+        key={`sheet-${item.key}`}
+        items={items.slice(i, j)}
+        depth={depth + 1}
+        visualsByCard={visualsByCard}
+        {...rest}
+      />,
+    );
+    i = j;
+  }
+  return <>{out}</>;
+}
+
+/**
+ * The deep-dive sheet: tinted, dashed pen edge, its start item as the tab.
+ * Item positions are reported in feed coordinates (the sheet's own y added,
+ * and re-reported when the sheet moves), so the "back to the question" button
+ * and the scroll to new items still work inside it.
+ */
+function DetourSheet({ onLayoutKey, ...rest }: FeedRunProps) {
+  const base = useRef<number | null>(null);
+  const local = useRef(new Map<string, { y: number; height: number }>());
+  const onChild = useCallback(
+    (key: string, y: number, height: number) => {
+      local.current.set(key, { y, height });
+      if (base.current !== null) {
+        onLayoutKey(key, base.current + y, height);
+      }
+    },
+    [onLayoutKey],
+  );
+  return (
+    <View
+      style={styles.sheet}
+      testID="detour-sheet"
+      onLayout={(e: LayoutChangeEvent) => {
+        base.current = e.nativeEvent.layout.y;
+        for (const [key, l] of local.current) {
+          onLayoutKey(key, e.nativeEvent.layout.y + l.y, l.height);
+        }
+      }}
+    >
+      <FeedRun {...rest} onLayoutKey={onChild} />
+    </View>
+  );
+}
+
 /** onScroll at most this often: only the jump button depends on it. */
 const SCROLL_THROTTLE_MS = 100;
 
 const styles = StyleSheet.create({
   wrap: { flex: 1 },
-  // Small, in the bottom-left corner over the "⋯" gutter (Arabic lines start
-  // on the right), just above the ask bar.
+  // Small, in the bottom corner at the reading end (Arabic lines start on the
+  // right), just above the ask bar.
   jump: {
     position: 'absolute',
     bottom: theme.space.xs,
-    left: theme.space.xs,
+    ...theme.reading.endEdge(theme.layout.gutter),
     minHeight: theme.size.touch,
     paddingHorizontal: theme.space.md,
     borderRadius: theme.radius.pill,
-    backgroundColor: theme.color.actionPrimary,
+    backgroundColor: theme.color.pen,
     justifyContent: 'center',
   },
   jumpText: {
+    ...theme.font.small,
+    fontFamily: theme.font.family.ui.bold,
     color: theme.color.textOnAccent,
-    fontSize: theme.font.size.footnote,
-    fontWeight: theme.font.weight.semibold,
     writingDirection: 'rtl',
   },
   feed: { flex: 1, backgroundColor: theme.color.backgroundApp },
-  content: { padding: theme.space.lg, paddingBottom: theme.space.scrollEnd },
-  statement: {
-    backgroundColor: theme.color.surfaceCard,
-    borderRadius: theme.radius.lg,
-    padding: theme.space.md,
-    marginVertical: theme.space.xxs,
-    borderLeftWidth: theme.border.focus,
-    borderLeftColor: theme.color.actionPrimary,
+  content: {
+    paddingHorizontal: theme.layout.gutter,
+    paddingTop: theme.space.sm,
+    paddingBottom: theme.space.scrollEnd,
   },
-  nested: {
-    borderRightWidth: theme.border.thick,
-    borderRightColor: theme.color.deepDiveRail,
-    paddingRight: theme.space.sm,
+  // Statement / goal: a plain white card (no left rail, DESIGN.md §3).
+  statement: {
+    backgroundColor: theme.color.card,
+    borderRadius: theme.radius.card,
+    borderWidth: theme.border.line,
+    borderColor: theme.color.border,
+    padding: theme.space.lg,
+    marginVertical: theme.space.xxs,
+  },
+  sheet: {
+    backgroundColor: theme.color.deepDive.bg,
+    borderWidth: theme.border.line,
+    borderStyle: 'dashed',
+    borderColor: theme.color.deepDive.edge,
+    borderRadius: theme.radius.card,
+    marginTop: theme.space.lg,
+    marginBottom: theme.space.xs,
+    paddingHorizontal: theme.space.md,
+    paddingBottom: theme.space.sm,
   },
   superseded: {
     fontSize: theme.font.size.footnote,
@@ -477,8 +645,9 @@ const styles = StyleSheet.create({
   },
   done: {
     textAlign: 'center',
-    color: theme.feedback.success.text,
-    fontSize: theme.font.size.bodyLarge,
+    ...theme.font.body,
+    fontFamily: theme.font.family.ui.bold,
+    color: theme.color.correct.ink,
     marginVertical: theme.space.lg,
   },
 });

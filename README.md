@@ -1,11 +1,10 @@
 This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
 
-# Dev tools (debug builds only)
+# Test mode (debug builds only)
 
-The Composants / Proba / Bidi tabs and the lesson's event log are hidden by default.
-In a **debug build**, press and hold the lesson title (« تمرين الاحتمالات ») for **2 seconds** to show them; hold again to hide them.
-Release builds never show them. The flag lives in `src/app/devFlags.ts`.
-The Proba tab has a perf panel (React commit times per component, keypad height): use it to take measurements on a device.
+Dev mode (the 5 dev tabs, the LLM status line, stored-event and event counters, export buttons, the part switch) is **off on every launch** and never shown in release builds.
+Turn it on for one run with the launch argument `-devMode on` (e.g. `xcrun simctl launch booted org.reactjs.native.example.NewTTClair -devMode on`), or hold the screen title (picker or lesson) for **2 seconds**; hold again to turn it off.
+`-devPart A1` opens a part directly in normal mode (`-devActions answerAll` plays it to its end; add `-devUntil sum` to stop at that step's card); `-devTab` / `-devComponent` open a dev tab (and so turn dev mode on). All arguments: `src/app/dev/launch.ts`. The Proba tab has a perf panel (React commit times, keypad height).
 
 # Getting Started
 

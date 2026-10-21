@@ -6,11 +6,15 @@
  */
 export { devScenario, runLive1, SCENARIO_CAP_USD } from './scenario';
 export { LlmRawPanel } from './LlmRawPanel';
+export { nextRightAction } from './answerAll';
 export {
+  devActionsAtLaunch,
   devComponentAtLaunch,
+  devDemoAtLaunch,
   devPartAtLaunch,
   devScrollAtLaunch,
   devTabAtLaunch,
-  devToolsAtLaunch,
+  devUntilAtLaunch,
+  devModeAtLaunch,
   runDevBench,
 } from './launch';

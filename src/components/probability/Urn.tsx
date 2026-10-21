@@ -169,8 +169,8 @@ const styles = StyleSheet.create({
     transform: [{ translateY: theme.offset.ballLift }],
   },
   ballText: {
+    fontFamily: theme.font.family.ui.bold,
     fontSize: theme.font.size.reading,
-    fontWeight: theme.font.weight.semibold,
     color: theme.color.textPrimary,
   },
   ballTextOn: { color: theme.color.textOnAccent },
@@ -178,6 +178,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: theme.offset.ballBadgeOutset,
     right: theme.offset.ballBadgeOutset,
+    fontFamily: theme.font.family.ui.regular,
     fontSize: theme.font.size.caption,
     color: theme.color.textOnAccent,
     backgroundColor: theme.feedback.success.text,

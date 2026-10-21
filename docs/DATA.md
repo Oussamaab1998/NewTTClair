@@ -67,6 +67,7 @@ Additions in the app (Phase 2):
 - Every event carries `contentVersion` (with `exerciseId`), so `stepId -> skills` stays correct when content changes.
 - `answer.kind: "task"`: the result of a task component (EventPicker, LawBuilder); `value` holds its details (selected/correct/missed/extra ids, table, sum).
 - `skip { reason: "knows_it" | "not_now" }`: an optional task the student chose not to do.
+- `part_done { counted, answered, revealed }` (stepId `part`): the part reached its done line. `counted` = its required acting steps (questions, lines, tasks, prediction gates; not optional practice), `answered` = those the student did, `revealed` = those shown at the end of the hint ladder. Emitted by the reducer (`finish`), derived (replay ignores it).
 - `component_event` names logged by the lesson itself: `shown` (a component entered the feed: the source for `representationsTried`) and `cell_filled_by_lesson { value, source: "solved" | "revealed" }` (a law cell filled after an EventPicker; `revealed` = shown at the end of the hint ladder, never a correct answer).
 
 Additions in Phase 3 (planner):
@@ -94,6 +95,9 @@ Content additions (Phase 5): step kind `lines` (`variables`, `lhs`, `start` + `s
 Content additions (Phase 3): `Exercise.variants[]` (`alternative | transfer | simpler | prerequisite`, `forSteps`, `representation`, `addresses`, `round`, optional own `experiment`, `intro` blocks, an asked or task `step`; answers computed by the engine with the variant's urn); `check` on asked steps (numeric check with the student's value); misconception `category: "math" | "writing"`; deep dives may have their own `experiment` and a task as their mini question (one interactive component max, loader-checked); `src/content/skillMap.json` (skill -> prerequisites, math vs writing; reviewed: false).
 
 Notes from the prototype log: it lacked the exact chosen option/typed value, time per step, whether a visual was used, self-report, and it mislabeled mini-question success as transfer. **A transfer event requires a changed variant of the original task**, not a mini-question.
+
+### Done parts (picker ✓, «كمّل من», the «الورقة» sheet)
+A part is done **only** when one of its sessions has a `part_done` with `answered >= 1`. Revealed-only (`answered = 0`), abandoned (no `part_done`: left with back, app closed) and skipped do not count (only optional practice can be skipped, and it is not counted). Matched by **exerciseId + questionId, across content versions**. Done parts are also kept in their own small record (MMKV `tteclair-progress`: `exerciseId/questionId -> { firstDoneAt, contentVersion }`), written when a counting `part_done` is logged, so the event store's cap never erases a done mark; done = record ∪ stored events (`src/state/doneParts.ts`). Retention: same open question as the events (PILOT_CONSENT.md OPEN 5).
 
 ## 3. Student state (derived)
 ```ts

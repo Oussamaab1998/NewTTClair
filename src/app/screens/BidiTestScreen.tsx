@@ -428,7 +428,7 @@ const styles = StyleSheet.create({
     fontSize: theme.font.size.tiny,
     color: theme.color.textSecondary,
     writingDirection: 'ltr',
-    fontFamily: Platform.select({ ios: 'Courier', default: 'monospace' }),
+    fontFamily: theme.font.family.mono,
   },
   timed: {
     borderTopWidth: StyleSheet.hairlineWidth,

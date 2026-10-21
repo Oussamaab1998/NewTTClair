@@ -1,13 +1,24 @@
 /**
  * Debug builds only (via src/app/dev/index.ts): launch arguments for checks
  * without tap automation.
- *   -devTools 1        dev tools on at start
+ *   -devMode on        dev mode on at start, for that run (README "Test mode")
  *   -devTab analyse    dev tools on, open this tab (lesson|demo|proba|analyse|bidi)
  *   -devComponent X    dev tools on, open the demo tab holding component X,
  *                      showing only X's demo cases (screenshots);
  *                      X#n shows only X's n-th case (from 0)
  *   -devScroll 600     demo screens start scrolled by this many points
- *   -devPart A1        the lesson opens on this part (1b, 2a, A1)
+ *   -devPart A1        the lesson opens on this part (1b, 2a, A1), in normal mode
+ *   -devActions notSure  the opened lesson plays these actions at start
+ *                      (comma-separated), e.g. a deep dive in the real lesson
+ *   -devActions answerAll  the opened part is played to its done line with the
+ *                      content's right answers (a real stored part_done)
+ *   -devUntil sum      with answerAll: stop when this main step's card is open
+ *                      (screenshots of a card mid-part, e.g. 2.a's sum)
+ *   -devDemo paperSheet  the opened lesson starts with «الورقة» open
+ *   -devDemo cardMenu  the Composants tab opens with a question card's "⋯"
+ *                      menu shown (screenshots of the open sheet)
+ *   -devDemo longPressMenu | longPressMenuPlain  the tutor long-press menu
+ *                      open, with / without its trust label and Report
  *   -devBench events   time 1,000 single-event appends + a reload in a
  *                      throwaway MMKV instance (deleted afterwards)
  */
@@ -26,7 +37,7 @@ const arg = (name: string): unknown => {
   }
 };
 
-export const devToolsAtLaunch = () => String(arg('devTools')) === '1';
+export const devModeAtLaunch = () => String(arg('devMode')) === 'on';
 
 const stringArg = (name: string): string | null => {
   const v = arg(name);
@@ -35,6 +46,15 @@ const stringArg = (name: string): string | null => {
 export const devTabAtLaunch = () => stringArg('devTab');
 export const devComponentAtLaunch = () => stringArg('devComponent');
 export const devPartAtLaunch = () => stringArg('devPart');
+export const devDemoAtLaunch = () => stringArg('devDemo');
+export const devUntilAtLaunch = () => stringArg('devUntil');
+type DevAction = 'notSure' | 'answerAll';
+/** `-devActions notSure|answerAll[,…]`: known names only; anything else is ignored. */
+export const devActionsAtLaunch = (): DevAction[] =>
+  (stringArg('devActions') ?? '')
+    .split(',')
+    .map(a => a.trim())
+    .filter((a): a is DevAction => a === 'notSure' || a === 'answerAll');
 export const devScrollAtLaunch = (): number => {
   const v = Number(arg('devScroll'));
   return Number.isFinite(v) && v > 0 ? v : 0;

@@ -208,6 +208,7 @@ function MarkerMark({
             x={view.px(m.at) + P.markerRadius + theme.space.xxs}
             y={view.py(y) - P.markerRadius}
             fontSize={P.labelSize}
+            fontFamily={theme.font.family.math.family}
             fill={P.color.marker}
           >
             {label}
@@ -242,6 +243,7 @@ function MarkerMark({
               : P.labelSize + theme.space.xxs
           }
           fontSize={P.labelSize}
+          fontFamily={theme.font.family.math.family}
           fill={P.color.guide}
           textAnchor={horizontal ? 'end' : 'start'}
         >

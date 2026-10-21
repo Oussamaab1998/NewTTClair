@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import {
-  Platform,
   StyleSheet,
   Text,
   View,
   type LayoutChangeEvent,
 } from 'react-native';
 
+import { theme } from '../../theme';
 import type { MathNode } from './latexSubset';
 
-export const MATH_FONT = Platform.select({ ios: 'Times New Roman', default: 'serif' });
 // Typesetting rules, not theme values: script/inner scales (0.7, 0.9), line
 // ratio 1.25, script offsets 0.45, operator scale 1.2 and the small glyph
 // spacings in `styles` below. They keep formulas proportional at any size, so
@@ -169,11 +168,11 @@ function Fenced({
 
 const styles = StyleSheet.create({
   text: {
-    fontFamily: MATH_FONT,
+    fontFamily: theme.font.family.math.family,
     writingDirection: 'ltr',
     includeFontPadding: false,
   },
-  italic: { fontStyle: 'italic' },
+  italic: { fontStyle: theme.font.style.italic },
   row: { flexDirection: 'row', alignItems: 'center', direction: 'ltr' },
   frac: { alignItems: 'center', marginHorizontal: 3 },
   fracRule: { alignSelf: 'stretch', marginVertical: 2 },

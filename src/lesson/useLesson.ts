@@ -12,6 +12,7 @@ import type { EventDraft } from '../telemetry/events';
 import { EventLog, type LogClock, type SessionInfo } from '../telemetry/log';
 import { TeacherNoteQueue } from '../telemetry/notes';
 import type { EventStore } from '../telemetry/eventStore';
+import type { DoneRecord } from '../state/doneParts';
 import {
   contextFor,
   type DeviceContext,
@@ -122,6 +123,8 @@ export interface LessonServices {
   llm?: LessonLlm;
   /** Persistent copy of the log (survives relaunch). */
   eventStore?: EventStore;
+  /** Done parts, kept apart from the log so its cap never erases them. */
+  doneRecord?: Pick<DoneRecord, 'note'>;
 }
 
 interface Provisional {
@@ -162,7 +165,14 @@ export function useLesson(
           contentVersion: loaded.exercise.contentVersion,
         },
         clock,
-        services.eventStore,
+        {
+          append: events => {
+            services.eventStore?.append(events);
+            for (const e of events) {
+              services.doneRecord?.note(e);
+            }
+          },
+        },
       ),
     // One log per lesson session.
     // eslint-disable-next-line react-hooks/exhaustive-deps

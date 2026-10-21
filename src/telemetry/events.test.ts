@@ -59,6 +59,7 @@ const samples: Record<EventType, Record<string, unknown>> = {
   },
   admit: { t: 'admit', resultId: 'p_B_7_10' },
   skip: { t: 'skip', reason: 'knows_it' },
+  part_done: { t: 'part_done', counted: 4, answered: 3, revealed: 1 },
   report: {
     t: 'report',
     blockId: 'q1b-s2',

@@ -29,10 +29,21 @@ export function OptionsQuestion({
     <View style={styles.list}>
       {options.map(o => {
         const chosen = result?.optionId === o.id;
+        // Green pencil / red pencil, each with its icon (DESIGN.md §3).
         const mark = chosen
           ? result.correct
-            ? theme.feedback.success
-            : theme.feedback.danger
+            ? {
+                edge: theme.color.correct.ink,
+                surface: theme.color.correct.bg,
+                text: theme.color.correct.ink,
+                icon: theme.feedback.success.icon,
+              }
+            : {
+                edge: theme.color.error.noteBorder,
+                surface: theme.color.error.noteBg,
+                text: theme.color.error.ink,
+                icon: theme.feedback.danger.icon,
+              }
           : null;
         return (
           <Pressable
@@ -46,11 +57,11 @@ export function OptionsQuestion({
             style={({ pressed }) => [
               styles.option,
               pressed && styles.pressed,
-              mark && { borderColor: mark.text, backgroundColor: mark.surface },
+              mark && { borderColor: mark.edge, backgroundColor: mark.surface },
             ]}
           >
             <View style={styles.label}>
-              <RichView rich={o.label} fontSize={theme.font.size.bodyLarge} />
+              <RichView rich={o.label} mathScroll={false} />
             </View>
             {mark && (
               <Text style={[styles.mark, { color: mark.text }]}>
@@ -68,20 +79,25 @@ const styles = StyleSheet.create({
   list: { gap: theme.space.sm, marginTop: theme.space.sm },
   option: {
     minHeight: theme.size.touch,
-    borderWidth: theme.border.medium,
-    borderColor: theme.color.borderDefault,
-    borderRadius: theme.radius.lg,
+    borderWidth: theme.border.line,
+    borderColor: theme.color.borderControl,
+    borderRadius: theme.radius.chip,
     paddingHorizontal: theme.space.lg,
     paddingVertical: theme.space.xs,
-    flexDirection: 'row',
+    // The label first, the ✓ / ✗ mark at the reading end (left).
+    flexDirection: theme.reading.row,
     alignItems: 'center',
-    backgroundColor: theme.color.surfaceCard,
+    gap: theme.space.sm,
+    backgroundColor: theme.color.card,
   },
-  pressed: { backgroundColor: theme.color.surfaceSelected },
+  // Highlighter under the finger (the tap answers at once).
+  pressed: {
+    backgroundColor: theme.color.highlighter,
+    borderColor: theme.color.ink,
+  },
   label: { flex: 1 },
   mark: {
-    fontSize: theme.font.size.reading,
-    fontWeight: theme.font.weight.bold,
-    marginLeft: theme.space.sm,
+    ...theme.font.body,
+    fontFamily: theme.font.family.ui.bold,
   },
 });

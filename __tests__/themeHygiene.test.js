@@ -18,6 +18,10 @@ const STYLE_NUMBER =
   /\b(?:[a-zA-Z]*Radius|[a-zA-Z]*Width|[a-zA-Z]*Height|width|height|padding[A-Za-z]*|margin[A-Za-z]*|gap|rowGap|columnGap|fontSize|lineHeight|fontWeight|letterSpacing|top|left|right|bottom|opacity|elevation|shadow[A-Za-z]*|translate[XY])\s*:\s*['"]?-?(?!0(?![.\d]))\d(?![\d.]*%)/;
 // Numeric size props in JSX, e.g. fontSize={16}.
 const JSX_NUMBER = /\b(?:fontSize|width|height|strokeWidth)=\{-?\d/;
+// Font faces come from theme.font.family (bundled files, checked by fonts.test.ts);
+// styles and named weights from theme.font too. Type annotations stay allowed.
+const FONT =
+  /\bfontFamily\s*:\s*(?!theme\.|string\b|undefined\b)\S|\bfontStyle\s*:\s*['"`]|\bfontWeight\s*:\s*['"`](?:bold|normal)\b/;
 
 function sourceFiles(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap(entry => {
@@ -38,7 +42,10 @@ function scan(text) {
     .map((line, i) => ({ line, n: i + 1 }))
     .filter(
       ({ line }) =>
-        COLOR.test(line) || STYLE_NUMBER.test(line) || JSX_NUMBER.test(line),
+        COLOR.test(line) ||
+        STYLE_NUMBER.test(line) ||
+        JSX_NUMBER.test(line) ||
+        FONT.test(line),
     );
 }
 
@@ -55,6 +62,11 @@ test('the guard patterns catch what they should (and not zero values)', () => {
     '  opacity: 0.4,',
     '  transform: [{ translateY: -6 }],',
     '<MathBlock latex="x" fontSize={16} />',
+    "  fontFamily: 'Tajawal-Regular',",
+    "  fontFamily: Platform.select({ ios: 'Courier', default: 'monospace' }),",
+    '  fontFamily: MATH_FONT,',
+    "  fontStyle: 'italic',",
+    "  fontWeight: 'bold',",
   ];
   const ok = [
     '  top: 0,',
@@ -63,12 +75,15 @@ test('the guard patterns catch what they should (and not zero values)', () => {
     "  width: '100%',",
     '  const MAX_LENGTH = 20;',
     '  opts: { fontSize: number; color: string },',
+    '  fontFamily: theme.font.family.mono,',
+    '  fontStyle: theme.font.style.italic,',
+    '  opts: { fontFamily: string },',
   ];
   expect(bad.filter(l => scan(l).length === 0)).toEqual([]);
   expect(ok.filter(l => scan(l).length > 0)).toEqual([]);
 });
 
-test('no hard-coded colors or numeric style values outside src/theme', () => {
+test('no hard-coded colors, fonts or numeric style values outside src/theme', () => {
   const files = [
     ...sourceFiles(path.join(ROOT, 'src')),
     path.join(ROOT, 'App.tsx'),

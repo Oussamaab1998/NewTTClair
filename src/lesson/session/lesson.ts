@@ -57,6 +57,7 @@ import type {
   CardPurpose,
   EventDraft,
   FeedItem,
+  FeedItemOf,
   Frame,
   LessonAction,
   LessonState,
@@ -64,6 +65,7 @@ import type {
   StepResult,
   UiMessage,
 } from './types';
+import { countsForProgress } from './progress';
 
 export const MAX_DEPTH = 3;
 /** A task mini question with this many wrong tries "did not help" (product owner, Phase 3). */
@@ -535,6 +537,40 @@ function finish(d: Draft) {
   });
   append(d, { kind: 'done', depth: 0 });
   d.s.finished = true;
+  d.events.push({
+    questionId: d.s.questionId,
+    stepId: 'part',
+    t: 'part_done',
+    ...partCounts(d),
+  });
+}
+
+/**
+ * The part's required acting steps (as the progress bar counts them): each
+ * one the student did (answered, a task solved, a prediction tapped) or was
+ * shown at the end of its hint ladder (revealed). Re-asked copies of a card
+ * after a detour count once (its last copy).
+ */
+function partCounts(d: Draft) {
+  const steps = d.c.question.groups
+    .flatMap(g => g.steps)
+    .filter(countsForProgress);
+  let answered = 0;
+  let revealed = 0;
+  for (const s of steps) {
+    const cards = d.s.items.filter(
+      (i): i is FeedItemOf<'question'> =>
+        i.kind === 'question' &&
+        i.ref.scope === 'main' &&
+        i.ref.stepId === s.id,
+    );
+    if (cards.some(c => c.revealed === true)) {
+      revealed += 1;
+    } else {
+      answered += 1;
+    }
+  }
+  return { counted: steps.length, answered, revealed };
 }
 
 // ---------------------------------------------------------------------------
@@ -1188,7 +1224,8 @@ function onReveal(d: Draft) {
     updateCard(d, frame.cardKey, { status: 'done', revealed: true });
     fillLaw(d, step, 'revealed');
   } else {
-    updateCard(d, frame.cardKey, { status: 'done' });
+    // Marked revealed too (part_done counts it as shown, not done).
+    updateCard(d, frame.cardKey, { status: 'done', revealed: true });
     d.s.items.push({
       key: nextKey(d, 'answer'),
       kind: 'answer',

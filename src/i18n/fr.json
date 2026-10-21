@@ -38,12 +38,26 @@
     }
   },
   "picker": {
-    "title": "Exercices",
-    "back": "Retour aux exercices"
+    "title": "Choisir un exercice",
+    "back": "Retour aux exercices",
+    "resumeFrom": "Reprendre à",
+    "start": "Commencer",
+    "soon": "Bientôt",
+    "moreSoon": "D’autres exercices bientôt",
+    "subject": {
+      "analysis": "Analyse",
+      "probability": "Probabilités"
+    },
+    "done": "fait",
+    "current": "suivant"
   },
   "lesson": {
     "title": "Exercice 2 : probabilités",
     "unreviewed": "Brouillon : contenu non relu par un enseignant.",
+    "draftTag": "Brouillon",
+    "exerciseLabel": "Exercice {{n}}",
+    "progress": "Progression dans la question",
+    "questionTab": "Question",
     "correct": "C'est juste.",
     "wrong": "Pas tout à fait. Regarde encore.",
     "invalidInput": "L'écriture est incomplète. Vérifie et réessaie.",
@@ -135,6 +149,7 @@
     "report": {
       "menu": "Options",
       "button": "Signaler une erreur",
+      "visual": "Signaler cette partie",
       "title": "Qu’est-ce qui ne va pas ?",
       "reasons": {
         "wrong_math": "Erreur de maths",
@@ -362,5 +377,11 @@
     },
     "copyPrevious": "⧉ Copier la ligne précédente",
     "unchanged": "C'est la même ligne : change quelque chose."
+  },
+  "paper": {
+    "title": "La feuille",
+    "here": "Vous êtes ici",
+    "proven": "Résultats démontrés",
+    "open": "La feuille"
   }
 }

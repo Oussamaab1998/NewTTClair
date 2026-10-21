@@ -131,6 +131,15 @@ export const EventSchema = z.discriminatedUnion('t', [
     t: z.literal('skip'),
     reason: z.enum(['knows_it', 'not_now']),
   }),
+  // The part reached its done line (docs/DATA.md "Done parts"): its required
+  // acting steps, how many the student did, how many were shown (revealed).
+  z.strictObject({
+    ...base,
+    t: z.literal('part_done'),
+    counted: z.number().int().min(0),
+    answered: z.number().int().min(0),
+    revealed: z.number().int().min(0),
+  }),
   z.strictObject({
     ...base,
     t: z.literal('report'),

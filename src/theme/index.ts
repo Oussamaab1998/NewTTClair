@@ -13,6 +13,7 @@ import {
   feedback,
   font,
   katex,
+  layout,
   offset,
   opacity,
   plot,
@@ -22,8 +23,10 @@ import {
   slider,
   space,
 } from './tokens';
+import { mathSide, reading } from './sides';
 
 export type { FeedbackTone } from './tokens';
+export { fontFiles } from './tokens';
 
 export const theme = {
   color,
@@ -43,4 +46,7 @@ export const theme = {
   slider,
   katex,
   editor,
+  layout,
+  reading,
+  mathSide,
 } as const;

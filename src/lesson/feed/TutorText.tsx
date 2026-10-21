@@ -19,6 +19,8 @@ interface TutorTextProps {
   blockId?: string;
   longPress: boolean;
   onLongPress?: (blockId: string, quoted: string) => void;
+  /** Screen-reader "report" action: the block's menu (trust label + Report). */
+  onReportAction?: () => void;
   testID?: string;
 }
 
@@ -28,6 +30,7 @@ export const TutorText = memo(function TutorTextImpl({
   blockId,
   longPress,
   onLongPress,
+  onReportAction,
   testID,
 }: TutorTextProps) {
   const { t } = useTranslation();
@@ -53,11 +56,18 @@ export const TutorText = memo(function TutorTextImpl({
         style={styles.block}
         testID={testID}
         accessibilityHint={enabled ? t('lesson.longPressHint') : undefined}
-        accessibilityActions={
-          enabled ? [{ name: 'longpress', label: t('lesson.menuTitle') }] : []
-        }
-        onAccessibilityAction={() => {
-          if (enabled) {
+        accessibilityActions={[
+          ...(enabled
+            ? [{ name: 'longpress', label: t('lesson.menuTitle') }]
+            : []),
+          ...(onReportAction
+            ? [{ name: 'report', label: t('lesson.report.button') }]
+            : []),
+        ]}
+        onAccessibilityAction={e => {
+          if (e.nativeEvent.actionName === 'report') {
+            onReportAction?.();
+          } else if (enabled) {
             onLongPress(blockId, richToPlain(rich));
           }
         }}

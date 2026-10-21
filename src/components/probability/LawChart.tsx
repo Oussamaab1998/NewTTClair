@@ -257,8 +257,14 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: theme.radius.xs,
     borderTopRightRadius: theme.radius.xs,
   },
-  barOn: { backgroundColor: theme.color.deepDiveRail },
+  // The tapped bar: pen fill and an ink outline (shape, not colour alone).
+  barOn: {
+    backgroundColor: theme.color.pen,
+    borderWidth: theme.border.active,
+    borderColor: theme.color.ink,
+  },
   pLabel: {
+    fontFamily: theme.font.family.ui.regular,
     fontSize: theme.font.size.caption,
     color: theme.color.textPrimary,
     writingDirection: 'ltr',
@@ -276,8 +282,8 @@ const styles = StyleSheet.create({
     top: PLOT_WITH_LABELS + theme.chart.axisLabelGap,
     width: theme.chart.axisLabelWidth,
     textAlign: 'center',
+    fontFamily: theme.font.family.ui.bold,
     fontSize: theme.font.size.callout,
-    fontWeight: theme.font.weight.semibold,
     color: theme.color.textPrimary,
     writingDirection: 'ltr',
   },
@@ -290,6 +296,7 @@ const styles = StyleSheet.create({
     borderColor: theme.feedback.danger.text,
   },
   eLabel: {
+    fontFamily: theme.font.family.ui.regular,
     fontSize: theme.font.size.caption,
     color: theme.feedback.danger.text,
     marginLeft: theme.space.markerLabel,

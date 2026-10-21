@@ -239,6 +239,38 @@ describe('A1 through the lesson', () => {
     });
   });
 
+  it('the done line emits part_done: all 4 required steps done by the student', () => {
+    const s = new Session();
+    toLines(s);
+    s.line(START_LINE);
+    s.line(GOAL_LINE);
+    const ev = s.act({ type: 'answer', value: { optionId: 'paire' } });
+    expect(ev.filter(e => e.t === 'part_done')).toEqual([
+      expect.objectContaining({
+        t: 'part_done',
+        questionId: 'A1',
+        counted: 4,
+        answered: 4,
+        revealed: 0,
+      }),
+    ]);
+  });
+
+  it('a step shown at the end of its ladder counts as revealed, not answered', () => {
+    const s = new Session();
+    toLines(s);
+    for (let i = 0; i < 3; i++) {
+      s.act({ type: 'hint' });
+    }
+    s.act({ type: 'reveal' });
+    const ev = s.act({ type: 'answer', value: { optionId: 'paire' } });
+    expect(ev.find(e => e.t === 'part_done')).toMatchObject({
+      counted: 4,
+      answered: 3,
+      revealed: 1,
+    });
+  });
+
   it('an unparsable line is logged, not counted as an answer', () => {
     const s = new Session();
     toLines(s);

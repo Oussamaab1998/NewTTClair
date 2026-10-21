@@ -10,9 +10,66 @@
       }
     ]
   },
+  "number": 4,
+  "subject": "analysis",
   "statement": {
     "fr": "Soit f la fonction définie sur ℝ par f(x) = eˣ / (1 + e²ˣ). On note (ζ) sa courbe représentative dans un repère orthonormé (O, i⃗, j⃗).",
     "math": "f(x)=\\frac{e^{x}}{1+e^{2x}}"
+  },
+  "paper": {
+    "section": {
+      "fr": "Partie A"
+    },
+    "questions": [
+      {
+        "id": "A1",
+        "label": "1",
+        "wording": [
+          {
+            "fr": "Montrer que f est paire."
+          }
+        ],
+        "status": "available"
+      },
+      {
+        "id": "A2",
+        "label": "2",
+        "wording": [
+          {
+            "fr": "Montrer que",
+            "math": "\\lim_{x\\to+\\infty} f(x) = 0"
+          },
+          {
+            "fr": "Interpréter."
+          }
+        ],
+        "status": "soon"
+      },
+      {
+        "id": "A3",
+        "label": "3",
+        "wording": [
+          {
+            "fr": "a) Montrer que, pour tout réel x,",
+            "math": "f'(x)=\\frac{(1-e^{2x})e^{x}}{(1+e^{2x})^{2}}"
+          },
+          {
+            "fr": "b) Dresser le tableau de variation de f."
+          }
+        ],
+        "status": "soon"
+      },
+      {
+        "id": "A4",
+        "label": "4",
+        "wording": [
+          {
+            "fr": "Tracer (ζ)."
+          }
+        ],
+        "status": "soon"
+      }
+    ]
   },
   "results": [
     {

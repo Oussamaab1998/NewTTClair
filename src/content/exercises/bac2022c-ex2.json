@@ -10,8 +10,55 @@
       }
     ]
   },
+  "number": 2,
+  "subject": "probability",
   "statement": {
     "fr": "Une urne contient cinq boules indiscernables au toucher, numérotées −1, 0, 0, 1 et 2. On tire simultanément deux boules de l'urne. On note B l'événement « au moins une des deux boules tirées porte le numéro 0 »."
+  },
+  "paper": {
+    "questions": [
+      {
+        "id": "1a",
+        "label": "1.a",
+        "status": "soon"
+      },
+      {
+        "id": "1b",
+        "label": "1.b",
+        "wording": [
+          {
+            "fr": "Montrer que",
+            "math": "p(B) = \\val{pB}"
+          }
+        ],
+        "status": "available"
+      },
+      {
+        "id": "2a",
+        "label": "2.a",
+        "wording": [
+          {
+            "fr": "X est la variable aléatoire égale au produit des numéros des deux boules tirées. Déterminer la loi de probabilité de X."
+          }
+        ],
+        "status": "available"
+      },
+      {
+        "id": "2b",
+        "label": "2.b",
+        "status": "soon"
+      },
+      {
+        "id": "3a",
+        "label": "3.a",
+        "status": "soon"
+      },
+      {
+        "id": "3b",
+        "label": "3.b",
+        "status": "soon"
+      }
+    ]
   },
   "experiment": {
     "urn": [

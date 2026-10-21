@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Platform, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { KatexMath } from './KatexMath';
 import { LatexSubsetError, parseLatexSubset } from './latexSubset';
 import { MathNodeView } from './NativeMath';
+import { spokenMath } from './spoken';
 import { nowMs } from '../../telemetry/clock';
 import { theme } from '../../theme';
 
@@ -76,12 +77,15 @@ export function MathBlock({
   };
 
   const showFallback = failed || parseError !== null;
+  const spokenLabel = useMemo(() => spokenMath(latex), [latex]);
 
   return (
     <View
       style={styles.block}
       testID={testID}
-      accessibilityLabel={latex}
+      // Read as words, never as raw LaTeX (DESIGN.md §3).
+      accessibilityLabel={spokenLabel}
+      accessibilityLanguage="fr"
       onLayout={
         renderer === 'native' || showFallback
           ? () => report(nowMs() - start.current)
@@ -113,7 +117,7 @@ const styles = StyleSheet.create({
     paddingVertical: theme.space.xs,
   },
   fallback: {
-    fontFamily: Platform.select({ ios: 'Courier', default: 'monospace' }),
+    fontFamily: theme.font.family.mono,
     writingDirection: 'ltr',
     fontSize: theme.font.size.small,
   },

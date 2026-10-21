@@ -119,7 +119,7 @@ const CASES: DemoCase[] = [
     spec: {
       component: 'PredictReveal',
       props: {
-        prompt: { fr: 'f(-x) comparé à f(x) ?' },
+        prompt: { fr: 'f(\u2212x) comparé à f(x) ?' },
         options: [
           { id: 'same', label: { math: 'f(-x)=f(x)' } },
           { id: 'opposite', label: { math: 'f(-x)=-f(x)' } },

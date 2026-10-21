@@ -249,8 +249,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: theme.radius.sm,
-    borderWidth: theme.border.thin,
-    borderColor: theme.color.borderDefault,
+    borderWidth: theme.border.line,
+    borderColor: theme.color.borderControl,
     backgroundColor: theme.color.surfaceCard,
   },
   wrong: {

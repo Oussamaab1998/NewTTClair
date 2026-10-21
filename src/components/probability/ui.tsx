@@ -75,16 +75,13 @@ export const OutcomeChip = memo(function OutcomeChipImpl({
         tone && { borderColor: tone.text, backgroundColor: tone.surface },
         (mark === 'extra' || mark === 'solution') && styles.dashed,
         focused && styles.focused,
-        dim && styles.dim,
+        dim && styles.dimChip,
         pressed && styles.pressed,
       ]}
     >
-      <Text style={styles.chipLabel}>{label}</Text>
-      {badge !== undefined && (
-        <Text style={[styles.badge, tint !== undefined && { color: tint }]}>
-          {badge}
-        </Text>
-      )}
+      <Text style={[styles.chipLabel, dim && styles.dimText]}>{label}</Text>
+      {/* Data-series colours are for graphics only: the badge text stays ink. */}
+      {badge !== undefined && <Text style={styles.badge}>{badge}</Text>}
       {mark && (
         <Text
           style={[
@@ -165,10 +162,16 @@ export function ActionButton({
       style={[
         styles.button,
         primary && styles.primary,
-        disabled && styles.disabled,
+        disabled && (primary ? styles.primaryDisabled : styles.buttonDisabled),
       ]}
     >
-      <Text style={[styles.buttonText, primary && styles.primaryText]}>
+      <Text
+        style={[
+          styles.buttonText,
+          primary && styles.primaryText,
+          disabled && !primary && styles.dimText,
+        ]}
+      >
         {label}
       </Text>
     </Pressable>
@@ -194,7 +197,7 @@ export const styles = StyleSheet.create({
   panel: {
     backgroundColor: theme.color.surfaceCard,
     borderRadius: theme.radius.card,
-    borderWidth: theme.border.thin,
+    borderWidth: theme.border.line,
     borderColor: theme.color.borderDefault,
     padding: theme.space.md,
     marginVertical: theme.space.xs,
@@ -212,38 +215,48 @@ export const styles = StyleSheet.create({
     minWidth: theme.size.chipMinWidth,
     paddingHorizontal: theme.space.md,
     paddingVertical: theme.space.xxs,
-    borderRadius: theme.radius.lg,
-    borderWidth: theme.border.medium,
-    borderColor: theme.color.borderDefault,
-    backgroundColor: theme.color.surfaceCard,
+    borderRadius: theme.radius.chip,
+    borderWidth: theme.border.line,
+    borderColor: theme.color.borderControl,
+    backgroundColor: theme.color.card,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  // Selected = highlighter + ink border (DESIGN.md §3); the chip also shows a mark.
   selected: {
-    borderColor: theme.color.actionPrimary,
+    borderColor: theme.color.ink,
     borderWidth: theme.border.selected,
     backgroundColor: theme.color.surfaceSelected,
   },
   dashed: { borderStyle: 'dashed', borderWidth: theme.border.thick },
   focused: { borderWidth: theme.border.focus },
-  dim: { opacity: theme.opacity.dimmed },
+  // Solid colours, not opacity: the label stays readable (4.59:1).
+  dimChip: { borderColor: theme.color.border },
+  dimText: { color: theme.color.inkDisabled },
+  buttonDisabled: { borderColor: theme.color.border },
+  primaryDisabled: {
+    backgroundColor: theme.color.inkDisabled,
+    borderColor: theme.color.inkDisabled,
+  },
   pressed: { opacity: theme.opacity.pressed },
+  // Sets, values and formulas: the math face (STIX), like the exam paper.
   chipLabel: {
+    fontFamily: theme.font.family.math.family,
     fontSize: theme.font.size.body,
     color: theme.color.textPrimary,
     writingDirection: 'ltr',
   },
   badge: {
+    fontFamily: theme.font.family.ui.bold,
     fontSize: theme.font.size.footnote,
-    fontWeight: theme.font.weight.semibold,
     writingDirection: 'ltr',
   },
   mark: {
     position: 'absolute',
     top: theme.offset.chipMarkTop,
     right: theme.offset.chipMarkEnd,
+    fontFamily: theme.font.family.ui.bold,
     fontSize: theme.font.size.tiny,
-    fontWeight: theme.font.weight.bold,
   },
   readout: {
     flexDirection: 'row-reverse',
@@ -251,56 +264,65 @@ export const styles = StyleSheet.create({
     gap: theme.space.sm,
     flexWrap: 'wrap',
   },
-  readoutLabel: { fontSize: theme.font.size.callout, writingDirection: 'rtl' },
+  readoutLabel: {
+    fontFamily: theme.font.family.ui.regular,
+    fontSize: theme.font.size.callout,
+    writingDirection: 'rtl',
+  },
   readoutValue: {
+    fontFamily: theme.font.family.math.family,
+    fontWeight: theme.font.weight.bold,
     fontSize: theme.font.size.bodyLarge,
-    fontWeight: theme.font.weight.semibold,
     writingDirection: 'ltr',
   },
   note: {
     flexDirection: 'row-reverse',
     alignItems: 'center',
     gap: theme.space.sm,
-    borderRadius: theme.radius.md,
+    borderRadius: theme.radius.chip,
     paddingHorizontal: theme.space.md,
     paddingVertical: theme.space.xs,
   },
   noteText: {
     flex: 1,
+    fontFamily: theme.font.family.ui.regular,
     fontSize: theme.font.size.callout,
     writingDirection: 'rtl',
     textAlign: 'right',
   },
   noteIcon: {
+    fontFamily: theme.font.family.ui.bold,
     fontSize: theme.font.size.callout,
-    fontWeight: theme.font.weight.bold,
   },
   button: {
     minHeight: theme.size.touch,
     paddingHorizontal: theme.space.xl,
-    borderRadius: theme.radius.pill,
-    borderWidth: theme.border.thin,
-    borderColor: theme.color.borderDefault,
+    borderRadius: theme.radius.button,
+    borderWidth: theme.border.line,
+    borderColor: theme.color.borderControl,
+    backgroundColor: theme.color.card,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  // The one primary action: filled ink.
   primary: {
-    backgroundColor: theme.color.actionPrimary,
-    borderColor: theme.color.actionPrimary,
+    backgroundColor: theme.color.ink,
+    borderColor: theme.color.ink,
   },
-  disabled: { opacity: theme.opacity.disabled },
   buttonText: {
+    fontFamily: theme.font.family.ui.regular,
     fontSize: theme.font.size.callout,
-    color: theme.color.actionPrimary,
+    color: theme.color.ink,
     writingDirection: 'rtl',
   },
   primaryText: {
     color: theme.color.textOnAccent,
-    fontWeight: theme.font.weight.semibold,
+    fontFamily: theme.font.family.ui.bold,
   },
   ltr: {
     writingDirection: 'ltr',
     color: theme.color.textPrimary,
+    fontFamily: theme.font.family.math.family,
     fontSize: theme.font.size.body,
   },
   rowEnd: {

@@ -56,5 +56,6 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   stack: { direction: 'ltr', alignItems: 'flex-start' },
+  // Values are math: the STIX face from ui.ltr, only smaller here.
   small: { fontSize: theme.font.size.small },
 });

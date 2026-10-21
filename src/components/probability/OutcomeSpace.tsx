@@ -241,8 +241,8 @@ const styles = StyleSheet.create({
     borderWidth: theme.border.focus,
   },
   legendText: {
+    fontFamily: theme.font.family.ui.bold,
     fontSize: theme.font.size.body,
-    fontWeight: theme.font.weight.bold,
     writingDirection: 'ltr',
   },
 });

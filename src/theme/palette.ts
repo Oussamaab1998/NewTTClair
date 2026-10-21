@@ -33,6 +33,33 @@ export const palette = {
   notice600: '#24527a',
   notice50: '#eaf2fb',
 
+  // Cahier direction (docs/DESIGN.md §2).
+  paper: '#f2f5fb',
+  paperGrid: '#dde5f3',
+  paperBorder: '#c5d2ea',
+  /** Control edges: 3.65:1 on card, 3.34:1 on paper (WCAG 1.4.11 non-text). */
+  controlBorder: '#7486ad',
+  ink: '#1b2a57',
+  inkMuted: '#55627f',
+  /** Disabled primary fill: white on it is 4.59:1 (WCAG AA for text). */
+  inkDisabled: '#6b7590',
+  inkScrim: 'rgba(27,42,87,0.4)',
+  pen: '#2f5bea',
+  penTint: '#f4f8ff',
+  highlighter: '#ffe680',
+  highlighterSoft: '#fff4bf',
+  green700: '#1e7a4c',
+  green50: '#e6f4ec',
+  green900: '#14532d',
+  redPencil: '#b8243d',
+  red50: '#fff1f3',
+  red200: '#e9a3ae',
+  red900: '#7a1428',
+  amber50: '#fff6cc',
+  amber500: '#e0b800',
+  amber900: '#5a4500',
+  teal700: '#1e7a7a',
+
   series1: '#1f5fbf',
   series2: '#b35900',
   series3: '#2e7d32',

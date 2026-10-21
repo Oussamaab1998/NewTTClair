@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -19,8 +19,8 @@ import {
   type Selection,
   type Sym,
 } from './editor';
-import { MATH_FONT } from '../math/NativeMath';
 import { theme } from '../../theme';
+import { scrollForCursor } from './lineScroll';
 
 const E = theme.editor;
 const sizeAt = (depth: number) =>
@@ -50,6 +50,8 @@ interface ViewCtx {
   sel?: Selection;
   /** The node a wrap just made, while it is shown. */
   flash?: Mark;
+  /** The cursor element, measured so a long line keeps it in view. */
+  cursorRef?: React.RefObject<React.ComponentRef<typeof View> | null>;
 }
 
 /** A slot: its nodes with the cursor; empty slots show a box. Tap = cursor to its end. */
@@ -70,11 +72,11 @@ function Slot({
   const marked = mark !== undefined && samePath(path, mark.path);
   const faulty = marked && mark.index === undefined;
   const sel = ctx.sel && samePath(ctx.sel.path, path) ? ctx.sel : undefined;
-  const flashAt =
-    flash && samePath(flash.path, path) ? flash.index : undefined;
+  const flashAt = flash && samePath(flash.path, path) ? flash.index : undefined;
   const caret = (key: string) => (
     <View
       key={key}
+      ref={ctx.cursorRef}
       style={[styles.cursor, { height: size * E.cursorRatio }]}
       testID="editor-cursor"
     />
@@ -235,10 +237,37 @@ export function EditorLine({
   showFlash?: boolean;
   testID?: string;
 }) {
-  // Typing past the width keeps the end of the line (the cursor) in view.
+  // A line wider than the field scrolls: the cursor stays in view (typing at
+  // the end, ← back to the start), with an inner margin on both sides.
   const scroll = useRef<ScrollViewInstance>(null);
+  const content = useRef<React.ComponentRef<typeof View>>(null);
+  const cursorRef = useRef<React.ComponentRef<typeof View>>(null);
+  const scrollX = useRef(0);
+  const viewWidth = useRef(0);
+  /** Scroll so the cursor is in view (after an edit, a layout, a size change). */
+  const follow = () => {
+    const c = cursorRef.current;
+    const host = content.current;
+    if (!c || !host || typeof c.measureLayout !== 'function') {
+      return;
+    }
+    c.measureLayout(host, x => {
+      const next = scrollForCursor(
+        x,
+        scrollX.current,
+        viewWidth.current,
+        theme.space.lg,
+      );
+      if (next !== null) {
+        scroll.current?.scrollTo({ x: next, animated: false });
+        scrollX.current = next;
+      }
+    });
+  };
+  useEffect(follow);
   const ctx: ViewCtx = {
     cursor: state.cursor,
+    cursorRef,
     ...(mark && { mark }),
     ...(state.sel && { sel: state.sel }),
     ...(showFlash && state.flash && { flash: state.flash }),
@@ -248,20 +277,32 @@ export function EditorLine({
     }),
   };
   return (
-    <ScrollView
-      ref={scroll}
-      horizontal
-      onContentSizeChange={() =>
-        scroll.current?.scrollToEnd({ animated: false })
-      }
-      style={styles.line}
-      contentContainerStyle={styles.lineContent}
-      testID={testID}
-    >
-      <Slot nodes={state.root} path={[]} depth={0} ctx={ctx} />
-    </ScrollView>
+    <View style={styles.line}>
+      <ScrollView
+        ref={scroll}
+        horizontal
+        onLayout={e => {
+          viewWidth.current = e.nativeEvent.layout.width;
+          follow();
+        }}
+        onContentSizeChange={follow}
+        onScroll={e => {
+          scrollX.current = e.nativeEvent.contentOffset.x;
+        }}
+        scrollEventThrottle={LINE_SCROLL_THROTTLE_MS}
+        contentContainerStyle={styles.lineContent}
+        testID={testID}
+      >
+        <View ref={content} style={styles.lineRow}>
+          <Slot nodes={state.root} path={[]} depth={0} ctx={ctx} />
+        </View>
+      </ScrollView>
+    </View>
   );
 }
+
+/** onScroll of a long line at most this often (only the cursor follow uses it). */
+const LINE_SCROLL_THROTTLE_MS = 50;
 
 /** Key labels (structure keys drawn as their shape, not as "^(" text). */
 const LABEL: Record<string, string> = {
@@ -357,6 +398,9 @@ export function EditorKeys({
               k={k}
               onKey={onKey}
               label={LABEL[k] ?? k}
+              {...(k === 'frac' && { icon: <FracIcon /> })}
+              // Structure keys stand out (DESIGN.md §3).
+              emphasis={k === 'frac' || k === 'pow'}
               a11y={t(`lines.key.${k}`, { defaultValue: k })}
               testID={`${testID}-key-${k}`}
             />
@@ -378,6 +422,9 @@ export function KeyButton<K>({
   disabled = false,
   small = false,
   weight = 1,
+  tool = false,
+  emphasis = false,
+  icon,
 }: {
   k: K;
   onKey: (k: K) => void;
@@ -392,6 +439,12 @@ export function KeyButton<K>({
   small?: boolean;
   /** Share of the row (flex). */
   weight?: number;
+  /** Arrow / tool keys: a light pen tint, apart from the symbol keys. */
+  tool?: boolean;
+  /** A structure key (fraction, power): pen border. */
+  emphasis?: boolean;
+  /** A drawn glyph instead of the text label (the label stays for tests / a11y). */
+  icon?: React.ReactNode;
 }) {
   return (
     <Pressable
@@ -406,21 +459,37 @@ export function KeyButton<K>({
         weight !== 1 && { flex: weight },
         !grow && styles.fixed,
         wide && styles.wide,
+        tool && styles.tool,
+        emphasis && styles.emphasis,
         pressed && styles.pressed,
-        disabled && styles.disabled,
+        disabled && styles.keyDisabled,
       ]}
     >
-      <Text
-        style={[
-          styles.keyText,
-          small && styles.keySmall,
-          typeof k === 'string' && LETTER.test(k) && styles.keyLetter,
-        ]}
-        numberOfLines={1}
-      >
-        {label}
-      </Text>
+      {icon ?? (
+        <Text
+          style={[
+            styles.keyText,
+            small && styles.keySmall,
+            typeof k === 'string' && LETTER.test(k) && styles.keyLetter,
+            disabled && styles.keyTextDisabled,
+          ]}
+          numberOfLines={1}
+        >
+          {label}
+        </Text>
+      )}
     </Pressable>
+  );
+}
+
+/** The fraction key: a box over a bar over a box (from the mockups). */
+function FracIcon() {
+  return (
+    <View style={styles.fracIcon} accessible={false}>
+      <View style={styles.fracBox} />
+      <View style={styles.fracBar} />
+      <View style={styles.fracBox} />
+    </View>
   );
 }
 
@@ -430,19 +499,26 @@ export const KEY_LABEL = LABEL;
 export const KEY_GAP = E.keyGap;
 
 const styles = StyleSheet.create({
+  // The line being written: 2 pt pen border (DESIGN.md §3).
+  // The border sits outside the scroll: a scrolled line keeps an inner margin
+  // (it never runs under the border).
   line: {
     minHeight: E.minHeight,
-    borderWidth: theme.border.medium,
-    borderColor: theme.color.borderDefault,
-    borderRadius: theme.radius.lg,
-    backgroundColor: theme.color.surfaceCard,
+    borderWidth: theme.border.active,
+    borderColor: theme.color.pen,
+    borderRadius: theme.radius.button,
+    backgroundColor: theme.color.card,
+    paddingHorizontal: theme.space.sm,
+    justifyContent: 'center',
+    overflow: 'hidden',
   },
   lineContent: {
     alignItems: 'center',
-    paddingHorizontal: theme.space.md,
+    paddingHorizontal: theme.space.xxs,
     paddingVertical: theme.space.xs,
     direction: 'ltr',
   },
+  lineRow: { flexDirection: 'row', alignItems: 'center', direction: 'ltr' },
   slot: { flexDirection: 'row', alignItems: 'flex-end', direction: 'ltr' },
   empty: {
     borderWidth: theme.border.thin,
@@ -462,10 +538,10 @@ const styles = StyleSheet.create({
   cursor: { width: E.cursorWidth, backgroundColor: E.color.cursor },
   sym: {
     color: theme.color.textPrimary,
-    fontFamily: MATH_FONT,
+    fontFamily: theme.font.family.math.family,
     writingDirection: 'ltr',
   },
-  letter: { fontStyle: 'italic' },
+  letter: { fontStyle: theme.font.style.italic },
   operator: { marginHorizontal: E.operatorSpace },
   selection: {
     flexDirection: 'row',
@@ -488,20 +564,46 @@ const styles = StyleSheet.create({
   group: { flexDirection: 'row', alignItems: 'center' },
   keys: { gap: E.keyGap, direction: 'ltr' },
   row: { flexDirection: 'row', gap: E.keyGap },
+  // Cahier keys: card fill, 1.5 border, radius 12.
   key: {
     flex: 1,
     minWidth: theme.size.touch,
     minHeight: theme.size.touch,
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.color.surfaceKey,
+    borderRadius: theme.radius.button,
+    borderWidth: theme.border.line,
+    borderColor: theme.color.borderControl,
+    backgroundColor: theme.color.card,
     alignItems: 'center',
     justifyContent: 'center',
   },
   fixed: { flex: 0, width: theme.size.touch },
   wide: { flex: 0, paddingHorizontal: theme.space.md },
-  pressed: { backgroundColor: theme.color.surfaceKeyPressed },
-  disabled: { opacity: theme.opacity.disabled },
-  keyText: { fontSize: theme.font.size.title, color: theme.color.textPrimary },
-  keyLetter: { fontFamily: MATH_FONT, fontStyle: 'italic' },
+  tool: { backgroundColor: E.color.toolKey },
+  emphasis: { borderColor: theme.color.pen },
+  pressed: { backgroundColor: theme.color.highlighterSoft },
+  // Solid colours, not opacity: the label stays readable (4.59:1 on white).
+  keyDisabled: {
+    backgroundColor: theme.color.card,
+    borderColor: theme.color.border,
+  },
+  keyTextDisabled: { color: theme.color.inkDisabled },
+  keyText: { fontSize: theme.font.size.title, color: theme.color.ink },
+  fracIcon: { alignItems: 'center', gap: E.fracIcon.gap },
+  fracBox: {
+    width: E.fracIcon.boxWidth,
+    height: E.fracIcon.boxHeight,
+    borderWidth: theme.border.line,
+    borderColor: theme.color.ink,
+    borderRadius: theme.radius.xs,
+  },
+  fracBar: {
+    width: E.fracIcon.barWidth,
+    height: theme.border.line,
+    backgroundColor: theme.color.ink,
+  },
+  keyLetter: {
+    fontFamily: theme.font.family.math.family,
+    fontStyle: theme.font.style.italic,
+  },
   keySmall: { fontSize: theme.font.size.callout },
 });

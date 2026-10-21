@@ -136,7 +136,7 @@ describe('PointOnCurve', () => {
       `f(1) = ${readoutNumber(evalFn('f_ex4', 1))}`,
     );
     expect(screen.getByTestId('point-fmx')).toHaveTextContent(
-      `f(-1) = ${readoutNumber(evalFn('f_ex4', -1))}`,
+      `f(\u22121) = ${readoutNumber(evalFn('f_ex4', -1))}`,
     );
     expect(screen.getByTestId('point-verdict')).toHaveTextContent(
       /نفس الارتفاع/,

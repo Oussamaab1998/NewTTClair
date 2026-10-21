@@ -47,12 +47,13 @@ function Root() {
   const insets = useSafeAreaInsets();
   const [atLaunch] = useState(launchTab);
   const [tab, setTab] = useState<Tab>(atLaunch ?? 'lesson');
+  // Dev mode is off on every launch; on only with `-devMode on`, a dev tab
+  // argument, or a 2 s press on the screen title (that run only).
   useEffect(() => {
-    if (atLaunch) {
+    if (atLaunch || devOnly?.devModeAtLaunch()) {
       setDevTools(true);
     }
   }, [atLaunch]);
-  // Dev tabs only behind the dev flag (long-press on the lesson title).
   const devTools = useDevTools();
   const shown: Tab = devTools ? tab : 'lesson';
   return (

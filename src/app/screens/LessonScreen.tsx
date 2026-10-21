@@ -8,6 +8,7 @@ import React, {
   useSyncExternalStore,
 } from 'react';
 import {
+  AccessibilityInfo,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -39,13 +40,19 @@ import {
 } from '../../lesson/feed/FeedbackCard';
 import {
   ReportSheet,
+  type CardAction,
   type ReportSheetState,
 } from '../../lesson/feed/ReportSheet';
 import { SnapshotRegistry } from '../../lesson/feed/snapshots';
+import type { ReportTarget } from '../../lesson/feed/reportTarget';
 import type { LocalQueue } from '../../telemetry/reports';
 import { appQueue } from '../appQueue';
 import { appEventStore } from '../appEventStore';
+import { appDoneRecord } from '../appDoneRecord';
+import { doneParts } from '../../state/doneParts';
+import { PaperSheet, type PaperCloseVia } from '../../lesson/feed/PaperSheet';
 import type { EventStore } from '../../telemetry/eventStore';
+import type { DoneRecord } from '../../state/doneParts';
 import { appLessonLlm, appLlmRuntime } from '../appLlm';
 import { LlmStatusLine } from '../LlmStatusLine';
 import type * as DevOnly from '../dev';
@@ -64,8 +71,7 @@ import {
   type DrawerChoice,
   type DrawerState,
 } from '../../tutor/TutorDrawer';
-import type { LessonContent } from '../../lesson/session/lesson';
-import type { LessonState } from '../../lesson/session/types';
+import { mainProgress, type Progress } from '../../lesson/session/progress';
 import { probe } from '../../perf/probe';
 import {
   DEV_REVEAL_MS,
@@ -101,6 +107,8 @@ interface LessonScreenProps {
   llm?: LessonLlm | null;
   /** Persistent event log (MMKV by default; tests inject a memory one). */
   eventStore?: EventStore;
+  /** Done-parts record (MMKV by default; tests inject a memory one). */
+  doneRecord?: DoneRecord;
 }
 
 /** The exercise picker, then a part played from JSON. */
@@ -113,7 +121,14 @@ export function LessonScreen({
   );
   const result = CATALOG.find(e => e.id === opened?.exerciseId)?.result;
   if (!opened || !result?.ok) {
-    return <ExercisePicker onOpen={setOpened} />;
+    // Mounted again after each lesson: done parts are read fresh then.
+    return (
+      <ExercisePicker
+        onOpen={setOpened}
+        eventStore={props.eventStore ?? appEventStore()}
+        doneRecord={props.doneRecord ?? appDoneRecord()}
+      />
+    );
   }
   return (
     <Lesson
@@ -126,6 +141,13 @@ export function LessonScreen({
     />
   );
 }
+
+/** Header glyphs (shape cues, not text: no i18n). */
+const SUBTITLE_SEPARATOR = ' \u00b7 ';
+/** «الورقة» button: a sheet-of-paper shape cue next to its label. */
+const PAPER_MARK = '\u25a4';
+const NOTHING_DONE: ReadonlySet<string> = new Set();
+const BACK_MARK = '\u2192';
 
 const newSessionId = () => `sess-${Date.now().toString(36)}`;
 
@@ -148,6 +170,7 @@ function Lesson({
   queue: injectedQueue,
   llm: injectedLlm,
   eventStore: injectedStore,
+  doneRecord: injectedDone,
 }: LessonProps) {
   const { t } = useTranslation();
   const [sessionId] = useState(newSessionId);
@@ -166,6 +189,7 @@ function Lesson({
       queue,
       device: deviceContext,
       eventStore: injectedStore ?? appEventStore(),
+      doneRecord: injectedDone ?? appDoneRecord(),
       ...(llm && { llm }),
     },
   );
@@ -178,15 +202,39 @@ function Lesson({
     [showFeedback, sendFeedback],
   );
   const [sheet, setSheet] = useState<ReportSheetState>(null);
+  // «الورقة»: done parts read when it opens (stored sessions incl. this one,
+  // plus the done record), focus back on its header button when it closes.
+  const [paper, setPaper] = useState<ReadonlySet<string> | null>(null);
+  const paperButton = useRef<React.ComponentRef<typeof View>>(null);
+  const openPaper = () => {
+    logUi('PaperSheet', 'opened', {});
+    setPaper(
+      doneParts(
+        (injectedStore ?? appEventStore()).load(),
+        injectedDone ?? appDoneRecord(),
+      ),
+    );
+  };
+  const closePaper = (via: PaperCloseVia) => {
+    logUi('PaperSheet', 'closed', { via });
+    setPaper(null);
+    if (paperButton.current) {
+      AccessibilityInfo.sendAccessibilityEvent(paperButton.current, 'focus');
+    }
+  };
   /** The active card's key: its component state goes with an ask. */
   const activeCard = state.stack[state.stack.length - 1]?.cardKey;
   useEffect(() => onLog?.(log), [log, onLog]);
 
   const [showEvents, setShowEvents] = useState(false);
   const devTools = useDevTools();
-  const [menu, setMenu] = useState<{ blockId: string; quoted: string } | null>(
-    null,
-  );
+  const [menu, setMenu] = useState<{
+    blockId: string;
+    quoted: string;
+    target: ReportTarget | null;
+  } | null>(null);
+  /** Report chosen in the long-press menu: opened once that menu is gone (iOS: one modal at a time). */
+  const pendingReport = useRef<ReportTarget | null>(null);
 
   const handlers = useMemo<FeedHandlers>(
     () => ({
@@ -201,9 +249,9 @@ function Lesson({
       onHint: () => dispatch({ type: 'hint' }),
       onReveal: () => dispatch({ type: 'reveal' }),
       onBack: () => dispatch({ type: 'leave_deep_dive' }),
-      onLongPress: (blockId, quoted) => {
+      onLongPress: (blockId, quoted, target) => {
         logUi('LongPressMenu', 'opened', { blockId });
-        setMenu({ blockId, quoted });
+        setMenu({ blockId, quoted, target });
       },
       // Component taps are logged only: the feed does not re-render, except
       // the tap that opens a gate (PredictReveal), which lets the lesson go on.
@@ -233,13 +281,23 @@ function Lesson({
       onCardChoice: (purpose, choice) =>
         dispatch({ type: 'card_choice', purpose, choice }),
       onKeypadHeight: h => probe.layout('keypad', h),
-      onBlockMenu: target => {
-        logUi('BlockMenu', 'opened', { blockId: target.blockId });
+      onBlockMenu: (target, via) => {
+        logUi('BlockMenu', 'opened', {
+          blockId: target.blockId,
+          ...(via && { via }),
+        });
         setSheet({ stage: 'menu', target });
       },
       onReport: target => {
         logUi('ReportSheet', 'opened', { blockId: target.blockId });
         setSheet({ stage: 'report', target });
+      },
+      onCardMenu: (target, card) => {
+        logUi('CardMenu', 'opened', {
+          blockId: target.blockId,
+          stepKey: card.stepKey,
+        });
+        setSheet({ stage: 'menu', target, card });
       },
     }),
     [dispatch, logUi, logError],
@@ -354,10 +412,17 @@ function Lesson({
   const live = useRef({ askTutor, chooseInDrawer });
   live.current = { askTutor, chooseInDrawer };
   useEffect(() => {
-    if (devOnly?.devToolsAtLaunch()) {
-      setDevTools(true);
-    }
     devOnly?.runDevBench();
+    // `-devActions notSure`: e.g. a deep dive in the real lesson (screenshots).
+    for (const a of devOnly?.devActionsAtLaunch() ?? []) {
+      if (a === 'notSure') {
+        dispatch({ type: 'not_sure' });
+      }
+    }
+    // `-devDemo paperSheet`: «الورقة» open from the start (screenshots).
+    if (devOnly?.devDemoAtLaunch() === 'paperSheet') {
+      openPaper();
+    }
     if (devOnly?.devScenario() !== 'live1' || part !== '1b' || !llm) {
       return;
     }
@@ -374,14 +439,51 @@ function Lesson({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // `-devActions answerAll` (debug builds): one right action per state until
+  // the done line, so a real part_done is stored (screenshots). With
+  // `-devUntil stepId`, it stops once that main step's card is open.
+  const answerAll = useRef(
+    devOnly?.devActionsAtLaunch().includes('answerAll') ?? false,
+  );
+  const until = useRef(devOnly?.devUntilAtLaunch() ?? null);
+  useEffect(() => {
+    if (!answerAll.current || !devOnly) {
+      return;
+    }
+    const ref = state.stack[state.stack.length - 1]?.ref;
+    if (ref?.scope === 'main' && ref.stepId === until.current) {
+      answerAll.current = false;
+      return;
+    }
+    const next = devOnly.nextRightAction(state, loaded);
+    if (next) {
+      dispatch(next);
+    } else if (state.finished) {
+      answerAll.current = false;
+    }
+  }, [state, loaded, dispatch]);
+
   const dismissSheet = () => {
-    if (sheet && sheet.stage !== 'thanks') {
+    if (sheet?.stage === 'menu' && sheet.card) {
+      logUi('CardMenu', 'dismissed', {
+        blockId: sheet.target.blockId,
+        stepKey: sheet.card.stepKey,
+      });
+    } else if (sheet && sheet.stage !== 'thanks') {
       logUi('ReportSheet', 'dismissed', {
         blockId: sheet.target.blockId,
         stage: sheet.stage,
       });
     }
+    if (sheet && sheet.stage !== 'thanks') {
+      sheet.card?.focusBack?.();
+    }
     setSheet(null);
+  };
+  /** A card menu action: close the menu, then act (the action logs its own event). */
+  const runCardAction = (action: CardAction) => {
+    setSheet(null);
+    action.onPress();
   };
 
   const chooseMode = (mode: AskMode) => {
@@ -403,6 +505,25 @@ function Lesson({
     }
     setMenu(null);
   };
+  /** «بلّغ على غلطة» in the long-press menu: that menu closes, then the report sheet opens. */
+  const reportFromMenu = () => {
+    if (!menu?.target) {
+      return;
+    }
+    logUi('LongPressMenu', 'report', { blockId: menu.blockId });
+    pendingReport.current = menu.target;
+    setMenu(null);
+    if (Platform.OS !== 'ios') {
+      openPendingReport();
+    }
+  };
+  const openPendingReport = () => {
+    const target = pendingReport.current;
+    pendingReport.current = null;
+    if (target) {
+      handlers.onReport(target);
+    }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -411,11 +532,75 @@ function Lesson({
       testID="lesson-screen"
     >
       <View style={styles.header}>
-        {devTools && <ExportQueue queue={queue} />}
-        {devTools && (
+        {/* Reading order (right to left): back, title, «الورقة». */}
+        <Pressable
+          onPress={() => {
+            logUi('LessonHeader', 'back_to_picker', {});
+            onBack();
+          }}
+          style={styles.back}
+          accessibilityRole="button"
+          accessibilityLabel={t('picker.back')}
+          testID="back-to-picker"
+        >
+          <Text style={styles.backGlyph}>{BACK_MARK}</Text>
+        </Pressable>
+        <View style={styles.titleBox}>
+          <Pressable
+            disabled={!devRevealAvailable()}
+            delayLongPress={DEV_REVEAL_MS}
+            onLongPress={() => setDevTools(!devToolsEnabled())}
+            testID="lesson-title"
+          >
+            <Text style={styles.title}>
+              {toPlainText(loaded.exercise.title.ar)}
+            </Text>
+          </Pressable>
+          <View style={styles.subtitleRow}>
+            <View style={styles.subtitle}>
+              <Text style={styles.subtitleText}>
+                {t('lesson.exerciseLabel', { n: loaded.exercise.number })}
+                {SUBTITLE_SEPARATOR}
+              </Text>
+              <Text
+                style={styles.subtitleText}
+                accessibilityLabel={`${t('lesson.part')} ${partLabel(part)}`}
+                testID="lesson-part"
+              >
+                {partLabel(part)}
+              </Text>
+            </View>
+            {!loaded.exercise.reviewed && (
+              <Text
+                style={styles.draftTag}
+                accessibilityLabel={t('lesson.unreviewed')}
+                testID="draft-tag"
+              >
+                {t('lesson.draftTag')}
+              </Text>
+            )}
+          </View>
+        </View>
+        <Pressable
+          ref={paperButton}
+          onPress={openPaper}
+          style={styles.paperButton}
+          accessibilityRole="button"
+          accessibilityLabel={t('paper.open')}
+          testID="paper-open"
+        >
+          <Text style={styles.paperText}>{t('paper.open')}</Text>
+          <Text style={styles.paperMark}>{PAPER_MARK}</Text>
+        </Pressable>
+      </View>
+      <ProgressBar
+        progress={mainProgress(content.question.groups, state)}
+        label={t('lesson.progress')}
+      />
+      {devTools && (
+        <View style={styles.devRow}>
+          <ExportQueue queue={queue} />
           <ExportEvents store={injectedStore ?? appEventStore()} log={log} />
-        )}
-        {devTools && (
           <Pressable
             onPress={() => setShowEvents(v => !v)}
             style={styles.events}
@@ -425,8 +610,6 @@ function Lesson({
             <EventCount log={log} />
             <Text style={styles.eventsLabel}>{t('lesson.events')}</Text>
           </Pressable>
-        )}
-        {devTools ? (
           <View style={styles.parts}>
             {allParts().map(o => (
               <Pressable
@@ -444,44 +627,8 @@ function Lesson({
               </Pressable>
             ))}
           </View>
-        ) : (
-          <>
-            <Pressable
-              onPress={() => {
-                logUi('LessonHeader', 'back_to_picker', {});
-                onBack();
-              }}
-              style={styles.part}
-              accessibilityRole="button"
-              testID="back-to-picker"
-            >
-              <Text style={styles.backText}>{t('picker.back')}</Text>
-            </Pressable>
-            <Text
-              style={styles.partText}
-              accessibilityLabel={`${t('lesson.part')} ${partLabel(part)}`}
-              testID="lesson-part"
-            >
-              {partLabel(part)}
-            </Text>
-          </>
-        )}
-        <View style={styles.titleBox}>
-          <Pressable
-            disabled={!devRevealAvailable()}
-            delayLongPress={DEV_REVEAL_MS}
-            onLongPress={() => setDevTools(!devToolsEnabled())}
-            testID="lesson-title"
-          >
-            <Text style={styles.title}>
-              {toPlainText(loaded.exercise.title.ar)}
-            </Text>
-          </Pressable>
-          {!loaded.exercise.reviewed && (
-            <Text style={styles.badge}>{t('lesson.unreviewed')}</Text>
-          )}
         </View>
-      </View>
+      )}
       {devTools && <LlmStatusLine runtime={llm?.runtime ?? appLlmRuntime()} />}
       {devTools && devOnly && (llm?.runtime ?? appLlmRuntime()).devRaw && (
         <devOnly.LlmRawPanel
@@ -504,7 +651,8 @@ function Lesson({
         />
       </HelpContext.Provider>
       <AskField
-        foldFor={keypadCard(state, content)}
+        // Collapsed while a question card is on screen (DESIGN.md §3).
+        foldFor={activeCard ?? null}
         chips={content.question.askChips ?? []}
         onChip={chipId => {
           const components = snapshots.collect(activeCard);
@@ -518,8 +666,13 @@ function Lesson({
       />
       <LongPressMenu
         quoted={menu?.quoted ?? null}
+        {...(menu?.target && {
+          trust: t(`lesson.trust.${menu.target.trust}`),
+          onReport: reportFromMenu,
+        })}
         onChoose={chooseMode}
         onDismiss={dismissMenu}
+        onHidden={openPendingReport}
       />
       <TutorDrawer
         state={drawer}
@@ -528,31 +681,24 @@ function Lesson({
         onReport={handlers.onReport}
         onMenu={handlers.onBlockMenu}
       />
+      <PaperSheet
+        visible={paper !== null}
+        loaded={loaded}
+        currentPartId={part}
+        done={paper ?? NOTHING_DONE}
+        onClose={closePaper}
+      />
       <ReportSheet
         state={sheet}
-        onOpenReport={target => setSheet({ stage: 'report', target })}
+        onOpenReport={(target, card) =>
+          setSheet({ stage: 'report', target, ...(card && { card }) })
+        }
         onSend={sendReport}
+        onAction={runCardAction}
         onDismiss={dismissSheet}
       />
     </KeyboardAvoidingView>
   );
-}
-
-/** Key of the active card when it shows a keypad (typed step, lines editor, LawBuilder fill), else null. */
-function keypadCard(state: LessonState, content: LessonContent): string | null {
-  const frame = state.stack[state.stack.length - 1];
-  const step = frame ? content.steps.get(frame.stepKey) : undefined;
-  if (!frame || !step) {
-    return null;
-  }
-  const fill =
-    step.kind === 'component' &&
-    step.component.component === 'LawBuilder' &&
-    (step.component.props.mode ?? 'fill_probabilities') ===
-      'fill_probabilities';
-  return step.kind === 'typed' || step.kind === 'lines' || fill
-    ? frame.cardKey
-    : null;
 }
 
 /** Dev only: shares the report / question queue as JSONL (share sheet -> Files, mail...). */
@@ -680,19 +826,112 @@ const EventPanel = memo(function EventPanelImpl({ log }: { log: EventLog }) {
   );
 });
 
+/** Main-path progress under the header (DESIGN.md §3); no step count shown. */
+function ProgressBar({
+  progress,
+  label,
+}: {
+  progress: Progress;
+  label: string;
+}) {
+  const ratio = progress.total > 0 ? progress.passed / progress.total : 0;
+  return (
+    <View
+      style={styles.progressTrack}
+      accessibilityRole="progressbar"
+      accessibilityLabel={label}
+      accessibilityValue={{ min: 0, max: progress.total, now: progress.passed }}
+      testID="lesson-progress"
+    >
+      <View style={[styles.progressFill, { flex: ratio }]} />
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: theme.color.backgroundApp },
+  // Cahier header (DESIGN.md §3), in reading order: the back button at the
+  // reading start (right), the title block, the «الورقة» button at the end.
   header: {
-    flexDirection: 'row',
+    flexDirection: theme.reading.row,
     alignItems: 'center',
-    paddingHorizontal: theme.space.lg,
+    paddingHorizontal: theme.layout.gutter,
     paddingVertical: theme.space.sm,
-    backgroundColor: theme.color.surfaceCard,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: theme.color.borderDefault,
+    backgroundColor: theme.color.paper,
+    gap: theme.space.lg,
+  },
+  titleBox: { flex: 1, alignItems: theme.reading.startAlign },
+  subtitleRow: {
+    flexDirection: theme.reading.row,
+    alignItems: 'center',
     gap: theme.space.sm,
   },
-  titleBox: { flex: 1 },
+  subtitle: { flexDirection: 'row', direction: 'ltr' },
+  subtitleText: {
+    ...theme.font.small,
+    color: theme.color.inkMuted,
+    writingDirection: 'ltr',
+  },
+  draftTag: {
+    ...theme.font.small,
+    color: theme.color.draft.text,
+    backgroundColor: theme.color.draft.bg,
+    borderColor: theme.color.draft.border,
+    borderWidth: theme.border.line,
+    borderRadius: theme.radius.tag,
+    overflow: 'hidden',
+    paddingHorizontal: theme.space.xs,
+    writingDirection: 'rtl',
+  },
+  back: {
+    width: theme.size.touch,
+    height: theme.size.touch,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.color.card,
+    borderColor: theme.color.ink,
+    borderWidth: theme.border.line,
+    borderRadius: theme.radius.button,
+  },
+  backGlyph: { ...theme.font.header, color: theme.color.ink },
+  // The label, then its mark at the reading end.
+  paperButton: {
+    minHeight: theme.size.touch,
+    flexDirection: theme.reading.row,
+    alignItems: 'center',
+    gap: theme.space.xs,
+    paddingHorizontal: theme.space.md,
+    borderRadius: theme.radius.button,
+    borderWidth: theme.border.line,
+    borderColor: theme.color.borderControl,
+    backgroundColor: theme.color.card,
+  },
+  paperMark: { ...theme.font.body, color: theme.color.ink },
+  paperText: {
+    ...theme.font.body,
+    fontFamily: theme.font.family.ui.bold,
+    color: theme.color.ink,
+    writingDirection: 'rtl',
+  },
+  // The bar fills from the reading start (right).
+  progressTrack: {
+    flexDirection: theme.reading.row,
+    height: theme.size.progressBar,
+    marginHorizontal: theme.layout.gutter,
+    marginBottom: theme.space.sm,
+    borderRadius: theme.size.progressBar,
+    backgroundColor: theme.color.border,
+    overflow: 'hidden',
+  },
+  progressFill: { backgroundColor: theme.color.pen },
+  devRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    paddingHorizontal: theme.space.lg,
+    paddingBottom: theme.space.xs,
+    gap: theme.space.sm,
+  },
   parts: { flexDirection: 'row', gap: theme.space.xxs },
   part: {
     minHeight: theme.size.touch,
@@ -708,28 +947,16 @@ const styles = StyleSheet.create({
     borderColor: theme.color.actionPrimary,
     borderWidth: theme.border.thick,
   },
-  backText: {
-    fontSize: theme.font.size.small,
-    textAlign: 'right',
-    writingDirection: 'rtl',
-  },
   partText: {
     fontSize: theme.font.size.callout,
     fontWeight: theme.font.weight.semibold,
     writingDirection: 'ltr',
   },
   title: {
-    fontSize: theme.font.size.reading,
-    fontWeight: theme.font.weight.semibold,
+    ...theme.font.header,
     textAlign: 'right',
     writingDirection: 'rtl',
-    color: theme.color.textPrimary,
-  },
-  badge: {
-    fontSize: theme.font.size.caption,
-    color: theme.feedback.warning.text,
-    textAlign: 'right',
-    writingDirection: 'rtl',
+    color: theme.color.ink,
   },
   events: {
     minHeight: theme.size.touch,
@@ -756,7 +983,7 @@ const styles = StyleSheet.create({
     padding: theme.space.xs,
   },
   mono: {
-    fontFamily: Platform.select({ ios: 'Courier', default: 'monospace' }),
+    fontFamily: theme.font.family.mono,
     fontSize: theme.font.size.micro,
     writingDirection: 'ltr',
   },

@@ -174,7 +174,7 @@ export function NumericKeypad({
           <Pressable
             onPress={submit}
             disabled={raw.length === 0}
-            style={[styles.check, raw.length === 0 && styles.disabled]}
+            style={[styles.check, raw.length === 0 && styles.checkDisabled]}
             accessibilityRole="button"
             accessibilityState={{ disabled: raw.length === 0 }}
             testID={`${testID}-check`}
@@ -199,33 +199,38 @@ export function NumericKeypad({
   );
 }
 
+// Same key style as the line editor (DESIGN.md §3): card keys, radius 12,
+// the field with a 2 pt pen border, «نثبّت» filled ink.
 const styles = StyleSheet.create({
   wrap: { marginTop: theme.space.sm, gap: theme.space.xs, direction: 'ltr' },
   row: { flexDirection: 'row', gap: theme.space.xs },
   display: {
     flex: 1,
     minHeight: theme.size.touch,
-    borderWidth: theme.border.medium,
-    borderColor: theme.color.borderDefault,
-    borderRadius: theme.radius.lg,
+    borderWidth: theme.border.active,
+    borderColor: theme.color.pen,
+    borderRadius: theme.radius.button,
     paddingHorizontal: theme.space.md,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: theme.color.surfaceCard,
+    backgroundColor: theme.color.card,
   },
   raw: {
+    fontFamily: theme.font.family.math.family,
     fontSize: theme.font.size.title,
     writingDirection: 'ltr',
-    color: theme.color.textPrimary,
+    color: theme.color.ink,
   },
   preview: { minWidth: theme.size.keypadPreviewMinWidth },
   key: {
     flex: 1,
     minWidth: theme.size.touch,
     minHeight: theme.size.touch,
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.color.surfaceKey,
+    borderRadius: theme.radius.button,
+    borderWidth: theme.border.line,
+    borderColor: theme.color.borderControl,
+    backgroundColor: theme.color.card,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -233,26 +238,28 @@ const styles = StyleSheet.create({
   fold: {
     minWidth: theme.size.touch,
     minHeight: theme.size.touch,
-    borderRadius: theme.radius.md,
-    borderWidth: theme.border.thin,
-    borderColor: theme.color.borderDefault,
+    borderRadius: theme.radius.button,
+    borderWidth: theme.border.line,
+    borderColor: theme.color.borderControl,
+    backgroundColor: theme.editor.color.toolKey,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  pressed: { backgroundColor: theme.color.surfaceKeyPressed },
-  keyText: { fontSize: theme.font.size.title, color: theme.color.textPrimary },
+  pressed: { backgroundColor: theme.color.highlighterSoft },
+  keyText: { fontSize: theme.font.size.title, color: theme.color.ink },
   check: {
     minHeight: theme.size.touch,
     paddingHorizontal: theme.space.lg,
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.color.actionPrimary,
+    borderRadius: theme.radius.button,
+    backgroundColor: theme.color.ink,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  disabled: { opacity: theme.opacity.disabled },
+  // A solid fill, not opacity: the label stays readable (DESIGN.md §2).
+  checkDisabled: { backgroundColor: theme.color.inkDisabled },
   checkText: {
     color: theme.color.textOnAccent,
     fontSize: theme.font.size.body,
-    fontWeight: theme.font.weight.semibold,
+    fontFamily: theme.font.family.ui.bold,
   },
 });

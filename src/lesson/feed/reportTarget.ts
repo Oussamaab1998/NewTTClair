@@ -1,8 +1,8 @@
 /**
  * What a Report button on a feed item refers to (docs/FEEDBACK_AND_TRUST.md):
  * a stable block id, the source, the trust label, and where to find the
- * component snapshot. Placement (product owner, 2026-10-17): always visible on
- * AI blocks and on the active question; elsewhere inside a small "..." menu.
+ * component snapshot. Where the student reaches it: `reportPath` (DESIGN.md §3,
+ * product owner 2026-10-21). AI blocks always show a visible Report button.
  */
 import type { JsonObject } from '../../components/contract';
 import type { LessonContent } from '../session/lesson';
@@ -119,4 +119,80 @@ export function reportTarget(
     default:
       return base(undefined);
   }
+}
+
+/**
+ * How a block's trust label and Report are reached (DESIGN.md §3, no per-block icon):
+ * - text: the tutor long-press menu (explain / why / example), Report last;
+ * - longpress: a long-press on the block opens its menu (trust label + Report);
+ * - title: a long-press on a choice card's title (its buttons stay plain taps);
+ * - card: the question card's single "⋯";
+ * - owner: interactive visuals (taps, sliders, scroll: no long-press) are a row
+ *   in the "⋯" of the card that owns them (`visualOwners`).
+ * null: not content (student bubbles, dividers, done, thinking).
+ * AI blocks also keep their visible Report button and trust line.
+ */
+export type ReportPath = 'text' | 'longpress' | 'title' | 'card' | 'owner';
+
+export function reportPath(item: FeedItem): ReportPath | null {
+  switch (item.kind) {
+    case 'student':
+    case 'variant_start':
+    case 'deep_dive_start':
+    case 'return':
+    case 'done':
+    case 'thinking':
+      return null;
+    case 'tutor':
+      return item.longPress && item.blockId !== undefined
+        ? 'text'
+        : 'longpress';
+    case 'statement':
+    case 'math':
+    case 'feedback':
+    case 'hint':
+    case 'answer':
+    case 'ask_answer':
+    case 'writeup':
+    case 'component_fallback':
+      return 'longpress';
+    case 'choice_card':
+      return 'title';
+    case 'question':
+      return 'card';
+    case 'component':
+      return 'owner';
+    default: {
+      const never: never = item;
+      return never;
+    }
+  }
+}
+
+/**
+ * Visual component key -> the question card whose "⋯" carries its Report: the
+ * next question card after it in the feed, or, for a visual with no card
+ * after it (the end of a part), the last card before it.
+ */
+export function visualOwners(items: readonly FeedItem[]): Map<string, string> {
+  const owners = new Map<string, string>();
+  let lastCard: string | undefined;
+  let waiting: string[] = [];
+  for (const item of items) {
+    if (item.kind === 'component') {
+      waiting.push(item.key);
+    } else if (item.kind === 'question') {
+      for (const v of waiting) {
+        owners.set(v, item.key);
+      }
+      waiting = [];
+      lastCard = item.key;
+    }
+  }
+  if (lastCard !== undefined) {
+    for (const v of waiting) {
+      owners.set(v, lastCard);
+    }
+  }
+  return owners;
 }

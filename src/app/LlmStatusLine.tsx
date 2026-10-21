@@ -1,5 +1,5 @@
 import React, { useCallback, useSyncExternalStore } from 'react';
-import { Platform, Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, StyleSheet, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import type { LlmRuntime } from '../planner/llm/runtime';
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
   },
   text: {
     color: theme.color.devConsoleText,
-    fontFamily: Platform.select({ ios: 'Courier', default: 'monospace' }),
+    fontFamily: theme.font.family.mono,
     fontSize: theme.font.size.micro,
     writingDirection: 'ltr',
   },

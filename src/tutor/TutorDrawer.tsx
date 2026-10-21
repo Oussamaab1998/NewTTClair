@@ -101,6 +101,9 @@ export function TutorDrawer({
                   <BlockActions
                     key={target.blockId}
                     target={target}
+                    // AI blocks: the visible Report button and trust line.
+                    path={null}
+                    label=""
                     onMenu={onMenu}
                     onReport={onReport}
                   >

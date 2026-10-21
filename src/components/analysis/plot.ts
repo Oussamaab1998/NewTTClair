@@ -13,6 +13,7 @@ import {
   type FnId,
   type Sign,
 } from '../../engine/analysis';
+import { MINUS } from '../probability/logic';
 
 export type Interval = readonly [number, number];
 
@@ -155,12 +156,15 @@ export function shadePath(
 }
 
 /** Plain number for SVG labels: small exact fraction, else 2 decimals (French comma). */
+/** Shown numbers use the real minus sign (U+2212), like the editor and the formulas. */
+const withMinus = (s: string) => s.replace(/^-/, MINUS);
+
 export function plainNumber(x: number): string {
   const q = toRational(x, { maxDen: 100, tol: 1e-9 });
   if (q) {
-    return q[1] === 1 ? String(q[0]) : `${q[0]}/${q[1]}`;
+    return withMinus(q[1] === 1 ? String(q[0]) : `${q[0]}/${q[1]}`);
   }
-  return x.toFixed(2).replace('.', ',');
+  return withMinus(x.toFixed(2).replace('.', ','));
 }
 
 /** Readout number: exact fraction (denominator <= 9), else 3 decimals (French comma). */
@@ -179,13 +183,15 @@ export function readoutNumber(
   // Small fractions stay exact (1/2, 1/3); 27/10 reads better as 2,7.
   const q = fractions ? toRational(x, { maxDen: 9, tol: 1e-9 }) : null;
   if (q) {
-    return q[1] === 1 ? String(q[0]) : `${q[0]}/${q[1]}`;
+    return withMinus(q[1] === 1 ? String(q[0]) : `${q[0]}/${q[1]}`);
   }
   // 3 decimals, trailing zeros dropped (0,010 -> 0,01).
-  return x
-    .toFixed(3)
-    .replace(/\.?0+$/, '')
-    .replace('.', ',');
+  return withMinus(
+    x
+      .toFixed(3)
+      .replace(/\.?0+$/, '')
+      .replace('.', ','),
+  );
 }
 
 const SUPERSCRIPT = '⁰¹²³⁴⁵⁶⁷⁸⁹';
@@ -198,7 +204,7 @@ export function scientific(x: number): string {
     .split('')
     .map(d => SUPERSCRIPT[Number(d)])
     .join('');
-  return `${m!.replace('.', ',')} × 10${exp < 0 ? '⁻' : ''}${sup}`;
+  return `${withMinus(m!.replace('.', ','))} × 10${exp < 0 ? '⁻' : ''}${sup}`;
 }
 
 /** The function's letter from its registry LaTeX ("g(x)=..." -> "g"), default f. */
@@ -334,6 +340,6 @@ export function readoutPair(a: number, b: number): [string, string] {
     return [scientific(a), scientific(b)];
   }
   const fixed = (x: number) =>
-    Number.isFinite(x) ? x.toFixed(3).replace('.', ',') : '?';
+    Number.isFinite(x) ? withMinus(x.toFixed(3).replace('.', ',')) : '?';
   return [fixed(a), fixed(b)];
 }

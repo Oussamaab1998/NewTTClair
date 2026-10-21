@@ -175,8 +175,8 @@ const styles = StyleSheet.create({
     direction: 'ltr',
     borderRadius: theme.radius.lg,
     overflow: 'hidden',
-    borderWidth: theme.border.thin,
-    borderColor: theme.color.borderDefault,
+    borderWidth: theme.border.line,
+    borderColor: theme.color.borderControl,
     minHeight: theme.size.complementBarMinHeight,
   },
   segment: {
@@ -193,8 +193,8 @@ const styles = StyleSheet.create({
     borderColor: theme.color.actionPrimary,
   },
   value: {
+    fontFamily: theme.font.family.ui.bold,
     fontSize: theme.font.size.reading,
-    fontWeight: theme.font.weight.bold,
     color: theme.color.textPrimary,
     writingDirection: 'ltr',
   },

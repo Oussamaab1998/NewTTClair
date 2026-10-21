@@ -3,6 +3,7 @@ import {
   isolateInline,
   ArRunsSchema,
   BIDI,
+  DEFAULT_ISOLATION,
   findRunIssues,
   toPlainText,
   spaceRunBoundaries,
@@ -194,5 +195,57 @@ describe('isolateInline (quotes and student text shown as plain strings)', () =>
   });
   it('leaves Arabic-only text unchanged', () => {
     expect(isolateInline('شنوّة نستنتجو؟')).toBe('شنوّة نستنتجو؟');
+  });
+});
+
+describe('the real A1 sentence «…والصورة متاع −x هي نفس الصورة متاع x»', () => {
+  // Measured on iOS (design pass, 2026-10-21, pixel columns of the screenshot):
+  // the minus is drawn left of the x, i.e. "−x" in LTR order, with Tajawal and
+  // with the system font. These segments are what makes that hold.
+  const step = (
+    require('../../content/exercises/bac2022c-ex4.json') as {
+      parts: {
+        id: string;
+        groups: { steps: { id: string; text?: { ar: ArRuns } }[] }[];
+      }[];
+    }
+  ).parts
+    .find(p => p.id === 'A1')!
+    .groups[0]!.steps.find(s => s.id === 's1')!;
+  const segments = toSegments(step.text!.ar, DEFAULT_ISOLATION);
+
+  it('the −x run is its own LTR segment, isolated and marked on both sides', () => {
+    const minusX = segments.find(s => s.text.includes('−x'))!;
+    expect(minusX).toEqual({
+      text: `${BIDI.LRI}${BIDI.LRM}−x${BIDI.LRM}${BIDI.PDI}`,
+      ltr: true,
+    });
+  });
+
+  it('the paragraph starts RTL and no Arabic segment carries the minus', () => {
+    expect(segments[0]?.text.startsWith(BIDI.RLM)).toBe(true);
+    expect(segments.filter(s => !s.ltr).some(s => s.text.includes('−'))).toBe(
+      false,
+    );
+  });
+});
+
+describe('a quoted A1 sentence in a student bubble (plain text, isolated at display)', () => {
+  const quoted = 'والصورة متاع −x هي نفس الصورة متاع x. وصلنا لـ f(−x) = f(x)';
+  const shown = isolateInline(quoted);
+  const isolate = (s: string) =>
+    `${BIDI.LRI}${BIDI.LRM}${s}${BIDI.LRM}${BIDI.PDI}`;
+
+  it('the whole formula f(−x) = f(x) is one LTR isolate, not split by its spaces', () => {
+    expect(shown).toContain(isolate('f(−x) = f(x)'));
+  });
+
+  it('−x and x are isolated too, and nothing else changes', () => {
+    expect(shown).toContain(isolate('−x'));
+    const controls = new RegExp(
+      `[${BIDI.LRI}${BIDI.PDI}${BIDI.LRM}${BIDI.RLM}]`,
+      'g',
+    );
+    expect(shown.replace(controls, '')).toBe(quoted);
   });
 });

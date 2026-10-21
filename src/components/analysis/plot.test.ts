@@ -9,6 +9,8 @@ import {
   plainNumber,
   readoutNumber,
   readoutPair,
+  scientific,
+  valueLine,
   regionOf,
   variationColumns,
   sampleCurve,
@@ -84,7 +86,7 @@ describe('shadePath', () => {
 describe('plainNumber', () => {
   it('writes engine values for SVG labels', () => {
     expect(plainNumber(0.5)).toBe('1/2');
-    expect(plainNumber(-1)).toBe('-1');
+    expect(plainNumber(-1)).toBe('\u22121');
     expect(plainNumber(Math.E)).toBe('2,72');
   });
 });
@@ -152,5 +154,20 @@ describe('readoutPair', () => {
       '2,06 × 10⁻⁹',
       '1,00 × 10⁻¹',
     ]);
+  });
+});
+
+describe('readouts use the real minus sign (U+2212), never a hyphen', () => {
+  const M = '\u2212';
+  it.each([
+    [readoutNumber(-1), `${M}1`],
+    [readoutNumber(-0.5), `${M}1/2`],
+    [readoutNumber(-0.324, { fractions: false }), `${M}0,324`],
+    [valueLine('f', -1, 0.324), `f(${M}1) = 0,324`],
+    [readoutPair(-0.1234, 0.1234)[0], `${M}0,123`],
+    [scientific(-123456), `${M}1,23 \u00d7 10\u2075`],
+  ])('%s', (shown, expected) => {
+    expect(shown).toBe(expected);
+    expect(shown).not.toContain('-');
   });
 });

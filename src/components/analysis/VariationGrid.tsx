@@ -81,7 +81,7 @@ export function VariationGrid({
 
 const styles = StyleSheet.create({
   grid: {
-    borderWidth: theme.border.thin,
+    borderWidth: theme.border.line,
     borderColor: theme.color.borderDefault,
     borderRadius: theme.radius.md,
     direction: 'ltr',
@@ -90,18 +90,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     minHeight: theme.size.touch,
-    borderBottomWidth: theme.border.thin,
+    borderBottomWidth: theme.border.line,
     borderColor: theme.color.borderDefault,
   },
   head: {
     width: theme.size.touch,
     alignItems: 'center',
-    borderRightWidth: theme.border.thin,
+    borderRightWidth: theme.border.line,
     borderColor: theme.color.borderDefault,
   },
   point: { minWidth: theme.size.touch, alignItems: 'center' },
   interval: { flex: 1, alignItems: 'center' },
   text: {
+    fontFamily: theme.font.family.ui.regular,
     fontSize: theme.font.size.callout,
     color: theme.color.textPrimary,
     writingDirection: 'ltr',

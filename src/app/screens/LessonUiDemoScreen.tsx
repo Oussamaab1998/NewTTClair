@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import type { Rich } from '../../content/schema';
 import {
@@ -12,11 +13,28 @@ import {
   Writeup,
 } from '../../lesson/feed/Bubbles';
 import { LongPressMenu } from '../../lesson/feed/LongPressMenu';
+import {
+  ReportSheet,
+  type ReportSheetState,
+} from '../../lesson/feed/ReportSheet';
+import type * as DevOnly from '../dev';
+import { FeedDemo } from './feedDemo';
 import { NumericKeypad } from '../../lesson/feed/NumericKeypad';
 import { OptionsQuestion } from '../../lesson/feed/OptionsQuestion';
 import { TutorText } from '../../lesson/feed/TutorText';
 import { MathBlock } from '../../lesson/math/MathBlock';
 import { theme } from '../../theme';
+
+/** Debug builds only (launch arguments); Metro drops it in release. */
+const devOnly: typeof DevOnly | null = __DEV__
+  ? (require('../dev') as typeof DevOnly)
+  : null;
+
+// Scripted feeds through the real reducer (feedDemo.tsx).
+const WRONG = [{ type: 'answer', value: { optionId: 'one' } }] as const;
+const NOT_SURE = [{ type: 'not_sure' }] as const;
+const NONE = [] as const;
+const RIGHT = [{ type: 'answer', value: { optionId: 'none' } }] as const;
 
 // Demo-only sample content (not lesson content; unreviewed).
 const SAMPLE: Rich = {
@@ -37,13 +55,59 @@ const OPTIONS = [
 /** Storybook-like screen: every lesson block in isolation, interactive and readonly. Titles are component ids. */
 export function LessonUiDemoScreen() {
   const [log, setLog] = useState<string[]>([]);
-  const [menu, setMenu] = useState<string | null>(null);
+  // `-devDemo longPressMenu` / `longPressMenuPlain`: the tutor long-press menu
+  // open with / without its Report group (height check).
+  const demo = devOnly?.devDemoAtLaunch();
+  const [menu, setMenu] = useState<string | null>(() =>
+    demo === 'longPressMenu' || demo === 'longPressMenuPlain'
+      ? 'الحدث B معناه au moins une كورة عليها صفر.'
+      : null,
+  );
   const push = (line: string) => setLog(l => [line, ...l].slice(0, 8));
+  const { t } = useTranslation();
+  // `-devDemo cardMenu`: a question card's "⋯" menu open, as on a card with
+  // authored help inside a deep dive (all three actions).
+  const [cardMenu, setCardMenu] = useState<ReportSheetState>(() =>
+    devOnly?.devDemoAtLaunch() === 'cardMenu'
+      ? {
+          stage: 'menu',
+          target: {
+            blockId: 'demo-card',
+            source: 'lesson',
+            trust: 'lesson_unreviewed',
+            prominent: false,
+            itemKey: 'demo-card',
+          },
+          card: {
+            stepKey: 'demo',
+            actions: [
+              {
+                label: t('lesson.changeMethod'),
+                testID: 'demo-change',
+                onPress: () => {},
+              },
+              {
+                label: t('lesson.simpler'),
+                testID: 'demo-simpler',
+                onPress: () => {},
+              },
+              {
+                label: t('lesson.back'),
+                testID: 'demo-back',
+                onPress: () => {},
+              },
+            ],
+          },
+        }
+      : null,
+  );
 
   return (
     <ScrollView
       style={styles.root}
       contentContainerStyle={styles.content}
+      // `-devScroll y` (screenshots without taps).
+      contentOffset={{ x: 0, y: devOnly?.devScrollAtLaunch() ?? 0 }}
       testID="lesson-ui-demo"
     >
       <Section title="log">
@@ -52,6 +116,33 @@ export function LessonUiDemoScreen() {
             {l}
           </Text>
         ))}
+      </Section>
+      <Section title="A1 first card + ask bar (chips open) at 390 pt" bleed>
+        <FeedDemo
+          part="A1"
+          actions={NONE}
+          from="question"
+          width={theme.size.demoWidthWide}
+          askBar
+        />
+      </Section>
+      <Section title="A1 first card + ask bar (chips open) at 360 pt" bleed>
+        <FeedDemo
+          part="A1"
+          actions={NONE}
+          from="question"
+          width={theme.size.demoWidthNarrow}
+          askBar
+        />
+      </Section>
+      <Section title="feed: 1.b not sure (deep dive)">
+        <FeedDemo part="1b" actions={NOT_SURE} from="student" />
+      </Section>
+      <Section title="feed: 1.b wrong (red-pencil note, offer card)">
+        <FeedDemo part="1b" actions={WRONG} from="student" />
+      </Section>
+      <Section title="feed: 1.b right (done card)">
+        <FeedDemo part="1b" actions={RIGHT} from="question" />
       </Section>
       <Section title="tutor_text">
         <TutorText
@@ -121,8 +212,25 @@ export function LessonUiDemoScreen() {
       <Section title="writeup">
         <Writeup lines={['p(B) = 1 − p(B̄) = 1 − 3/10 = 7/10.']} />
       </Section>
+      <ReportSheet
+        state={cardMenu}
+        onOpenReport={target => setCardMenu({ stage: 'report', target })}
+        onSend={() => setCardMenu({ stage: 'thanks' })}
+        onAction={a => {
+          push(`card ${a.testID}`);
+          setCardMenu(null);
+        }}
+        onDismiss={() => setCardMenu(null)}
+      />
       <LongPressMenu
         quoted={menu}
+        {...(demo !== 'longPressMenuPlain' && {
+          trust: t('lesson.trust.lesson_unreviewed'),
+          onReport: () => {
+            push('longpress report');
+            setMenu(null);
+          },
+        })}
         onChoose={mode => {
           push(`ask ${mode}`);
           setMenu(null);
@@ -138,13 +246,16 @@ export function LessonUiDemoScreen() {
 
 function Section({
   title,
+  bleed = false,
   children,
 }: {
   title: string;
+  /** Full screen width, no padding (width checks: nothing cut by the section). */
+  bleed?: boolean;
   children: React.ReactNode;
 }) {
   return (
-    <View style={styles.section}>
+    <View style={bleed ? styles.bleed : styles.section}>
       <Text style={styles.sectionTitle}>{title}</Text>
       {children}
     </View>
@@ -157,6 +268,11 @@ const styles = StyleSheet.create({
     padding: theme.space.lg,
     gap: theme.space.lg,
     paddingBottom: theme.space.scrollEnd,
+  },
+  bleed: {
+    marginHorizontal: -theme.space.lg,
+    alignItems: 'center',
+    gap: theme.space.xs,
   },
   section: {
     backgroundColor: theme.color.surfaceCard,

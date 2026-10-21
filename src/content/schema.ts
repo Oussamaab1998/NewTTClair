@@ -553,6 +553,26 @@ export type Variant = z.infer<typeof VariantSchema>;
 
 export const ResultSchema = z.strictObject({ id: Id, statement: RichSchema });
 
+/**
+ * One question of the exam paper (the «الورقة» sheet, the picker chips).
+ * `wording` is the exam's own French, in sentence order, exactly as
+ * transcribed (never paraphrased); absent when it is not transcribed yet.
+ * `available`: authored (a part of this exercise); `soon`: not built yet.
+ */
+export const PaperQuestionSchema = z.strictObject({
+  id: Id,
+  /** How the exam numbers it: "1", "2", "3.a". */
+  label: z.string().min(1),
+  wording: z.array(RichSchema).min(1).optional(),
+  status: z.enum(['available', 'soon']),
+});
+export const PaperSchema = z.strictObject({
+  /** The exam's section heading, e.g. «Partie A». */
+  section: RichSchema.optional(),
+  questions: z.array(PaperQuestionSchema).min(1),
+});
+export type PaperQuestion = z.infer<typeof PaperQuestionSchema>;
+
 function collectBlockIds(blocks: readonly Block[], out: string[]): string[] {
   for (const b of blocks) {
     out.push(b.blockId);
@@ -568,7 +588,13 @@ export const ExerciseSchema = z
     id: Id,
     contentVersion: z.string().min(1),
     title: z.strictObject({ fr: z.string().min(1), ar: ArRunsSchema }),
+    /** The exam's exercise number (Exercice 4). */
+    number: z.number().int().min(1),
+    /** Picker subject tag. */
+    subject: z.enum(['analysis', 'probability']),
     statement: RichSchema,
+    /** The exam paper's question list (optional; see PaperQuestionSchema). */
+    paper: PaperSchema.optional(),
     parts: z.array(QuestionSchema).min(1),
     results: z.array(ResultSchema),
     deepDives: z.array(DeepDiveSchema),
@@ -630,6 +656,39 @@ export const ExerciseSchema = z
         }
       }
     });
+    // The paper list: unique ids; authored parts are available, the rest soon.
+    if (ex.paper) {
+      const partIds = new Set(ex.parts.map(q => q.id));
+      const paperIds = ex.paper.questions.map(q => q.id);
+      ex.paper.questions.forEach((q, i) => {
+        if (paperIds.indexOf(q.id) !== i) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['paper', 'questions', i],
+            message: `duplicate paper question ${q.id}`,
+          });
+        }
+        const authored = partIds.has(q.id);
+        if (authored !== (q.status === 'available')) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['paper', 'questions', i],
+            message: authored
+              ? `paper question ${q.id} is authored: status must be available`
+              : `paper question ${q.id} is not authored: status must be soon`,
+          });
+        }
+      });
+      for (const id of partIds) {
+        if (!paperIds.includes(id)) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['paper'],
+            message: `part ${id} is missing from the paper list`,
+          });
+        }
+      }
+    }
     const dup = (ids: string[]) => ids.filter((id, i) => ids.indexOf(id) !== i);
     for (const id of dup(blockIds)) {
       ctx.addIssue({

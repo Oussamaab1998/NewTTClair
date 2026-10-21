@@ -9,6 +9,38 @@ import { RichView } from './RichView';
 import { theme, type FeedbackTone } from '../../theme';
 import { isolateInline } from '../rich/runs';
 
+/**
+ * Feed pencils (DESIGN.md §3): green = correct, red pencil = a wrong answer's
+ * note (the reducer's `warning` tone; `danger` looks the same), highlighter =
+ * hint / revealed answer / info. Icon + text, never color alone. Components
+ * keep `theme.feedback` until D3.
+ */
+const RED_PENCIL = {
+  surface: theme.color.error.noteBg,
+  edge: theme.color.error.noteBorder,
+  text: theme.color.error.noteText,
+  mark: theme.color.error.ink,
+};
+const TONE: Record<
+  FeedbackTone,
+  { surface: string; edge: string; text: string; mark: string }
+> = {
+  success: {
+    surface: theme.color.correct.bg,
+    edge: theme.color.correct.ink,
+    text: theme.color.correct.text,
+    mark: theme.color.correct.ink,
+  },
+  danger: RED_PENCIL,
+  info: {
+    surface: theme.color.highlighterSoft,
+    edge: theme.color.highlighter,
+    text: theme.color.ink,
+    mark: theme.color.ink,
+  },
+  warning: RED_PENCIL,
+};
+
 export const StudentBubble = memo(function StudentBubbleImpl({
   content,
 }: {
@@ -66,15 +98,16 @@ export const ToneBlock = memo(function ToneBlockImpl({
   children,
 }: ToneBlockProps) {
   const { t } = useTranslation();
-  const c = theme.feedback[tone];
+  const c = TONE[tone];
+  const icon = theme.feedback[tone].icon;
   return (
     <View
-      style={[styles.tone, { backgroundColor: c.surface, borderColor: c.text }]}
+      style={[styles.tone, { backgroundColor: c.surface, borderColor: c.edge }]}
       testID={testID ?? `feedback-${tone}`}
     >
       <View style={styles.toneHeader}>
-        <View style={[styles.icon, { borderColor: c.text }]}>
-          <Text style={[styles.iconText, { color: c.text }]}>{c.icon}</Text>
+        <View style={[styles.icon, { borderColor: c.mark }]}>
+          <Text style={[styles.iconText, { color: c.mark }]}>{icon}</Text>
         </View>
         {label}
       </View>
@@ -83,13 +116,7 @@ export const ToneBlock = memo(function ToneBlockImpl({
           {t(`lesson.${message}`)}
         </Text>
       )}
-      {rich && (
-        <RichView
-          rich={rich}
-          color={c.text}
-          fontSize={theme.font.size.bodyLarge}
-        />
-      )}
+      {rich && <RichView rich={rich} color={c.text} />}
       {children}
     </View>
   );
@@ -122,15 +149,20 @@ export function LevelLabel({
   text,
   level,
   total,
+  muted = false,
 }: {
   text: string;
   level: number;
   total: number;
+  /** A used-up ladder: the disabled label colour (still 4.59:1). */
+  muted?: boolean;
 }) {
   return (
     <View style={styles.levelLabel}>
-      <Text style={styles.ltrCount}>{levelText(level, total)}</Text>
-      <Text style={styles.rtl}>{text}</Text>
+      <Text style={[styles.ltrCount, muted && styles.muted]}>
+        {levelText(level, total)}
+      </Text>
+      <Text style={[styles.rtl, muted && styles.muted]}>{text}</Text>
     </View>
   );
 }
@@ -210,14 +242,16 @@ const styles = StyleSheet.create({
   rtl: {
     writingDirection: 'rtl',
     textAlign: 'right',
-    fontSize: theme.font.size.bodyLarge,
-    lineHeight: theme.font.lineHeight.relaxed,
-    color: theme.color.textPrimary,
+    ...theme.font.body,
+    color: theme.color.ink,
   },
+  // Blue pen: what the student wrote or chose, on the reading end side.
   student: {
-    alignSelf: 'flex-start',
+    alignSelf: theme.reading.endAlign,
     maxWidth: '85%',
-    backgroundColor: theme.color.surfaceSelected,
+    backgroundColor: theme.color.card,
+    borderWidth: theme.border.line,
+    borderColor: theme.color.pen,
     borderRadius: theme.radius.card,
     paddingHorizontal: theme.space.lg,
     paddingVertical: theme.space.sm,
@@ -225,18 +259,19 @@ const styles = StyleSheet.create({
   },
   typed: {
     writingDirection: 'ltr',
+    fontFamily: theme.font.family.math.family,
     fontSize: theme.font.size.title,
-    color: theme.color.textPrimary,
+    color: theme.color.pen,
   },
-  quote: { color: theme.color.textSecondary, fontStyle: 'italic' },
+  quote: { color: theme.color.inkMuted, fontStyle: theme.font.style.italic },
   tone: {
-    borderWidth: theme.border.thin,
-    borderRadius: theme.radius.xl,
+    borderWidth: theme.border.line,
+    borderRadius: theme.radius.card,
     padding: theme.space.md,
     marginVertical: theme.space.xxs,
   },
   toneHeader: {
-    flexDirection: 'row-reverse',
+    flexDirection: theme.reading.row,
     alignItems: 'center',
     gap: theme.space.sm,
   },
@@ -244,45 +279,54 @@ const styles = StyleSheet.create({
     width: theme.size.toneIcon,
     height: theme.size.toneIcon,
     borderRadius: theme.size.toneIcon / 2,
-    borderWidth: theme.border.medium,
+    borderWidth: theme.border.line,
     alignItems: 'center',
     justifyContent: 'center',
   },
   iconText: {
-    fontWeight: theme.font.weight.bold,
+    fontFamily: theme.font.family.ui.bold,
     fontSize: theme.font.size.small,
   },
+  muted: { color: theme.color.inkDisabled },
   levelLabel: {
-    flexDirection: 'row-reverse',
+    flexDirection: theme.reading.row,
     alignItems: 'center',
     gap: theme.space.xs,
   },
   ltrCount: {
     writingDirection: 'ltr',
-    color: theme.feedback.info.text,
+    fontFamily: theme.font.family.ui.medium,
+    color: theme.color.ink,
     fontSize: theme.font.size.small,
   },
+  // A quiet card (no rail, DESIGN.md §1).
   askAnswer: {
-    borderRightWidth: theme.border.focus,
-    borderRightColor: theme.color.actionPrimary,
-    paddingRight: theme.space.md,
+    backgroundColor: theme.color.card,
+    borderWidth: theme.border.line,
+    borderColor: theme.color.border,
+    borderRadius: theme.radius.card,
+    padding: theme.space.md,
     marginVertical: theme.space.xxs,
   },
   source: {
-    fontSize: theme.font.size.caption,
-    color: theme.color.textSecondary,
+    ...theme.font.small,
+    color: theme.color.inkMuted,
     textAlign: 'right',
     writingDirection: 'rtl',
   },
+  // The detour's start item is the tab on its sheet's top edge.
   diveStart: {
-    borderRightWidth: theme.border.focus,
-    borderRightColor: theme.color.deepDiveRail,
-    paddingRight: theme.space.sm,
-    marginTop: theme.space.sm,
+    alignSelf: theme.reading.startAlign,
+    marginTop: theme.offset.cardTab,
+    marginBottom: theme.space.xs,
+    backgroundColor: theme.color.pen,
+    borderRadius: theme.radius.tag,
+    paddingHorizontal: theme.space.md,
   },
   diveTitle: {
-    color: theme.color.deepDiveRail,
-    fontWeight: theme.font.weight.semibold,
+    ...theme.font.small,
+    fontFamily: theme.font.family.ui.bold,
+    color: theme.color.textOnAccent,
   },
   divider: {
     flexDirection: 'row',
@@ -292,30 +336,32 @@ const styles = StyleSheet.create({
   },
   rule: {
     flex: 1,
-    height: theme.size.divider,
-    backgroundColor: theme.color.deepDiveRail,
+    borderTopWidth: theme.border.line,
+    borderStyle: 'dashed',
+    borderColor: theme.color.border,
   },
   dividerText: {
-    color: theme.color.deepDiveRail,
-    fontSize: theme.font.size.callout,
+    ...theme.font.small,
+    fontFamily: theme.font.family.ui.bold,
+    color: theme.color.ink,
+    writingDirection: 'rtl',
   },
   paper: {
-    backgroundColor: theme.color.surfacePaper,
-    borderWidth: theme.border.thin,
-    borderColor: theme.color.borderPaper,
-    borderRadius: theme.radius.md,
+    backgroundColor: theme.color.card,
+    borderWidth: theme.border.line,
+    borderColor: theme.color.border,
+    borderRadius: theme.radius.card,
     padding: theme.space.lg,
     marginVertical: theme.space.sm,
   },
   paperTitle: {
-    fontWeight: theme.font.weight.semibold,
+    fontFamily: theme.font.family.ui.bold,
     marginBottom: theme.space.xs,
   },
   paperLine: {
     writingDirection: 'ltr',
     textAlign: 'left',
-    fontSize: theme.font.size.body,
-    lineHeight: theme.font.lineHeight.body,
-    color: theme.color.textPrimary,
+    ...theme.font.paper,
+    color: theme.color.ink,
   },
 });

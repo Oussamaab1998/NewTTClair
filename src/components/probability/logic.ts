@@ -31,7 +31,8 @@ export interface ExperimentProps {
 export const outcomesOf = (p: ExperimentProps): Outcome[] =>
   enumerateOutcomes(p.balls, p.draw, p.k);
 
-const MINUS = '−';
+/** The real minus sign (U+2212), as in the editor and the formulas. */
+export const MINUS = '\u2212';
 const PRIME = '′';
 
 /** Integer with a real minus sign (−1), for chips and readouts. */

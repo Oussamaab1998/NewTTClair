@@ -26,6 +26,8 @@ export function ex2q1b() {
       fr: 'Exercice 2 : probabilités',
       ar: [{ ar: 'تمرين الاحتمالات' }],
     },
+    number: 2,
+    subject: 'probability',
     statement: {
       fr: 'Une urne contient cinq boules numérotées -1, 0, 0, 1, 2.',
     },

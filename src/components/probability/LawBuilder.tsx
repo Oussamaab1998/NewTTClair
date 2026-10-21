@@ -262,9 +262,7 @@ function FillMode(p: ModeProps) {
       )}
       {live && active !== null && (
         <>
-          <Text style={ui.ltr} testID="law-active">
-            {activeLabel(active)}
-          </Text>
+          <MathLine text={activeLabel(active)} testID="law-active" />
           {invalid && <Note tone="info" text={t('lesson.invalidInput')} />}
           <NumericKeypad
             readonly={false}
@@ -369,6 +367,28 @@ function ProgressiveMode(
 }
 
 const REVEALED_MARK = '◆';
+const LETTERS = /([A-Za-z]+)/;
+
+/**
+ * A short formula line in the math face, set like MathBlock and the table
+ * header: letters italic, digits and signs upright. One Text, so the line
+ * reads the same for tests and screen readers.
+ */
+function MathLine({ text, testID }: { text: string; testID: string }) {
+  return (
+    <Text style={styles.mathLine} testID={testID}>
+      {text.split(LETTERS).map((part, i) =>
+        LETTERS.test(part) ? (
+          <Text key={i} style={styles.mathLetter}>
+            {part}
+          </Text>
+        ) : (
+          part
+        ),
+      )}
+    </Text>
+  );
+}
 
 function SumCheck({ check }: { check: LawCheck }) {
   const { t } = useTranslation();
@@ -565,20 +585,22 @@ const styles = StyleSheet.create({
   table: {
     flexDirection: 'row',
     direction: 'ltr',
-    borderWidth: theme.border.thin,
+    borderWidth: theme.border.line,
     borderColor: theme.color.borderDefault,
     borderRadius: theme.radius.md,
   },
   headerCol: {
     justifyContent: 'space-around',
     paddingHorizontal: theme.space.xs,
-    borderRightWidth: theme.border.thin,
+    borderRightWidth: theme.border.line,
     borderRightColor: theme.color.borderDefault,
     backgroundColor: theme.color.backgroundApp,
   },
+  // x and p(X = x) are math: STIX has the italic (Tajawal has none).
   headerText: {
+    fontFamily: theme.font.family.math.family,
     fontSize: theme.font.size.small,
-    fontStyle: 'italic',
+    fontStyle: theme.font.style.italic,
     color: theme.color.textPrimary,
     writingDirection: 'ltr',
     minHeight: theme.size.touch,
@@ -591,10 +613,12 @@ const styles = StyleSheet.create({
     borderRightWidth: StyleSheet.hairlineWidth,
     borderRightColor: theme.color.borderDefault,
   },
+  // Values and probabilities are math: the math face, upright (DESIGN.md §2).
   valueText: {
     textAlign: 'center',
-    fontSize: theme.font.size.bodyLarge,
+    fontFamily: theme.font.family.math.family,
     fontWeight: theme.font.weight.bold,
+    fontSize: theme.font.size.bodyLarge,
     color: theme.color.textPrimary,
     writingDirection: 'ltr',
     lineHeight: theme.size.touch,
@@ -603,7 +627,7 @@ const styles = StyleSheet.create({
     minHeight: theme.size.touch,
     margin: theme.space.cellInset,
     borderWidth: theme.border.medium,
-    borderColor: theme.color.borderDefault,
+    borderColor: theme.color.borderControl,
     borderRadius: theme.radius.sm,
     alignItems: 'center',
     justifyContent: 'center',
@@ -614,6 +638,7 @@ const styles = StyleSheet.create({
   },
   dashed: { borderStyle: 'dashed', borderWidth: theme.border.thick },
   cellText: {
+    fontFamily: theme.font.family.math.family,
     fontSize: theme.font.size.body,
     color: theme.color.textPrimary,
     writingDirection: 'ltr',
@@ -622,16 +647,23 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: theme.offset.cellMarkTop,
     right: theme.offset.cellMarkEnd,
+    fontFamily: theme.font.family.ui.bold,
     fontSize: theme.font.size.micro,
-    fontWeight: theme.font.weight.bold,
   },
   sum: { gap: theme.space.xs },
+  mathLine: {
+    fontFamily: theme.font.family.math.family,
+    fontSize: theme.font.size.body,
+    color: theme.color.textPrimary,
+    writingDirection: 'ltr',
+  },
+  mathLetter: { fontStyle: theme.font.style.italic },
   columns: { flexDirection: 'row', direction: 'ltr', gap: theme.space.xs },
   column: {
     flex: 1,
     minHeight: theme.size.assignColumnMinHeight,
     borderWidth: theme.border.medium,
-    borderColor: theme.color.borderDefault,
+    borderColor: theme.color.borderControl,
     borderRadius: theme.radius.md,
     alignItems: 'center',
     paddingBottom: theme.space.xs,
@@ -642,6 +674,7 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
   },
   assigned: {
+    fontFamily: theme.font.family.ui.regular,
     fontSize: theme.font.size.caption,
     color: theme.color.textSecondary,
     writingDirection: 'ltr',

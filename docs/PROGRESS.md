@@ -157,6 +157,255 @@ The temporary live-check harness (`src/app/llmSpike.ts`) is deleted; the transpo
 ## Phase 5, editor decisions (2026-10-21)
 Signs stay outside a wrap (trailing sign, leading + or ×; leading − inside); widen stops before a trailing sign; the fraction key keeps wrapping in a denominator (nested fractions typable, 12 presses for (1/x)/(1+1/x²)). Tests only (model and card); `npm run check` green.
 
+## Design pass D0-D1 (2026-10-21), before A2/A3 (product owner)
+**DESIGN.md:** written from the brief and docs/design (Proposed), with the product owner's three edits (§6 flat paper first, hint label wording, prediction cards stay one tap).
+**D0, tokens and fonts:**
+- Cahier colour roles, radius (button / chip / tag / sheetTop), `border.line` / `active`, text roles (`font.screenTitle`, `header`, `body`, `small`, `paper`), `font.family`, `font.style`, `layout.gutter` / `grid`, `size.progressBar`. Existing font literals (Courier, Times New Roman, italic) were moved to tokens with the same values.
+- Fonts in `assets/fonts/`, official google/fonts files only: Tajawal 400/500/700/800, STIX Two Text (variable, roman + italic), each with its OFL.txt. Registered through an Xcode folder reference and `UIAppFonts`, no npm package.
+- Licence: both are SIL OFL 1.1. Use, bundling and redistribution are allowed. Conditions: the copyright notice and licence must go with every copy (OFL.txt is copied into the app, and the licence is also embedded in each file), the fonts cannot be sold on their own, and a modified version cannot use a Reserved Font Name (STIX: «TM Math»). Tajawal's metadata copyright string says "All rights reserved", but its OFL.txt and google/fonts list it as OFL.
+- Measured on iOS: Tajawal resolves by PostScript name. STIX resolves only by family name «STIX Two Text» plus italic / weight (its variable instances have no PostScript names, so «STIXTwoText-Italic» showed upright). Tokens follow that.
+- Guard: `themeHygiene` now also forbids `fontFamily` not from `theme.`, and literal `fontStyle` / named `fontWeight` (self-tests extended). New `__tests__/fonts.test.ts`: names in the files, files present, plist list, licences.
+- **Measured (iPhone 17 Pro simulator, Release build, temporary probe in index.js, removed):**
+  - .app size 63,572 → 64,692 KB (+1,120 KB).
+  - Launch command to first frame, 10 warm runs each: median 478 ms without fonts, 484 ms with (+6 ms; run-to-run spread about 20 ms). The first run after install: 906 / 557 ms.
+  - Cheap Android not measured.
+**D1, shell:**
+- Dev mode is off at every launch (memory only, as before). It is turned on by `-devMode on` (replaces `-devTools 1`; applied in `App.tsx`), by `-devTab` / `-devComponent`, or by the 2 s title press. `-devPart` opens in normal mode.
+- Lesson header (DESIGN.md §3):
+  - back «→» at the right (44 pt, a11y «رجوع للتمارين»);
+  - title in Tajawal Bold;
+  - «مسودّة» draft tag (a11y = the full sentence) and the LTR subtitle «Exercice n · part»;
+  - a progress bar under the header (`mainProgress`: main-path steps passed / total, detours not counted, open step not passed).
+  In dev mode, a row below the header holds the counters, exports and the part switch. README "Test mode" note.
+- New Arabic strings `lesson.draftTag` «مسودّة», `lesson.progress` «التقدّم في السؤال»: reviewed: false.
+- The subtitle's «Exercice n» is the French title up to " :" (no exercise-number field in the content yet).
+**Tests:** no existing test edited. New: fonts (9), progress (5), header (2), `-devMode on` (1). Hygiene self-test lists extended and the test renamed to include fonts.
+**Checked on the simulator (Debug, screenshots in `docs/screens/design/`, nothing tapped):** picker, A1 and 2.a first screens with the new header, `-devMode on` on the picker and in A1, a plain relaunch (dev mode off again). **Tests only:** back button press, title long-press, progress moving on an answer.
+**Run:** `npm run check` (70 suites, 796 tests + 11 todo).
+
+## Design pass D2a, up to check-in 1 (2026-10-21)
+**Before D2 (product owner):**
+- Progress counts only required acting steps: questions, lines, tasks and gates; not explanations, not optional practice. A1 = 4, 1.b = 4, 2.a = 7. The plan said 8 for 2.a: its values-group LawBuilder is the progressive table, a visual. The bar starts at 0.
+- DECISIONS D22 (fonts; Android not done; Tajawal metadata note for the legal review).
+- D13 / D18 updates (report in the card's "⋯" menu, in-block icon).
+**Built:**
+- Paper everywhere, status-bar area included. Generic colour roles re-pointed (`textPrimary` ink, `textSecondary` inkMuted, `borderDefault`, `actionPrimary` pen, `overlayScrim` ink scrim): components change colour only, before D3.
+- Tajawal in lesson text (16.5 / ≈1.8) and the sheets; STIX for math everywhere (editor included) and for the statement's exam wording.
+- Question card: «السؤال» tab and 2 pt pen border; quiet dashed «ما نعرفش» / hint / reveal / skip; one "⋯".
+  - The "⋯" is the ReportSheet menu stage with the card's actions: change method / easier (authored only), back in deep dives, trust label, Report keeping `block-report-<key>`.
+  - It closes on a tap outside or the back gesture; focus goes back to the card. `CardMenu opened / dismissed` carry `stepKey`.
+- In-block "⋯" icon (no gutter); AI blocks keep the visible report and trust line.
+- Red-pencil note for wrong answers: the reducer's `warning` tone, view mapping only (testIDs unchanged). Green correct; highlighter hint / info; blue-pen student bubbles; dashed offer cards; AskAnswer without a rail.
+- Deep dives / variants as one inset dashed sheet with the start item as its tab. Positions are reported in feed coordinates; new jump test.
+- Ask bar on paper with a round pen send button (a11y «ابعث») and quiet chips; same folding.
+- Demo: scripted feeds through the real reducer (`feedDemo.tsx`), `-devDemo cardMenu`, `-devScroll` on the Composants tab.
+- New i18n `lesson.questionTab` «السؤال» (reviewed: false).
+**Tests changed (one extra tap on `card-menu-…`, assertions unchanged):**
+- LessonScreen.ex4 "help buttons appear only with an authored answer";
+- LessonScreen "can leave a deep dive with back";
+- LessonScreen "writes at least one event for every interaction";
+- LessonScreen.report "the active question's Report" (renamed: one tap away in the "⋯" menu).
+The header progress test (new in D1) moved to acting-step numbers.
+**New tests:**
+- card menu (tap outside, back gesture, focus, step key);
+- a mini card's menu has back but no help requests;
+- a done card's menu has trust + Report only;
+- a card inside a deep-dive sheet in feed coordinates;
+- progress rules on synthetic and real parts.
+**Checked on the simulator (screenshots `docs/screens/design/d2a-*`, nothing tapped):** A1 / 2.a / 1.b first screens; the demo's scripted feeds (deep dive, wrong answer, done card); feedback blocks; bubbles; the open card menu; the editor and keypad before their restyle (STIX math). **Tests only:** every tap flow, the menu actions, focus return.
+**Run:** `npm run check` (70 suites, 802 tests + 11 todo).
+
+## Design pass: full width, report paths, ask chips, "−x" check (2026-10-21, before D2b)
+**Built:**
+- Full width: no per-block "⋯", no side room; 16 pt margin on both sides; the deep-dive sheet has no extra inset. The D2b side room is cancelled.
+- Report paths (`reportPath`, DESIGN.md §3):
+  - tutor long-press menu: trust label + «بلّغ على غلطة» last, set apart (iOS: the report sheet opens after that menu's dismissal);
+  - long-press on display blocks (statement, math, feedback, hint, answer, ask answer, write-up, fallback);
+  - choice cards on their title;
+  - question cards and their tasks in the card "⋯";
+  - interactive visuals as «بلّغ على هذا الجزء» rows in the next card's "⋯" (or the last card before them);
+  - AI blocks unchanged.
+  - Screen readers: a "report" action. Each long-press block is one element labelled with its words; formulas use `spokenMath` (French words, never LaTeX; every content formula checked by a test).
+- Ask chips:
+  - one line (text with "…"); formula chips two lines (formula on its own LTR line);
+  - the open row has a fixed height (40 / 64 pt);
+  - collapsed while a question card is on screen, open on tap for that card.
+- `-devActions notSure` (debug only), `-devDemo longPressMenu | longPressMenuPlain`; 390 / 360 pt demo sections.
+**"x-" (reported):**
+- Reproduced in the real lesson (A1 s1) and measured by pixel columns: the minus is drawn left of the x («هي», then −, then x, then «متاع»), i.e. "−x" in LTR order. Same with Tajawal and the system font, and for 4 isolation variants (temporary probe, removed).
+- No code change; a test pins the real sentence's segments. Crops: `docs/screens/design/bidi-minus-real-zoom.png`, `bidi-probe-variants.png`. Waiting for the product owner to confirm the spot.
+**Measured (iPhone 17 Pro simulator):**
+- Long-press menu: 269 pt without the Report group, 354 pt with it (+85 pt).
+- Ask bar: collapsed = the input line only (field 44 pt + 6 + 6 padding = 56 pt); open = 56 + 6 + 64 = 126 pt with a formula chip (102 pt without). The row scrolls sideways, so the height is the same at 390 and 360 pt (demo shots).
+- A1 start: the chips band (61 pt) + gap is gone, about 67 pt more feed.
+- Question-card footer («ما نعرفش», hint, "⋯") on one row at 402, 390 and 360 pt.
+**Release:** `npm run check:release-key` ok. A Release bundle contains none of the `-devActions` / `-devDemo` / demo-feed code; only the dead call-site property name `devActionsAtLaunch`, as in D20.
+**Tests changed (assertions unchanged unless the product rule changed):**
+- LessonScreen.report "'...' on a lesson block" (renamed "long-press on a lesson block") and "cancelling the sheet": long-press instead of `block-menu-*`.
+- Product rule "chips collapsed while a card is on screen":
+  - LessonScreen.ex4 "the ask chips fold while the lines editor is active" → also collapsed on the first card, open on request;
+  - LessonScreen "answers ask-field chips": a toggle tap first;
+  - LessonScreen "folds the ask chips while a keypad is open": the next choice card collapses them again (was: chips back).
+**New tests:**
+- `reportPath` for every kind; `visualOwners`, including "no card after it → the last card before";
+- tutor menu Report; feedback and choice-card long-press; the 2.a urn row with the Urn snapshot;
+- a11y "report" on a display block and on tutor text;
+- labels without LaTeX; long-press cancelled by a scroll on math and feedback blocks;
+- spoken math; the fixed chip-row height; the real "−x" sentence.
+**Checked on the simulator (nothing tapped):** `-devPart A1` / `2a` / `1b -devActions notSure` (deep dive in the real lesson); the 390 / 360 demo sections; the long-press menu with and without Report. **Tests only:** every long-press, menu action and a11y action.
+**Run:** `npm run check` (72 suites, 824 tests + 11 todo).
+
+## Design pass: review fixes + D2b (2026-10-21)
+**Review fixes:**
+1. **«ما نعرفش» clipping.** In the real lesson it fit (cut only at its bottom by the feed edge); the fw-06 clipping came from the demo frame (390 inside a 358 pt section).
+   - Full-bleed width demos now.
+   - New debug-only footer check (`layoutCheck.ts`, onLayout; warns and stores the numbers).
+   - Measured:
+     - 402 pt: row 342, «ما نعرفش» edge 342.0;
+     - 390 pt (iPhone 16e, real lesson): row 330, edge 330.0;
+     - 360 pt (demo frame): row 298, edge 298.0;
+     - no overflow.
+   - Jest tests the check with fed measurements (Jest has no layout).
+2. **Card border / tab clipping:** demo-only, same cause. The real lesson at 390 pt does not clip (iOS has no 360 pt device).
+3. **Stray mark:** a slice of the previous block shown by the auto-scroll margin. The feed now scrolls exactly to the new item's top; gone in the deep-dive shot.
+4. **Progress in fw-03:** correct. Only «ما نعرفش» was tapped, so the question is still open. New test: unchanged during the dive, 0 → 1 once the question is answered.
+5. **Ask bar order:** send (far end, left), field, «اسأل» toggle (start, right), as in the mockups. No test change.
+6. **Footer:** «ما نعرفش», hint and "⋯" are one group at the start, 8 pt gaps.
+**D2b:**
+- Line editor as a notebook page: white card, ruled lines (`gridLine`), a margin line (`error.noteBorder`) with ✓ / × circle marks on the left (DESIGN.md text).
+- The current line has a 2 pt pen border; the wrong-line note is red pencil, below the line; the goal sits on a highlighter mark.
+- Keys: card fill, radius 12, 1.5 border; arrow / tool keys in a light pen tint; fraction and power keys with a pen border; a drawn box / bar / box fraction icon; «نثبّت» filled ink.
+- Numeric keypad: same key style, pen-bordered field, ink «نثبّت», ▾ fold kept.
+- Fixed while checking: an empty ruled row after an accepted, non-final line.
+- `Note` (shared with the components) waits for D3. EDITOR.md keys, rules and the measured-width layout are unchanged. No test changed in D2b.
+**Checked on the simulator (nothing tapped):**
+- editor demo cases at 402 pt (empty, accepted, error, undo chip, long line, keys) and the error case at 390 pt (iPhone 16e);
+- the keypad in a scripted feed;
+- real lessons A1 (402, 390), 1.b deep dive, 2.a.
+**Tests only:** every key press and the check flows (existing suites).
+**Run:** `npm run check` (73 suites, 827 tests + 11 todo).
+
+## Small fixes before D3 (2026-10-21)
+1. **Long typed line.** It was scrolled to the end, not clipped, but it ran under the field's border with no margin, and moving the cursor never scrolled back.
+   - The border is now outside the scroll, with an inner margin.
+   - The line keeps the cursor in view (`scrollForCursor`, unit-tested; measured with `measureLayout` after edits, layout and size changes).
+   - Checked on the simulator: the cursor at the end shows "−3" with a margin; the cursor at the start shows the start (new demo case LinesEditor#9).
+2. **Margin strip:** 36 → 28 pt, marks 24 → 20 pt (marks, not buttons).
+3. **Disabled «نثبّت»:** a solid #6B7590 fill instead of 40 % opacity. White label contrast 2.32:1 → 4.59:1 (WCAG AA). Lines editor and keypad.
+4. **Student-bubble quote:** already isolated: `isolateInline` makes «f(−x) = f(x)» one LRI LRM … LRM PDI run. A test pins it.
+**Run:** `npm run check` (74 suites, 833 tests + 11 todo).
+
+## Design pass D3: visual components on the Cahier tokens (2026-10-21)
+**Built (tokens only; no layout or behaviour change):**
+- `feedback` tones re-pointed to the Cahier pencils.
+- Surfaces: `surfaceSelected` = highlighter, keys = card, pressed = highlighterSoft, muted = pen tint.
+- `deepDiveRail` removed: LawChart's tapped bar is pen with an ink outline.
+- Plot: curve pen, axis inkMuted, positive / negative green / red pencil. Slider: borderControl track, pen fill and thumb.
+- New `borderControl` #7486AD on every control (components and feed); `inkDisabled` #6B7590.
+- Component text in Tajawal. Sets, values and formulas in STIX: chips, readouts, LTR strings, plot labels, LawBuilder headers, whose italic is back (Tajawal has none).
+- 1 → 1.5 pt borders; chip / button radii.
+- Disabled states use solid colours instead of opacity: keys, the used-up hint, chips, «نثبّت», report send.
+- Done-card opacity 0.6 → 0.75.
+- The chip badge text is ink (data series only as graphics).
+**Contrast:** table in DESIGN.md §2, enforced by `__tests__/contrast.test.ts`. Disabled labels went from 2.07-2.38:1 to 4.59:1; done-card ink text from 3.98:1 to 6.30:1.
+**Layout shift (LawBuilder, same demo case, pixel-measured):** the table moves 0.7 pt down (the borders); the content below it moves 4.3 pt up (Tajawal vs system line metrics). Other components: the same small text-metric shifts; nothing clipped.
+**Lighter control border considered:** #7B8DB1 is the lightest that holds 3:1 on both card and paper (3.34 / 3.06). Shown next to #7486AD (`d3-alt-*`): nearly indistinguishable, so #7486AD is kept.
+**Colour never alone (checked in code and on screenshots):**
+- urn: ✓ badge and lift;
+- chips: ● / ✓ / ✗ / ◆ marks;
+- LawBuilder cells: ✓ / ◆ and dashed revealed;
+- options: ✓ / ✗;
+- ComplementView: "?" and dashed;
+- plots: dashed where f < 0;
+- LawChart bar: an ink outline, added in D3;
+- PredictReveal: a thicker ink border, then the verdict text;
+- hint / info blocks: their «تلميح n» label and "i" icon.
+- Highlighted sentences (long-press) are not built yet, so there is nothing to confuse the hint with.
+**Not changed (noted):** «f(-1)» readouts and «f(-x) comparé à f(x) ?» use a hyphen-minus (readout formatting / demo content, not style); the slider keeps its disabled opacity (no label).
+**Android:** not checked for D3. Colours are platform-independent, but borders and fonts need an Android pass (fonts are not registered for Android, D22).
+**Checked on the simulator (nothing tapped):** every component's first demo case at 402 pt; LawBuilder and PointOnCurve at 390 pt (iPhone 16e); real 2.a / A1; before / after for Urn, LawBuilder, LawChart, PointOnCurve, PredictReveal (`docs/screens/design/d3-before-*`, `d3-after-*`). **Tests only:** tapped states.
+**Run:** `npm run check` (75 suites, 871 tests + 11 todo). No existing test changed.
+
+## D3 follow-ups + design pass D4 (2026-10-21)
+**Before D4:**
+- Done-card opacity 0.75 → 0.88: muted text 4.64:1 and ink 9.70:1, composited over paper (contrast test added).
+- Readouts and the demo prompt use the real minus (U+2212) through one helper in `plot.ts` (readouts, plain numbers, scientific, readout pairs); a readout format test was added.
+**D4, built:**
+- **Content:** required `number` and `subject`; optional `paper { section?, questions[{ id, label, wording?, status }] }`, checked by the loader (ids unique, authored = available, the rest soon, none forgotten, formulas parse).
+  - ex4: «Partie A», A1–A4 wording copied exactly from EX4_ANALYSIS.md (still "to verify against the PDF").
+  - ex2: 1.b and 2.a from their goals; 1.a, 2.b, 3.a, 3.b listed with no wording.
+  - The wording guard test compares with the transcription only, not with the exam.
+  - The title-parsing stopgap is replaced by «Exercice {number}» (i18n).
+- **Content versions not bumped** (deviation from the plan): the new fields change no step, block or event, and a bump would detach skills from older stored sessions.
+- **`part_done { counted, answered, revealed }`** is emitted at the done line. A revealed card is now marked `revealed` in every case, not only for components.
+- **Done parts:** `doneParts` (answered ≥ 1, matched by exerciseId + questionId across versions) plus a separate record (MMKV `tteclair-progress`) so the event cap never erases a done mark. DATA.md updated.
+- **Picker cards (§4.1):**
+  - subject tag, draft tag, «Exercice n», the statement's key line, the Arabic title;
+  - chips: done ✓, current, available, soon (dashed, not pressable);
+  - «كمّل من X» / «نبداو», a dashed «تمارين أخرى قريبا», the error card as an error note.
+  - Done parts are read on every mount (after each lesson).
+- **«الورقة» (§4.3):**
+  - header button; statement, questions (done / current «انت هنا» / available / soon), «النتائج المثبتة»;
+  - it closes 4 ways, each logged (`PaperSheet opened / closed { via }`), and focus goes back to the button;
+  - it opens scrolled to the current question.
+- **Debug only (absent from the release bundle; key check ok):** `-devActions answerAll` (plays a part to its done line with the content's answers, incl. variant cards, choice cards, tasks) and `-devDemo paperSheet`.
+**Tests changed:**
+- ExercisePicker "one card per exercise…": `title.fr` → «Exercice n» and the Arabic title by its label; soon chips also checked.
+- events.test: the sample record gained `part_done` (required for every event type).
+- Before D4 (minus sign): `plot.test` `plainNumber(-1)` → «−1»; analysis `components.test` «f(−1) = …».
+- No assertion weakened.
+**New tests:**
+- paper schema / loader, wording guard;
+- `part_done` counts (all done; one revealed);
+- `doneParts` and the record;
+- picker (no history, a done part, revealed-only not done, the record, recompute after a lesson);
+- the sheet (states, proven results, 4 closes, focus, scroll to current);
+- `answerAll` plays A1, 1.b and 2.a;
+- contrast for done cards; readout format.
+**Checked on the simulator (iPhone 17 Pro; iPhone 16e 390 pt):**
+- picker with no history;
+- A1 played to its end by `-devActions answerAll`, then the picker with ✓A.1 (a real stored `part_done`);
+- «الورقة» in A1 (proven «f est paire», scrolled to the current question) and in 2.a.
+- **Tests only:** taps on chips, the resume button, each way to close the sheet.
+**Ex2 wording still missing** (to transcribe from the PDF): 1.a, 2.b, 3.a, 3.b (and the section heading, if the exam has one).
+**Run:** `npm run check` (79 suites, 903 tests + 11 todo).
+
+## Design pass D5: RTL roles, long formulas, law-table face (2026-10-21)
+**Reading-side roles** (`src/theme/sides.ts`, DESIGN.md §8):
+- `theme.reading` (row in reading order, start / end align, start / end edge) and `theme.mathSide` (LTR math and exam lines).
+- Guard: `__tests__/readingSides.test.js` (no physical left / right keys or bare `'row-reverse'` in the feed, line editor, app screens).
+- Changed to roles, same look (pixel-identical before / after):
+  - jump button (reading end);
+  - «السؤال» tab (start); done-card «⋯» (end); card footer;
+  - student bubble (end); deep-dive tab (start); tone and hint headers; choice and feedback rows;
+  - notebook margin (math start); copy chip (reading start); undo chip (math end);
+  - lesson header: children in reading order, back · title · «الورقة»; back stays on the right, «الورقة» on the left. The paper button's label is before its mark, and the subtitle row comes before the draft tag;
+  - progress bar fill;
+  - ask bar: toggle · field · send;
+  - picker top row: tags · «Exercice n»; picker chips;
+  - «الورقة» head (titles · ×), proven tags; question rows and result tags named as `mathSide` (French exam order).
+- **Look changed:** option ✓ / ✗ marks move from the right edge to the reading end (left).
+- **Kept physical:** LTR math / data components; corner badges; sheet radii; the AI-block footer (a lone report link would jump sides under `row-reverse`); the ask-chips scroll (first chip at the left, unchanged, noted); dev demo screens.
+**Long formulas:** `ScrollingMath` (the LinesCard line pattern): a horizontal LTR scroll, centred when it fits, scrolling only when wider (a short formula never takes the swipe), with an indicator flash once wider.
+- Used by RichView's formula (prompts, tutor text, statement, sheet) and feed math items. Off in ask chips and options.
+- `flexGrow: 0` is needed: without it, the first try took the active card's spare height and blanked the card (seen on the simulator, fixed before the baseline).
+- 2.a sum: inside the card at 402 and 390 pt.
+**LawBuilder:** the active line «p(X = −2) = ?» is set in STIX like the header (italic letters, upright digits; same text for tests). Column values and cells use STIX too. «Σ p = 0» (shared Readout) still has an upright bold p (left as is).
+**Debug only:** `-devUntil stepId` with `-devActions answerAll` stops at that step's card (2.a sum screenshots). Release bundle: only the dead call-site name, as for `devActionsAtLaunch`.
+**Screenshots:** `docs/screens/design/d5-before-*` / `d5-after-*` (iPhone 17 Pro 402 pt; iPhone 16e 390 pt for A1, 2.a, sum). The "before" set was taken before any edit; for the sum card, after adding only `-devUntil` (no rendering change). Pixel diff: only options, LawBuilder and the sum card changed.
+**Gesture check (sum scroll vs feed scroll): not done.** This session can't post input events to the Simulator (no Accessibility permission). It is in MANUAL_TESTS.md §4.
+**Tests:** new `readingSides.test.js`, `ScrollingMath.test.tsx` (2.a prompt in a horizontal LTR scroll; scroll only when wider; off for chips). No existing test changed.
+**Manual checklist:** `docs/MANUAL_TESTS.md`.
+**Run:** `npm run check` (81 suites, 908 tests + 11 todo).
+
+### Still open after the design pass
+- Paper grid experiment: flat paper now; a grid only if measured free on a low-end Android (DESIGN.md §6).
+- Android pass: font registration (Tajawal, STIX; D22), border widths, layout, bidi isolation.
+- 360 pt on a real device (only the demo frames were checked at 360).
+- Teacher review of all Arabic (`reviewed: false`) and of the exam wording (ex4 "to verify against the PDF"; ex2 1.a, 2.b, 3.a, 3.b and the section heading still missing).
+- The sum-card gesture check and the VoiceOver order (header, ask bar) by hand (MANUAL_TESTS.md).
+- Small: the law table's active line has no spoken label; «Σ p» upright p; the ask-chips row starts at the left.
+
 ## Next step
 Phase 5 (product owner, 2026-10-20), in order:
 1. Done 2026-10-20: exam wording, engine-derived A1 conclusion, exercise picker.

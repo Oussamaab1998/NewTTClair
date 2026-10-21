@@ -135,13 +135,14 @@ const styles = StyleSheet.create({
     gap: theme.space.sm,
   },
   title: {
+    fontFamily: theme.font.family.ui.regular,
     fontSize: theme.font.size.callout,
     color: theme.color.textPrimary,
     textAlign: 'right',
     writingDirection: 'rtl',
   },
   faces: {
-    flexDirection: 'row-reverse',
+    flexDirection: theme.reading.row,
     flexWrap: 'wrap',
     gap: theme.space.sm,
   },
@@ -158,6 +159,7 @@ const styles = StyleSheet.create({
     borderWidth: theme.border.thick,
   },
   faceText: {
+    fontFamily: theme.font.family.ui.regular,
     fontSize: theme.font.size.callout,
     color: theme.color.textPrimary,
     writingDirection: 'rtl',
@@ -172,6 +174,7 @@ const styles = StyleSheet.create({
     color: theme.color.textPrimary,
   },
   thanks: {
+    fontFamily: theme.font.family.ui.regular,
     fontSize: theme.font.size.footnote,
     color: theme.color.textSecondary,
     textAlign: 'center',

@@ -14,6 +14,8 @@ interface RichTextProps {
   runs: ArRuns;
   strategy?: IsolationStrategy;
   style?: StyleProp<TextStyle>;
+  /** One-line uses (ask chips): the paragraph ends with "…". */
+  numberOfLines?: number;
   testID?: string;
 }
 
@@ -25,6 +27,7 @@ export function RichText({
   runs,
   strategy = DEFAULT_ISOLATION,
   style,
+  numberOfLines,
   testID,
 }: RichTextProps) {
   const segments = useMemo(() => toSegments(runs, strategy), [runs, strategy]);
@@ -34,6 +37,7 @@ export function RichText({
       style={[styles.paragraph, style]}
       accessibilityLanguage="ar"
       accessibilityLabel={toPlainText(runs)}
+      {...(numberOfLines !== undefined && { numberOfLines })}
       testID={testID}
     >
       {segments.map((segment, i) =>
@@ -53,6 +57,7 @@ const styles = StyleSheet.create({
   paragraph: {
     writingDirection: 'rtl',
     textAlign: 'right',
+    fontFamily: theme.font.family.ui.regular,
     fontSize: theme.font.size.reading,
     lineHeight: theme.font.lineHeight.reading,
     color: theme.color.textPrimary,

@@ -1,6 +1,5 @@
 import React, { useCallback, useState, useSyncExternalStore } from 'react';
 import {
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -74,7 +73,6 @@ export function LlmRawPanel({
   );
 }
 
-const mono = Platform.select({ ios: 'Courier', default: 'monospace' });
 
 const styles = StyleSheet.create({
   bar: {
@@ -89,7 +87,7 @@ const styles = StyleSheet.create({
   },
   mono: {
     color: theme.color.devConsoleText,
-    fontFamily: mono,
+    fontFamily: theme.font.family.mono,
     fontSize: theme.font.size.micro,
     writingDirection: 'ltr',
   },

@@ -20,26 +20,46 @@ export const REPORT_TEXT_MAX = 300;
 /** Taps inside the sheet (incl. on a disabled button) never reach the backdrop. */
 const swallow = () => undefined;
 
+/** One entry of a question card's "⋯" menu (DESIGN.md §3); keeps its old testID. */
+export interface CardAction {
+  label: string;
+  testID: string;
+  onPress: () => void;
+}
+
+/** A menu opened from a question card: its step key (events) and its own actions. */
+export interface CardMenu {
+  stepKey: string;
+  actions: CardAction[];
+  /** Puts the screen reader back on the card's "⋯" when the menu closes. */
+  focusBack?: () => void;
+}
+
 export type ReportSheetState =
-  | { stage: 'menu' | 'report'; target: ReportTarget }
+  | { stage: 'menu' | 'report'; target: ReportTarget; card?: CardMenu }
   | { stage: 'thanks' }
   | null;
 
 interface ReportSheetProps {
   state: ReportSheetState;
-  onOpenReport: (target: ReportTarget) => void;
+  onOpenReport: (target: ReportTarget, card?: CardMenu) => void;
   onSend: (target: ReportTarget, reason: ReportReason, text?: string) => void;
+  /** A card action was chosen: the menu closes, then the action runs. */
+  onAction: (action: CardAction) => void;
   onDismiss: () => void;
 }
 
 /**
- * Block menu and report sheet (docs/FEEDBACK_AND_TRUST.md): one tap for a
- * reason, optional short text, then a kind confirmation; no lecture.
+ * Block menu, question-card menu and report sheet (docs/FEEDBACK_AND_TRUST.md):
+ * one tap for a reason, optional short text, then a kind confirmation; no
+ * lecture. A card menu lists the card's actions first, then its trust label
+ * and Report; it closes on a tap outside or the back gesture.
  */
 export function ReportSheet({
   state,
   onOpenReport,
   onSend,
+  onAction,
   onDismiss,
 }: ReportSheetProps) {
   const { t } = useTranslation();
@@ -59,6 +79,7 @@ export function ReportSheet({
       transparent
       animationType="fade"
       onRequestClose={onDismiss}
+      testID="report-modal"
     >
       <Pressable
         style={styles.backdrop}
@@ -73,13 +94,26 @@ export function ReportSheet({
         >
           {state?.stage === 'menu' && (
             <>
+              {state.card?.actions.map(a => (
+                <Option
+                  key={a.testID}
+                  label={a.label}
+                  onPress={() => onAction(a)}
+                  testID={a.testID}
+                />
+              ))}
               <Text style={styles.label} testID="report-trust">
                 {t(`lesson.trust.${state.target.trust}`)}
               </Text>
               <Option
                 label={t('lesson.report.button')}
-                onPress={() => onOpenReport(state.target)}
-                testID="report-open"
+                onPress={() => onOpenReport(state.target, state.card)}
+                // A card's Report keeps the id it had as a visible button.
+                testID={
+                  state.card
+                    ? `block-report-${state.target.itemKey}`
+                    : 'report-open'
+                }
               />
             </>
           )}
@@ -117,7 +151,7 @@ export function ReportSheet({
                     );
                   }
                 }}
-                style={[styles.send, reason === null && styles.disabled]}
+                style={[styles.send, reason === null && styles.sendDisabled]}
                 accessibilityRole="button"
                 accessibilityState={{ disabled: reason === null }}
                 testID="report-send"
@@ -187,20 +221,21 @@ const styles = StyleSheet.create({
   },
   sheet: {
     backgroundColor: theme.color.surfaceCard,
-    borderTopLeftRadius: theme.radius.sheet,
-    borderTopRightRadius: theme.radius.sheet,
+    borderTopLeftRadius: theme.radius.sheetTop,
+    borderTopRightRadius: theme.radius.sheetTop,
     padding: theme.space.xxl,
     paddingBottom: theme.space.sheetBottom,
   },
   title: {
+    fontFamily: theme.font.family.ui.bold,
     fontSize: theme.font.size.body,
-    fontWeight: theme.font.weight.semibold,
     textAlign: 'right',
     writingDirection: 'rtl',
     color: theme.color.textPrimary,
     marginBottom: theme.space.sm,
   },
   label: {
+    fontFamily: theme.font.family.ui.regular,
     fontSize: theme.font.size.footnote,
     color: theme.color.textSecondary,
     textAlign: 'right',
@@ -215,6 +250,7 @@ const styles = StyleSheet.create({
   },
   optionSelected: { backgroundColor: theme.color.surfaceSelected },
   optionText: {
+    fontFamily: theme.font.family.ui.regular,
     fontSize: theme.font.size.reading,
     textAlign: 'right',
     writingDirection: 'rtl',
@@ -242,8 +278,9 @@ const styles = StyleSheet.create({
   },
   sendText: {
     color: theme.color.textOnAccent,
+    fontFamily: theme.font.family.ui.bold,
     fontSize: theme.font.size.callout,
-    fontWeight: theme.font.weight.semibold,
   },
-  disabled: { opacity: theme.opacity.disabled },
+  // Solid, not opacity: the white label stays at 4.59:1.
+  sendDisabled: { backgroundColor: theme.color.inkDisabled },
 });

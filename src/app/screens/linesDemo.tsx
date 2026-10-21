@@ -162,4 +162,12 @@ export const LINES_CASES: DemoCase[] = [
     title: 'Lines: long fraction / exponent line',
     render: card({ ...emptyLines(), editor: typed(LONG) }),
   },
+  {
+    key: 'LinesEditor',
+    title: 'Lines: long line, cursor back at its start (start in view)',
+    render: card({
+      ...emptyLines(),
+      editor: { ...typed(LONG), cursor: { path: [], at: 0 } },
+    }),
+  },
 ];

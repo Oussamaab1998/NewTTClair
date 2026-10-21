@@ -289,55 +289,72 @@ export function LinesCard({
         <Text style={styles.label}>{t('lines.goal')}</Text>
         <Line latex={goal} testID={`${testID}-goal`} />
       </View>
-      {notebook.map((src, i) => (
-        <Line
-          key={i}
-          latex={`${i === 0 ? firstPrefix : '='}${latexOf(src, vars)}`}
-          testID={`${testID}-line-${i}`}
-        />
-      ))}
-      {state.last && (
-        <Feedback verdict={state.last} testID={testID} />
-      )}
+      {/* The notebook page: ruled lines, a margin with each line's mark. */}
+      <View style={styles.page}>
+        <View style={styles.margin} />
+        {notebook.map((src, i) => (
+          <NotebookRow
+            key={i}
+            // The given start line has no mark; accepted lines are right.
+            mark={i === 0 && spec.start !== undefined ? null : 'ok'}
+          >
+            <Line
+              latex={`${i === 0 ? firstPrefix : '='}${latexOf(src, vars)}`}
+              testID={`${testID}-line-${i}`}
+            />
+          </NotebookRow>
+        ))}
+        {live && (
+          <NotebookRow mark={state.last?.kind === 'wrong' ? 'wrong' : null}>
+            <View>
+              <EditorLine
+                state={state.editor}
+                onKey={press}
+                {...(mark && { mark })}
+                showFlash={flashOn}
+                testID={`${testID}-editor`}
+              />
+              {isEmpty(state.editor) && copySource && (
+                <Pressable
+                  onPress={copyPrevious}
+                  accessibilityRole="button"
+                  style={styles.copy}
+                  testID={`${testID}-copy`}
+                >
+                  <Text style={styles.copyText}>{t('lines.copyPrevious')}</Text>
+                </Pressable>
+              )}
+              {chipOn && change && (
+                <Pressable
+                  onPress={() => press('undo')}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${t(`lines.change.${change}`)}، ${t(
+                    'lines.undo',
+                  )}`}
+                  style={styles.undoChip}
+                  testID={`${testID}-undo-chip`}
+                >
+                  <Text style={styles.undoChipText}>
+                    {t(`lines.change.${change}`)}
+                  </Text>
+                  <Text style={[styles.undoChipText, styles.undoChipAction]}>
+                    {t('lines.undo')}
+                  </Text>
+                </Pressable>
+              )}
+            </View>
+          </NotebookRow>
+        )}
+        {/* An accepted line that is not the last one has no note: no empty row. */}
+        {state.last &&
+          !(state.last.kind === 'accepted' && !state.last.final) && (
+            <NotebookRow mark={null}>
+              <Feedback verdict={state.last} testID={testID} />
+            </NotebookRow>
+          )}
+      </View>
       {live && (
         <>
-          <View>
-            <EditorLine
-              state={state.editor}
-              onKey={press}
-              {...(mark && { mark })}
-              showFlash={flashOn}
-              testID={`${testID}-editor`}
-            />
-            {isEmpty(state.editor) && copySource && (
-              <Pressable
-                onPress={copyPrevious}
-                accessibilityRole="button"
-                style={styles.copy}
-                testID={`${testID}-copy`}
-              >
-                <Text style={styles.copyText}>{t('lines.copyPrevious')}</Text>
-              </Pressable>
-            )}
-            {chipOn && change && (
-              <Pressable
-                onPress={() => press('undo')}
-                accessibilityRole="button"
-                accessibilityLabel={`${t(`lines.change.${change}`)}، ${t(
-                  'lines.undo',
-                )}`}
-                style={styles.undoChip}
-                testID={`${testID}-undo-chip`}
-              >
-                <Text style={styles.undoChipText}>
-                  {t(`lines.change.${change}`)}
-                </Text>
-                <Text style={[styles.undoChipText, styles.undoChipAction]}>
-                  {t('lines.undo')}
-                </Text>
-              </Pressable>
-            )}
-          </View>
           <View style={styles.row}>
             {(['left', 'up', 'down', 'right', 'back'] as const).map(k => (
               <KeyButton
@@ -345,6 +362,7 @@ export function LinesCard({
                 k={k}
                 onKey={press}
                 label={KEY_LABEL[k]!}
+                tool
                 a11y={t(`lines.key.${k}`)}
                 testID={`${testID}-key-${k}`}
               />
@@ -363,6 +381,7 @@ export function LinesCard({
                     : KEY_LABEL[k]!
                 }
                 small={k === 'undo'}
+                tool
                 weight={k === 'undo' ? 2 : 1}
                 a11y={t(`lines.key.${k}`)}
                 disabled={
@@ -376,6 +395,7 @@ export function LinesCard({
               onKey={press}
               label={t('lines.widen')}
               small
+              tool
               a11y={t('lines.key.widen')}
               testID={`${testID}-key-widen`}
             />
@@ -401,7 +421,7 @@ export function LinesCard({
               accessibilityRole="button"
               accessibilityState={{ disabled: isEmpty(state.editor) }}
               testID={`${testID}-check`}
-              style={[styles.check, isEmpty(state.editor) && styles.disabled]}
+              style={[styles.check, isEmpty(state.editor) && styles.checkDisabled]}
             >
               <Text
                 style={styles.checkText}
@@ -421,6 +441,43 @@ export function LinesCard({
           />
         </>
       )}
+    </View>
+  );
+}
+
+const OK_MARK = '✓';
+const WRONG_MARK = '×';
+
+/** One ruled line of the notebook page: the margin mark (shape + color), then the line. */
+function NotebookRow({
+  mark,
+  children,
+}: {
+  mark: 'ok' | 'wrong' | null;
+  children: React.ReactNode;
+}) {
+  return (
+    <View style={styles.pageRow}>
+      <View style={styles.markCell}>
+        {mark && (
+          <View
+            style={[
+              styles.mark,
+              mark === 'ok' ? styles.markOk : styles.markWrong,
+            ]}
+          >
+            <Text
+              style={[
+                styles.markText,
+                mark === 'ok' ? styles.markTextOk : styles.markTextWrong,
+              ]}
+            >
+              {mark === 'ok' ? OK_MARK : WRONG_MARK}
+            </Text>
+          </View>
+        )}
+      </View>
+      <View style={styles.pageLine}>{children}</View>
     </View>
   );
 }
@@ -534,34 +591,84 @@ function Feedback({
 
 const styles = StyleSheet.create({
   card: { gap: theme.space.sm },
+  // The goal, on a highlighter mark (DESIGN.md §3, notebook page).
   goal: {
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.color.surfacePaper,
-    borderWidth: theme.border.thin,
-    borderColor: theme.color.borderPaper,
+    borderRadius: theme.radius.chip,
+    backgroundColor: theme.color.highlighterSoft,
     padding: theme.space.sm,
   },
   label: {
-    fontSize: theme.font.size.callout,
-    color: theme.color.textSecondary,
+    ...theme.font.small,
+    fontFamily: theme.font.family.ui.bold,
+    color: theme.color.inkMuted,
     writingDirection: 'rtl',
     textAlign: 'right',
   },
+  page: {
+    backgroundColor: theme.color.card,
+    borderWidth: theme.border.line,
+    borderColor: theme.color.border,
+    borderRadius: theme.radius.card,
+    overflow: 'hidden',
+  },
+  // The notebook margin line, between the marks and the lines (math side:
+  // the LTR lines start at the left, the marks stay left of the margin).
+  margin: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    ...theme.mathSide.startEdge(theme.editor.markColumn),
+    width: theme.border.line,
+    backgroundColor: theme.color.error.noteBorder,
+  },
+  pageRow: {
+    flexDirection: theme.mathSide.row,
+    direction: 'ltr',
+    alignItems: 'center',
+    minHeight: theme.size.touch,
+    borderBottomWidth: theme.border.thin,
+    borderBottomColor: theme.color.gridLine,
+  },
+  markCell: {
+    width: theme.editor.markColumn,
+    alignItems: 'center',
+  },
+  mark: {
+    width: theme.editor.mark,
+    height: theme.editor.mark,
+    borderRadius: theme.editor.mark / 2,
+    borderWidth: theme.border.active,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  markOk: { borderColor: theme.color.correct.ink },
+  markWrong: { borderColor: theme.color.error.ink },
+  markText: { ...theme.font.small, fontFamily: theme.font.family.ui.bold },
+  markTextOk: { color: theme.color.correct.ink },
+  markTextWrong: { color: theme.color.error.ink },
+  pageLine: {
+    flex: 1,
+    paddingVertical: theme.space.xxs,
+    paddingHorizontal: theme.space.sm,
+  },
   lineContent: { direction: 'ltr', alignItems: 'center' },
+  // Red-pencil note: where the line goes wrong and what to change.
   feedback: {
     gap: theme.space.xxs,
-    borderRadius: theme.radius.md,
+    borderRadius: theme.radius.chip,
+    borderWidth: theme.border.line,
+    borderColor: theme.color.error.noteBorder,
     padding: theme.space.sm,
-    backgroundColor: theme.feedback.warning.surface,
+    backgroundColor: theme.color.error.noteBg,
   },
   warn: {
-    color: theme.feedback.warning.text,
+    color: theme.color.error.noteText,
     fontSize: theme.font.size.callout,
   },
   action: {
-    color: theme.color.textPrimary,
+    color: theme.color.error.noteText,
     fontSize: theme.font.size.callout,
-    fontWeight: theme.font.weight.semibold,
+    fontFamily: theme.font.family.ui.bold,
   },
   row: { flexDirection: 'row', gap: KEY_GAP, direction: 'ltr' },
   // Inside the empty field, at its start (right): the field's placeholder.
@@ -569,7 +676,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     bottom: 0,
-    right: theme.space.xs,
+    ...theme.reading.startEdge(theme.space.xs),
     justifyContent: 'center',
   },
   copyText: {
@@ -584,12 +691,12 @@ const styles = StyleSheet.create({
     backgroundColor: theme.editor.color.activeSlotBackground,
     writingDirection: 'rtl',
   },
-  // Above the field's end: no layout shift, the line and cursor stay visible.
+  // Above the LTR field's end: no layout shift, the line and cursor stay visible.
   undoChip: {
     position: 'absolute',
     bottom: '100%',
-    right: 0,
-    flexDirection: 'row-reverse',
+    ...theme.mathSide.endEdge(0),
+    flexDirection: theme.reading.row,
     alignItems: 'center',
     gap: theme.space.xs,
     minHeight: theme.size.touch,
@@ -613,26 +720,29 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: theme.size.touch,
     minHeight: theme.size.touch,
-    borderRadius: theme.radius.md,
-    borderWidth: theme.border.thin,
-    borderColor: theme.color.borderDefault,
+    borderRadius: theme.radius.button,
+    borderWidth: theme.border.line,
+    borderColor: theme.color.borderControl,
+    backgroundColor: theme.editor.color.toolKey,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  foldText: { fontSize: theme.font.size.title, color: theme.color.textPrimary },
+  foldText: { fontSize: theme.font.size.title, color: theme.color.ink },
+  // The one primary action: «نثبّت», filled ink.
   check: {
     flex: 1,
     paddingHorizontal: theme.space.xs,
     minHeight: theme.size.touch,
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.color.actionPrimary,
+    borderRadius: theme.radius.button,
+    backgroundColor: theme.color.ink,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  disabled: { opacity: theme.opacity.disabled },
+  // A solid fill, not opacity: the label stays readable (DESIGN.md §2).
+  checkDisabled: { backgroundColor: theme.color.inkDisabled },
   checkText: {
     color: theme.color.textOnAccent,
     fontSize: theme.font.size.body,
-    fontWeight: theme.font.weight.semibold,
+    fontFamily: theme.font.family.ui.bold,
   },
 });

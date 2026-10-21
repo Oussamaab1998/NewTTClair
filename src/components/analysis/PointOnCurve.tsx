@@ -296,7 +296,11 @@ const oneLine = (compact: boolean) =>
     : {};
 
 const styles = StyleSheet.create({
-  compact: { fontSize: theme.font.size.small },
+  // Readouts like f(1) = 0,324 are math (STIX), like the exam paper.
+  compact: {
+    fontFamily: theme.font.family.math.family,
+    fontSize: theme.font.size.small,
+  },
 });
 
 const tone = (same: boolean) =>

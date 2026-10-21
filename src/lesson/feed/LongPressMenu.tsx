@@ -11,15 +11,27 @@ export const ASK_MODES: readonly AskMode[] = ['explain', 'why', 'example'];
 interface LongPressMenuProps {
   /** The quoted text; the menu is hidden when null. */
   quoted: string | null;
+  /** The block's trust label, shown above its Report row. */
+  trust?: string;
+  /** «بلّغ على غلطة», the last row, apart from the ask modes. */
+  onReport?: () => void;
   onChoose: (mode: AskMode) => void;
   onDismiss: () => void;
+  /** iOS: the menu is gone (the next sheet may open now). */
+  onHidden?: () => void;
 }
 
-/** اشرحلي / علاش؟ / مثال for a long-pressed paragraph. */
+/**
+ * اشرحلي / علاش؟ / مثال for a long-pressed paragraph, then, set apart, its
+ * trust label and «بلّغ على غلطة» (DESIGN.md §3).
+ */
 export function LongPressMenu({
   quoted,
+  trust,
+  onReport,
   onChoose,
   onDismiss,
+  onHidden,
 }: LongPressMenuProps) {
   const { t } = useTranslation();
   return (
@@ -28,6 +40,8 @@ export function LongPressMenu({
       transparent
       animationType="fade"
       onRequestClose={onDismiss}
+      {...(onHidden && { onDismiss: onHidden })}
+      testID="longpress-modal"
     >
       <Pressable
         style={styles.backdrop}
@@ -58,6 +72,25 @@ export function LongPressMenu({
               </Text>
             </Pressable>
           ))}
+          {onReport && (
+            <View style={styles.reportGroup}>
+              {trust !== undefined && (
+                <Text style={styles.trust} testID="longpress-trust">
+                  {trust}
+                </Text>
+              )}
+              <Pressable
+                style={styles.option}
+                onPress={onReport}
+                accessibilityRole="button"
+                testID="longpress-report"
+              >
+                <Text style={styles.optionText}>
+                  {t('lesson.report.button')}
+                </Text>
+              </Pressable>
+            </View>
+          )}
           <Pressable
             style={styles.option}
             onPress={onDismiss}
@@ -82,19 +115,20 @@ const styles = StyleSheet.create({
   },
   sheet: {
     backgroundColor: theme.color.surfaceCard,
-    borderTopLeftRadius: theme.radius.sheet,
-    borderTopRightRadius: theme.radius.sheet,
+    borderTopLeftRadius: theme.radius.sheetTop,
+    borderTopRightRadius: theme.radius.sheetTop,
     padding: theme.space.xxl,
     paddingBottom: theme.space.sheetBottom,
   },
   title: {
+    fontFamily: theme.font.family.ui.bold,
     fontSize: theme.font.size.body,
-    fontWeight: theme.font.weight.semibold,
     textAlign: 'right',
     writingDirection: 'rtl',
     color: theme.color.textPrimary,
   },
   quote: {
+    fontFamily: theme.font.family.ui.regular,
     marginVertical: theme.space.sm,
     color: theme.color.textSecondary,
     textAlign: 'right',
@@ -107,10 +141,24 @@ const styles = StyleSheet.create({
     borderTopColor: theme.color.borderDefault,
   },
   optionText: {
+    fontFamily: theme.font.family.ui.regular,
     fontSize: theme.font.size.reading,
     textAlign: 'right',
     writingDirection: 'rtl',
     color: theme.color.actionPrimary,
   },
   cancel: { color: theme.color.textSecondary },
+  // Report is set apart from the ask modes: a thicker rule and some space.
+  reportGroup: {
+    marginTop: theme.space.md,
+    borderTopWidth: theme.border.active,
+    borderTopColor: theme.color.border,
+    paddingTop: theme.space.xs,
+  },
+  trust: {
+    ...theme.font.small,
+    color: theme.color.inkMuted,
+    textAlign: 'right',
+    writingDirection: 'rtl',
+  },
 });

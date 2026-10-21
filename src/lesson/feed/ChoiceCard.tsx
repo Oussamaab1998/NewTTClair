@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { CardPurpose, FeedItemOf } from '../session/types';
 import { theme } from '../../theme';
+import { LongPressBlock, type MenuVia } from './BlockActions';
 
 const TITLES = {
   clarify: 'lesson.card.clarify.title',
@@ -50,9 +51,12 @@ function labelKey(purpose: CardPurpose, choice: string) {
 export const ChoiceCard = memo(function ChoiceCardImpl({
   item,
   onChoose,
+  onTitleMenu,
 }: {
   item: FeedItemOf<'choice_card'>;
   onChoose: (purpose: CardPurpose, choice: string) => void;
+  /** Long-press on the title only (the buttons stay plain taps): trust + Report. */
+  onTitleMenu?: (via: MenuVia) => void;
 }) {
   const { t } = useTranslation();
   const open = item.status === 'open';
@@ -62,7 +66,17 @@ export const ChoiceCard = memo(function ChoiceCardImpl({
       testID={`card-${item.purpose}-${item.status}`}
       accessibilityState={{ disabled: !open }}
     >
-      <Text style={styles.title}>{t(TITLES[item.purpose])}</Text>
+      {onTitleMenu ? (
+        <LongPressBlock
+          testID={`card-${item.purpose}-title-longpress`}
+          label={t(TITLES[item.purpose])}
+          onMenu={onTitleMenu}
+        >
+          <Text style={styles.title}>{t(TITLES[item.purpose])}</Text>
+        </LongPressBlock>
+      ) : (
+        <Text style={styles.title}>{t(TITLES[item.purpose])}</Text>
+      )}
       <View style={styles.row}>
         {item.choices.map(choice => {
           const chosen = item.choice === choice;
@@ -95,49 +109,52 @@ export const ChoiceCard = memo(function ChoiceCardImpl({
 const CHOSEN_MARK = '✓';
 
 const styles = StyleSheet.create({
+  // Self-report / clarify / teacher-note: white, dashed edge, quiet buttons.
   card: {
-    backgroundColor: theme.color.surfaceCard,
+    backgroundColor: theme.color.card,
     borderRadius: theme.radius.card,
-    borderWidth: theme.border.thin,
+    borderWidth: theme.border.line,
     borderStyle: 'dashed',
-    borderColor: theme.color.deepDiveRail,
+    borderColor: theme.color.inkMuted,
     padding: theme.space.lg,
     marginVertical: theme.space.xs,
     gap: theme.space.sm,
   },
   inactive: { opacity: theme.opacity.inactive },
   title: {
-    fontSize: theme.font.size.bodyLarge,
-    color: theme.color.textPrimary,
+    ...theme.font.body,
+    fontFamily: theme.font.family.ui.bold,
+    color: theme.color.ink,
     writingDirection: 'rtl',
     textAlign: 'right',
   },
   row: {
-    flexDirection: 'row-reverse',
+    flexDirection: theme.reading.row,
     flexWrap: 'wrap',
     gap: theme.space.sm,
   },
   button: {
     minHeight: theme.size.touch,
     paddingHorizontal: theme.space.xl,
-    borderRadius: theme.radius.pill,
-    borderWidth: theme.border.thin,
-    borderColor: theme.color.borderDefault,
+    borderRadius: theme.radius.button,
+    borderWidth: theme.border.line,
+    borderColor: theme.color.borderControl,
+    backgroundColor: theme.color.card,
     justifyContent: 'center',
   },
   chosen: {
-    borderColor: theme.color.actionPrimary,
-    borderWidth: theme.border.thick,
-    backgroundColor: theme.color.surfaceSelected,
+    borderColor: theme.color.ink,
+    backgroundColor: theme.color.highlighter,
   },
   buttonText: {
-    fontSize: theme.font.size.callout,
-    color: theme.color.actionPrimary,
+    ...theme.font.body,
+    fontFamily: theme.font.family.ui.medium,
+    color: theme.color.ink,
     writingDirection: 'rtl',
   },
   closed: {
-    fontSize: theme.font.size.footnote,
-    color: theme.color.textSecondary,
+    ...theme.font.small,
+    color: theme.color.inkMuted,
     writingDirection: 'rtl',
     textAlign: 'right',
   },
