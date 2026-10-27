@@ -7,14 +7,18 @@
  * The `static` part depends only on (exercise, content version, question), so
  * it is byte-identical across calls and the provider's prompt cache can reuse it.
  */
+import { CATALOG_META } from '../../components/catalogMeta';
+import type { ComponentName } from '../../components/contract';
 import { componentMeta } from '../../components/registry';
 import type { JsonObject } from '../../components/contract';
 import type { Rich } from '../../content/schema';
 import { stepKey } from '../../content/loader';
-import { fractionToPlain } from '../../engine/format';
+import { fractionToPlain, parseNumeric } from '../../engine/format';
+import { add } from '../../engine/rational';
 import type { LessonContent } from '../../lesson/session/lesson';
 import type { Situation } from '../situation';
 import { plannerComponents } from './plannerFormat';
+import { revealingNotes } from './revealing';
 import {
   answerTokensFor,
   mainStepOf,
@@ -23,7 +27,7 @@ import {
   valueKey,
 } from './shown';
 
-export const PACK_VERSION = 1;
+export const PACK_VERSION = 2;
 export const STUDENT_TEXT_MAX = 500;
 
 export interface StaticPack {
@@ -33,6 +37,13 @@ export interface StaticPack {
   verifiedSolution: {
     results: { id: string; statement: string }[];
   };
+  /** Known misconceptions of this exercise (diagnosis ids; descriptions in English). */
+  misconceptions: {
+    id: string;
+    skillId: string;
+    category: string;
+    description: string;
+  }[];
   menu: {
     deepDives: { id: string; representation: string; forStep?: string }[];
     variants: {
@@ -52,10 +63,39 @@ export interface PlanContextPack {
   static: StaticPack;
   dynamic: {
     situation: Omit<Situation, 'request'>;
+    /** Why the AI is asked now (consult.ts ConsultReason). */
+    aiTrigger?: string;
+    /**
+     * The engine's check of what the student just did: their typed value as
+     * the engine reads it, the numeric check identity when the step has one,
+     * or the line verdict (also in situation.step.line). Never the answer.
+     */
+    engineCheck?: {
+      kind: 'typed' | 'line';
+      studentValue?: string;
+      identity?: string;
+      line?: Situation['step']['line'];
+    };
+    /** Representations tried on this step that did not help. */
+    representationsFailed: string[];
     verifiedSoFar: SolutionSoFar;
     constraints: string[];
+    /**
+     * Components the guard accepts at THIS step (2026-10-22): per-step, so in
+     * the uncached part; the full catalog stays in the cached system prompt.
+     */
+    offeredComponents: { component: string; use: string }[];
+    /** While hints are left: component settings that would show the answer (revealing.ts). */
+    notWhileHintsLeft?: string[];
     studentText?: string;
   };
+}
+
+/** The catalog's "when to use", first sentence, at most 200 characters. */
+function useOf(name: ComponentName): string {
+  const w = CATALOG_META[name]?.whenToUse ?? '';
+  const first = /^[^.]*\./.exec(w)?.[0] ?? w;
+  return first.slice(0, 200);
 }
 
 /**
@@ -158,6 +198,12 @@ export function buildStaticPack(content: LessonContent): StaticPack {
         statement: richToText(r.statement),
       })),
     },
+    misconceptions: [...content.loaded.misconceptions.values()].map(m => ({
+      id: m.id,
+      skillId: m.skillId,
+      category: m.category,
+      description: m.description,
+    })),
     menu: {
       deepDives: exercise.deepDives.map(d => ({
         id: d.id,
@@ -289,12 +335,62 @@ export function constraintsFor(s: Situation): string[] {
   return out;
 }
 
+/** Detours on this step that did not help (a failed mini, abandoned, wrong). */
+export function representationsFailed(s: Situation): string[] {
+  const failed = s.detours.filter(
+    d =>
+      d.helped === false ||
+      d.outcome === 'abandoned' ||
+      d.outcome === 'wrong' ||
+      d.outcome === 'revealed',
+  );
+  return [...new Set(failed.map(d => d.representation))];
+}
+
+/** The engine's reading of the student's last typed value or line (no answer). */
+export function engineCheckFor(
+  content: LessonContent,
+  s: Situation,
+): PlanContextPack['dynamic']['engineCheck'] {
+  if (s.step.line && (s.trigger === 'wrong' || s.trigger === 'line_invalid')) {
+    return { kind: 'line', line: s.step.line };
+  }
+  const value = s.step.last?.value;
+  const step = content.steps.get(s.step.key);
+  if (s.trigger !== 'wrong' || !value || step?.kind !== 'typed') {
+    return undefined;
+  }
+  const parsed = parseNumeric(value);
+  if (!parsed.ok) {
+    return undefined;
+  }
+  // The identity only once the rules showed it (its numbers are then allowed).
+  const shownCheck = s.decisions.some(x => x.kind === 'numeric_check');
+  const check = shownCheck && 'check' in step ? step.check : undefined;
+  const known = check ? content.loaded.values.get(check.known) : undefined;
+  return {
+    kind: 'typed',
+    studentValue: fractionToPlain(parsed.value),
+    ...(known && {
+      identity: `${fractionToPlain(parsed.value)} + ${fractionToPlain(
+        known,
+      )} = ${fractionToPlain(add(parsed.value, known))}`,
+    }),
+  };
+}
+
 export function buildPlanPack(
   content: LessonContent,
   situation: Situation,
+  o: { reason?: string } = {},
 ): PlanContextPack {
   const { request, ...rest } = situation;
   const text = request?.text ? cleanStudentText(request.text) : '';
+  const engineCheck = engineCheckFor(content, situation);
+  const hintsLeft =
+    situation.step.hintsUsed < situation.step.hintCount &&
+    !situation.step.revealed;
+  const notes = revealingNotes(content, situation.step.key);
   return {
     v: PACK_VERSION,
     kind: 'plan',
@@ -302,6 +398,9 @@ export function buildPlanPack(
     static: buildStaticPack(content),
     dynamic: {
       situation: rest,
+      ...(o.reason && { aiTrigger: o.reason }),
+      ...(engineCheck && { engineCheck }),
+      representationsFailed: representationsFailed(situation),
       verifiedSoFar: solutionSoFar(content, {
         stepKey: situation.step.key,
         hintsUsed: situation.step.hintsUsed,
@@ -311,6 +410,12 @@ export function buildPlanPack(
         variantsShown: situation.question.variantsShown,
       }),
       constraints: constraintsFor(situation),
+      offeredComponents: plannerComponents(situation.step.skills).map(c => ({
+        component: c,
+        use: useOf(c),
+      })),
+      ...(hintsLeft &&
+        notes.length > 0 && { notWhileHintsLeft: notes }),
       ...(text && { studentText: text }),
     },
   };
@@ -357,6 +462,25 @@ export function buildTutorPack(
       studentText: cleanStudentText(input.studentText),
     },
   };
+}
+
+/** The static part alone (a cache breakpoint ends it; D22). */
+export function serializeStatic(
+  pack: PlanContextPack | TutorContextPack,
+): string {
+  return JSON.stringify({
+    v: pack.v,
+    kind: pack.kind,
+    locale: pack.locale,
+    static: pack.static,
+  });
+}
+
+/** The dynamic part alone (after the static part). */
+export function serializeDynamic(
+  pack: PlanContextPack | TutorContextPack,
+): string {
+  return JSON.stringify({ dynamic: pack.dynamic });
 }
 
 /** Serialized input: static part first (cacheable prefix), then dynamic. */

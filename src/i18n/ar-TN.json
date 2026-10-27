@@ -44,18 +44,27 @@
     "start": "نبداو",
     "soon": "قريبا",
     "moreSoon": "تمارين أخرى قريبا",
+    "section": {
+      "mathematiques": "رياضيات",
+      "sciences-experimentales": "علوم تجريبية"
+    },
     "subject": {
       "analysis": "تحليل",
       "probability": "احتمالات"
     },
     "done": "كملتو",
-    "current": "التالي"
+    "current": "التالي",
+    "viewPaper": "شوف الورقة"
   },
   "lesson": {
     "title": "تمرين الاحتمالات",
     "unreviewed": "مسودّة: مازال ما راجعهاش أستاذ.",
     "draftTag": "مسودّة",
     "exerciseLabel": "Exercice {{n}}",
+    "sectionShort": {
+      "mathematiques": "Maths",
+      "sciences-experimentales": "Sc. exp."
+    },
     "progress": "التقدّم في السؤال",
     "questionTab": "السؤال",
     "correct": "صحيح.",
@@ -65,6 +74,7 @@
     "ladderEnd": "شفت التلميحات الكل. تنجم تشوف الحل.",
     "revealed": "هاو الجواب:",
     "noCannedAnswer": "ما عنديش جواب جاهز على هذا توّا. سؤالك تسجّل.",
+    "noCannedAnswerField": "اكتب سؤالك في خانة «اسأل» توّا.",
     "deepDiveTitle": "نفهمو بالشوية",
     "returnToQuestion": "نرجعو للسؤال ↓",
     "askMode": {
@@ -137,7 +147,23 @@
         "yes": "إيه",
         "no": "لا"
       },
-      "closed": "فات"
+      "closed": "فات",
+      "probe": {
+        "title": "كيفاش لقيت النتيجة هذي؟",
+        "counts_balls_not_pairs": "عدّيت الكور",
+        "confuses_event_and_complement": "عدّيت العكس",
+        "counts_all_outcomes": "عدّيت التيراجات الكل",
+        "counts_ordered_pairs": "حسبت الترتيب",
+        "merges_identical_balls": "الزوز كور اللي عليهم نفس الرقم حسبتهم وحدة",
+        "reuses_earlier_result": "عاودت النتيجة اللي قبل",
+        "dismissed": "موش توّا"
+      },
+      "ask_next": {
+        "title": "تحب تلميح ولا نفهمو الفكرة مع بعض؟",
+        "hint": "تلميح",
+        "deep_dive": "نفهمو الفكرة",
+        "dismissed": "موش توّا"
+      }
     },
     "variantStart": {
       "alternative": "بطريقة أخرى",
@@ -178,7 +204,11 @@
       "tapKill": "اضغط باش توقف ولا ترجع",
       "rawTitle": "خرجات النموذج الخام",
       "rawEmpty": "حتى خرجة",
-      "stored": "الأحداث المحفوظة"
+      "stored": "الأحداث المحفوظة",
+      "traceTitle": "أثر قرارات الذكاء الاصطناعي",
+      "traceEmpty": "حتى قرار",
+      "everyMistake": "كل غلطة",
+      "spend": "المصروف"
     },
     "exportEvents": "تصدير الأحداث",
     "feedbackCard": {
@@ -190,9 +220,31 @@
       "send": "ابعث",
       "noNote": "بلاش",
       "thanks": "يعطيك الصحة!"
+    },
+    "helpReason": {
+      "alternative": "نجرّبو نفس الفكرة بطريقة أخرى.",
+      "deepDive": "نفهمو الفكرة قبل، وبعد نرجعو للسؤال.",
+      "simpler": "نبداو بمثال أصغر.",
+      "prerequisite": "نرجعو خطوة لتالي، لحاجة أسهل.",
+      "hint": "ما فمّاش طريقة أخرى هنا: جرّب التلميح.",
+      "reveal": "ما فمّاش طريقة أخرى هنا: تنجم تشوف الجواب."
+    },
+    "helpChoice": {
+      "notSureOnly": "ما نعرفش برك"
+    },
+    "afterRevealReason": "نجرّبو مثال آخر باش نتأكدو.",
+    "freshNotNow": "موش توّا",
+    "walkthrough": {
+      "title": "خطوة بخطوة",
+      "next": "التالي",
+      "number": "{{n}}."
     }
   },
   "proba": {
+    "ball": {
+      "red": "كورة حمراء {{n}}",
+      "black": "كورة كحلة {{n}}"
+    },
     "urn": {
       "pick": "اختار الكور اللي تجبدهم.",
       "draw": "التيراج:"
@@ -383,5 +435,15 @@
     "here": "انت هنا",
     "proven": "النتائج المثبتة",
     "open": "الورقة"
+  },
+  "examPaper": {
+    "points": "{{n}} نقاط",
+    "heading": "Exercice {{n}} ({{points}} points)"
+  },
+  "reset": {
+    "link": "ابدا من جديد",
+    "question": "تحب تبدا التمرين هذا من جديد؟ العلامات متاع التقدّم باش تتمسح.",
+    "confirm": "ابدا من جديد",
+    "cancel": "لا"
   }
 }

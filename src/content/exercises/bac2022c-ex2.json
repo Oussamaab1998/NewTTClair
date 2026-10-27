@@ -12,51 +12,57 @@
   },
   "number": 2,
   "subject": "probability",
+  "section": "mathematiques",
   "statement": {
     "fr": "Une urne contient cinq boules indiscernables au toucher, numérotées −1, 0, 0, 1 et 2. On tire simultanément deux boules de l'urne. On note B l'événement « au moins une des deux boules tirées porte le numéro 0 »."
   },
   "paper": {
-    "questions": [
+    "source": "Examen du baccalauréat · Session de contrôle 2022 · Mathématiques",
+    "parts": [
       {
-        "id": "1a",
-        "label": "1.a",
-        "status": "soon"
-      },
-      {
-        "id": "1b",
-        "label": "1.b",
-        "wording": [
+        "questions": [
           {
-            "fr": "Montrer que",
-            "math": "p(B) = \\val{pB}"
-          }
-        ],
-        "status": "available"
-      },
-      {
-        "id": "2a",
-        "label": "2.a",
-        "wording": [
+            "id": "1a",
+            "label": "1.a",
+            "status": "soon"
+          },
           {
-            "fr": "X est la variable aléatoire égale au produit des numéros des deux boules tirées. Déterminer la loi de probabilité de X."
+            "id": "1b",
+            "label": "1.b",
+            "wording": [
+              {
+                "fr": "Montrer que",
+                "math": "p(B) = \\val{pB}"
+              }
+            ],
+            "status": "available"
+          },
+          {
+            "id": "2a",
+            "label": "2.a",
+            "wording": [
+              {
+                "fr": "X est la variable aléatoire égale au produit des numéros des deux boules tirées. Déterminer la loi de probabilité de X."
+              }
+            ],
+            "status": "available"
+          },
+          {
+            "id": "2b",
+            "label": "2.b",
+            "status": "soon"
+          },
+          {
+            "id": "3a",
+            "label": "3.a",
+            "status": "soon"
+          },
+          {
+            "id": "3b",
+            "label": "3.b",
+            "status": "soon"
           }
-        ],
-        "status": "available"
-      },
-      {
-        "id": "2b",
-        "label": "2.b",
-        "status": "soon"
-      },
-      {
-        "id": "3a",
-        "label": "3.a",
-        "status": "soon"
-      },
-      {
-        "id": "3b",
-        "label": "3.b",
-        "status": "soon"
+        ]
       }
     ]
   },
@@ -681,6 +687,9 @@
         "source": "authored",
         "status": "ok"
       },
+      "addresses": [
+        "counting"
+      ],
       "blocks": [
         {
           "type": "tutor_text",
@@ -985,6 +994,9 @@
             {
               "math": "p(B) = 1 - p(\\bar{B})"
             }
+          ],
+          "addresses": [
+            "why"
           ]
         },
         {
@@ -1270,6 +1282,53 @@
                   "fr": "contraire de B : « … des deux boules ne porte le numéro 0 »"
                 }
               ],
+              "walkthrough": {
+                "lines": [
+                  {
+                    "ar": [
+                      {
+                        "ar": "اقرا الحدث "
+                      },
+                      {
+                        "fr": "B"
+                      },
+                      {
+                        "ar": " مليح: شنوّة الحالات الكل اللي يصير فيها؟"
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "العكس هو الحالات اللي "
+                      },
+                      {
+                        "fr": "B"
+                      },
+                      {
+                        "ar": " ما يصيرش فيها: جرّب كل اختيار وشوف واش يغطّيهم الكل."
+                      }
+                    ]
+                  }
+                ]
+              },
+              "solutionPhrases": {
+                "fr": [
+                  "aucune",
+                  "ni l'une ni l'autre",
+                  "sans zéro",
+                  "pas de zéro"
+                ],
+                "ar": [
+                  "ولا وحدة",
+                  "حتى وحدة",
+                  "ولا كورة",
+                  "حتى كورة",
+                  "حتى صفر",
+                  "ولا صفر",
+                  "بلا صفر"
+                ]
+              },
               "deepDiveId": "au_moins_contraire"
             },
             {
@@ -1375,6 +1434,28 @@
                   }
                 }
               ],
+              "procedures": [
+                {
+                  "id": "all_balls",
+                  "misconceptionId": "counts_balls_not_pairs",
+                  "reviewed": false
+                },
+                {
+                  "id": "ordered_draw",
+                  "misconceptionId": "complement_ordered",
+                  "reviewed": false
+                },
+                {
+                  "id": "opposite_event",
+                  "misconceptionId": "confuses_event_and_complement",
+                  "reviewed": false
+                },
+                {
+                  "id": "all_outcomes",
+                  "misconceptionId": "counts_all_outcomes",
+                  "reviewed": false
+                }
+              ],
               "hints": [
                 {
                   "ar": [
@@ -1401,6 +1482,35 @@
                   "math": "\\{-1 ; 1\\},\\ \\{-1 ; 2\\},\\ \\ldots"
                 }
               ],
+              "walkthrough": {
+                "lines": [
+                  {
+                    "ar": [
+                      {
+                        "ar": "ثبّت في المطلوب: نعدّو التيراجات اللي ما فيهم حتى صفر، موش الكور."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "كوّن الأزواج من الكور اللي ما عليهمش صفر، كل زوج مرّة وحدة، وبعد عدّهم."
+                      }
+                    ]
+                  }
+                ]
+              },
+              "solutionPhrases": {
+                "fr": [
+                  "trois tirages",
+                  "trois paires"
+                ],
+                "ar": [
+                  "ثلاثة تيراجات",
+                  "ثلاث تيراجات",
+                  "ثلاثة أزواج"
+                ]
+              },
               "deepDiveId": "pairs_listing"
             },
             {
@@ -1525,7 +1635,45 @@
                   ],
                   "math": "p(\\bar{B}) = \\frac{\\val{nNoZero}}{\\ldots}"
                 }
-              ]
+              ],
+              "walkthrough": {
+                "lines": [
+                  {
+                    "ar": [
+                      {
+                        "ar": "ارجع لعدد التيراجات اللي ما فيهم صفر، اللي لقيته في الخطوة اللي قبل."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "الاحتمال هو عدد الحالات المواتية على عدد الحالات الكل: اقسم."
+                      }
+                    ]
+                  }
+                ]
+              },
+              "link": {
+                "resultRef": "nNoZero",
+                "text": {
+                  "ar": [
+                    {
+                      "ar": "لقينا قبل عدد التيراجات اللي ما فيهم حتى صفر:"
+                    }
+                  ]
+                }
+              },
+              "solutionPhrases": {
+                "fr": [
+                  "trois sur dix",
+                  "trois dixièmes"
+                ],
+                "ar": [
+                  "ثلاثة على عشرة",
+                  "ثلاثة من عشرة"
+                ]
+              }
             },
             {
               "id": "s8",
@@ -1586,6 +1734,28 @@
                   }
                 }
               ],
+              "procedures": [
+                {
+                  "id": "balls_in_event",
+                  "misconceptionId": "counts_balls_not_pairs",
+                  "reviewed": false
+                },
+                {
+                  "id": "opposite_event",
+                  "misconceptionId": "confuses_event_and_complement",
+                  "reviewed": false
+                },
+                {
+                  "id": "merged_identical",
+                  "misconceptionId": "merges_identical_balls",
+                  "reviewed": false
+                },
+                {
+                  "id": "earlier_result",
+                  "misconceptionId": "reuses_earlier_result",
+                  "reviewed": false
+                }
+              ],
               "hints": [
                 {
                   "ar": [
@@ -1604,6 +1774,35 @@
                   "math": "p(B) = 1 - \\val{pNotB}"
                 }
               ],
+              "walkthrough": {
+                "lines": [
+                  {
+                    "ar": [
+                      {
+                        "ar": "ارجع للاحتمال اللي لقيته للحدث العكسي:"
+                      }
+                    ],
+                    "math": "p(\\bar{B})"
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "الحدث وعكسو مع بعض يعطيو الاحتمالات الكل: نقص من واحد."
+                      }
+                    ]
+                  }
+                ]
+              },
+              "solutionPhrases": {
+                "fr": [
+                  "sept sur dix",
+                  "sept dixièmes"
+                ],
+                "ar": [
+                  "سبعة على عشرة",
+                  "سبعة من عشرة"
+                ]
+              },
               "deepDiveId": "au_moins_contraire",
               "check": {
                 "kind": "complement_sum",
@@ -1819,6 +2018,23 @@
                   }
                 }
               ],
+              "procedures": [
+                {
+                  "id": "all_balls",
+                  "misconceptionId": "counts_balls_not_pairs",
+                  "reviewed": false
+                },
+                {
+                  "id": "ordered_draw",
+                  "misconceptionId": "counts_ordered_pairs",
+                  "reviewed": false
+                },
+                {
+                  "id": "merged_identical",
+                  "misconceptionId": "merges_identical_balls",
+                  "reviewed": false
+                }
+              ],
               "hints": [
                 {
                   "ar": [
@@ -1843,6 +2059,16 @@
                   ]
                 }
               ],
+              "solutionPhrases": {
+                "fr": [
+                  "dix tirages",
+                  "dix paires"
+                ],
+                "ar": [
+                  "عشرة تيراجات",
+                  "عشر تيراجات"
+                ]
+              },
               "deepDiveId": "pairs_listing"
             }
           ]
@@ -2008,7 +2234,18 @@
                   ],
                   "math": "(-1) \\times 1,\\ (-1) \\times 2,\\ 1 \\times 2"
                 }
-              ]
+              ],
+              "solutionPhrases": {
+                "fr": [
+                  "quatre valeurs",
+                  "moins deux"
+                ],
+                "ar": [
+                  "أربعة قيم",
+                  "أربع قيم",
+                  "ناقص زوز"
+                ]
+              }
             },
             {
               "id": "law_intro",
@@ -2122,6 +2359,18 @@
                   "math": "\\val{nX0}"
                 }
               ],
+              "solutionPhrases": {
+                "fr": [
+                  "sept tirages",
+                  "contient un zéro"
+                ],
+                "ar": [
+                  "سبعة تيراجات",
+                  "سبع تيراجات",
+                  "فيهم صفر",
+                  "فيها صفر"
+                ]
+              },
               "diagnoses": [
                 {
                   "misconceptionId": "misses_duplicate_value_pair",
@@ -2317,6 +2566,16 @@
                   "math": "(-1) \\times 2"
                 }
               ],
+              "solutionPhrases": {
+                "fr": [
+                  "moins un et deux",
+                  "un seul tirage"
+                ],
+                "ar": [
+                  "ناقص واحد مع زوز",
+                  "تيراج وحيد"
+                ]
+              },
               "fillsLaw": "q2a-law"
             },
             {
@@ -2372,6 +2631,14 @@
                   "math": "(-1) \\times 1"
                 }
               ],
+              "solutionPhrases": {
+                "fr": [
+                  "moins un et un"
+                ],
+                "ar": [
+                  "ناقص واحد مع واحد"
+                ]
+              },
               "fillsLaw": "q2a-law"
             },
             {
@@ -2427,6 +2694,14 @@
                   "math": "1 \\times 2"
                 }
               ],
+              "solutionPhrases": {
+                "fr": [
+                  "un et deux"
+                ],
+                "ar": [
+                  "واحد مع زوز"
+                ]
+              },
               "fillsLaw": "q2a-law"
             },
             {
@@ -2488,7 +2763,19 @@
                     }
                   ]
                 }
-              ]
+              ],
+              "solutionPhrases": {
+                "fr": [
+                  "égal à un",
+                  "vaut un",
+                  "font un"
+                ],
+                "ar": [
+                  "يساوي واحد",
+                  "تعطي واحد",
+                  "المجموع واحد"
+                ]
+              }
             },
             {
               "id": "s18",
@@ -2556,6 +2843,18 @@
                   "math": "p(X = 0) = p(B) = \\val{pB}"
                 }
               ],
+              "solutionPhrases": {
+                "fr": [
+                  "un sur dix",
+                  "un dixième",
+                  "sept dixièmes"
+                ],
+                "ar": [
+                  "واحد على عشرة",
+                  "وحدة على عشرة",
+                  "سبعة على عشرة"
+                ]
+              },
               "diagnoses": [
                 {
                   "misconceptionId": "law_sum_not_one",
@@ -4222,6 +4521,28 @@
             }
           }
         },
+        "procedures": [
+          {
+            "id": "balls_in_event",
+            "misconceptionId": "counts_balls_not_pairs",
+            "reviewed": false
+          },
+          {
+            "id": "opposite_event",
+            "misconceptionId": "confuses_event_and_complement",
+            "reviewed": false
+          },
+          {
+            "id": "merged_identical",
+            "misconceptionId": "merges_identical_balls",
+            "reviewed": false
+          },
+          {
+            "id": "earlier_result",
+            "misconceptionId": "reuses_earlier_result",
+            "reviewed": false
+          }
+        ],
         "hints": [
           {
             "ar": [
@@ -4245,6 +4566,18 @@
             "math": "p(C) = 1 - p(\\bar{C})"
           }
         ],
+        "solutionPhrases": {
+          "fr": [
+            "deux sur cinq",
+            "quatre sur dix",
+            "quatre tirages"
+          ],
+          "ar": [
+            "زوز على خمسة",
+            "أربعة على عشرة",
+            "أربعة تيراجات"
+          ]
+        },
         "check": {
           "kind": "complement_sum",
           "known": "pNo2",
@@ -4312,6 +4645,43 @@
             }
           }
         },
+        "procedures": [
+          {
+            "id": "balls_in_event",
+            "misconceptionId": "counts_balls_not_pairs",
+            "reviewed": false
+          },
+          {
+            "id": "all_balls",
+            "misconceptionId": "counts_balls_not_pairs",
+            "reviewed": false
+          },
+          {
+            "id": "opposite_event",
+            "misconceptionId": "confuses_event_and_complement",
+            "reviewed": false
+          },
+          {
+            "id": "all_outcomes",
+            "misconceptionId": "counts_all_outcomes",
+            "reviewed": false
+          },
+          {
+            "id": "ordered_draw",
+            "misconceptionId": "counts_ordered_pairs",
+            "reviewed": false
+          },
+          {
+            "id": "merged_identical",
+            "misconceptionId": "merges_identical_balls",
+            "reviewed": false
+          },
+          {
+            "id": "earlier_result",
+            "misconceptionId": "reuses_earlier_result",
+            "reviewed": false
+          }
+        ],
         "hints": [
           {
             "ar": [
@@ -4327,7 +4697,953 @@
               }
             ]
           }
+        ],
+        "walkthrough": {
+          "lines": [
+            {
+              "ar": [
+                {
+                  "ar": "نحّي الكورة اللي عليها رقم سالب، وشوف الكور اللي بقاو."
+                }
+              ]
+            },
+            {
+              "ar": [
+                {
+                  "ar": "الزوز كور اللي عليهم صفر زوز كور مختلفين: سمّيهم بحرفين مختلفين."
+                }
+              ]
+            },
+            {
+              "ar": [
+                {
+                  "ar": "اكتب الأزواج الكل من الكور اللي بقاو، كل زوج مرّة وحدة، وعدّهم."
+                }
+              ]
+            }
+          ]
+        },
+        "link": {
+          "resultRef": "nNoZero",
+          "text": {
+            "ar": [
+              {
+                "ar": "في السؤال الأصلي لقينا عدد التيراجات اللي ما فيهم حتى صفر:"
+              }
+            ]
+          }
+        },
+        "solutionPhrases": {
+          "fr": [
+            "six tirages",
+            "six paires"
+          ],
+          "ar": [
+            "ستّة تيراجات",
+            "ستّة أزواج"
+          ]
+        }
+      }
+    },
+    {
+      "id": "tr-1b-s5-fresh",
+      "blockId": "var-tr-1b-s5-fresh",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "transfer",
+      "forSteps": [
+        "1b/s5"
+      ],
+      "representation": "Urn",
+      "afterReveal": true,
+      "intro": [
+        {
+          "type": "component",
+          "blockId": "var-tr-1b-s5-fresh-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.4.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "Urn",
+            "props": {}
+          }
+        }
+      ],
+      "step": {
+        "id": "count",
+        "blockId": "var-tr-1b-s5-fresh-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "counting-pairs"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "صندوق جديد فيه ثمنية كور، زوز منهم عليهم صفر. نجبدو زوز كور مع بعض. قدّاش من تيراج ما فيه حتى صفر؟"
+            }
+          ]
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "count",
+            "args": {
+              "event": {
+                "id": "not",
+                "args": {
+                  "event": {
+                    "id": "any_value",
+                    "args": {
+                      "value": 0
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "procedures": [
+          {
+            "id": "balls_in_event",
+            "misconceptionId": "counts_balls_not_pairs",
+            "reviewed": false
+          },
+          {
+            "id": "all_balls",
+            "misconceptionId": "counts_balls_not_pairs",
+            "reviewed": false
+          },
+          {
+            "id": "opposite_event",
+            "misconceptionId": "confuses_event_and_complement",
+            "reviewed": false
+          },
+          {
+            "id": "all_outcomes",
+            "misconceptionId": "counts_all_outcomes",
+            "reviewed": false
+          },
+          {
+            "id": "ordered_draw",
+            "misconceptionId": "counts_ordered_pairs",
+            "reviewed": false
+          },
+          {
+            "id": "earlier_result",
+            "misconceptionId": "reuses_earlier_result",
+            "reviewed": false
+          }
+        ],
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "نحّي الكور اللي عليهم صفر، وعدّ الأزواج من الكور اللي بقاو."
+              }
+            ]
+          },
+          {
+            "ar": [
+              {
+                "ar": "الترتيب ما يهمّش: كل زوج نعدّوه مرّة وحدة."
+              }
+            ]
+          }
+        ],
+        "solutionPhrases": {
+          "fr": [
+            "quinze tirages",
+            "quinze paires"
+          ],
+          "ar": [
+            "خمستاش تيراج",
+            "خمستاش زوج"
+          ]
+        }
+      },
+      "experiment": {
+        "urn": [
+          {
+            "id": "f0",
+            "value": 0
+          },
+          {
+            "id": "f1",
+            "value": 0
+          },
+          {
+            "id": "f2",
+            "value": 1
+          },
+          {
+            "id": "f3",
+            "value": 2
+          },
+          {
+            "id": "f4",
+            "value": 3
+          },
+          {
+            "id": "f5",
+            "value": 4
+          },
+          {
+            "id": "f6",
+            "value": 5
+          },
+          {
+            "id": "f7",
+            "value": 6
+          }
+        ],
+        "draw": "simultaneous",
+        "k": 2
+      }
+    },
+    {
+      "id": "tr-1b-s8-fresh",
+      "blockId": "var-tr-1b-s8-fresh",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "transfer",
+      "forSteps": [
+        "1b/s8"
+      ],
+      "representation": "Urn",
+      "afterReveal": true,
+      "intro": [
+        {
+          "type": "component",
+          "blockId": "var-tr-1b-s8-fresh-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.4.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "Urn",
+            "props": {}
+          }
+        }
+      ],
+      "step": {
+        "id": "prob",
+        "blockId": "var-tr-1b-s8-fresh-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "complement-event"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "نفس الصندوق الجديد. شنوّة احتمال التيراج اللي فيه "
+            },
+            {
+              "fr": "au moins une"
+            },
+            {
+              "ar": " كورة عليها صفر؟"
+            }
+          ]
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "probability",
+            "args": {
+              "event": {
+                "id": "any_value",
+                "args": {
+                  "value": 0
+                }
+              }
+            }
+          }
+        },
+        "procedures": [
+          {
+            "id": "balls_in_event",
+            "misconceptionId": "counts_balls_not_pairs",
+            "reviewed": false
+          },
+          {
+            "id": "opposite_event",
+            "misconceptionId": "confuses_event_and_complement",
+            "reviewed": false
+          },
+          {
+            "id": "merged_identical",
+            "misconceptionId": "merges_identical_balls",
+            "reviewed": false
+          },
+          {
+            "id": "earlier_result",
+            "misconceptionId": "reuses_earlier_result",
+            "reviewed": false
+          }
+        ],
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "خدم بالعكس: احسب احتمال التيراج اللي ما فيه حتى صفر."
+              }
+            ]
+          },
+          {
+            "ar": [
+              {
+                "ar": "بعد، نقص النتيجة من واحد."
+              }
+            ]
+          }
+        ],
+        "solutionPhrases": {
+          "fr": [
+            "treize sur vingt-huit"
+          ],
+          "ar": [
+            "تلطاش على ثمنية وعشرين"
+          ]
+        }
+      },
+      "experiment": {
+        "urn": [
+          {
+            "id": "f0",
+            "value": 0
+          },
+          {
+            "id": "f1",
+            "value": 0
+          },
+          {
+            "id": "f2",
+            "value": 1
+          },
+          {
+            "id": "f3",
+            "value": 2
+          },
+          {
+            "id": "f4",
+            "value": 3
+          },
+          {
+            "id": "f5",
+            "value": 4
+          },
+          {
+            "id": "f6",
+            "value": 5
+          },
+          {
+            "id": "f7",
+            "value": 6
+          }
+        ],
+        "draw": "simultaneous",
+        "k": 2
+      }
+    },
+    {
+      "id": "tr-1b-s3-fresh",
+      "blockId": "var-tr-1b-s3-fresh",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "transfer",
+      "forSteps": [
+        "1b/s3"
+      ],
+      "representation": "Urn",
+      "afterReveal": true,
+      "intro": [
+        {
+          "type": "component",
+          "blockId": "var-tr-1b-s3-fresh-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.4.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "Urn",
+            "props": {}
+          }
+        }
+      ],
+      "step": {
+        "id": "complement",
+        "blockId": "var-tr-1b-s3-fresh-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "complement-event",
+          "au-moins-un"
+        ],
+        "kind": "choice",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "صندوق جديد فيه ثمنية كور. الحدث "
+            },
+            {
+              "fr": "C"
+            },
+            {
+              "ar": " معناه "
+            },
+            {
+              "fr": "au moins une des deux boules porte un numéro supérieur à 4"
+            },
+            {
+              "ar": ". شنوّة الحدث العكسي متاعو؟"
+            }
+          ]
+        },
+        "options": [
+          {
+            "id": "one",
+            "label": {
+              "fr": "exactement une boule porte un numéro supérieur à 4"
+            },
+            "misconceptionId": "au_moins_direct_miscount",
+            "event": {
+              "id": "and",
+              "args": {
+                "events": [
+                  {
+                    "id": "or",
+                    "args": {
+                      "events": [
+                        {
+                          "id": "any_value",
+                          "args": {
+                            "value": 5
+                          }
+                        },
+                        {
+                          "id": "any_value",
+                          "args": {
+                            "value": 6
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "or",
+                    "args": {
+                      "events": [
+                        {
+                          "id": "any_value",
+                          "args": {
+                            "value": 0
+                          }
+                        },
+                        {
+                          "id": "any_value",
+                          "args": {
+                            "value": 1
+                          }
+                        },
+                        {
+                          "id": "any_value",
+                          "args": {
+                            "value": 2
+                          }
+                        },
+                        {
+                          "id": "any_value",
+                          "args": {
+                            "value": 3
+                          }
+                        },
+                        {
+                          "id": "any_value",
+                          "args": {
+                            "value": 4
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "none",
+            "label": {
+              "fr": "aucune des deux boules ne porte un numéro supérieur à 4"
+            },
+            "event": {
+              "id": "not",
+              "args": {
+                "event": {
+                  "id": "or",
+                  "args": {
+                    "events": [
+                      {
+                        "id": "any_value",
+                        "args": {
+                          "value": 5
+                        }
+                      },
+                      {
+                        "id": "any_value",
+                        "args": {
+                          "value": 6
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "id": "two",
+            "label": {
+              "fr": "les deux boules portent un numéro supérieur à 4"
+            },
+            "misconceptionId": "complement_partial_event",
+            "event": {
+              "id": "not",
+              "args": {
+                "event": {
+                  "id": "or",
+                  "args": {
+                    "events": [
+                      {
+                        "id": "any_value",
+                        "args": {
+                          "value": 0
+                        }
+                      },
+                      {
+                        "id": "any_value",
+                        "args": {
+                          "value": 1
+                        }
+                      },
+                      {
+                        "id": "any_value",
+                        "args": {
+                          "value": 2
+                        }
+                      },
+                      {
+                        "id": "any_value",
+                        "args": {
+                          "value": 3
+                        }
+                      },
+                      {
+                        "id": "any_value",
+                        "args": {
+                          "value": 4
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "answer": {
+          "type": "complement",
+          "of": {
+            "id": "or",
+            "args": {
+              "events": [
+                {
+                  "id": "any_value",
+                  "args": {
+                    "value": 5
+                  }
+                },
+                {
+                  "id": "any_value",
+                  "args": {
+                    "value": 6
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "العكس فيه الحالات الكل اللي "
+              },
+              {
+                "fr": "C"
+              },
+              {
+                "ar": " ما يصيرش فيها."
+              }
+            ]
+          },
+          {
+            "ar": [
+              {
+                "ar": "كي "
+              },
+              {
+                "fr": "C"
+              },
+              {
+                "ar": " ما يصيرش، قدّاش من كورة فوق الأربعة تنجم تكون في يدّك؟"
+              }
+            ]
+          }
+        ],
+        "solutionPhrases": {
+          "fr": [
+            "aucune des deux"
+          ],
+          "ar": [
+            "ولا وحدة فوق الأربعة",
+            "الزوز تحت الخمسة"
+          ]
+        }
+      },
+      "experiment": {
+        "urn": [
+          {
+            "id": "f0",
+            "value": 0
+          },
+          {
+            "id": "f1",
+            "value": 0
+          },
+          {
+            "id": "f2",
+            "value": 1
+          },
+          {
+            "id": "f3",
+            "value": 2
+          },
+          {
+            "id": "f4",
+            "value": 3
+          },
+          {
+            "id": "f5",
+            "value": 4
+          },
+          {
+            "id": "f6",
+            "value": 5
+          },
+          {
+            "id": "f7",
+            "value": 6
+          }
+        ],
+        "draw": "simultaneous",
+        "k": 2
+      }
+    },
+    {
+      "id": "tr-1b-s7-fresh",
+      "blockId": "var-tr-1b-s7-fresh",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "transfer",
+      "forSteps": [
+        "1b/s7"
+      ],
+      "representation": "Urn",
+      "afterReveal": true,
+      "intro": [
+        {
+          "type": "component",
+          "blockId": "var-tr-1b-s7-fresh-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.4.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "Urn",
+            "props": {}
+          }
+        }
+      ],
+      "step": {
+        "id": "prob",
+        "blockId": "var-tr-1b-s7-fresh-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "equiprobability",
+          "complement-event"
+        ],
+        "kind": "choice",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "صندوق جديد فيه ثمنية كور، زوز منهم عليهم صفر. نجبدو زوز مع بعض. شنوّة احتمال التيراج اللي ما فيه حتى صفر؟"
+            }
+          ]
+        },
+        "options": [
+          {
+            "id": "p13_28",
+            "value": "13/28",
+            "misconceptionId": "confuses_event_and_complement"
+          },
+          {
+            "id": "p3_4",
+            "value": "3/4",
+            "misconceptionId": "counts_balls_not_pairs"
+          },
+          {
+            "id": "p15_28",
+            "value": "15/28"
+          }
+        ],
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "probability",
+            "args": {
+              "event": {
+                "id": "not",
+                "args": {
+                  "event": {
+                    "id": "any_value",
+                    "args": {
+                      "value": 0
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "عدّ التيراجات اللي ما فيهم صفر، وبعد التيراجات الكل."
+              }
+            ]
+          },
+          {
+            "ar": [
+              {
+                "ar": "الاحتمال: الأوّل على الثاني."
+              }
+            ]
+          }
+        ],
+        "solutionPhrases": {
+          "fr": [
+            "quinze sur vingt-huit"
+          ],
+          "ar": [
+            "خمستاش على ثمنية وعشرين"
+          ]
+        }
+      },
+      "experiment": {
+        "urn": [
+          {
+            "id": "f0",
+            "value": 0
+          },
+          {
+            "id": "f1",
+            "value": 0
+          },
+          {
+            "id": "f2",
+            "value": 1
+          },
+          {
+            "id": "f3",
+            "value": 2
+          },
+          {
+            "id": "f4",
+            "value": 3
+          },
+          {
+            "id": "f5",
+            "value": 4
+          },
+          {
+            "id": "f6",
+            "value": 5
+          },
+          {
+            "id": "f7",
+            "value": 6
+          }
+        ],
+        "draw": "simultaneous",
+        "k": 2
+      }
+    },
+    {
+      "id": "sim-1b-s7-1",
+      "blockId": "var-sim-1b-s7-1",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "ex2-0.4.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "simpler",
+      "forSteps": [
+        "1b/s7"
+      ],
+      "representation": "Urn",
+      "intro": [
+        {
+          "type": "component",
+          "blockId": "var-sim-1b-s7-1-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "ex2-0.4.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "Urn",
+            "props": {}
+          }
+        }
+      ],
+      "step": {
+        "id": "prob",
+        "blockId": "var-sim-1b-s7-1-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "ex2-0.4.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "skills": [
+          "equiprobability",
+          "complement-event"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "مثال أصغر: صندوق فيه أربعة كور، وحدة منهم عليها صفر. نجبدو زوز مع بعض. شنوّة احتمال التيراج اللي ما فيه حتى صفر؟"
+            }
+          ]
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "probability",
+            "args": {
+              "event": {
+                "id": "not",
+                "args": {
+                  "event": {
+                    "id": "any_value",
+                    "args": {
+                      "value": 0
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "عدّ التيراجات الكل، وبعد عدّ اللي ما فيهم صفر."
+              }
+            ]
+          },
+          {
+            "ar": [
+              {
+                "ar": "اقسم العدد الثاني على الأوّل."
+              }
+            ]
+          }
         ]
+      },
+      "round": 1,
+      "experiment": {
+        "urn": [
+          {
+            "id": "t0",
+            "value": 0
+          },
+          {
+            "id": "t1",
+            "value": 1
+          },
+          {
+            "id": "t2",
+            "value": 2
+          },
+          {
+            "id": "t3",
+            "value": 3
+          }
+        ],
+        "draw": "simultaneous",
+        "k": 2
       }
     },
     {
@@ -4389,7 +5705,19 @@
               }
             ]
           }
-        ]
+        ],
+        "solutionPhrases": {
+          "fr": [
+            "quinze tirages",
+            "quinze paires",
+            "quinze"
+          ],
+          "ar": [
+            "خمسطاش",
+            "خمستاش",
+            "خمسطاش تيراج"
+          ]
+        }
       },
       "experiment": {
         "urn": [
@@ -4534,7 +5862,20 @@
               }
             ]
           }
-        ]
+        ],
+        "solutionPhrases": {
+          "fr": [
+            "moins trois",
+            "moins deux",
+            "quatre valeurs"
+          ],
+          "ar": [
+            "ناقص ثلاثة",
+            "ناقص زوز",
+            "أربعة قيم",
+            "أربع قيم"
+          ]
+        }
       },
       "experiment": {
         "urn": [
@@ -4641,7 +5982,16 @@
               }
             ]
           }
-        ]
+        ],
+        "solutionPhrases": {
+          "fr": [
+            "trois tirages"
+          ],
+          "ar": [
+            "ثلاثة تيراجات",
+            "ثلاث تيراجات"
+          ]
+        }
       },
       "experiment": {
         "urn": [

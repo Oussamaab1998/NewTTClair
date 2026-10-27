@@ -13,6 +13,7 @@ import {
   secondMoment,
   variance,
   type Ball,
+  type BallColor,
   type Draw,
   type EventContext,
   type EventSpec,
@@ -45,17 +46,49 @@ export function formatFraction([num, den]: Fraction): string {
   return den === 1 ? n : `${n}/${den}`;
 }
 
+/** The letter of a coloured ball, as on the French exam paper (rouge, noire). */
+export const BALL_LETTER: Record<BallColor, string> = { red: 'R', black: 'N' };
+
+/** 12 -> "₁₂" (subscript digits). */
+const subscript = (n: number): string =>
+  [...String(n)]
+    .map(d => String.fromCharCode(0x2080 + Number(d)))
+    .join('');
+
+/** 1-based number of each coloured ball within its colour (R₁ … R₄, N₁ … N₆). */
+export function colorIndexes(balls: readonly Ball[]): Map<string, number> {
+  const seen = new Map<string, number>();
+  const out = new Map<string, number>();
+  for (const b of balls) {
+    if (b.color !== undefined) {
+      const n = (seen.get(b.color) ?? 0) + 1;
+      seen.set(b.color, n);
+      out.set(b.id, n);
+    }
+  }
+  return out;
+}
+
 /**
  * Ball id -> label. With `markDuplicates`, the second ball carrying a value
  * gets a prime (0, 0′), the third two primes, so equal values stay distinguishable.
+ * A coloured ball shows its letter instead, numbered within its colour (R₁, N₂).
  */
 export function ballLabels(
   balls: readonly Ball[],
   markDuplicates: boolean,
 ): Map<string, string> {
   const seen = new Map<number, number>();
+  const index = colorIndexes(balls);
   const out = new Map<string, string>();
   for (const b of balls) {
+    if (b.color !== undefined) {
+      out.set(
+        b.id,
+        BALL_LETTER[b.color] + (markDuplicates ? subscript(index.get(b.id)!) : ''),
+      );
+      continue;
+    }
     const n = seen.get(b.value) ?? 0;
     seen.set(b.value, n + 1);
     out.set(b.id, formatInt(b.value) + (markDuplicates ? PRIME.repeat(n) : ''));

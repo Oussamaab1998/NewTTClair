@@ -186,6 +186,26 @@ does not change. In normal mode there are no dev tabs, no status strip and no co
 - Primary «نرجعو للسؤال» closes the sheet. Opening and closing are logged (`component_event Paper open/close`).
 - Not built: the «نسلّم بيه» admit-a-result row in image 10 (no such feature).
 
+### 4.4 Exam paper screen (05, 06; 07's marks without any gating)
+From the picker card's quiet «شوف الورقة», before starting: the whole exercise as printed.
+- Header in reading order: back (→) at the right, «Exercice n», the «p نقاط» tag (only when `paper.points`
+  is set) and «مسودّة». No difficulty, duration or page count (no such data; the sheet scrolls).
+- One white sheet on the Cahier grid, French LTR in STIX: the source line (small spaced capitals, from
+  `paper.source`, never an emblem), «Exercice n (p points)» underlined, the statement, each part's underlined
+  heading and intro, numbered questions «1)» with hanging «a) b) c)». Formulas are their own LTR lines.
+- Marks: ✓ (green circle) on done questions, the current one highlighted with a dot; a question without
+  transcribed wording shows only its label and «قريبا». Built-later questions with wording carry no mark.
+- Bottom: the picker card's own primary button («كمّل من X» / «نبداو»). No lock, Premium or free-question
+  link (not in scope). Content: `paper.parts[].questions[].subs[]` (schema.ts); the picker chips and the
+  «الورقة» sheet show only the parts the app teaches (`appPaperParts`, src/content/paper.ts).
+
+### 4.5 «ابدا من جديد» (start the exercise from scratch)
+A quiet link under the primary button of a picker card and of the paper screen, only when the exercise has a
+done part; never inside lessons. It opens a small dialog: «تحب تبدا التمرين هذا من جديد؟ العلامات متاع التقدّم
+باش تتمسح.», «لا» (filled ink, the screen-reader focus, first in reading order) and «ابدا من جديد» (outlined, red
+text: said in words, not by colour alone). Tapping outside or the back gesture cancels. Confirming refreshes the
+screen at once (D25: progress reset, history kept).
+
 ## 5. Behaviour the design must keep
 - PredictReveal holds the lesson until one tap and hides its verdict before it. It stays one tap
   (image 04 shows «نثبّت» under a prediction: not copied).
@@ -196,10 +216,13 @@ does not change. In normal mode there are no dev tabs, no status strip and no co
 - Every interaction still emits its event. testIDs and a11y labels used by tests stay.
 
 ## 6. Paper grid
-D2 starts with flat paper (`color.paper`). The 22 pt grid in `gridLine` is added only if a measurement
-shows no scroll cost (numbers reported: mount time and scroll frame times on the simulator, with and
-without). If added, it is drawn once as a fixed (non-scrolling) background behind the feed, never
-re-rendered by feed updates. Cheap Android will be measured later.
+The Cahier squared paper of the mockups (01, 02, 04, 09) is the default (product owner, 2026-10-21; D24):
+22 pt squares, 1 pt lines in `gridLine` #DDE5F3 on `paper` #F2F5FB (1.16:1, decorative, as measured in
+the mockups: 2 px lines every 44 px at 2×). Drawn once (`PaperBackground`, react-native-svg) as a fixed,
+non-scrolling background behind the lesson feed, the picker and the «الورقة» sheet; never re-rendered by
+feed updates (tested). White cards stay solid. Not behind the keypad or the line editor's own ruled page.
+`theme.layout.paperStyle` falls back to `'flat'` if a measurement shows a real problem (cheap Android
+not measured yet). `-devPaper flat|grid|ruled` compares in debug builds.
 
 ## 7. Dev mode and test mode
 Dev mode is off on every launch. It is turned on only by the launch argument `-devMode on` or by a 2 s

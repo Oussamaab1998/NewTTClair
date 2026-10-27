@@ -17,6 +17,11 @@ import { SKILLS, type Skills } from '../content/skills';
 import type { Event } from '../telemetry/events';
 import { eventStepKey, stepInfo, type Catalog } from './catalog';
 import { THRESHOLDS, type Thresholds } from './config';
+import {
+  attemptOutcomes,
+  outcomesBySkill,
+  type SkillOutcomes,
+} from './outcomes';
 
 /**
  * Statuses are planner hypotheses about what to show next, never labels for
@@ -42,6 +47,13 @@ export interface SkillEvidence {
   skipped: number;
   transferOk: number;
   transferFail: number;
+  /** "Change method" / "easier" taps (help chips, 2026-10-22): struggle signals like "not sure". */
+  changeMethod: number;
+  easier: number;
+  /** Long-press asks with no verified answer (round 1, 2026-10-22): a struggle signal too. */
+  unanswered: number;
+  /** D1: misconceptions of this skill seen on another skill's step (a struggle signal). */
+  misconceptionSignals: number;
   lastSeen: number;
 }
 
@@ -55,6 +67,8 @@ export interface SkillState {
   /** Planner-chosen representations after which the original step was answered right. */
   representationsHelped: string[];
   misconceptions: Record<string, number>;
+  /** E1: the outcome class of each finished attempt on this skill (planner input, never shown). */
+  outcomes: SkillOutcomes;
   nextReviewAt?: number;
 }
 
@@ -83,6 +97,9 @@ interface Acc {
   /** Sessions of clean transfers (no hints). */
   cleanTransfers: { session: string; ts: number }[];
   firstTransferSession?: string;
+  /** D2: the last reveal, and the last correct answer on a variant (a transfer included). */
+  lastRevealAt?: number;
+  lastVariantOkAt?: number;
 }
 
 const emptyEvidence = (): SkillEvidence => ({
@@ -96,6 +113,10 @@ const emptyEvidence = (): SkillEvidence => ({
   skipped: 0,
   transferOk: 0,
   transferFail: 0,
+  changeMethod: 0,
+  easier: 0,
+  unanswered: 0,
+  misconceptionSignals: 0,
   lastSeen: 0,
 });
 
@@ -186,6 +207,9 @@ export function deriveState(
           const helped = helpedSteps.has(key);
           touch(ids, e.ts, a => {
             a.ev.correct += 1;
+            if (e.stepId.startsWith('var:')) {
+              a.lastVariantOkAt = e.ts;
+            }
             if (helped) {
               a.ev.helped += 1;
             }
@@ -212,14 +236,31 @@ export function deriveState(
           h.lastSeen = Math.max(h.lastSeen, e.ts);
           break;
         }
+        // D1 (2026-10-22): the wrong answer is evidence on the step's skills;
+        // its misconception is counted under its own skill (the library's
+        // skillId), which also gets one signal when it is not one of them.
+        const own =
+          e.misconceptionId !== undefined
+            ? catalog.misconceptions.get(e.misconceptionId)?.skillId
+            : undefined;
         touch(ids, e.ts, a => {
           a.ev.wrong += 1;
           signal(a, e.sessionId);
-          if (e.misconceptionId !== undefined) {
+          if (e.misconceptionId !== undefined && own === undefined) {
             a.misconceptions[e.misconceptionId] =
               (a.misconceptions[e.misconceptionId] ?? 0) + 1;
           }
         });
+        if (own !== undefined && e.misconceptionId !== undefined) {
+          const m = e.misconceptionId;
+          touch([own], e.ts, a => {
+            a.misconceptions[m] = (a.misconceptions[m] ?? 0) + 1;
+            if (!ids.includes(own)) {
+              a.ev.misconceptionSignals += 1;
+              signal(a, e.sessionId);
+            }
+          });
+        }
         break;
       }
       case 'not_sure':
@@ -228,6 +269,26 @@ export function deriveState(
           a.ev.notSure += 1;
           signal(a, e.sessionId);
         });
+        break;
+      case 'request':
+        // Counts like "not sure": a struggle signal on the step's skills.
+        helpedSteps.add(key);
+        touch(skillsOf(e), e.ts, a => {
+          if (e.kind === 'simpler') {
+            a.ev.easier += 1;
+          } else {
+            a.ev.changeMethod += 1;
+          }
+          signal(a, e.sessionId);
+        });
+        break;
+      case 'ask':
+        if (e.unanswered) {
+          touch(skillsOf(e), e.ts, a => {
+            a.ev.unanswered += 1;
+            signal(a, e.sessionId);
+          });
+        }
         break;
       case 'hint':
         helpedSteps.add(key);
@@ -239,6 +300,7 @@ export function deriveState(
         helpedSteps.delete(key);
         touch(skillsOf(e), e.ts, a => {
           a.ev.revealed += 1;
+          a.lastRevealAt = e.ts;
         });
         break;
       case 'skip':
@@ -262,6 +324,7 @@ export function deriveState(
         touch([e.skillId], e.ts, a => {
           if (e.correct) {
             a.ev.transferOk += 1;
+            a.lastVariantOkAt = e.ts;
             a.firstTransferSession ??= e.sessionId;
             if (e.hintsUsed === 0) {
               a.cleanTransfers.push({ session: e.sessionId, ts: e.ts });
@@ -300,6 +363,7 @@ export function deriveState(
   }
 
   const out: Record<string, SkillState> = {};
+  const byOutcome = outcomesBySkill(attemptOutcomes(events, catalog));
   for (const [id, a] of acc) {
     const status = statusOf(a, th);
     const delay =
@@ -310,6 +374,7 @@ export function deriveState(
         ? th.reviewDelayMs[status]
         : undefined;
     out[id] = {
+      outcomes: byOutcome.get(id) ?? { counts: {}, recent: [] },
       skillId: id,
       kind: skills.kind(id) ?? 'math',
       status,
@@ -329,6 +394,13 @@ function statusOf(a: Acc, th: Thresholds): SkillStatus {
   const hadGap = [...a.signals.values()].some(
     n => n >= th.gapSignalsPerSession,
   );
+  // D2 (2026-10-22): a reveal holds the skill until a later correct variant.
+  if (
+    a.lastRevealAt !== undefined &&
+    a.lastRevealAt >= (a.lastVariantOkAt ?? -1)
+  ) {
+    return hadGap ? 'gap' : 'shaky';
+  }
   if (ev.transferOk > 0) {
     if (!hadGap) {
       return 'known';
@@ -342,7 +414,13 @@ function statusOf(a: Acc, th: Thresholds): SkillStatus {
     return 'gap';
   }
   if (
-    ev.wrong + ev.notSure >= th.shakySignals ||
+    ev.wrong +
+      ev.notSure +
+      ev.changeMethod +
+      ev.easier +
+      ev.unanswered +
+      ev.misconceptionSignals >=
+      th.shakySignals ||
     ev.guessed > 0 ||
     ev.helped > 0 ||
     ev.revealed > 0 ||

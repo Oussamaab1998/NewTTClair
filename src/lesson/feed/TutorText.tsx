@@ -7,7 +7,7 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import type { Rich } from '../../content/schema';
-import { richToPlain, RichView } from './RichView';
+import { richToQuote, type Quote, RichView } from './RichView';
 import { theme } from '../../theme';
 
 /** COMPONENTS_LESSON_UI.md §6: 450 ms hold, 8 pt move cancels. */
@@ -18,7 +18,7 @@ interface TutorTextProps {
   rich: Rich;
   blockId?: string;
   longPress: boolean;
-  onLongPress?: (blockId: string, quoted: string) => void;
+  onLongPress?: (blockId: string, quote: Quote) => void;
   /** Screen-reader "report" action: the block's menu (trust label + Report). */
   onReportAction?: () => void;
   testID?: string;
@@ -45,7 +45,7 @@ export const TutorText = memo(function TutorTextImpl({
     testID: testID ? `${testID}-longpress` : undefined,
     onActivate: () => {
       if (enabled) {
-        onLongPress(blockId, richToPlain(rich));
+        onLongPress(blockId, richToQuote(rich));
       }
     },
   });
@@ -68,7 +68,7 @@ export const TutorText = memo(function TutorTextImpl({
           if (e.nativeEvent.actionName === 'report') {
             onReportAction?.();
           } else if (enabled) {
-            onLongPress(blockId, richToPlain(rich));
+            onLongPress(blockId, richToQuote(rich));
           }
         }}
       >

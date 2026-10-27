@@ -14,6 +14,7 @@ The planner answers one question: **"given this student's behavior so far, what 
    - Mini-example loop: simpler twins in round order, max 3 rounds (`example_round` events), then the prerequisite or "save a note for my teacher".
    - No rule applies: the next authored step (`rule.next_step`).
 2. **LLM planner (backend proxy).** Used when rules cannot diagnose: free-text answers, unusual mistakes, typed questions, long-press asks not covered by verified content, repeated failure after rule actions.
+   - **AI tutor v2 (D26):** asked on a wrong answer without a known misconception, the 2nd struggle signal on a step, a wrong or unreadable typed line (`line_invalid` trigger), a free-text request or a rules fallback; pilot flag "AI on every mistake" with its own daily cap. Output: one action, at most 3 blocks, a misconception id or a short description, and a dev-only `why`, as the flat wire format (`wireFormat.ts`) mapped to `PlannerOutput`. Prompt `p3`: tutor rules from TUTOR_BEHAVIOR.md + the generated component catalog (`catalog.ts`).
 3. **Deterministic fallback.** If the LLM times out, errors, or returns invalid output -> rules result or the next authored step.
 
 ## Input: context pack (keep small; cache the static part)

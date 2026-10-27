@@ -8,6 +8,13 @@
  *                                               planner vs labels, per decision point
  *   reports <queue.jsonl>                       exported report / question queue as a table
  *   guard                                       output guard on the hand-written planner fixtures
+ *   phrases                                     steps with a final answer and their solution phrases (D16)
+ *   help-usage <log.jsonl>                      how often the help chips, "⋯", choice and repair offer were used
+ *   coverage [log.jsonl ...]                    content coverage per step (+ wrong/hint/reveal counts from logs)
+ *   eval --estimate [--models a,b] [--log <log.jsonl>|--no-log]
+ *                                               AI tutor v2: cost estimate (free token counts, no generation)
+ *   eval --live --cap-usd <n> [--models a,b] [--log ...] [--timeout-ms <ms>]
+ *                                               AI tutor v2: live comparison, report + darija review (paid)
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 
@@ -28,10 +35,22 @@ import {
 } from './lib';
 import { readQueueExport } from '../../src/telemetry/reports';
 import { formatReports } from './reports';
+import { contentCoverage, formatCoverage, usageByStep } from './coverage';
 import {
   formatGuardRows,
   runGuardFixtures,
 } from '../../src/planner/llm/fixtures/guardFixtures';
+import { runEval } from './evalCli';
+import { formatHelpUsage, helpUsage } from '../../src/telemetry/helpUsage';
+import ex4 from '../../src/content/exercises/bac2022c-ex4.json';
+import ex4Misconceptions from '../../src/content/exercises/bac2022c-ex4.misconceptions.json';
+import exSc2 from '../../src/content/exercises/bac2022c-sc-ex2.json';
+import exSc2Misconceptions from '../../src/content/exercises/bac2022c-sc-ex2.misconceptions.json';
+import { buildContent } from '../../src/lesson/session/lesson';
+import {
+  formatPhraseCoverage,
+  phraseCoverage,
+} from '../../src/planner/llm/solutionConcepts';
 
 function fail(message: string): never {
   process.stderr.write(`${message}\n`);
@@ -167,8 +186,62 @@ switch (command) {
     );
     break;
   }
+  case 'help-usage': {
+    const [input] = args;
+    if (!input) {
+      fail('usage: help-usage <log.jsonl>');
+    }
+    const { events } = readLog(readFileSync(input, 'utf8'));
+    process.stdout.write(`${formatHelpUsage(helpUsage(events))}\n`);
+    break;
+  }
+  case 'coverage': {
+    const events = args.flatMap(f => readLog(readFileSync(f, 'utf8')).events);
+    const usage = args.length > 0 ? usageByStep(events) : undefined;
+    for (const [raw, mis] of [
+      [ex2, ex2Misconceptions],
+      [exSc2, exSc2Misconceptions],
+      [ex4, ex4Misconceptions],
+    ] as const) {
+      const r = loadExercise(raw, mis);
+      if (!r.ok) {
+        fail(r.errors.join('\n'));
+      }
+      process.stdout.write(
+        `\n## ${r.loaded.exercise.id}\n\n${formatCoverage(
+          contentCoverage(r.loaded),
+          usage,
+        )}\n`,
+      );
+    }
+    break;
+  }
+  case 'phrases': {
+    for (const [raw, mis, questions] of [
+      [ex2, ex2Misconceptions, ['1b', '2a']],
+      [exSc2, exSc2Misconceptions, ['1']],
+      [ex4, ex4Misconceptions, ['A1']],
+    ] as const) {
+      const r = loadExercise(raw, mis);
+      if (!r.ok) {
+        fail(r.errors.join('\n'));
+      }
+      for (const q of questions) {
+        process.stdout.write(
+          `\n## ${q}\n\n${formatPhraseCoverage(
+            phraseCoverage(buildContent(r.loaded, q)),
+          )}\n`,
+        );
+      }
+    }
+    break;
+  }
+  case 'eval': {
+    runEval(args).catch(e => fail(String(e)));
+    break;
+  }
   default:
     fail(
-      'commands: table | convert | agree | reports | guard (see tools/replay/README.md)',
+      'commands: table | convert | agree | reports | guard | phrases | help-usage | eval (see tools/replay/README.md)',
     );
 }

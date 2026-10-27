@@ -93,6 +93,19 @@ export function richToSpoken(rich: Rich): string {
 }
 
 /** Plain text of a Rich (quotes in student bubbles). */
+/** A quoted block: its words, and its formula apart (rendered as math, never as raw LaTeX). */
+export interface Quote {
+  text: string;
+  math?: string;
+}
+
+export function richToQuote(rich: Rich): Quote {
+  const text = [rich.ar && toPlainText(rich.ar), rich.fr]
+    .filter(Boolean)
+    .join(' ');
+  return rich.math !== undefined ? { text, math: rich.math } : { text };
+}
+
 export function richToPlain(rich: Rich): string {
   return [rich.ar && toPlainText(rich.ar), rich.fr, rich.math]
     .filter(Boolean)

@@ -2,11 +2,14 @@
  * Hand-written planner answers (valid and invalid) for the output guard, run
  * through the same pipeline as live answers (FakeClient -> zod -> content ->
  * guard). Situations: Exercise 2, 1.b, after a wrong answer on s3 (choice,
- * answer "none") and on s5 (typed, answer 3; the student typed 4).
+ * answer "none") and on s5 (typed, answer 3; the student typed 4); 2.a s10
+ * (EventPicker); Exercise 4 A1 s8 (lines) after an unknown wrong line.
  * Arabic text here is test data only (reviewed: false).
  */
 import ex2 from '../../../content/exercises/bac2022c-ex2.json';
 import ex2Misconceptions from '../../../content/exercises/bac2022c-ex2.misconceptions.json';
+import ex4 from '../../../content/exercises/bac2022c-ex4.json';
+import ex4Misconceptions from '../../../content/exercises/bac2022c-ex4.misconceptions.json';
 import { loadExercise } from '../../../content/loader';
 import {
   buildContent,
@@ -21,7 +24,13 @@ import { buildSituation, type Situation } from '../../situation';
 import { consultWith } from '../consult';
 import { createFakeClient } from '../plannerClient';
 
-export type Where = 's3' | 's5' | '2a-s10';
+export type Where =
+  | 's3'
+  | 's5'
+  | '2a-s6'
+  | '2a-s10'
+  | 'A1-s8'
+  | 'A1-s8-invalid';
 
 export interface GuardFixture {
   id: string;
@@ -95,7 +104,8 @@ export const GUARD_FIXTURES: GuardFixture[] = [
       next: {
         kind: 'explain',
         blocks: [
-          said('العكس متاع الحدث هذا هو اللي ما يصيرش فيه حتى صفر.'),
+          // Reworded (D16, 2026-10-22): "… ما يصيرش فيه حتى صفر" states s3's answer.
+          said('العكس متاع الحدث هو الحالات اللي ما يصيرش فيها.'),
           { type: 'math', latex: '\\bar{B}' },
         ],
       },
@@ -253,6 +263,441 @@ export const GUARD_FIXTURES: GuardFixture[] = [
       next: { kind: 'explain', blocks: [said('فمّا 3 تيراجات.')] },
     },
   },
+  // D16 (2026-10-22): the current step's answer in words, Arabic or math.
+  {
+    id: 'live-aucune-and-complement',
+    at: 's3',
+    expect: 'reject',
+    reasons: ['final_answer_early'],
+    output: {
+      ...dx('live'),
+      next: {
+        kind: 'explain',
+        blocks: [
+          {
+            type: 'tutor_text',
+            text: {
+              ar: [
+                { ar: 'الحدث العكسي يعني ' },
+                { fr: 'aucune' },
+                { ar: ' من الكور.' },
+              ],
+            },
+          },
+          {
+            type: 'math',
+            latex: '\\overline{B} : \\text{aucune boule portant le numéro } 0',
+          },
+        ],
+      },
+    },
+  },
+  {
+    id: 'arabic-paraphrase-of-answer',
+    at: 's3',
+    expect: 'reject',
+    reasons: ['final_answer_early'],
+    output: {
+      ...dx('paraphrase'),
+      next: {
+        kind: 'explain',
+        blocks: [said('العكس هو اللي ما فيه ولا وحدة عليها صفر.')],
+      },
+    },
+  },
+  {
+    id: 'lists-all-options',
+    at: 's3',
+    expect: 'reject',
+    reasons: ['option_list'],
+    output: {
+      ...dx('options'),
+      next: {
+        kind: 'explain',
+        blocks: [
+          {
+            type: 'tutor_text',
+            text: { fr: 'Aucune, exactement une, ou les deux ?' },
+          },
+        ],
+      },
+    },
+  },
+  {
+    id: 'answer-number-in-words',
+    at: 's5',
+    expect: 'reject',
+    reasons: ['final_answer_early'],
+    output: {
+      ...dx('words'),
+      next: { kind: 'explain', blocks: [said('عدّيت ثلاثة تيراجات؟')] },
+    },
+  },
+  {
+    id: 'near-miss-question-on-cases',
+    at: 's3',
+    expect: 'accept',
+    output: {
+      ...dx('point'),
+      next: {
+        kind: 'explain',
+        blocks: [
+          {
+            type: 'tutor_text',
+            text: {
+              ar: [
+                { ar: 'شنوّة الحالات اللي ' },
+                { fr: 'B' },
+                { ar: ' ما يصيرش فيها؟' },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  },
+  {
+    id: 'near-miss-wrong-option-named',
+    at: 's3',
+    expect: 'accept',
+    output: {
+      ...dx('option'),
+      next: {
+        kind: 'explain',
+        blocks: [
+          {
+            type: 'tutor_text',
+            text: {
+              ar: [
+                { ar: 'هل ' },
+                { fr: 'exactement une' },
+                { ar: ' تغطّي الحالات الكل؟' },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  },
+  // RTL (2026-10-22): Latin inside an Arabic run is isolated; LaTeX is not.
+  {
+    id: 'latin-inside-arabic-isolated',
+    at: 's3',
+    expect: 'accept',
+    output: {
+      ...dx('isolate'),
+      next: {
+        kind: 'explain',
+        blocks: [said('شنوّة الحالات اللي الحدث B ما يصيرش فيها؟')],
+      },
+    },
+  },
+  {
+    id: 'latex-inside-arabic',
+    at: 's3',
+    expect: 'reject',
+    reasons: ['rtl_formula_in_text'],
+    output: {
+      ...dx('latex in ar'),
+      next: {
+        kind: 'explain',
+        blocks: [said('نحسبو \\frac{1}{2} توّا.')],
+      },
+    },
+  },
+  // AI interface fixes (2026-10-22): components that show the answer by
+  // construction, props the model may not set, praise of a wrong value.
+  {
+    id: 'outcome-space-shows-the-count',
+    at: 's5',
+    expect: 'reject',
+    reasons: ['component_reveals_answer'],
+    output: {
+      ...dx('reveal by picture'),
+      next: {
+        kind: 'show_component',
+        component: {
+          component: 'OutcomeSpace',
+          props: {
+            colorBy: 'event',
+            event: { id: 'any_value', args: { value: 0 } },
+          },
+        },
+        instruction: ar('شوف التيراجات الكل.'),
+      },
+    },
+  },
+  {
+    id: 'outcome-space-without-count',
+    at: 's5',
+    expect: 'accept',
+    output: {
+      ...dx('picture, count hidden'),
+      next: {
+        kind: 'show_component',
+        component: {
+          component: 'OutcomeSpace',
+          props: {
+            colorBy: 'event',
+            event: { id: 'any_value', args: { value: 0 } },
+            showCount: false,
+          },
+        },
+        instruction: ar('شوف التيراجات الكل.'),
+      },
+    },
+  },
+  {
+    id: 'function-plot-invented-markers',
+    at: 'A1-s8',
+    expect: 'reject',
+    reasons: ['props_not_allowed'],
+    output: {
+      ...dx('markers'),
+      next: {
+        kind: 'show_component',
+        component: {
+          component: 'FunctionPlot',
+          props: { fn: 'f_ex4', markers: [{ type: 'vline', at: 0 }] },
+        },
+        instruction: ar('شوف الرسم.'),
+      },
+    },
+  },
+  {
+    id: 'praise-of-a-wrong-value',
+    at: 's5',
+    expect: 'reject',
+    reasons: ['praise_wrong_value'],
+    output: {
+      ...dx('praise'),
+      next: {
+        kind: 'explain',
+        blocks: [said('برافو، 4 قريبة برشا. عاود عدّ التيراجات.')],
+      },
+    },
+  },
+  // Props leak, formulas and quality (2026-10-22, simulation run 2).
+  {
+    id: 'predict-reveal-answer-in-options',
+    at: '2a-s10',
+    expect: 'reject',
+    reasons: ['props_leak'],
+    output: {
+      ...dx('predict'),
+      next: {
+        kind: 'show_component',
+        component: {
+          component: 'PredictReveal',
+          props: {
+            prompt: ar('قبل ما تشوف، توقّع: قدّاش من تيراج فيهم الجداء صفر؟'),
+            options: [
+              { id: 'a', label: ar('ثلاثة') },
+              { id: 'b', label: ar('ستّة') },
+              { id: 'c', label: ar('سبعة') },
+            ],
+            reveal: {
+              component: 'OutcomeSpace',
+              props: { colorBy: 'none', showCount: false },
+            },
+          },
+        },
+        instruction: ar('توقّع الجواب، وبعدها اضغط باش تشوف.'),
+      },
+    },
+  },
+  {
+    id: 'numeric-twin-compare-is-the-goal',
+    at: 'A1-s8',
+    expect: 'reject',
+    reasons: ['props_leak'],
+    output: {
+      ...dx('twin goal'),
+      next: {
+        kind: 'show_component',
+        component: {
+          component: 'NumericTwin',
+          props: {
+            symbol: 'a',
+            template: 'e^(-a)/(1+e^(-2*a))',
+            compare: 'e^a/(1+e^(2*a))',
+            values: [1, 2],
+          },
+        },
+        instruction: ar('جرّب بأعداد وقارن.'),
+      },
+    },
+  },
+  {
+    id: 'numeric-twin-general-rule',
+    at: 'A1-s8',
+    expect: 'accept',
+    output: {
+      ...dx('twin rule'),
+      next: {
+        kind: 'show_component',
+        component: {
+          component: 'NumericTwin',
+          props: {
+            symbol: 'a',
+            template: 'a^2*a^3',
+            compare: 'a^5',
+            values: [1, 2, 3],
+          },
+        },
+        instruction: ar('جرّب بأعداد وقارن.'),
+      },
+    },
+  },
+  {
+    id: 'target-part-in-text',
+    at: 'A1-s8',
+    expect: 'reject',
+    reasons: ['target_part'],
+    output: {
+      ...dx('part'),
+      next: {
+        kind: 'explain',
+        blocks: [
+          {
+            type: 'tutor_text',
+            text: {
+              ar: [{ ar: 'الإسم الصحيح كان ' }, { fr: '1 + e^(2x)' }],
+            },
+          },
+        ],
+      },
+    },
+  },
+  {
+    id: 'formula-with-the-numbers',
+    at: '2a-s6',
+    expect: 'reject',
+    reasons: ['formula_answer'],
+    output: {
+      ...dx('binom'),
+      next: {
+        kind: 'explain',
+        blocks: [said('نختارو زوز كور مع بعض:'), { type: 'math', latex: '\\binom{5}{2}' }],
+      },
+    },
+  },
+  {
+    id: 'formula-in-words',
+    at: '2a-s6',
+    expect: 'reject',
+    reasons: ['formula_answer'],
+    output: {
+      ...dx('words'),
+      next: { kind: 'explain', blocks: [said('نختارو زوز من خمسة.')] },
+    },
+  },
+  {
+    id: 'general-formula-before-the-method-hint',
+    at: '2a-s6',
+    expect: 'reject',
+    reasons: ['method_early'],
+    output: {
+      ...dx('general'),
+      next: {
+        kind: 'explain',
+        blocks: [
+          said('القاعدة العامة:'),
+          { type: 'math', latex: '\\binom{n}{2} = \\frac{n(n-1)}{2}' },
+        ],
+      },
+    },
+  },
+  {
+    id: 'close-without-a-value',
+    at: 's5',
+    expect: 'reject',
+    reasons: ['praise_wrong_value'],
+    output: {
+      ...dx('close'),
+      next: { kind: 'explain', blocks: [said('إنت قريب، عاود عدّ التيراجات.')] },
+    },
+  },
+  {
+    id: 'credit-for-an-earlier-step',
+    at: 'A1-s8',
+    expect: 'accept',
+    output: {
+      ...dx('credit'),
+      next: {
+        kind: 'explain',
+        blocks: [
+          {
+            type: 'tutor_text',
+            text: {
+              ar: [
+                { ar: 'الـ ' },
+                { fr: 'domaine' },
+                { ar: ' متاعك صحيح، برافو. شوف المقام.' },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  },
+  {
+    id: 'english-word-in-a-french-run',
+    at: 's3',
+    expect: 'reject',
+    reasons: ['english_word'],
+    output: {
+      ...dx('english'),
+      next: {
+        kind: 'explain',
+        blocks: [
+          {
+            type: 'tutor_text',
+            text: { ar: [{ ar: 'شوف الـ ' }, { fr: 'order' }, { ar: ' متاع الكور.' }] },
+          },
+        ],
+      },
+    },
+  },
+  {
+    id: 'ball-word-for-a-curve',
+    at: 'A1-s8',
+    expect: 'reject',
+    reasons: ['wrong_word'],
+    output: {
+      ...dx('curve'),
+      next: { kind: 'explain', blocks: [said('شوف الكورة متاع الدالة.')] },
+    },
+  },
+  {
+    id: 'line-invalid-component',
+    at: 'A1-s8-invalid',
+    expect: 'reject',
+    reasons: ['action_not_allowed'],
+    output: {
+      ...dx('invalid line'),
+      next: {
+        kind: 'show_component',
+        component: {
+          component: 'NumericTwin',
+          props: { symbol: 'a', template: 'a^2*a^3', compare: 'a^5', values: [1, 2] },
+        },
+        instruction: ar('جرّب بأعداد.'),
+      },
+    },
+  },
+  {
+    id: 'line-invalid-explain',
+    at: 'A1-s8-invalid',
+    expect: 'accept',
+    output: {
+      ...dx('invalid line explain'),
+      next: {
+        kind: 'explain',
+        blocks: [said('السطر متاعك فيه زوز علامات ورا بعضهم. عاود اكتبو.')],
+      },
+    },
+  },
   // Guard fix (a): a later step's answer is not shown yet.
   {
     id: 'later-step-answer',
@@ -342,7 +787,87 @@ export const GUARD_FIXTURES: GuardFixture[] = [
     expect: 'reject',
     output: { ...dx('x'), next: { kind: 'self_destruct' } },
   },
+  // --- lines (A1 s8, hints left): explaining THIS line, never writing the answer (D22) ---
+  {
+    id: 'line-final-line-math',
+    at: 'A1-s8',
+    expect: 'reject',
+    reasons: ['final_answer_early'],
+    output: {
+      ...dx('writes the final line for the student'),
+      next: {
+        kind: 'explain',
+        blocks: [
+          said('السطر الأخير:'),
+          { type: 'math', latex: 'f(-x) = \\frac{e^{x}}{1+e^{2x}}' },
+        ],
+      },
+    },
+  },
+  {
+    id: 'line-final-line-reordered',
+    at: 'A1-s8',
+    expect: 'reject',
+    reasons: ['final_answer_early'],
+    output: {
+      ...dx('a correct transformed line, in another order'),
+      next: {
+        kind: 'explain',
+        blocks: [
+          said('اكتب:'),
+          { type: 'math', latex: '\\frac{e^{x}}{e^{2x}+1}' },
+        ],
+      },
+    },
+  },
+  {
+    id: 'line-final-line-in-french-run',
+    at: 'A1-s8',
+    expect: 'reject',
+    reasons: ['final_answer_early'],
+    output: {
+      ...dx('the final line as a French run'),
+      next: {
+        kind: 'explain',
+        blocks: [
+          {
+            type: 'tutor_text',
+            text: { ar: [{ ar: 'النتيجة' }, { fr: 'e^x/(1+e^(2x))' }] },
+          },
+        ],
+      },
+    },
+  },
+  {
+    id: 'line-rule-in-other-letters',
+    at: 'A1-s8',
+    expect: 'accept',
+    output: {
+      ...dx('names the rule, the student applies it'),
+      next: {
+        kind: 'explain',
+        blocks: [
+          said('القاعدة اللي تلزمك:'),
+          { type: 'math', latex: 'e^{a} \\times e^{b} = e^{a+b}' },
+          said('طبّقها على السطر متاعك وعاود اكتب.'),
+        ],
+      },
+    },
+  },
 ];
+
+const loaded4 = (() => {
+  const r = loadExercise(ex4, ex4Misconceptions);
+  if (!r.ok) {
+    throw new Error(r.errors.join('\n'));
+  }
+  return r.loaded;
+})();
+
+/** A wrong line no misconception knows (the denominator ends in +2). */
+export const A1_UNKNOWN_WRONG_LINE = '((e^(x))/(e^(2x)+2))';
+/** A line the safe parser cannot read (two operators in a row). */
+export const A1_INVALID_LINE = '((e^(x))/(e^(2x)++1))';
 
 const loaded = (() => {
   const r = loadExercise(ex2, ex2Misconceptions);
@@ -357,13 +882,18 @@ export function fixtureSituation(at: Where): {
   content: LessonContent;
   situation: Situation;
 } {
-  const content = buildContent(loaded, at === '2a-s10' ? '2a' : '1b');
+  const a1 = at === 'A1-s8' || at === 'A1-s8-invalid';
+  const ex = a1 ? loaded4 : loaded;
+  const content = buildContent(
+    ex,
+    a1 ? 'A1' : at === '2a-s10' || at === '2a-s6' ? '2a' : '1b',
+  );
   const log = new EventLog(
     {
       sessionId: 'fx',
       studentId: 'fx',
-      exerciseId: loaded.exercise.id,
-      contentVersion: loaded.exercise.contentVersion,
+      exerciseId: ex.exercise.id,
+      contentVersion: ex.exercise.contentVersion,
     },
     fixedClock(),
   );
@@ -386,7 +916,19 @@ export function fixtureSituation(at: Where): {
       });
     }
   };
-  if (at === 's5') {
+  if (a1) {
+    act({ type: 'answer', value: { optionId: 'yes' }, at: 20000 });
+    act({ type: 'gate_passed', stepId: 's4', at: 40000 });
+    act({
+      type: 'answer',
+      value: {
+        line: at === 'A1-s8-invalid' ? A1_INVALID_LINE : A1_UNKNOWN_WRONG_LINE,
+      },
+      at: 60000,
+    });
+  } else if (at === '2a-s6') {
+    act({ type: 'answer', value: { raw: '20' }, at: 1000 });
+  } else if (at === 's5') {
     act({ type: 'answer', value: { optionId: 'none' }, at: 1000 });
     dismissSelfReport();
     act({ type: 'answer', value: { raw: '4' }, at: 2000 });
@@ -409,8 +951,9 @@ export function fixtureSituation(at: Where): {
   const lastWrong = events
     .map(e => e.t === 'answer' && !e.correct)
     .lastIndexOf(true);
+  // An unreadable line is not a wrong answer: its own decision point, the last one.
   const situation = buildSituation(
-    events.slice(0, lastWrong + 1),
+    at === 'A1-s8-invalid' ? events : events.slice(0, lastWrong + 1),
     content.catalog,
   );
   if (!situation) {

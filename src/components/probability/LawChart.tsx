@@ -72,8 +72,9 @@ export function LawChart(p: ViewProps<LawChartProps>) {
   }, [balls, draw, k, law, valueFn]);
   const m = useMemo(() => moments(rows), [rows]);
   const outcomes = useMemo(
-    () => (balls && draw && k ? outcomesOf({ balls, draw, k }) : []),
-    [balls, draw, k],
+    // A given law has no draws to list (E3: the urn may exceed the cap).
+    () => (!law && balls && draw && k ? outcomesOf({ balls, draw, k }) : []),
+    [balls, draw, k, law],
   );
   const labels = useMemo(
     () => ballLabels(balls ?? [], markDuplicates),

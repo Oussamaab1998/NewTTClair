@@ -9,6 +9,10 @@
  * [R] https://developers.openai.com/api/docs/guides/rate-limits
  * [PO] listed by the product owner; NOT found on [E] or [R] (kept because
  *      clients commonly receive them; mapping is by meaning).
+ * [AE] Anthropic https://platform.claude.com/docs/en/api/errors (error.type)
+ * [AR] Anthropic https://platform.claude.com/docs/en/api/rate-limits
+ *      (error.details.error_code, anthropic-ratelimit-* headers), both
+ *      checked 2026-10-21.
  */
 import type { LlmErrorKind } from './client';
 
@@ -32,6 +36,18 @@ export const PROVIDER_CODES = {
   invalid_request_error: null,
   invalid_api_key: 'auth', // [PO]
   model_not_found: 'config', // [PO]
+  // [AE] Anthropic error.type values (rate_limit_error and invalid_request_error above).
+  authentication_error: 'auth', // 401
+  permission_error: 'auth', // 403
+  billing_error: 'no_credit', // 402
+  not_found_error: 'config', // 404
+  request_too_large: 'provider', // 413
+  conflict_error: 'provider', // 409
+  api_error: 'provider', // 500
+  timeout_error: 'provider', // 504
+  overloaded_error: 'provider', // 529
+  // [AR] 429 rate_limit_error with this details.error_code: tier spend cap reached.
+  enforced_spend_limit_reached: 'spend_limit',
 } as const satisfies Record<string, LlmErrorKind | null>;
 
 export type ProviderCode = keyof typeof PROVIDER_CODES;
@@ -165,4 +181,41 @@ export function errorKind(
     return 'auth';
   }
   return status === 429 ? 'rate_limited' : 'provider';
+}
+
+/**
+ * Anthropic error body: `error.type` and `error.details.error_code` ([AE],
+ * [AR]); the message and request_id are not read.
+ */
+export function readAnthropicErrorCodes(
+  body: unknown,
+): Pick<ProviderErrorInfo, 'code' | 'type'> {
+  const err = isObj(body) ? body.error : undefined;
+  if (!isObj(err)) {
+    return { code: null, type: null };
+  }
+  const details = isObj(err.details) ? err.details : undefined;
+  return { code: allowed(details?.error_code), type: allowed(err.type) };
+}
+
+/**
+ * [AR] header names, numbers only (the *-reset headers are RFC 3339 times
+ * and are not kept). Undefined when no header is present.
+ */
+export function readAnthropicRateLimit(headers: {
+  get(name: string): string | null;
+}): RateLimitInfo | undefined {
+  const info: RateLimitInfo = {};
+  const set = <K extends keyof RateLimitInfo>(k: K, v: number | undefined) => {
+    if (v !== undefined) {
+      info[k] = v;
+    }
+  };
+  const h = (n: string) => intHeader(headers.get(`anthropic-ratelimit-${n}`));
+  set('limitRequests', h('requests-limit'));
+  set('remainingRequests', h('requests-remaining'));
+  set('limitTokens', h('tokens-limit'));
+  set('remainingTokens', h('tokens-remaining'));
+  set('retryAfterSec', intHeader(headers.get('retry-after')));
+  return Object.keys(info).length > 0 ? info : undefined;
 }

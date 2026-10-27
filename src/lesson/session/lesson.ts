@@ -245,6 +245,10 @@ function showCard(d: Draft, frame: Frame) {
     ref: frame.ref,
     status: 'active',
     attempts: frame.attempts,
+    ...(frame.notSures && { notSure: frame.notSures }),
+    ...(frame.chipsHold !== undefined && { chipsHold: frame.chipsHold }),
+    ...(revealUnlocked(frame) && { revealUnlocked: true }),
+    ...(frame.fresh && { freshExit: true }),
     hintLevel: frame.hintLevel,
     hintCount: step.hints?.length ?? 0,
     canGoBack: frame.ref.scope !== 'main',
@@ -252,6 +256,28 @@ function showCard(d: Draft, frame: Frame) {
   });
   if (step.kind === 'component') {
     logShown(d, step.component, step.blockId, frame.stepId);
+  }
+}
+
+/**
+ * Reveal before the end of the ladder (product owner, 2026-10-22): on a
+ * variant / transfer step only, after 2 closed detours from it. Main steps
+ * keep rule 6 (the ladder first).
+ */
+const REVEAL_AFTER_DETOURS = 2;
+const revealUnlocked = (frame: Frame) =>
+  frame.ref.scope === 'variant' &&
+  (frame.detoursClosed ?? 0) >= REVEAL_AFTER_DETOURS;
+
+/**
+ * A detour just closed: it counts toward the parent's reveal unlock only if
+ * the student acted in it or finished it; one left at once does not
+ * (product owner, 2026-10-22).
+ */
+function countClosedDetour(d: Draft, closed: Frame, finished: boolean) {
+  const parent = editTop(d);
+  if (parent && (finished || closed.acted === true)) {
+    parent.detoursClosed = (parent.detoursClosed ?? 0) + 1;
   }
 }
 
@@ -289,6 +315,7 @@ function pushFrame(d: Draft, ref: AskRef, depth: number, reaction?: Reaction) {
     cardKey: '',
     shownAt: d.at,
     ...(reaction && { reaction }),
+    ...(reaction?.reactionId === 'rule.after_reveal.fresh' && { fresh: true }),
   };
   d.s.stack.push(frame);
   showCard(d, frame);
@@ -318,11 +345,68 @@ function closeOpenCards(d: Draft) {
   if (!d.s.items.some(i => i.kind === 'choice_card' && i.status === 'open')) {
     return;
   }
+  for (const i of d.s.items) {
+    if (
+      i.kind === 'choice_card' &&
+      i.purpose === 'probe' &&
+      i.status === 'open'
+    ) {
+      logProbe(d, i, null, true);
+    }
+  }
   d.s.items = d.s.items.map(i =>
     i.kind === 'choice_card' && i.status === 'open' && !i.blocking
       ? { ...i, status: 'closed' }
       : i,
   );
+}
+
+/**
+ * The open probe card's answers would all lead to the same next action
+ * (2026-10-22): it is taken back before the student sees it. The
+ * hypothesis's line is shown as a question, as with no probe, and the
+ * planner reacts. Not logged: the card was never shown.
+ */
+function onProbeDrop(d: Draft) {
+  const index = d.s.items.findIndex(
+    i =>
+      i.kind === 'choice_card' && i.purpose === 'probe' && i.status === 'open',
+  );
+  const card = d.s.items[index];
+  const frame = editTop(d);
+  if (card?.kind !== 'choice_card' || !frame) {
+    return;
+  }
+  d.s.items = d.s.items.filter((_, i) => i !== index);
+  frame.probed = false;
+  const line = misconceptionFeedback(d, frame, card.misconceptionIds?.[0]);
+  if (line) {
+    append(d, {
+      kind: 'feedback',
+      depth: card.depth,
+      tone: 'warning',
+      rich: line,
+    });
+  }
+  setPending(d, 'wrong', card.stepId);
+}
+
+/** C3: the probe card's answer (null = skipped; movedOn = the student acted on the step). */
+function logProbe(
+  d: Draft,
+  card: FeedItemOf<'choice_card'>,
+  choice: string | null,
+  movedOn = false,
+) {
+  d.events.push({
+    questionId: d.s.questionId,
+    stepId: card.stepId,
+    t: 'probe',
+    value: card.value ?? '',
+    candidates: card.misconceptionIds ?? [],
+    choice,
+    ...(movedOn && { movedOn: true }),
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -570,6 +654,19 @@ function partCounts(d: Draft) {
       answered += 1;
     }
   }
+  // D3 (2026-10-22): a detour step (variant, mini) revealed at least once
+  // counts too; `answered` stays main steps only, so "done" is unchanged.
+  const detours = new Set(
+    d.s.items
+      .filter(
+        (i): i is FeedItemOf<'question'> =>
+          i.kind === 'question' &&
+          i.ref.scope !== 'main' &&
+          i.revealed === true,
+      )
+      .map(i => JSON.stringify(i.ref)),
+  );
+  revealed += detours.size;
   return { counted: steps.length, answered, revealed };
 }
 
@@ -694,6 +791,7 @@ function closeVariant(
     throw new Error('closeVariant without a variant');
   }
   const v = d.c.variants.get(frame.ref.variantId)!;
+  countClosedDetour(d, frame, outcome !== 'abandoned');
   const parent = top(d);
   const reaction = withReaction(frame.reaction);
   if (v.kind === 'transfer' && outcome !== 'abandoned') {
@@ -753,10 +851,11 @@ function closeDeepDive(
   helped?: boolean,
 ) {
   const mini = d.s.stack.pop()!;
-  const parent = top(d)!;
   if (mini.ref.scope !== 'mini') {
     throw new Error('closeDeepDive without a deep dive');
   }
+  countClosedDetour(d, mini, outcome === 'completed');
+  const parent = top(d)!;
   d.events.push({
     ...eventBase(d, parent),
     t: 'deepdive',
@@ -800,7 +899,12 @@ function giveHint(d: Draft, frame: Frame, reaction: Reaction | null): boolean {
 // ---------------------------------------------------------------------------
 // Step completion.
 
-function completeStep(d: Draft, frame: Frame, correct: boolean) {
+function completeStep(
+  d: Draft,
+  frame: Frame,
+  correct: boolean,
+  revealed = false,
+) {
   if (frame.ref.scope === 'mini') {
     const first = correct && frame.attempts === 0;
     // Task minis: revealed, or 2 wrong tries, means the deep dive did not help.
@@ -822,6 +926,9 @@ function completeStep(d: Draft, frame: Frame, correct: boolean) {
   if (correct) {
     // The planner may add a self-report, a transfer or an offer before moving on.
     setPending(d, 'correct', frame.stepId);
+  } else if (revealed) {
+    // D2: after a reveal the planner may open a fresh variant first.
+    setPending(d, 'revealed', frame.stepId);
   } else {
     advance(d);
   }
@@ -947,6 +1054,9 @@ function onLine(
             : 'undetermined',
       },
     });
+    // Not graded; the rules change nothing (rule.line_invalid.continue), the
+    // AI tutor may explain this line (D22).
+    setPending(d, 'line_invalid', frame.stepId);
     return;
   }
   if (v.kind === 'accepted') {
@@ -1056,6 +1166,8 @@ function onAnswer(d: Draft, action: Extract<LessonAction, { type: 'answer' }>) {
   let feedback: Rich | undefined;
   let value: string;
   let numeric: string | undefined;
+  let inferredBy: 'authored' | 'procedure' | undefined;
+  let candidates: string[] = [];
 
   if (step.kind === 'choice') {
     if (!('optionId' in action.value)) {
@@ -1115,13 +1227,36 @@ function onAnswer(d: Draft, action: Extract<LessonAction, { type: 'answer' }>) {
     value = raw;
     numeric = raw;
     correct = equals(parsed.value, answer.value);
-    const known = step.wrongAnswers?.find(w => {
-      const v = parseNumeric(w.value);
-      return v.ok && equals(v.value, parsed.value);
-    });
-    misconceptionId = known?.misconceptionId;
+    // C3: authored wrong answers first, then the engine's wrong procedures.
+    const known = correct
+      ? undefined
+      : step.wrongAnswers?.find(w => {
+          const v = parseNumeric(w.value);
+          return v.ok && equals(v.value, parsed.value);
+        });
+    if (known) {
+      inferredBy = 'authored';
+      misconceptionId = known.misconceptionId;
+    } else if (!correct) {
+      candidates = [
+        ...new Set(
+          (answer.procedures ?? [])
+            .filter(p => p.values.some(v => equals(v, parsed.value)))
+            .map(p => p.misconceptionId),
+        ),
+      ];
+      if (candidates.length > 0) {
+        inferredBy = 'procedure';
+        misconceptionId = candidates[0];
+      }
+    }
+    // A hypothesis (several candidates) gets no misconception message: the
+    // probe card asks instead.
     feedback =
-      known?.feedback ?? misconceptionFeedback(d, frame, misconceptionId);
+      known?.feedback ??
+      (candidates.length > 1
+        ? undefined
+        : misconceptionFeedback(d, frame, misconceptionId));
     append(d, {
       kind: 'student',
       depth: frame.depth,
@@ -1137,6 +1272,8 @@ function onAnswer(d: Draft, action: Extract<LessonAction, { type: 'answer' }>) {
     value,
     correct,
     ...(!correct && misconceptionId !== undefined && { misconceptionId }),
+    ...(!correct && inferredBy && { inferredBy }),
+    ...(!correct && candidates.length > 0 && { candidates }),
     attempt: frame.attempts + 1,
   });
 
@@ -1174,6 +1311,23 @@ function onAnswer(d: Draft, action: Extract<LessonAction, { type: 'answer' }>) {
       ...(feedback ? { rich: feedback } : { message: 'wrong' as UiMessage }),
     });
   }
+  if (candidates.length > 1 && !frame.probed) {
+    // C3: one short probe card per step; the planner reacts once it is answered or skipped.
+    frame.probed = true;
+    append(d, {
+      kind: 'choice_card',
+      depth: frame.depth,
+      purpose: 'probe',
+      choices: [...candidates.slice(0, 2), 'dismissed'],
+      status: 'open',
+      blocking: false,
+      stepId: frame.stepId,
+      ruleId: 'probe',
+      misconceptionIds: candidates,
+      value,
+    });
+    return;
+  }
   setPending(d, 'wrong', frame.stepId);
 }
 
@@ -1192,6 +1346,8 @@ function onNotSure(d: Draft) {
     ...(id !== undefined && { deepDiveId: id }),
     attempt: frame.attempts + 1,
   });
+  frame.notSures = (frame.notSures ?? 0) + 1;
+  updateCard(d, frame.cardKey, { notSure: frame.notSures });
   d.s.compressed = false;
   append(d, {
     kind: 'student',
@@ -1207,8 +1363,8 @@ function onReveal(d: Draft) {
     return;
   }
   const hints = stepOf(d, frame).hints ?? [];
-  if (frame.hintLevel < hints.length) {
-    return; // Rule 6: never before the end of the ladder.
+  if (frame.hintLevel < hints.length && !revealUnlocked(frame)) {
+    return; // Rule 6: never before the end of the ladder (variant exception above).
   }
   closeOpenCards(d);
   d.events.push({
@@ -1234,7 +1390,45 @@ function onReveal(d: Draft) {
       trust: 'engine_computed',
     });
   }
-  completeStep(d, frame, false);
+  completeStep(d, frame, false, true);
+}
+
+/** B4: the step's own walk-through lines (a parent's would show the parent's numbers). */
+function walkthroughOf(d: Draft, frame: Frame): Rich[] | undefined {
+  return (stepOf(d, frame) as { walkthrough?: { lines: Rich[] } }).walkthrough
+    ?.lines;
+}
+
+function logWalkthroughLine(d: Draft, frame: Frame, index: number) {
+  d.events.push({
+    ...eventBase(d, frame),
+    t: 'component_event',
+    component: 'Walkthrough',
+    name: 'line',
+    payload: { index },
+  });
+}
+
+/** «التالي»: the next line; after the last one, the step's card again for the final value. */
+function onWalkthroughNext(d: Draft) {
+  const frame = editTop(d);
+  const index = d.s.items.findIndex(
+    i => i.kind === 'walkthrough' && !i.done && i.stepId === frame?.stepId,
+  );
+  const item = d.s.items[index];
+  if (!frame || item?.kind !== 'walkthrough') {
+    return;
+  }
+  const shown = item.shown + 1;
+  const done = shown >= item.lines.length;
+  d.s.items = d.s.items.map((x, i) =>
+    i === index ? { ...item, shown, done } : x,
+  );
+  logWalkthroughLine(d, frame, shown - 1);
+  if (done) {
+    updateCard(d, frame.cardKey, { status: 'paused' });
+    returnTo(d, frame);
+  }
 }
 
 /** Optional tasks only. Logged with a reason; neither a pass nor a fail. */
@@ -1348,6 +1542,8 @@ function onRequest(
     ...duration(d, frame),
     t: 'request',
     kind: action.kind,
+    attempt: frame.attempts + 1,
+    ...(action.via && { via: action.via }),
   });
   append(d, {
     kind: 'student',
@@ -1366,6 +1562,9 @@ const CARD_CHOICES: Record<CardPurpose, readonly string[]> = {
   compress: ['yes', 'no'],
   repair: ['yes', 'no'],
   teacher_note: ['yes', 'no'],
+  // Probe cards list the candidate misconceptions themselves (C3).
+  probe: ['dismissed'],
+  ask_next: ['hint', 'deep_dive', 'dismissed'],
 };
 
 function addCard(
@@ -1481,8 +1680,50 @@ function onCardChoice(
           reactionId: card.ruleId,
           representation: v.representation,
         });
+      } else if (!yes) {
+        // Declined: the help chips wait for the next wrong / "not sure" on the step.
+        const frame = editTop(d);
+        if (frame?.stepId === card.stepId) {
+          frame.chipsHold = frame.attempts + (frame.notSures ?? 0);
+          updateCard(d, frame.cardKey, { chipsHold: frame.chipsHold });
+        }
       }
       break;
+    }
+    case 'ask_next': {
+      d.events.push({
+        ...base,
+        t: 'offer_response',
+        offer: 'ask_next',
+        accepted: action.choice !== 'dismissed',
+      });
+      const frame = editTop(d);
+      if (
+        frame &&
+        (action.choice === 'hint' || action.choice === 'deep_dive')
+      ) {
+        askNextHelp(d, frame, action.choice);
+      }
+      return;
+    }
+    case 'probe': {
+      const confirmed = action.choice === 'dismissed' ? null : action.choice;
+      logProbe(d, card, confirmed);
+      // The line the answer held back: named plainly when confirmed, asked
+      // for the hypothesis on «موش توّا». The planner's reaction follows.
+      const frame = editTop(d);
+      const id = confirmed ?? card.misconceptionIds?.[0];
+      const m =
+        id === undefined ? undefined : d.c.loaded.misconceptions.get(id);
+      const line = confirmed
+        ? m?.feedbackConfirmed ?? m?.feedback
+        : m?.feedback;
+      if (frame && id !== undefined && line) {
+        frame.misconceptionsShown = [...(frame.misconceptionsShown ?? []), id];
+        append(d, { kind: 'feedback', depth, tone: 'warning', rich: line });
+      }
+      setPending(d, 'wrong', card.stepId);
+      return;
     }
     case 'teacher_note':
       d.events.push({
@@ -1536,31 +1777,103 @@ function onAskLongPress(
   const answer = d.c.asksByBlock.get(action.blockId)?.[action.mode];
   const frame = top(d);
   const quoted = action.quoted.slice(0, SHORT_TEXT);
+  const math = action.quotedMath?.slice(0, SHORT_TEXT);
   d.events.push({
     ...eventBase(d, frame),
     t: 'ask',
     via: 'longpress',
     mode: action.mode,
-    quoted,
+    // Logged as before: the text, then its formula.
+    quoted: [quoted, math].filter(Boolean).join(' ').slice(0, SHORT_TEXT),
     source: 'local',
     snapshot: {
       ...askSnapshot(d),
       blockId: action.blockId,
       ...(action.components && { components: action.components }),
     },
+    ...(!answer && { unanswered: true }),
   });
   const depth = frame?.depth ?? 0;
   append(d, {
     kind: 'student',
     depth,
-    content: { kind: 'quote', mode: action.mode, quoted },
+    content: {
+      kind: 'quote',
+      mode: action.mode,
+      quoted,
+      ...(math && { math }),
+    },
   });
-  append(
-    d,
-    answer
-      ? { kind: 'ask_answer', depth, parts: answer }
-      : { kind: 'feedback', depth, tone: 'info', message: 'noCannedAnswer' },
-  );
+  if (answer) {
+    append(d, { kind: 'ask_answer', depth, parts: answer });
+    return;
+  }
+  // Round 1 "dead ends" (2026-10-22): never a dead end. The first time on a
+  // block: the line, then an offer of the next hint or the deep dive; after
+  // that, the help comes at once.
+  const seen = d.s.deadEndBlocks?.includes(action.blockId) === true;
+  if (!seen) {
+    d.s.deadEndBlocks = [...(d.s.deadEndBlocks ?? []), action.blockId];
+    append(d, {
+      kind: 'feedback',
+      depth,
+      tone: 'info',
+      message: 'noCannedAnswer',
+    });
+  }
+  const active = editTop(d);
+  const hintLeft =
+    active !== undefined &&
+    active.hintLevel < (stepOf(d, active).hints ?? []).length;
+  const dive = active ? availableDeepDive(d, active) : undefined;
+  if (!active || (!hintLeft && dive === undefined)) {
+    append(d, {
+      kind: 'feedback',
+      depth,
+      tone: 'info',
+      message: 'noCannedAnswerField',
+    });
+    return;
+  }
+  if (seen) {
+    askNextHelp(d, active, hintLeft ? 'hint' : 'deep_dive');
+    return;
+  }
+  append(d, {
+    kind: 'choice_card',
+    depth: active.depth,
+    purpose: 'ask_next',
+    choices: [
+      ...(hintLeft ? ['hint'] : []),
+      ...(dive !== undefined ? ['deep_dive'] : []),
+      'dismissed',
+    ],
+    status: 'open',
+    blocking: false,
+    stepId: active.stepId,
+    ruleId: 'ask.no_canned_answer',
+  });
+}
+
+const ASK_NEXT_REACTION: Reaction = {
+  reactionId: 'ask.no_canned_answer',
+  representation: 'ask_next',
+};
+
+/** The help an unanswered long-press leads to: the next hint, or the step's deep dive. */
+function askNextHelp(d: Draft, frame: Frame, help: 'hint' | 'deep_dive') {
+  closeOpenCards(d);
+  if (help === 'hint') {
+    giveHint(d, frame, ASK_NEXT_REACTION);
+    return;
+  }
+  const id = availableDeepDive(d, frame);
+  if (id !== undefined) {
+    openDeepDive(d, frame, id, {
+      ...ASK_NEXT_REACTION,
+      representation: deepDiveRepresentation(d.c.deepDives.get(id)!),
+    });
+  }
 }
 
 function onAskField(
@@ -1622,6 +1935,8 @@ function stateRejects(d: Draft, a: Action): string | null {
     case 'quiz':
     case 'revisit_prerequisite':
       return (frame?.depth ?? -1) < MAX_DEPTH ? null : 'depth cap';
+    case 'walkthrough':
+      return frame && walkthroughOf(d, frame) ? null : 'no walk-through here';
     case 'numeric_check':
       return frame?.lastRaw !== undefined && numericCheck(d, frame) !== null
         ? null
@@ -1681,7 +1996,8 @@ function applyAction(
       if (
         trigger === 'detour_closed' ||
         trigger === 'correct' ||
-        trigger === 'self_report'
+        trigger === 'self_report' ||
+        trigger === 'revealed'
       ) {
         if (frame) {
           returnTo(d, frame);
@@ -1755,11 +2071,39 @@ function applyAction(
       addCard(d, 'compress', decision, pendingStepId);
       return;
     case 'teacher_note':
+      // B4 (2026-10-22): queued silently, no card (the walk-through or the
+      // next hint is what the student sees).
+      d.events.push({
+        questionId: d.s.questionId,
+        stepId: frame?.stepId ?? pendingStepId,
+        t: 'teacher_note',
+        noteId: nextKey(d, 'note'),
+        skillIds: decision.diagnosis.skillIds.slice(0, 10),
+        misconceptionIds: decision.diagnosis.misconceptionIds.slice(0, 10),
+        ruleId: decision.ruleId,
+        silent: true,
+      });
       if (!frame && !d.s.finished) {
         advance(d);
       }
-      addCard(d, 'teacher_note', decision, top(d)?.stepId ?? pendingStepId);
       return;
+    case 'walkthrough': {
+      const lines = frame ? walkthroughOf(d, frame) : undefined;
+      if (!frame || !lines) {
+        return;
+      }
+      closeOpenCards(d);
+      append(d, {
+        kind: 'walkthrough',
+        depth: frame.depth,
+        stepId: frame.stepId,
+        lines,
+        shown: 1,
+        done: false,
+      });
+      logWalkthroughLine(d, frame, 0);
+      return;
+    }
     case 'show_component':
       append(d, {
         kind: 'tutor',
@@ -1859,6 +2203,34 @@ function onApplyPlan(
     decision,
     ...(action.shownSource && { shownSource: action.shownSource }),
   });
+  if (pending.trigger === 'request') {
+    // One short line: what happens after "change method" / "easier".
+    append(d, {
+      kind: 'feedback',
+      depth: top(d)?.depth ?? 0,
+      tone: 'info',
+      message: helpReason(d, decision.next),
+    });
+  }
+  if (decision.nextMove) {
+    // E2: every move decision is logged with what stopped it, if anything.
+    d.events.push({
+      questionId: pending.questionId,
+      stepId: pending.stepId,
+      t: 'next_move',
+      ...decision.nextMove,
+      ruleId: decision.ruleId,
+    });
+  }
+  if (decision.ruleId === 'rule.after_reveal.fresh') {
+    // D2: one line on why a new example comes (round 2).
+    append(d, {
+      kind: 'feedback',
+      depth: top(d)?.depth ?? 0,
+      tone: 'info',
+      message: 'afterRevealReason',
+    });
+  }
   applyAction(d, decision.next, decision, pending.trigger, pending.stepId);
   if (decision.followUp) {
     applyAction(
@@ -1875,6 +2247,30 @@ function onApplyPlan(
   if (card?.kind === 'question' && card.status === 'paused' && !d.s.pending) {
     returnTo(d, frame!);
   }
+}
+
+/**
+ * The reason line after a help request (help chips, 2026-10-22): the detour
+ * it opens, or, with nothing left, the next hint or "show the answer" once
+ * the ladder is used up (never a dead end).
+ */
+function helpReason(d: Draft, next: Action): UiMessage {
+  if (next.kind === 'deep_dive') {
+    return 'helpReason.deepDive';
+  }
+  if (next.kind === 'variant') {
+    const kind = d.c.variants.get(next.variantId)?.kind;
+    return kind === 'simpler'
+      ? 'helpReason.simpler'
+      : kind === 'prerequisite'
+      ? 'helpReason.prerequisite'
+      : 'helpReason.alternative';
+  }
+  const frame = top(d);
+  const card = frame && d.s.items.find(i => i.key === frame.cardKey);
+  const hintsLeft =
+    card?.kind === 'question' ? card.hintLevel < card.hintCount : false;
+  return hintsLeft ? 'helpReason.hint' : 'helpReason.reveal';
 }
 
 // ---------------------------------------------------------------------------
@@ -1906,6 +2302,20 @@ export function startLesson(content: LessonContent, at = 0): StepResult {
   return { state: d.s, events: d.events };
 }
 
+/** Actions by which the student acts on the top frame (a detour counts for the reveal unlock then). */
+const ACTING = new Set<LessonAction['type']>([
+  'answer',
+  'not_sure',
+  'hint',
+  'reveal',
+  'component_result',
+  'skip',
+  'request',
+  'ask_longpress',
+  'ask_field',
+  'detour_acted',
+]);
+
 export function reduce(
   content: LessonContent,
   state: LessonState,
@@ -1920,6 +2330,12 @@ export function reduce(
   // While a decision is pending only the decision itself is accepted.
   if (state.pending && action.type !== 'apply_plan') {
     return { state, events: [] };
+  }
+  if (ACTING.has(action.type) && top(d)?.ref.scope !== 'main') {
+    const frame = editTop(d);
+    if (frame && !frame.acted) {
+      frame.acted = true;
+    }
   }
   switch (action.type) {
     case 'answer':
@@ -1968,6 +2384,14 @@ export function reduce(
       break;
     case 'apply_plan':
       onApplyPlan(d, action);
+      break;
+    case 'detour_acted':
+      break; // Marked above.
+    case 'probe_drop':
+      onProbeDrop(d);
+      break;
+    case 'walkthrough_next':
+      onWalkthroughNext(d);
       break;
   }
   return { state: d.s, events: d.events };

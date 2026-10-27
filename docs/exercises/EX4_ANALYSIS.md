@@ -9,6 +9,37 @@ Transcribed from the PDF by the product owner (2026-10-20), **to verify against 
 - A2 (2): « Montrer que \lim_{x\to+\infty} f(x) = 0. Interpréter. » Goal to author: `{"fr": "Montrer que", "math": "\\lim_{x\\to+\\infty} f(x) = 0"}` then « Interpréter. » as its own sentence.
 - A3 (3): « a) Montrer que f'(x) = (1 − e^{2x}) e^x / (1 + e^{2x})², pour tout réel x. b) Dresser le tableau de variation de f. » Goal to author: `{"fr": "a) Montrer que, pour tout réel x,", "math": "f'(x)=\\frac{(1-e^{2x})e^{x}}{(1+e^{2x})^{2}}"}`, then « b) Dresser le tableau de variation de f. »
 - A4 (4): « Tracer (ζ). » (not in this phase's scope)
+- Heading of the first part: « Partie A ».
+- Paper source line (given by the product owner, D6, 2026-10-21): « Examen du baccalauréat · Session de contrôle 2022 · Mathématiques ». Points: « Exercice 4 (7 points) ».
+
+### Parties B and C (verified by the product owner against the PDF on 2026-10-21)
+Shown on the paper screen only; not authored (« قريبا » in the app).
+
+Partie B
+Soit F la fonction définie sur ]0, +∞[ par F(x) = ∫ de 0 à ln x de f(t) dt.
+1) Montrer que F est dérivable sur ]0, +∞[ et calculer F'(x) pour tout x > 0.
+2) a) Montrer que la fonction g définie par g(x) = tan x est une bijection de ]0, π/2[ sur ]0, +∞[. On note g⁻¹ la fonction réciproque de g.
+   b) Déterminer g⁻¹(1) et lim g⁻¹(x) quand x → +∞.
+   c) Montrer que g⁻¹ est dérivable sur ]0, +∞[ et que (g⁻¹)'(x) = 1 / (1 + x²), pour tout x > 0.
+3) Montrer que F(x) = g⁻¹(x) − π/4, pour tout x > 0.
+4) Soit λ > 0. On désigne par A(λ) l'aire de la partie du plan limitée par la courbe (ζ), l'axe des abscisses et les droites d'équations x = −λ et x = λ.
+   a) Montrer que A(λ) = 2F(e^λ).
+   b) Déterminer lim A(λ) quand λ → +∞.
+
+Partie C
+Pour tout n ∈ ℕ*, on pose I_n = ∫ de 0 à 1 de t^n F(e^t) dt.
+1) a) Montrer que pour tout réel t ≥ 0, 0 ≤ F(e^t) ≤ π/4.
+   b) En déduire lim I_n.
+2) a) À l'aide d'une intégration par parties, montrer que I_n = F(e)/(n + 1) − 1/(n + 1) × ∫ de 0 à 1 de t^(n+1) f(t) dt.
+   b) En déduire que lim n I_n = g⁻¹(e) − π/4.
+
+Content form (the words stay verbatim in `fr`; a formula that needs 2-D layout is its own `math` line, typeset in STIX, sentence-final period dropped as in A2):
+- B intro: `{"fr": "Soit F la fonction définie sur ]0, +∞[ par", "math": "F(x)=\\int_{0}^{\\ln x} f(t)\\,dt"}`
+- B4 a: `"math": "A(\\lambda) = 2F(e^{\\lambda})"`
+- C intro: `"math": "I_{n} = \\int_{0}^{1} t^{n} F(e^{t})\\,dt"`
+- C1 a: `"math": "0 \\le F(e^{t}) \\le \\frac{\\pi}{4}"`; C1 b: `"math": "\\lim I_{n}"`
+- C2 a: `"math": "I_{n} = \\frac{F(e)}{n+1} - \\frac{1}{n+1} \\times \\int_{0}^{1} t^{n+1} f(t)\\,dt"`
+- C2 b: `"math": "\\lim n I_{n} = g^{-1}(e) - \\frac{\\pi}{4}"`
 
 ## Checkpoint map (each ~5 minutes, one goal, one result)
 | Part | Checkpoint | Result | Components |

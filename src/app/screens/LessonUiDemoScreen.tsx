@@ -12,6 +12,7 @@ import {
   ToneBlock,
   Writeup,
 } from '../../lesson/feed/Bubbles';
+import type { Quote } from '../../lesson/feed/RichView';
 import { LongPressMenu } from '../../lesson/feed/LongPressMenu';
 import {
   ReportSheet,
@@ -58,9 +59,9 @@ export function LessonUiDemoScreen() {
   // `-devDemo longPressMenu` / `longPressMenuPlain`: the tutor long-press menu
   // open with / without its Report group (height check).
   const demo = devOnly?.devDemoAtLaunch();
-  const [menu, setMenu] = useState<string | null>(() =>
+  const [menu, setMenu] = useState<Quote | null>(() =>
     demo === 'longPressMenu' || demo === 'longPressMenuPlain'
-      ? 'الحدث B معناه au moins une كورة عليها صفر.'
+      ? { text: 'الحدث B معناه au moins une كورة عليها صفر.' }
       : null,
   );
   const push = (line: string) => setLog(l => [line, ...l].slice(0, 8));
@@ -149,9 +150,9 @@ export function LessonUiDemoScreen() {
           rich={SAMPLE}
           blockId="demo-1"
           longPress
-          onLongPress={(id, quoted) => {
+          onLongPress={(id, quote) => {
             push(`longpress ${id}`);
-            setMenu(quoted);
+            setMenu(quote);
           }}
         />
       </Section>
@@ -223,7 +224,7 @@ export function LessonUiDemoScreen() {
         onDismiss={() => setCardMenu(null)}
       />
       <LongPressMenu
-        quoted={menu}
+        quote={menu}
         {...(demo !== 'longPressMenuPlain' && {
           trust: t('lesson.trust.lesson_unreviewed'),
           onReport: () => {

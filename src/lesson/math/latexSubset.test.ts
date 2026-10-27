@@ -51,6 +51,33 @@ describe('parseLatexSubset', () => {
     });
   });
 
+  it('an integral keeps its bounds below and above (exam paper layout)', () => {
+    const n = parseLatexSubset('\\int_{0}^{1} t');
+    expect(n).toMatchObject({
+      t: 'row',
+      children: [
+        {
+          t: 'limits',
+          base: { t: 'text', v: '∫' },
+          under: { t: 'text', v: '0' },
+          over: { t: 'text', v: '1' },
+        },
+        { t: 'text', v: 't' },
+      ],
+    });
+  });
+
+  it('a thin space between a function name and its letter argument, none before «(»', () => {
+    expect(parseLatexSubset('\\ln x')).toMatchObject({
+      t: 'row',
+      children: [{ v: 'ln\u2009' }, { v: 'x' }],
+    });
+    expect(parseLatexSubset('\\ln(x)')).toMatchObject({
+      t: 'row',
+      children: [{ v: 'ln(' }, { v: 'x' }, { v: ')' }],
+    });
+  });
+
   it('supports the notation of exercises 2 and 4', () => {
     const samples = [
       'P(B) = 1 - P(\\bar{B}) = 1 - \\frac{3}{10} = \\frac{7}{10}',

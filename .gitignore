@@ -81,3 +81,6 @@ src/config/llmLocal.generated.ts
 
 # Simulator screenshots for check-ins (local only).
 docs/screens/
+
+# AI tutor v2 evaluation outputs (raw model outputs, spend ledger): local only.
+tools/replay/out/

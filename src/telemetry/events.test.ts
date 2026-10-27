@@ -18,6 +18,8 @@ const samples: Record<EventType, Record<string, unknown>> = {
     value: '1/10',
     correct: false,
     misconceptionId: 'p_x0_counts_one_pair',
+    inferredBy: 'procedure',
+    candidates: ['p_x0_counts_one_pair'],
     attempt: 1,
   },
   not_sure: { t: 'not_sure', deepDiveId: 'prod0', attempt: 1 },
@@ -60,6 +62,7 @@ const samples: Record<EventType, Record<string, unknown>> = {
   admit: { t: 'admit', resultId: 'p_B_7_10' },
   skip: { t: 'skip', reason: 'knows_it' },
   part_done: { t: 'part_done', counted: 4, answered: 3, revealed: 1 },
+  exercise_reset: { t: 'exercise_reset' },
   report: {
     t: 'report',
     blockId: 'q1b-s2',
@@ -76,6 +79,20 @@ const samples: Record<EventType, Record<string, unknown>> = {
   },
   request: { t: 'request', kind: 'change_method' },
   clarify: { t: 'clarify', choice: 'counting' },
+  next_move: {
+    t: 'next_move',
+    outcome: 'guessed',
+    wanted: 'repeat',
+    move: 'move_on',
+    stoppedBy: 'repeatPerSkillPerSession',
+    ruleId: 'rule.transfer_after_self_report',
+  },
+  probe: {
+    t: 'probe',
+    value: '4',
+    candidates: ['counts_balls_not_pairs', 'confuses_event_and_complement'],
+    choice: null,
+  },
   offer_response: { t: 'offer_response', offer: 'compress', accepted: true },
   plan: {
     t: 'plan',
@@ -113,6 +130,20 @@ const samples: Record<EventType, Record<string, unknown>> = {
     cachedInputTokens: 0,
     outputTokens: 60,
     costUsd: 0.00027,
+    prepMs: 12,
+    headersMs: 1690,
+    bodyMs: 32,
+  },
+  llm_model_check: {
+    t: 'llm_model_check',
+    client: 'direct:anthropic:claude-haiku-5-5+cap',
+    model: 'claude-haiku-5-5',
+    result: 'invalid',
+    statusClass: '2xx',
+    latencyMs: 412,
+    providerType: 'not_found_error',
+    returnedId: 'claude-haiku-5-5-20261001',
+    apiVersion: '2026-10-21',
   },
   feedback: { t: 'feedback', choice: 'liked', text: 'مليح' },
   tutor_answer: {
@@ -185,6 +216,20 @@ describe('EventSchema', () => {
         ...plan,
         decision: { ...decision, next: { kind: 'reveal_answer' } },
       }).success,
+    ).toBe(false);
+  });
+
+  it('a model check carries our codes only: no message text, no free-text provider type', () => {
+    const check = { ...base, ...samples.llm_model_check };
+    expect(
+      EventSchema.safeParse({ ...check, message: 'Invalid model' }).success,
+    ).toBe(false);
+    expect(
+      EventSchema.safeParse({ ...check, providerType: 'Some message text' })
+        .success,
+    ).toBe(false);
+    expect(
+      EventSchema.safeParse({ ...check, result: 'not_a_result' }).success,
     ).toBe(false);
   });
 

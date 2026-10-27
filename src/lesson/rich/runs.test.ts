@@ -1,6 +1,7 @@
 import { RichSchema } from '../../content/schema';
 import {
   isolateInline,
+  isolateLlmRuns,
   ArRunsSchema,
   BIDI,
   DEFAULT_ISOLATION,
@@ -247,5 +248,49 @@ describe('a quoted A1 sentence in a student bubble (plain text, isolated at disp
       'g',
     );
     expect(shown.replace(controls, '')).toBe(quoted);
+  });
+});
+
+describe('isolateLlmRuns (AI text: Latin, digits and short formulas get their own run)', () => {
+  it('the live block: B and 0 inside Arabic runs become their own runs; quotes and commas stay Arabic', () => {
+    const out = isolateLlmRuns([
+      { ar: 'فكّر: ' },
+      { ar: 'إذا كان الحدث B هو «على الأقل واحدة فيها 0»، ' },
+    ]);
+    expect(out).toEqual([
+      { ar: 'فكّر: إذا كان الحدث ' },
+      { fr: 'B' },
+      { ar: ' هو «على الأقل واحدة فيها ' },
+      { fr: '0' },
+      { ar: '»، ' },
+    ]);
+    expect(findRunIssues(out!)).toEqual([]);
+    expect(RichSchema.safeParse({ ar: out }).success).toBe(true);
+  });
+
+  it('short formulas as authored content writes them (f(−x) = f(x), x = 5) become one run', () => {
+    expect(isolateLlmRuns([{ ar: 'نثبّتو أنّ f(−x) = f(x) لكل x.' }])).toEqual([
+      { ar: 'نثبّتو أنّ ' },
+      { fr: 'f(−x) = f(x)' },
+      { ar: ' لكل ' },
+      { fr: 'x' },
+      { ar: '.' },
+    ]);
+  });
+
+  it('Arabic-only runs and French runs are kept as they are', () => {
+    const runs: ArRuns = [{ ar: 'شوف ' }, { fr: 'au moins un' }, { ar: ' هنا.' }];
+    expect(isolateLlmRuns(runs)).toEqual(runs);
+  });
+
+  it('rejects (null) what cannot be a run: LaTeX, a long formula, bidi controls', () => {
+    expect(isolateLlmRuns([{ ar: 'نحسبو \\frac{3}{10} توّا' }])).toBeNull();
+    expect(isolateLlmRuns([{ fr: 'p(\\bar{B})' }])).toBeNull();
+    expect(
+      isolateLlmRuns([
+        { ar: 'نحسبو p(B) = 1 - p(B barre) = 1 - 3/10 = 7/10 donc fini توّا' },
+      ]),
+    ).toBeNull();
+    expect(isolateLlmRuns([{ ar: `شوف ${BIDI.LRI}x${BIDI.PDI}` }])).toBeNull();
   });
 });

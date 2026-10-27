@@ -197,7 +197,14 @@ describe('lesson 1.b, happy path', () => {
     s.choose('none');
     const events = s.type('3');
     // A correct answer is a decision point: the planner's choice is logged after it.
-    expect(events.map(e => e.t)).toEqual(['component_event', 'answer', 'plan']);
+    // E2 (round 3): followed by the move it chose (a first try: move on).
+    expect(events.map(e => e.t)).toEqual([
+      'component_event',
+      'answer',
+      'plan',
+      'next_move',
+    ]);
+    expect(events[3]).toMatchObject({ outcome: 'first_try', move: 'move_on' });
     expect(events[2]).toMatchObject({
       trigger: 'correct',
       decision: { ruleId: 'rule.next_step', next: { kind: 'continue' } },
@@ -506,12 +513,23 @@ describe('hint ladder and reveal', () => {
       expect(s.items.at(-2)).toMatchObject({ kind: 'hint', level, total: 3 });
     }
     expect(s.act({ type: 'hint' })).toEqual([]);
-    expect(s.act({ type: 'reveal' })).toMatchObject([
+    // D2 (round 2): the reveal is followed by the planner's decision.
+    // C1 (2026-10-23): s3 now has a fresh variant (was: nothing, the lesson
+    // moved on), so the move is a repeat; its card opens next.
+    expect(s.act({ type: 'reveal' }).slice(0, 3)).toMatchObject([
       { t: 'reveal', hintsUsed: 3, attempt: 1 },
+      {
+        t: 'plan',
+        trigger: 'revealed',
+        decision: { ruleId: 'rule.after_reveal.fresh' },
+      },
+      { t: 'next_move', outcome: 'revealed', wanted: 'repeat', move: 'repeat' },
     ]);
     expect(s.items.find(i => i.kind === 'answer')).toMatchObject({
       rich: { fr: 'aucune des deux boules ne porte le numéro 0' },
     });
+    s.cardFor('var:tr-1b-s3-fresh');
+    s.choose('none');
     s.cardFor('s5');
   });
 
@@ -560,9 +578,15 @@ describe('asking', () => {
       mode: 'example',
       quoted: 'x',
     });
-    expect(s.items.at(-2)).toMatchObject({
+    // Round 1 "dead ends": the line stays, and an offer of the next help
+    // follows it (was the last thing before the card).
+    expect(s.items.at(-3)).toMatchObject({
       kind: 'feedback',
       message: 'noCannedAnswer',
+    });
+    expect(s.items.at(-2)).toMatchObject({
+      kind: 'choice_card',
+      purpose: 'ask_next',
     });
   });
 
@@ -628,6 +652,9 @@ describe('event log', () => {
     s.act({ type: 'hint' });
     s.act({ type: 'hint' });
     s.act({ type: 'reveal' });
+    // C1 (2026-10-23): the reveal opens s7's fresh variant; answered right.
+    s.cardFor('var:tr-1b-s7-fresh');
+    s.choose('p15_28');
     s.cardFor('s8');
     s.act({ type: 'request', kind: 'simpler' });
     s.cardFor('var:pre-event-as-set');
@@ -636,15 +663,13 @@ describe('event log', () => {
     s.type('3/10');
     s.card_('repair', 'no');
     s.act({ type: 'not_sure' });
-    // ComplementView was seen inside the deep dive: the untried bar instead.
+    // Changed (help chips, 2026-10-22): the "easier" tap above counts as a
+    // struggle signal, so wrong + not sure + tap = 3: the card asks what is
+    // unclear. "counting" reaches the untried bar (ComplementView was seen in
+    // the deep dive; the declined offer is not proposed again).
+    s.card_('clarify', 'counting');
     s.cardFor('var:alt-1b-s8-bar');
     s.type('3');
-    s.cardFor('s8');
-    s.type('6/10');
-    s.card_('clarify', 'why');
-    // "why": the not-yet-shown alternative that addresses it.
-    s.cardFor('var:alt-1b-s8-complement');
-    s.choose('bbar');
     s.cardFor('s8');
     s.type('7/10');
     s.cardFor('var:tr-1b-aumoins2');
@@ -981,6 +1006,10 @@ describe('Exercise 2, question 2.a (components)', () => {
     s.act({ type: 'hint' });
     s.act({ type: 'hint' });
     s.act({ type: 'reveal' });
+    // D2 (round 2): the reveal opens the fresh variant on its own urn; the
+    // student leaves it quietly («موش توّا»), then the script goes on as before.
+    s.cardFor('var:tr-2a-s10-urn');
+    s.act({ type: 'leave_deep_dive' });
     s.act(ok(['a-d']));
     s.act(ok(['d-e']));
     s.type('9/10');

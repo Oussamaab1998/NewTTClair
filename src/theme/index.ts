@@ -25,7 +25,7 @@ import {
 } from './tokens';
 import { mathSide, reading } from './sides';
 
-export type { FeedbackTone } from './tokens';
+export type { FeedbackTone, PaperStyle } from './tokens';
 export { fontFiles } from './tokens';
 
 export const theme = {

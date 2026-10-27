@@ -1,12 +1,19 @@
 import React from 'react';
-import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from '@testing-library/react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import '../../i18n';
 import { toPlainText } from '../../lesson/rich/runs';
 import { fixedClock, type EventLog } from '../../telemetry/log';
 import { setDevTools } from '../devFlags';
-import { allParts, CATALOG, findPart } from '../exercises';
+import { appPaperQuestions } from '../../content/paper';
+import { allParts, CATALOG, findPart, partLabel } from '../exercises';
 import { ExercisePicker } from './ExercisePicker';
 import { createDoneRecord } from '../../state/doneParts';
 import { memoryStore } from '../../storage/kv';
@@ -120,17 +127,25 @@ describe('ExercisePicker', () => {
       expect(
         screen.getByLabelText(toPlainText(exercise.title.ar)),
       ).toBeOnTheScreen();
-      expect(screen.getByText(`Exercice ${exercise.number}`)).toBeOnTheScreen();
+      // Two papers of a session can both have «Exercice 2»: look inside the card.
+      expect(
+        within(screen.getByTestId(`exercise-${e.id}`)).getByText(
+          `Exercice ${exercise.number}`,
+        ),
+      ).toBeOnTheScreen();
       for (const p of exercise.parts) {
         expect(screen.getByTestId(`open-${p.id}`)).toBeOnTheScreen();
       }
       // Questions not built yet are on the card too, not pressable.
-      for (const q of exercise.paper?.questions ?? []) {
+      for (const q of appPaperQuestions(exercise)) {
         if (q.status === 'soon') {
           expect(screen.getByTestId(`soon-${q.id}`)).toBeOnTheScreen();
         }
       }
     }
+    // Parts B / C of ex4 are on the paper screen only, never chips (D6).
+    expect(screen.queryByTestId('soon-B1')).toBeNull();
+    expect(screen.queryByTestId('soon-C2')).toBeNull();
     expect(screen.queryByTestId('lesson-screen')).toBeNull();
   });
 
@@ -276,5 +291,51 @@ describe('picker cards: done parts, current part, «كمّل من»', () => {
     store.append([partDone('1b', 3)]);
     await fireEvent.press(screen.getByTestId('back-to-picker'));
     expect(screen.getByTestId('open-1b')).toHaveTextContent('✓1.b');
+  });
+});
+
+describe('two papers of one session (E5)', () => {
+  it('a question without a sub-letter keeps its label; others get a dot', () => {
+    expect(partLabel('1')).toBe('1');
+    expect(partLabel('1b')).toBe('1.b');
+    expect(partLabel('A1')).toBe('A.1');
+  });
+  it('findPart takes an exercise-qualified id', () => {
+    expect(findPart('bac2022c-ex2/1b')).toEqual({
+      exerciseId: 'bac2022c-ex2',
+      partId: '1b',
+    });
+    expect(findPart('bac2022c-ex4/1b')).toBeNull();
+    expect(findPart('1b')).toEqual({
+      exerciseId: 'bac2022c-ex2',
+      partId: '1b',
+    });
+  });
+  it('each card shows its section next to the subject', async () => {
+    await renderApp();
+    expect(screen.getByTestId('section-bac2022c-ex2')).toHaveTextContent(
+      'رياضيات',
+    );
+    expect(screen.getByTestId('section-bac2022c-ex4')).toHaveTextContent(
+      'رياضيات',
+    );
+  });
+  it('the two «Exercice 2» cards differ by their section tag and title', async () => {
+    await renderApp();
+    expect(screen.getAllByText('Exercice 2')).toHaveLength(2);
+    expect(screen.getByTestId('section-bac2022c-sc-ex2')).toHaveTextContent(
+      'علوم تجريبية',
+    );
+    expect(screen.getByLabelText('تمرين الكور الحمر والكحل')).toBeOnTheScreen();
+    expect(screen.getByLabelText('تمرين الاحتمالات')).toBeOnTheScreen();
+  });
+  it('the new exercise opens on question «1» (label without a dot)', async () => {
+    await renderApp('bac2022c-sc-ex2/1');
+    expect(screen.getByText(/^Exercice 2 · Sc\. exp\. ·$/)).toBeOnTheScreen();
+    expect(screen.getByTestId('lesson-part')).toHaveTextContent(/^1$/);
+  });
+  it('the lesson subtitle names the section', async () => {
+    await renderApp('1b');
+    expect(screen.getByText(/^Exercice 2 · Maths ·$/)).toBeOnTheScreen();
   });
 });

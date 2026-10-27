@@ -135,7 +135,9 @@ Replaces "student actions are ignored while a decision is pending" for LLM consu
 **Fixed (product owner, 2026-10-17):** (a) numbers come from what the student has been shown at this point (`src/planner/llm/shown.ts`): the statement and goal, the urn, steps up to the current one, the current step's used hints, opened detours, answers of steps already done, a shown numeric check; later steps' answers are not allowed. (b) The final-answer check covers task components, computed by the engine: EventPicker favorable outcome ids, their count and probability; LawBuilder cells. Numbers always on screen (urn, statement, goal) are not giveaways on their own. (c) One invalid fixture per case (24 fixtures). The tutor's math checks use the same two functions.
 **Answer leak (seen in the live check):** the final-answer check matches values and the French option label only; a paraphrase in Arabic of a choice answer passed (the tutor wrote «الزوز كور ما عليهمش صفر», the 1.b/s3 answer, while hints were left).
 - **Fix A, built (product owner, 2026-10-17):** the model no longer receives the current or later steps' answers. `static.verifiedSolution` keeps only the results the exam gives; `dynamic.verifiedSoFar` has the answers of steps already done, the current step's answer only once revealed or the hint ladder is used up, and only engine values the student was shown (`solutionSoFar` in `contextPack.ts`). Prompt `p2` names both fields and says the current answer is withheld (no change to Arabic wording or darija style). Not yet re-measured live.
-- **B, backlog:** teacher-written Arabic phrasings of choice answers for the guard to match.
+- **B, built (product owner, 2026-10-22):** `solutionConcepts.ts`: while hints are left, the planner guard and the tutor drawer reject (planner) or drop (drawer, per block) text that states the current step's answer: values, also in words («ثلاثة», «trois», «3 sur 10»); the correct option's own French words (none of the wrong options use them; words the statement, goal or prompt already show do not count, e.g. «paire» in A1); the option label; the step's authored `solutionPhrases` (French and Arabic; 1.b/s3 and A1/s3 for now, `reviewed: false`). Words and phrases are compared as tokens without accents, Arabic diacritics or tatweel. Asking and pointing stay allowed (fixtures `near-miss-*`). The live answer of 2026-10-22 is a fixture: its «aucune» block, Arabic paraphrase and complement math are rejected; its pointer block is kept.
+- **RTL in AI text (2026-10-22):** LLM answers are parsed by shape (`RichShapeSchema`); Latin, digits and short formulas inside an Arabic run then become their own run as authored content writes them (`isolateLlmRuns`); LaTeX or a stretch over 40 characters in a run is rejected (`rtl_formula_in_text`: the planner decision, or the one drawer block). The result still passes `RichSchema` before it is shown.
+- **Still open:** Arabic phrasings for the other choice steps (2.a/s9 has a set answer, A1/s9's answer is its own goal); a paraphrase using words not on the list still passes.
 
 ## D17. Tutor drawer — Proposed (2026-10-17)
 A free-text question from the ask field opens a drawer (chips still answer in the feed). Order: an ask chip of this question whose label words match (>= 75%) -> verified answer; else the LLM (when on) -> blocks checked by the engine (`src/tutor/verify.ts`: arithmetic equalities and named values verified or dropped, other math kept with "ممكن فيه غلط", final answer dropped while hints are left, broken LaTeX dropped), each AI block labelled and with a visible Report button; else the question is saved to the local queue and "سؤالك تسجّل." is shown. "مازلت ما فهمتش" and `needsTeacher` also save it. Loading state, no provisional answer. Nothing about the AI or credit is shown to students except the `ai_generated` trust label on AI blocks.
@@ -196,3 +198,212 @@ After a question's done line, outside any question card: «كيفاش كان ا�
 
 ## D23. Content versions not bumped for the D4 content fields — Accepted (product owner, 2026-10-21)
 The D4 fields (`number`, `subject`, the optional `paper` list) change no step, block or event. A `contentVersion` bump would detach the planner's skill history: the skill catalog only maps steps of known versions, and every block's trust data carries the version, so older stored sessions would lose their skills. So ex2 stays `ex2-0.5.0` and ex4 `ex4-0.1.0`. Bump when steps, blocks, answers or wording shown in the lesson change.
+
+## D24. Cahier squared paper is the default background — Accepted (product owner, 2026-10-21)
+The mockups' grid (22 pt, 1 pt lines, #DDE5F3) is drawn behind the lesson feed, the picker and the «الورقة»
+sheet (DESIGN.md §6). Flat paper is the fallback (one theme flag, `theme.layout.paperStyle`) if a
+measurement shows a real problem. Simulator: no mount-time difference; scroll smoothness and cheap Android
+not measured yet.
+
+## D25. «ابدا من جديد» resets progress, not history — Accepted (product owner, 2026-10-21)
+"Start the exercise from scratch" logs `exercise_reset` and wipes that exercise's done marks (picker ✓, «كمّل من», the paper screen, «الورقة»). Stored events stay (reports, planner). The planner treats the next attempt with its **earlier history** (skill states, representations tried, transfers, deep dives already shown), so the second attempt gets smarter help; per-step counters are per session, so the student is not held to past mistakes on a step. Deleting stored data is a separate feature ("delete my data", to plan later). Resetting a single part is out of scope.
+
+
+## D26. AI tutor v2 (Anthropic adapter, triggers, caps, trace, evaluation) — Accepted plan (product owner, 2026-10-21); default model open until the comparison runs
+- **Adapter** `src/planner/llm/anthropic.ts` (implements D14): raw `fetch`, `POST https://api.anthropic.com/v1/messages`, `anthropic-version: 2026-10-21` (latest; its breaking changes are documents, citations and sampling parameters, none used), fixed host allowlist `api.anthropic.com`, no retries, only allowlisted `error.type` / `details.error_code` kept (`providerErrors.ts`), `request-id` kept. Model check `GET /v1/models/{id}`. Key: `CLAUDE_API_KEY` in `.env.llm.local` (gen.js); release bundles still get the blank stub (D21; the release-key check now has an Anthropic sentinel too).
+- **Structured output: JSON (`output_config.format`, json_schema), not tool use**: GA without a beta header, listed for every model we use; forced `tool_choice` is a 400 on Sonnet 5.5. **Found:** the per-component planner schema is outside Anthropic's documented limits (27+ optional parameters, max 24; recursive event schemas), so the planner answers a flat **wire format** (`wireFormat.ts`: all fields required, enums only, props as a JSON string checked afterwards by the registry schema), mapped to `LlmPlannerOutput` before the usual zod → `validateDecision` → guard path. One schema for every step. The OpenAI adapter uses the same wire format when asked (`useWire`), so the comparison is like for like. The OpenAI adapter stays in the code, not selected (`LLM_CONFIG.provider = 'anthropic'`).
+- **Caching:** `cache_control: ephemeral` (5 min) on the system prompt (instructions + tutor rules + catalog) and on the static pack (its own user block). Minimum cacheable prefix: 4096 tokens on Haiku 4.5, 512 on Haiku 5.5 / Sonnet 5.5 (caching page). Measured hit rates come from the live run.
+- **Thinking:** off for latency (Haiku 4.5: omitted; Haiku 5.5: `disabled`; Sonnet 5.5: `between_tools`), effort `low` where accepted. No server-side refusal fallback: a refusal falls back to the rules.
+- **Models (official pages, checked 2026-10-21, sources in `models.ts`):** `claude-haiku-4-5-20251001` ($1 / $1.25 write / $0.10 read / $5; legacy, tentative retirement "not sooner than October 15, 2026", already passed), `claude-haiku-5-5` ($0.10 / $0.125 / $0.01 / $0.50), `claude-sonnet-5-5` ($2 / $2.50 / $0.10 / $10). App default until the comparison: `claude-haiku-5-5`.
+- **Catalog** (`catalog.ts`, `components/catalogMeta.ts`): generated from the registry; when to use, skills, student action, compact props type. Visual components only (graded tasks stay on the lesson path).
+- **Triggers** (`consultReason`): rules answer first, as before; the AI is asked on (a) a wrong answer without a known misconception, (b) the 2nd or later struggle signal on a step, (c) a wrong typed line (even with a known misconception) or an unreadable / unchecked line (new trigger `line_invalid`; its rule `rule.line_invalid.continue` changes nothing, so the rules-only lesson now logs one `plan` event per invalid line), plus the existing free-text request and rules fallback. Pilot flag `aiOnEveryMistake` (off; dev `-aiEveryMistake on`) with its own cap of 60 calls per device per day.
+- **Caps:** $0.50 per device per day for every live call (MMKV `llm.spend.v1`, worst case reserved before each call), next to the 200 calls/day cap.
+- **Guard additions:** lines steps: the engine's values at the checked point (and the student's line) are allowed numbers; while hints are left, any written math the engine finds equivalent to the goal but not in the start's form is `final_answer_early` (4 new fixtures). Not applied to the tutor drawer (out of scope).
+- **Dev:** AI trace panel (`-devMode on`), fake planner `-devLlm fake|fakeSlow` (free) for simulator checks.
+- **Evaluation:** `npm run replay -- eval --estimate` (free token counts) then `--live --cap-usd 5` (first run capped at $5); outputs in `tools/replay/out/` (gitignored). **Blocked (2026-10-21):** the `CLAUDE_API_KEY` in `.env.llm.local` is not scoped to a workspace; Anthropic then requires an `anthropic-workspace-id` header on every request, and such a key can also manage the organization through the Admin API, so it should not ship in a test build. Needed: a key scoped to one workspace (ideally a dedicated workspace with its own spend limit).
+
+## D27. AI answer checks after simulation 2 — Accepted (product owner, 2026-10-22)
+- **Props leak:** every string inside a component's props (PredictReveal options and labels, insight, captions, labels) gets the same answer checks as the text (values, number words, the option's words, authored phrases); NumericTwin `template` / `compare` (its letter read as x) must not be equivalent to the lines step's goal or to a part of it. Reasons `props_leak`, `target_part` (a numerator or denominator of the goal, not the start's).
+- **Displayed values:** a LawChart or ComplementView whose engine values (probabilities, and counts out of the total) include the answer's value is `component_reveals_answer` (LawChart shows p(X = 0) at 2.a/s10 and 1.b/s8), next to the rules derived from the answer spec.
+- **Counting formulas (4c):** on a count / outcomeCount step, a formula written with the exercise's numbers (`\binom{5}{2}`, `5 × 4 / 2`, `C(5, 2)`) is **evaluated by the engine** and, if it gives the answer while hints are left, rejected as `formula_answer`: **this part is solid.** The rest is **a list and will miss other wordings:** the phrasing «زوز من خمسة» / "2 parmi 5" (read as C(5, 2)), and the shapes and words of a general formula (`\binom{n}{k}`, `n(n-1)`, "combinaison", "parmi", «تأليف») that are `method_early` until the hint that states the method (the first hint with `\binom`, "combinaison", "parmi" or `C_`; else the end of the ladder) has been used.
+- **Quality (lists, not proofs):** "close" / "almost" (قريب، تقريبا، presque, proche, pas loin) about the student's answer while it is wrong is rejected (`praise_wrong_value`), praise next to a wrong value too; praise of an earlier verified step stays allowed. English words inside "fr" runs from a fixed list (order, slider, pairs, event, simultaneous, draw, ball, outcome...; "pairs" is also French for "even" and may be over-blocked) are `english_word`; «الكورة» in an exercise with no urn is `wrong_word`. For an unreadable line (`line_invalid`) only explain or hint (`action_not_allowed`). The tutor drawer drops a block for the same text rules.
+- **Planner timeout 5000 ms** (was 3.5 s); the swap rule is unchanged (only if the student has not acted). The trace shows the share of calls inside the limit.
+- **aiOnEveryMistake stays off by default.** In simulations 1 and 2, where the rules already diagnosed the mistake (a known wrong value or option), the AI repeated the authored repair (FoldSymmetry, NumericTwin) or failed; it added nothing there. The pilot flag remains for measurement only.
+
+
+## D28. Help chips follow-up — Accepted (product owner, 2026-10-22)
+- **Layout A (two quiet chips) is the default;** layout B (the «ما نعرفش» choice) stays behind `-devHelpLayout choice`.
+- **Detour cap with one exemption:** at most 3 detours per step (transfers not counted). Beyond the cap, one step back to a prerequisite is still allowed (max 4 in all), and at most one per skill in the session (a prerequisite already shown for that skill is not offered again).
+- **Rule 6 exception: reveal on variant and transfer steps.** On a variant or transfer step, "show the answer" unlocks after 2 closed detours from that step (deep dives or variants, finished or left), or at the end of its hint ladder. Main steps keep rule 6: reveal only after the ladder. The count lives on the frame (`detoursClosed`) and the card carries `revealUnlocked`. The answer shown is still the engine's.
+- **A declined repair offer holds the chips:** after «لا», the chips wait for the next wrong answer or "not sure" on that step (the count is kept on the frame, so a card shown again keeps it). Until then they stay in "⋯".
+- **Footer scroll:** when the chips appear, the feed scrolls the card's bottom (with the chips) into view, but only if the student has not dragged the feed since the last new feed item (`footerScrollY`, `jump.ts`).
+- **Chip border = control edge** `borderControl` #7486AD, 3.65:1 on the white card (non-text ≥ 3:1). The chip label is `inkMuted` #55627F, 6.11:1 (text ≥ 4.5:1). The decorative card edge #C5D2EA (1.52:1) is not used for controls. Checked by `src/theme/contrast.test.ts`.
+- **One spelling: «حاجة أسهل»** for the chip and the "⋯" entry (the same i18n key, `lesson.simpler`) and in the reason line.
+
+**Teacher review list (help chips; all `reviewed: false`):**
+- Chip and "⋯" labels: «غيّر الطريقة» (`lesson.changeMethod`), «حاجة أسهل» (`lesson.simpler`); layout B's plain entry «ما نعرفش برك» (`lesson.helpChoice.notSureOnly`).
+- Reason lines (`lesson.helpReason.*`):
+  - alternative «نجرّبو نفس الفكرة بطريقة أخرى.»
+  - deepDive «نفهمو الفكرة قبل، وبعد نرجعو للسؤال.»
+  - simpler «نبداو بمثال أصغر.»
+  - prerequisite «نرجعو خطوة لتالي، لحاجة أسهل.»
+  - hint «ما فمّاش طريقة أخرى هنا: جرّب التلميح.»
+  - reveal «ما فمّاش طريقة أخرى هنا: تنجم تشوف الجواب.»
+- To check: is «لتالي» the right word for "back" in derja? Is «حاجة أسهل» (rather than «مثال أسهل», which the detour header uses) clear on a chip?
+
+## D29. Reveal-unlock detours, tall cards, wrong procedures, clarify ladder — Accepted (product owner, 2026-10-22)
+- **Reveal unlock counts only detours the student acted in:** answered, tapped, a hint, "not sure", a help request, an ask, or finished. A detour left at once does not count. Component taps inside a detour reach the reducer as `detour_acted` (one per detour; while a detour is open, any component tap counts, because deep-dive visuals carry the parent's step id).
+- **Footer scroll on a tall card: the question wins.** The scroll stops at the card top; if the footer still does not fit, the chips stay below the fold (also in "⋯").
+- **C1–C3, misconception inference:** `src/engine/procedures.ts` runs the step's engine call again with a known wrong procedure: ordered draw, balls in the event, all balls, opposite event, all outcomes, balls of the same number merged, an earlier result. Per-step tables in content (`reviewed: false`); the loader rejects a row that does not fit or equals the answer. Authored wrong answers are matched first. One match gives its misconception; several give the first as a hypothesis, with one skippable probe card per step. The planner waits for that card; if the student acts instead, the card closes as skipped. New misconceptions: `merges_identical_balls`, `reuses_earlier_result`.
+- **B3, clarify ladder** (`CLARIFY_LADDER` in `rules.ts`). counting: a counting alternative, a deep dive tagged counting, a twin, a hint. why: the step's deep dive, the ask chip tagged why, an alternative, a hint. link: the step's `link` (earlier result, engine value), the results the question uses, an alternative, the deep dive, a hint. Each chip or link is shown once per step.
+
+**Teacher review list (all `reviewed: false`):**
+- Probe card (`lesson.card.probe.*`): title «كيفاش لقيت النتيجة هذي؟»; «عدّيت الكور», «عدّيت العكس», «عدّيت التيراجات الكل», «حسبت الترتيب», «الزوز كور اللي عليهم نفس الرقم حسبتهم وحدة», «عاودت النتيجة اللي قبل», «موش توّا».
+- Link texts: 1b/s7 «لقينا قبل عدد التيراجات اللي ما فيهم حتى صفر:»; the transfer of 1b/s5 «في السؤال الأصلي لقينا عدد التيراجات اللي ما فيهم حتى صفر:».
+- The procedure tables and the two new misconceptions (`docs/exercises` wording in English only).
+
+## D30. Round 1 "dead ends", items 1–3 — Accepted (product owner, 2026-10-22)
+- **Safety net:** after a diagnosed wrong answer (authored or inferred), the rules never return a bare "continue". The misconception's line is on screen; with no repair, `rule.first_wrong.diagnosed` gives the next hint, else the next detour within the cap. Only when nothing authored is left (ladder used, cap reached) does the lesson continue: the line stays and reveal is open. An undiagnosed first wrong answer still shows the generic line only.
+- **Lines:** each misconception may have `feedback` (a question: only a value was typed or an option picked) and `feedbackConfirmed` (named plainly after a probe confirmation). A place's own authored text still wins. After a probe answer, the confirmed line is shown; on «موش توّا», the hypothesis's question line.
+- **Coverage test** (`misconceptionCoverage.test.ts`): every misconception, at every place it can be reached in Ex 2 and A.1, with the probe confirmed and dismissed, must show a line and a next step. 8 library entries have no place yet (Ex 4 parts not built, the line checker's own codes); the test lists them, so a new place is tested automatically.
+- **«عدّيت العكس» on the transfer of 1b/s5:** no ComplementView exists for 1b/s5 or its transfer. ComplementView exists only for 1b/s8–s7 (`alt-1b-s8-complement`), 2a/s10, the prerequisite `pre-complement`, the deep dive `au_moins_contraire` and 2a/s13. So: the plain line, then the next hint. Nothing invented.
+
+**Teacher review list (all `reviewed: false`), Ex 2 misconception lines (Q = question form, C = after confirmation):**
+- counts_balls_not_pairs: Q «عدّيت الكور ولا التيراجات؟ كل تيراج هو زوز كور مع بعض: عدّ الأزواج.» C «عدّيت الكور، والمطلوب التيراجات. كل تيراج هو زوز كور مع بعض: عدّ الأزواج.»
+- counts_ordered_pairs: Q «حسبت الترتيب؟ في التيراج simultané ما فمّاش كورة أولى وكورة ثانية: عاود عدّ بلا ترتيب.» C «حسبت الترتيب، أما في التيراج simultané الترتيب ما يهمّش: عاود عدّ بلا ترتيب.»
+- au_moins_direct_miscount: Q «au moins une معناها وحدة ولا أكثر: حسبت الحالة اللي فيها الزوز؟»
+- complement_partial_event: Q «هذي حالة وحدة من الحدث. العكس فيه الحالات الكل اللي الحدث ما يصيرش فيها: شنوّة هي؟»
+- confuses_event_and_complement: Q «حسبت الحدث المطلوب ولا العكس متاعو؟ ارجع اقرا شنوّة المطلوب بالضبط.» C «حسبت العكس متاع الحدث المطلوب. ارجع اقرا المطلوب، وعدّ الحالات متاعو هو.»
+- counts_all_outcomes: Q «عدّيت التيراجات الكل؟ المطلوب كان التيراجات اللي فيهم الشرط برك.» C «عدّيت التيراجات الكل. خوذ كان اللي فيهم الشرط، ونحّي البقية.»
+- merges_identical_balls: Q «الكور اللي عليهم نفس الرقم حسبتهم كورة وحدة؟ هوما كور مختلفين، حتى كان الرقم كيف كيف.» C «حسبت الكور اللي عليهم نفس الرقم كورة وحدة. هوما كور مختلفين: كل وحدة تعطي تيراجات متاعها.»
+- reuses_earlier_result: Q «هذي النتيجة متاع سؤال قبل؟ السؤال تبدّل: عاود احسب بالشرط الجديد.» C «عاودت النتيجة اللي قبل، أما السؤال تبدّل. اقرا الشرط الجديد واحسب من جديد.»
+- lists_ball_values_not_products: Q «هاذوما الأرقام اللي على الكور؟ X هو الجداء متاع الزوز أرقام: احسب الجداء في كل تيراج.»
+- values_include_product_1: Q «باش يجي الجداء هذا، تلزمك زوز كور عليهم نفس الرقم. ثبّت في الكور اللي في الصندوق: موجودين؟»
+
+## D31. Round 1 "dead ends", item 4 and probe rule — Accepted (product owner, 2026-10-22)
+- **Probe only when the answers differ:** right after a probe card opens, the rules decide once per candidate (a hypothetical answer, never logged). If all give the same next action, the card is dropped before it is shown: the hypothesis's line as a question, then the rules' reaction. Value 3 on the transfer of 1b/s5 no longer asks. `pre-complement` is not a repair for counting steps (hint 1 after the plain line stays).
+- **Long-press with no verified answer:** the first time on a block, the line «ما عنديش جواب جاهز…», then an offer card «تحب تلميح ولا نفهمو الفكرة مع بعض؟» (only the available choices, and «موش توّا»). Later asks on that block: the next hint (or the deep dive) at once, no line. With no hint and no deep dive left: a line pointing to the ask field. Logged `ask.unanswered`, a struggle signal.
+- **Quotes:** a long-pressed block's formula is rendered as math in the menu and the student bubble (never raw LaTeX); the event's `quoted` keeps text + formula as before.
+- **Jump button:** its own row under the feed (it covered options when it floated over the feed).
+- **Detour tabs:** a sheet's top margin (`space.sheetTop`, 20) clears its tab (−11) by 8 pt+; a tab outside a sheet has no negative margin.
+- **Release:** `npm run check:release-dev` builds a Release bundle and fails if any debug launch option read in `src/app/dev/launch.ts` (or `Settings.get`) is in it; ok with 19 options (2026-10-22). A debug bundle fails it, as it should.
+- **Typed answers:** a done card shows the value once, rendered (it showed the typed text and its preview side by side).
+- **Teacher review (`reviewed: false`):** «تحب تلميح ولا نفهمو الفكرة مع بعض؟», «تلميح», «نفهمو الفكرة», «موش توّا», «اكتب سؤالك في خانة «اسأل» توّا.» (was «… اللوطة»; product owner, 2026-10-22)
+
+## D32. Round 2: fresh variant after a reveal, detour reveals in part_done, guided walk-through — Accepted (product owner, 2026-10-22)
+- **D2:** a main step or transfer revealed is followed by a fresh variant on a new urn (`afterReveal` transfers; 2.a's own-urn transfers too), opened directly:
+  - one reason line, then the variant, with a quiet «موش توّا» exit (closes it without a failure);
+  - at most one per reveal, and `THRESHOLDS.freshAfterRevealPerSkillPerSession = 1`;
+  - a skill whose last reveal is not followed by a correct variant is at most "shaky";
+  - loader checks: own urn, a transfer, and an answer that is neither the parent's answer nor one of its known wrong values.
+- **D3:** `part_done.revealed` includes detour steps revealed; "done" unchanged.
+- **B4:** the teacher-note card is gone. A stuck student gets the step's own guided walk-through (once per step), else the next hint, else the lesson goes on; the note for the teacher is queued silently.
+  - Each walk-through line is checked like an AI answer: values in digits or words, the answer's words and phrases, and formulas worth the answer.
+  - The check runs after loading (`src/lesson/walkthroughCheck.ts`, from `src/app/exercises.ts`), because the loader cannot import the lesson. A failing exercise does not load.
+
+**Teacher review list (all `reviewed: false`):**
+- Reason line «نجرّبو مثال آخر باش نتأكدو.»; exit «موش توّا»; walk-through title «خطوة بخطوة», button «التالي».
+- Fresh variants:
+  - `tr-1b-s5-fresh`: «صندوق جديد فيه ثمنية كور، زوز منهم عليهم صفر. نجبدو زوز كور مع بعض. قدّاش من تيراج ما فيه حتى صفر؟» (urn 0, 0, 1, 2, 3, 4, 5, 6; answer 15).
+  - `tr-1b-s8-fresh`: «نفس الصندوق الجديد. شنوّة احتمال التيراج اللي فيه au moins une كورة عليها صفر؟» (13/28).
+  - Both with hints, procedure tables and answer phrases.
+- Walk-throughs:
+  - 1b/s5 (2 lines, revised by the product owner 2026-10-22: line 1 no longer lists the balls): «ثبّت في المطلوب: نعدّو التيراجات اللي ما فيهم حتى صفر، موش الكور.»; «كوّن الأزواج من الكور اللي ما عليهمش صفر، كل زوج مرّة وحدة، وبعد عدّهم.» (was: «ثبّت في الصندوق: أما كور ما عليهمش صفر؟ اكتبهم.» + math −1, 1, 2)
+  - 1b/s8 (2 lines): «ارجع للاحتمال اللي لقيته للحدث العكسي:» + math p(B̄); «الحدث وعكسو مع بعض يعطيو الاحتمالات الكل: نقص من واحد.»
+  - The transfer of 1b/s5 (3 lines; the third is needed for the two 0 balls): «نحّي الكورة اللي عليها رقم سالب، وشوف الكور اللي بقاو.»; «الزوز كور اللي عليهم صفر زوز كور مختلفين: سمّيهم بحرفين مختلفين.»; «اكتب الأزواج الكل من الكور اللي بقاو، كل زوج مرّة وحدة، وعدّهم.»
+- For the teacher: is 1b/s5's line 1 (listing −1, 1, 2) too close to the answer? It shows what to count, not the count. Product owner (2026-10-22): yes, the list is removed; the line now says to count the draws with no zero, not the balls. Still for teacher review.
+
+## D33. Round 3: misconceptions under their own skill, outcome classes, nextMove — Accepted (product owner, 2026-10-22)
+- **D1:** a misconception is counted under its own skill. The wrong answer and its signal stay on the step's skills; the misconception's own skill gets one struggle signal when it is not one of them. `Situation.skills` also shows that skill; `step.skills` and the forms tried are unchanged.
+- **E1:** one outcome class per finished attempt: `first_try`, `after_retry` (added), `after_hint`, `after_detour`, `revealed`, `guessed`, `transfer_ok`, `transfer_fail`. Counted per skill; never shown (a test guards the screens and i18n).
+- **E2:** `nextMove` after a correct answer, a self-report, a reveal or a closed transfer.
+  - `first_try` and `transfer_ok` → move on.
+  - `after_retry` → repeat only on a shaky skill.
+  - `after_hint`, `after_detour`, `guessed`, `revealed` → repeat.
+  - `transfer_fail` (answered right only after a wrong answer), or a transfer revealed after a failed one on the skill in the session → step back.
+  - A revealed fresh variant → move on (D2).
+  - A first try with no reasoning shown (lines: the goal at once) → repeat (keeps the 2026-10-18 rule).
+  - Hard caps (config, untuned): `repeatPerSkillPerSession 2`, `stepBackPerSkillPerSession 1`, `movesPerQuestion 4`; D2's fresh cap is kept. A property test (200 seeded sequences) shows no loop.
+  - Every decision is logged as `next_move`, with the cap that stopped it. The dev panel shows the last decisions and the caps used.
+- **Behaviour change (accepted 2026-10-22):** after a first-try answer, «فهمت علاش» now moves on; «خمّنت» still gets the transfer. Before, any self-report except «موش توّا» led to the transfer. A self-report after a first try is asked only when the answer time was unusual (`rule.odd_timing`: faster than `fastAnswerMs` 1.2 s or slower than `slowAnswerMs` 3 min).
+- **Open product question:** should an unusual answer time still lead to a transfer when the student says «فهمت علاش»? And is the 1.2 s threshold meaningful for a choice tap? Measured 2026-10-23 with the new dev line (`answer-timing`, `src/telemetry/answerTiming.ts`):
+  - The simulator's stored events (1803, all sessions): 205 timed first tries, all 205 faster than 1.2 s, none slower than 3 min; `rule.odd_timing` fired 51 times. Almost all of these are dev-script runs, which answer within milliseconds, so they say nothing about students.
+  - The repo's sample log (`ex2_session_1.converted.jsonl`): no durations (converted prototype log).
+  - No human session with durations is stored in the repo. Needed: the threshold measured on real sessions (a pilot export) before deciding.
+
+## D34. Content round C1: finish 1.b — Accepted (product owner, 2026-10-23); all strings `reviewed: false`
+- **Engine support:** a new answer type `complement { of: <event> }`. Each option carries its `event`, and the loader finds the one option whose draws are exactly the draws outside `of`.
+- **Fresh choice variants:** checked against the parent. The correct option must not repeat the parent's correct option, and its value must be neither the parent's answer nor one of its wrong options' values.
+- **Option order:** the correct option of each fresh variant sits in a different position from its parent's (test).
+- **Coverage:** `npm run replay -- coverage [log.jsonl ...]` regenerates the content-coverage table, with optional counts from logs.
+
+**Teacher review list (C1), with what each line must not reveal:**
+- **Walk-through 1b/s3** (must not name the correct option: no «ولا وحدة / حتى صفر / aucune»):
+  1. «اقرا الحدث B مليح: شنوّة الحالات الكل اللي يصير فيها؟»
+  2. «العكس هو الحالات اللي B ما يصيرش فيها: جرّب كل اختيار وشوف واش يغطّيهم الكل.»
+- **Walk-through 1b/s7** (must not state 3/10 or its numbers):
+  1. «ارجع لعدد التيراجات اللي ما فيهم صفر، اللي لقيته في الخطوة اللي قبل.»
+  2. «الاحتمال هو عدد الحالات المواتية على عدد الحالات الكل: اقسم.»
+- **Simpler twin for 1b/s7 (`sim-1b-s7-1`; urn 0, 1, 2, 3; answer 1/2)** (the hints must not give the counts 3 and 6):
+  - Prompt: «مثال أصغر: صندوق فيه أربعة كور، وحدة منهم عليها صفر. نجبدو زوز مع بعض. شنوّة احتمال التيراج اللي ما فيه حتى صفر؟»
+  - Hints: «عدّ التيراجات الكل، وبعد عدّ اللي ما فيهم صفر.»; «اقسم العدد الثاني على الأوّل.»
+- **Fresh variant for 1b/s3 (`tr-1b-s3-fresh`; urn 0, 0, 1, 2, 3, 4, 5, 6; event C = a number greater than 4)** (the hints must not name the correct option):
+  - Prompt: «صندوق جديد فيه ثمنية كور. الحدث C معناه au moins une des deux boules porte un numéro supérieur à 4. شنوّة الحدث العكسي متاعو؟»
+  - Options (French): «exactement une boule porte un numéro supérieur à 4» (au moins un read as "exactly one"); «aucune des deux boules ne porte un numéro supérieur à 4» (correct, 2nd position); «les deux boules portent un numéro supérieur à 4» (a sub-case).
+  - Hints: «العكس فيه الحالات الكل اللي C ما يصيرش فيها.»; «كي C ما يصيرش، قدّاش من كورة فوق الأربعة تنجم تكون في يدّك؟»
+  - Answer phrases (for the AI answer check): fr «aucune des deux»; ar «ولا وحدة فوق الأربعة», «الزوز تحت الخمسة».
+- **Fresh variant for 1b/s7 (`tr-1b-s7-fresh`; same urn; answer 15/28)** (the hints must not state 15, 28 or the fraction):
+  - Prompt: «صندوق جديد فيه ثمنية كور، زوز منهم عليهم صفر. نجبدو زوز مع بعض. شنوّة احتمال التيراج اللي ما فيه حتى صفر؟»
+  - Options: 13/28 (the opposite event), 3/4 (counting balls), 15/28 (correct, 3rd position).
+  - Hints: «عدّ التيراجات اللي ما فيهم صفر، وبعد التيراجات الكل.»; «الاحتمال: الأوّل على الثاني.»
+  - Answer phrases: fr «quinze sur vingt-huit»; ar «خمستاش على ثمنية وعشرين».
+- **To check:** the fresh variants of 1b/s5 and 1b/s7 use the same urn and the same event (draws with no 0). A student who meets both sees 15, then 15/28. Is that acceptable, or should s7's fresh variant use another event?
+
+## D35. New exercise `bac2022c-sc-ex2` (red / black urn), milestone 1 — Accepted (product owner, 2026-10-23); all strings `reviewed: false`
+Source file: `docs/exercises/EX_URN_RN.md`. Scope of milestone 1: E1–E5 and question 1 (steps a–c). Question 2 (d–g) waits for the product owner's OK. Deferred: the 4 fresh variants and the 3 prerequisites. Alternatives were not in the slice, so none are authored.
+- **D1 (id, source line):** the id is `bac2022c-sc-ex2`, and `bac2022c-ex2` stays as it is (stored progress is keyed by it). **Open:** the exact « Section : … » line of the paper header was not supplied (the message still had the placeholder). Until it is, `paper.source` is absent and the paper screen shows the section short label («Sc. exp.») in its place. A test asserts the source is absent, so adding it is a deliberate change.
+- **D2 (ball letters):** a ball may carry `color: red | black`. It is shown by its letter, R or N (rouge / noire, as on the French paper), numbered within its colour (R₁…R₄, N₁…N₆). VoiceOver reads «كورة حمراء 1» / «كورة كحلة 2». Events still read `value` (red = 1, black = 0; `count_value(1)` = number of reds). The engine checks that a colour is on every ball or on none, and that each colour has its own value. The fill is secondary:
+  - Red `#9c4221`: white letter 6.53:1, 5.98:1 on paper. Its hue is ≥ 20° from every error / wrong-answer red (26° from red pencil), and it is not equal to the unused `critical600` or the data colour `series5`.
+  - Black `#22252b`: 15.36:1.
+  - A drawn coloured ball keeps its fill, lifts, and gets the pen ring and the check mark.
+  - Balls without a colour take the old code path. Proof: 14 screens (Ex 2 lessons 1.b and 2.a, A.1, picker, «الورقة», paper screen, every probability demo) are pixel-identical before and after E2 on the 390 pt simulator.
+- **D3 (cap):** only `Urn` in display mode is exempt from the 60-draw cap. It lists no draws; the urn and the draw are still checked. `Urn` select mode, `OutcomeSpace` and `LawChart` from an urn stay capped (tests on the 120-draw urn).
+- **E1:** a new wrong procedure, `with_replacement` (each ball put back before the next). It gives 1000, 54/125 and 27/125 on this urn.
+- **E3:** `LawChart.law.of` (a value function). The schema recomputes every row from the urn and rejects any disagreement. In content, the loader requires `of` on every `LawChart` that gives a `law`, also inside containers. The AI path still only sums to 1 when `of` is absent (unchanged; noted here).
+- **E5:**
+  - `section` on exercises (`mathematiques` / `sciences-experimentales`). It shows as an outline tag on the picker card (رياضيات / علوم تجريبية) and as «Maths» / «Sc. exp.» in the lesson and «الورقة» subtitles. Ex 2 and Ex 4 are marked `mathematiques`.
+  - `partLabel("1")` is "1" (it was ".1").
+  - `findPart` accepts `exerciseId/partId`, e.g. `-devPart bac2022c-sc-ex2/1`.
+  - Debug-only `-devThen type:720,notSure` plays once after `answerAll` stops at `-devUntil`.
+  - The replay tool registers the new exercise.
+- **Change 1 (a valid ordered method is never marked wrong):**
+  - 720 at step a shows an authored line: the method is correct, but each group of three is counted 6 times (3 × 2 × 1).
+  - 360 at step b says the same.
+  - At step c, 360/720 is accepted (an equivalent fraction; test), and the step after it shows the ordered computation 360/720 = 1/2.
+  - The write-up has a «Variante (tirages ordonnés)» line, and the chip «ونجّم نعدّ بالترتيب؟» ("can I count in order?") explains the condition (order on both sides).
+  - **Open:** the 720 line sits in the standard wrong-answer note (red pencil, «!»), because the step asks for the simultaneous count. Should a value that comes from a valid method get a neutral tone instead (a new `tone` on authored wrong answers)?
+- **Content choices to confirm:**
+  - The goal reads «Montrer que P(A) = 1/2» (engine value). The paper wording keeps «0.5» verbatim, and a test checks 1/2 = 0.5.
+  - Binomial notation is `\binom{10}{3}` in hints and C(10,3) in the write-up, as in Ex 2. Tunisian textbooks write C₁₀³: which one should the app use?
+
+**Teacher review: must-review** (on the main path, or shown after a wrong answer):
+1. Words and tags:
+   - «كورة حمراء N», «كورة كحلة N» (VoiceOver).
+   - The letters R / N.
+   - The title «تمرين الكور الحمر والكحل».
+   - The section tags «رياضيات», «علوم تجريبية»; the subtitles «Maths», «Sc. exp.».
+2. Question 1 main path (`1/s1`–`1/s9`, 37 Arabic strings):
+   - The intro and the comparison labels: «نجبدو الزوز مع بعض» ("we draw both together"), «وحدة بوحدة، ونرجّعو الكورة» ("one by one, putting the ball back"), and the insight.
+   - The «كيفاش نجبدو» choice ("how do we draw?") with its 3 options and 2 feedbacks.
+   - The 3 typed prompts, their 9 hints and 6 walk-through lines.
+   - The 720 and 360 lines (change 1).
+   - The ordered-alternative sentence.
+3. The 14 misconception lines (`feedback` + `feedbackConfirmed`, 28 strings), shown on a first wrong answer anywhere.
+4. The French write-up (4 lines, including the «Variante» line): exam-paper writing.
+
+**Teacher review: nice-to-have** (detours, optional, or never shown as text):
+1. The 3 deep dives (10 strings, minis included).
+2. The 4 simpler twins and 2 transfers (16 strings).
+3. The 3 ask chips (6 strings).
+4. `solutionPhrases` (AI answer guard only; wrong phrasing only weakens the guard).
+5. Misconception `description` / `signature` (English, internal).

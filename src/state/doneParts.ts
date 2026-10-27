@@ -9,9 +9,15 @@
  *
  * Done parts are also kept in a small record of their own, so the event log's
  * cap (oldest chunks dropped) never erases a done mark.
+ *
+ * "Start the exercise from scratch" (`exercise_reset`): a part done in a
+ * session that started before the exercise's latest reset no longer counts,
+ * and the record forgets that exercise. Stored events stay (reports, planner
+ * history: DECISIONS.md D25).
  */
 import type { KeyValueStore } from '../storage/kv';
 import type { Event } from '../telemetry/events';
+import { EventLog, type LogClock } from '../telemetry/log';
 
 export const partKey = (exerciseId: string, questionId: string) =>
   `${exerciseId}/${questionId}`;
@@ -53,20 +59,95 @@ export function createDoneRecord(kv: KeyValueStore) {
       all[key] = { firstDoneAt: e.ts, contentVersion: e.contentVersion };
       kv.set(RECORD_KEY, JSON.stringify(all));
     },
+    /** Forgets every done mark of this exercise (and only this one). */
+    clearExercise(exerciseId: string) {
+      const prefix = partKey(exerciseId, '');
+      const all = read();
+      const kept = Object.fromEntries(
+        Object.entries(all).filter(([key]) => !key.startsWith(prefix)),
+      );
+      kv.set(RECORD_KEY, JSON.stringify(kept));
+    },
   };
 }
 export type DoneRecord = ReturnType<typeof createDoneRecord>;
 
-/** Done part keys: the record, plus any counting `part_done` in these events. */
+/** Each exercise's latest `exercise_reset` time. */
+function latestResets(events: readonly Event[]): Map<string, number> {
+  const resets = new Map<string, number>();
+  for (const e of events) {
+    if (e.t === 'exercise_reset') {
+      resets.set(e.exerciseId, Math.max(resets.get(e.exerciseId) ?? 0, e.ts));
+    }
+  }
+  return resets;
+}
+
+/**
+ * Done part keys: the record, plus any counting `part_done` in these events;
+ * minus what an exercise's latest reset wiped (a session started before it, a
+ * record entry first done before it, in case clearing the record failed).
+ */
 export function doneParts(
   events: readonly Event[],
   record?: Pick<DoneRecord, 'all'>,
 ): Set<string> {
-  const done = new Set(Object.keys(record?.all() ?? {}));
+  const resets = latestResets(events);
+  const sessionStart = new Map<string, number>();
   for (const e of events) {
-    if (countsAsDone(e)) {
+    sessionStart.set(
+      e.sessionId,
+      Math.min(sessionStart.get(e.sessionId) ?? e.ts, e.ts),
+    );
+  }
+  const afterReset = (exerciseId: string, ts: number) =>
+    ts >= (resets.get(exerciseId) ?? 0);
+  const done = new Set<string>();
+  for (const [key, entry] of Object.entries(record?.all() ?? {})) {
+    const exerciseId = key.slice(0, key.lastIndexOf('/'));
+    if (afterReset(exerciseId, entry.firstDoneAt)) {
+      done.add(key);
+    }
+  }
+  for (const e of events) {
+    if (
+      countsAsDone(e) &&
+      afterReset(e.exerciseId, sessionStart.get(e.sessionId) ?? e.ts)
+    ) {
       done.add(partKey(e.exerciseId, e.questionId));
     }
   }
   return done;
+}
+
+/**
+ * "Start the exercise from scratch": logs `exercise_reset` for this exercise
+ * (its own short session), then clears its done marks. Nothing is deleted.
+ */
+export function resetExercise(
+  exercise: { id: string; contentVersion: string },
+  services: {
+    eventStore: { append(events: readonly Event[]): void };
+    doneRecord: Pick<DoneRecord, 'clearExercise'>;
+    clock?: LogClock;
+    /** The reset dialog's log (its events share one session); else a new one. */
+    log?: EventLog;
+  },
+) {
+  const log =
+    services.log ??
+    new EventLog(
+      {
+        sessionId: `reset-${Date.now().toString(36)}`,
+        studentId: 'local-anon',
+        exerciseId: exercise.id,
+        contentVersion: exercise.contentVersion,
+      },
+      services.clock,
+      services.eventStore,
+    );
+  log.append([
+    { t: 'exercise_reset', questionId: 'exercise', stepId: 'reset' },
+  ]);
+  services.doneRecord.clearExercise(exercise.id);
 }

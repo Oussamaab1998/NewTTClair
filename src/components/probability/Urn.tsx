@@ -12,7 +12,13 @@ import { z } from 'zod';
 import { RichView } from '../../lesson/feed/RichView';
 import type { Outcome } from '../../engine/probability';
 import { useEmit, type ViewProps } from '../host';
-import { ballLabels, outcomeLabel, valueExpression, valueOf } from './logic';
+import {
+  ballLabels,
+  colorIndexes,
+  outcomeLabel,
+  valueExpression,
+  valueOf,
+} from './logic';
 import type { UrnProps } from './schemas';
 import { Panel, Readout, styles as ui } from './ui';
 import { theme } from '../../theme';
@@ -30,6 +36,7 @@ export function Urn(p: ViewProps<UrnProps>) {
     () => ballLabels(balls, markDuplicates),
     [balls, markDuplicates],
   );
+  const colorIndex = useMemo(() => colorIndexes(balls), [balls]);
   const initial = useMemo(() => {
     const snap = SnapshotSchema.safeParse(p.snapshot);
     return snap.success ? snap.data.selected : p.props.selected ?? [];
@@ -87,18 +94,38 @@ export function Urn(p: ViewProps<UrnProps>) {
       <View style={styles.urn}>
         {balls.map(b => {
           const on = selected.includes(b.id);
+          // A coloured ball keeps its fill when drawn: the lift, the pen ring
+          // and the check mark it (its letter carries the meaning).
+          const tone = b.color && theme.color.ball[b.color];
           return (
             <Pressable
               key={b.id}
               disabled={!canTap}
               onPress={() => toggle(b.id)}
               accessibilityRole={canTap ? 'button' : 'image'}
-              accessibilityLabel={labels.get(b.id)}
+              accessibilityLabel={
+                b.color
+                  ? t(`proba.ball.${b.color}`, { n: colorIndex.get(b.id) })
+                  : labels.get(b.id)
+              }
               accessibilityState={{ selected: on, disabled: !canTap }}
               testID={`urn-ball-${b.id}`}
-              style={[styles.ball, on && styles.ballOn]}
+              style={[
+                styles.ball,
+                tone
+                  ? [
+                      { backgroundColor: tone.fill, borderColor: tone.fill },
+                      on && styles.colorBallOn,
+                    ]
+                  : on && styles.ballOn,
+              ]}
             >
-              <Text style={[styles.ballText, on && styles.ballTextOn]}>
+              <Text
+                style={[
+                  styles.ballText,
+                  tone ? { color: tone.text } : on && styles.ballTextOn,
+                ]}
+              >
                 {labels.get(b.id)}
               </Text>
               {on && (
@@ -172,6 +199,10 @@ const styles = StyleSheet.create({
     fontFamily: theme.font.family.ui.bold,
     fontSize: theme.font.size.reading,
     color: theme.color.textPrimary,
+  },
+  colorBallOn: {
+    borderColor: theme.color.actionPrimary,
+    transform: [{ translateY: theme.offset.ballLift }],
   },
   ballTextOn: { color: theme.color.textOnAccent },
   check: {

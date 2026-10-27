@@ -47,6 +47,24 @@ export const THRESHOLDS = {
   maxExampleRounds: 3,
   /** "Take me to something simpler": prerequisite levels below the original question. */
   maxPrerequisiteLevels: 2,
+  /** Detours (deep dives, alternatives, twins, prerequisites; not transfers) per step, from any source (help chips, 2026-10-22). */
+  maxDetoursPerStep: 3,
+  /** D2: fresh variants opened after a reveal, per skill and session (hard cap). */
+  freshAfterRevealPerSkillPerSession: 1,
+  // E2 nextMove (round 3, 2026-10-22), untuned hard caps: no loop is possible.
+  /** Repeats (a transfer or a fresh variant) per skill and session. */
+  repeatPerSkillPerSession: 2,
+  /** Step-backs (a prerequisite) per skill and session. */
+  stepBackPerSkillPerSession: 1,
+  /** Repeats and step-backs together, per question. */
+  movesPerQuestion: 4,
+  /** Help chips: seconds without any action on the active card before they show. */
+  helpChipsIdleMs: 20_000,
+  /**
+   * Idle alone shows the chips (product owner choice, off): by default idle
+   * shows them only on a card that already had a wrong answer or a "not sure".
+   */
+  helpChipsIdleAlone: false,
 } as const;
 
 export type Thresholds = typeof THRESHOLDS;

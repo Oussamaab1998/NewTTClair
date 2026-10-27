@@ -1,12 +1,15 @@
 {
   "contentVersion": "skills-0.1.0",
   "reviewed": false,
-  "note": "Minimal prerequisite map for Exercise 2 (bac2022c-ex2) and the Exercise 4 checkpoints in docs/exercises/EX4_ANALYSIS.md. Drafted by the dev team, not reviewed by a teacher.",
+  "note": "Minimal prerequisite map for Exercise 2 (bac2022c-ex2) and the Exercise 4 checkpoints in docs/exercises/EX4_ANALYSIS.md; combinations-count, multiplication-principle and probability-by-counting for the red / black urn (bac2022c-sc-ex2, docs/exercises/EX_URN_RN.md). Drafted by the dev team, not reviewed by a teacher.",
   "skills": [
     { "id": "sample-space", "kind": "math", "requires": [] },
     { "id": "simultaneous-draw", "kind": "math", "requires": ["sample-space"] },
     { "id": "counting-pairs", "kind": "math", "requires": ["simultaneous-draw", "sample-space"] },
     { "id": "equiprobability", "kind": "math", "requires": ["counting-pairs"] },
+    { "id": "combinations-count", "kind": "math", "requires": ["simultaneous-draw", "sample-space"] },
+    { "id": "multiplication-principle", "kind": "math", "requires": ["combinations-count"] },
+    { "id": "probability-by-counting", "kind": "math", "requires": ["combinations-count", "equiprobability"] },
     { "id": "probability-sure-event", "kind": "math", "requires": [] },
     { "id": "event-as-set", "kind": "math", "requires": ["sample-space"] },
     { "id": "complement-event", "kind": "math", "requires": ["event-as-set", "probability-sure-event"] },

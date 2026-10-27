@@ -11,7 +11,14 @@ import {
   stepKey,
   type LoadedExercise,
 } from '../content/loader';
-import type { Exercise, Variant } from '../content/schema';
+import type {
+  AskChip,
+  ClarifyChoice,
+  Exercise,
+  Rich,
+  Variant,
+} from '../content/schema';
+import type { Fraction } from '../engine/rational';
 import {
   DecisionSchema,
   type Action,
@@ -40,6 +47,14 @@ export interface PlannerMenu {
   /** Results a question uses ("résultats acquis"). */
   usedResults(questionId: string): Exercise['results'];
   hasCheck(key: string): boolean;
+  /** B3: deep dives tagged for an ask_clarify answer, in authored order. */
+  deepDivesAddressing(choice: ClarifyChoice): string[];
+  /** B3: a question's ask chips tagged for an ask_clarify answer. */
+  askChipsFor(questionId: string, choice: ClarifyChoice): AskChip[];
+  /** B3: the step's earlier result (`link`), its value from the engine. */
+  linkOf(key: string): { text: Rich; value: Fraction } | undefined;
+  /** B4: the step has its own guided walk-through. */
+  hasWalkthrough(key: string): boolean;
 }
 
 export function buildMenu(loaded: LoadedExercise): PlannerMenu {
@@ -47,10 +62,26 @@ export function buildMenu(loaded: LoadedExercise): PlannerMenu {
   const variants = new Map(ex.variants.map(v => [v.id, v]));
   const deepDiveOf = new Map<string, string>();
   const checks = new Set<string>();
+  const links = new Map<string, { text: Rich; value: Fraction }>();
+  const walkthroughs = new Set<string>();
+  const addLink = (key: string, s: object) => {
+    const link =
+      'link' in s
+        ? (s as { link?: { resultRef: string; text: Rich } }).link
+        : undefined;
+    const value = link ? loaded.values.get(link.resultRef) : undefined;
+    if (link && value) {
+      links.set(key, { text: link.text, value });
+    }
+    if ('walkthrough' in s && s.walkthrough) {
+      walkthroughs.add(key);
+    }
+  };
   for (const q of ex.parts) {
     for (const g of q.groups) {
       for (const s of g.steps) {
         const key = stepKey.main(q.id, s.id);
+        addLink(key, s);
         if ('deepDiveId' in s && s.deepDiveId !== undefined) {
           deepDiveOf.set(key, s.deepDiveId);
         }
@@ -70,6 +101,7 @@ export function buildMenu(loaded: LoadedExercise): PlannerMenu {
   }
   for (const v of ex.variants) {
     const key = stepKey.variant(v.id);
+    addLink(key, v.step);
     if ('deepDiveId' in v.step && v.step.deepDiveId !== undefined) {
       deepDiveOf.set(key, v.step.deepDiveId);
     }
@@ -98,6 +130,14 @@ export function buildMenu(loaded: LoadedExercise): PlannerMenu {
       return ex.results.filter(r => q?.uses.includes(r.id));
     },
     hasCheck: key => checks.has(key),
+    deepDivesAddressing: choice =>
+      ex.deepDives.filter(d => d.addresses?.includes(choice)).map(d => d.id),
+    askChipsFor: (questionId, choice) =>
+      (ex.parts.find(p => p.id === questionId)?.askChips ?? []).filter(c =>
+        c.addresses?.includes(choice),
+      ),
+    linkOf: key => links.get(key),
+    hasWalkthrough: key => walkthroughs.has(key),
   };
 }
 

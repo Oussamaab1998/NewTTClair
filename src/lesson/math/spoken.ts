@@ -40,6 +40,7 @@ const WORDS: Record<string, string> = {
   ℂ: 'C',
   '′': 'prime',
   '∑': 'somme',
+  '∫': 'intégrale',
   '…': 'etc.',
   ';': 'point-virgule',
   ',': 'virgule',
@@ -87,6 +88,11 @@ function say(n: MathNode): string {
       const base = say(n.base);
       const under = n.under ? ` quand ${say(n.under)}` : '';
       const over = n.over ? ` jusqu'à ${say(n.over)}` : '';
+      if (base === 'intégrale') {
+        const from = n.under ? ` de ${say(n.under)}` : '';
+        const to = n.over ? ` à ${say(n.over)}` : '';
+        return `intégrale${from}${to} de`;
+      }
       return base === 'lim' ? `limite${under}` : `${base}${under}${over}`;
     }
   }

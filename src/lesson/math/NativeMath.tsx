@@ -1,10 +1,5 @@
 import React, { useState } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  type LayoutChangeEvent,
-} from 'react-native';
+import { StyleSheet, Text, View, type LayoutChangeEvent } from 'react-native';
 
 import { theme } from '../../theme';
 import type { MathNode } from './latexSubset';
@@ -14,6 +9,9 @@ import type { MathNode } from './latexSubset';
 // spacings in `styles` below. They keep formulas proportional at any size, so
 // they stay here (the theme guard allows this file by name).
 const SCRIPT_SCALE = 0.7;
+/** An integral sign with bounds is drawn taller than the text (display style). */
+const INTEGRAL_SCALE = 1.6;
+const INTEGRAL = '∫';
 const MIN_SIZE = 11;
 const SQRT = '√';
 
@@ -122,7 +120,15 @@ export function MathNodeView({ node, size, color }: NodeProps) {
           {node.over ? (
             <MathNodeView node={node.over} size={small} color={color} />
           ) : null}
-          <MathNodeView node={node.base} size={size} color={color} />
+          <MathNodeView
+            node={node.base}
+            size={
+              node.base.t === 'text' && node.base.v === INTEGRAL
+                ? size * INTEGRAL_SCALE
+                : size
+            }
+            color={color}
+          />
           {node.under ? (
             <MathNodeView node={node.under} size={small} color={color} />
           ) : null}

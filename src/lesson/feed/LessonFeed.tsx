@@ -44,12 +44,14 @@ import {
   Writeup,
 } from './Bubbles';
 import { ChoiceCard } from './ChoiceCard';
-import { isAway } from './jump';
+import { FooterRevealContext } from './help';
+import { footerScrollY, isAway } from './jump';
 import { CardMemory, CardMemoryContext } from './cardMemory';
 import { SnapshotContext, type SnapshotRegistry } from './snapshots';
 import { QuestionCard, type QuestionHandlers } from './QuestionCard';
 import type { ComponentErrorReason } from '../../components/ComponentHost';
-import { RichView, richToSpoken } from './RichView';
+import { RichView, richToSpoken, type Quote } from './RichView';
+import { WalkthroughCard } from './WalkthroughCard';
 import { TutorText } from './TutorText';
 import { BlockActions, type MenuVia } from './BlockActions';
 import {
@@ -59,7 +61,8 @@ import {
   type ReportTarget,
 } from './reportTarget';
 import { spokenMath } from '../math/spoken';
-import { theme } from '../../theme';
+import { PaperBackground } from '../paper/PaperBackground';
+import { theme, type PaperStyle } from '../../theme';
 
 const DONE_MARK = '✓';
 const NO_VISUALS: readonly ReportTarget[] = [];
@@ -69,10 +72,12 @@ export interface FeedHandlers extends QuestionHandlers {
   /** Tutor text long-press: the ask menu (with its block's trust label and Report). */
   onLongPress: (
     blockId: string,
-    quoted: string,
+    quote: Quote,
     target: ReportTarget | null,
   ) => void;
   onCardChoice: (purpose: CardPurpose, choice: string) => void;
+  /** B4: «التالي» on the walk-through. */
+  onWalkthroughNext: () => void;
   /** A block's menu (trust label + Report): long-press or screen-reader action. */
   onBlockMenu: (target: ReportTarget, via?: MenuVia) => void;
   /** The visible Report button (AI blocks). */
@@ -103,6 +108,11 @@ function blockLabel(item: FeedItem, t: TFunction): string {
       return item.parts.map(richToSpoken).join(' ');
     case 'writeup':
       return [t('lesson.writeupTitle'), ...item.lines].join(' ');
+    case 'walkthrough':
+      return [
+        t('lesson.walkthrough.title'),
+        ...item.lines.slice(0, item.shown).map(richToSpoken),
+      ].join(' ');
     case 'component_fallback':
       return t('lesson.componentFallback');
     default:
@@ -147,8 +157,8 @@ const FeedItemView = memo(function FeedItemViewImpl({
         <TutorText
           rich={item.rich}
           longPress={item.longPress}
-          onLongPress={(blockId, quoted) =>
-            handlers.onLongPress(blockId, quoted, target)
+          onLongPress={(blockId, quote) =>
+            handlers.onLongPress(blockId, quote, target)
           }
           {...(target && {
             onReportAction: () => handlers.onBlockMenu(target, 'a11y'),
@@ -223,10 +233,10 @@ const FeedItemView = memo(function FeedItemViewImpl({
       );
       break;
     case 'variant_start':
-      body = <VariantStart kind={item.variantKind} />;
+      body = <VariantStart kind={item.variantKind} inSheet={item.depth > 0} />;
       break;
     case 'deep_dive_start':
-      body = <DeepDiveStart />;
+      body = <DeepDiveStart inSheet={item.depth > 0} />;
       break;
     case 'return':
       body = <ReturnDivider />;
@@ -242,6 +252,16 @@ const FeedItemView = memo(function FeedItemViewImpl({
       break;
     case 'writeup':
       body = <Writeup lines={item.lines} />;
+      break;
+    case 'walkthrough':
+      body = (
+        <WalkthroughCard
+          lines={item.lines}
+          shown={item.shown}
+          done={item.done}
+          onNext={handlers.onWalkthroughNext}
+        />
+      );
       break;
     case 'thinking':
       // A provisional answer is on screen; it may still change.
@@ -349,6 +369,12 @@ interface LessonFeedProps {
   onUserScroll?: () => void;
   /** Rendered after the last item (the end-of-question feedback card). */
   endCard?: React.ReactNode;
+  /** The paper behind the feed (DESIGN.md §6; default the theme's). */
+  paper?: PaperStyle;
+  /** Debug builds (`-devScrollEnd on`): keep the feed at its end (screenshots). */
+  devScrollToEnd?: boolean;
+  /** Debug builds (`-devScroll N` with `-devScrollEnd on`): N pt back from the end. */
+  devScrollBack?: number;
 }
 
 /**
@@ -365,6 +391,9 @@ export const LessonFeed = memo(function LessonFeedImpl({
   snapshots,
   onUserScroll,
   endCard,
+  paper = theme.layout.paperStyle,
+  devScrollToEnd = false,
+  devScrollBack = 0,
 }: LessonFeedProps) {
   probe.count('LessonFeed');
   const { t } = useTranslation();
@@ -388,6 +417,10 @@ export const LessonFeed = memo(function LessonFeedImpl({
   const known = useRef(new Set<string>());
   const scrollTarget = useRef<string | null>(null);
   const view = useRef({ offset: 0, height: 0 });
+  /** The student dragged the feed since the last new item (help chips then do not scroll). */
+  const userScrolled = useRef(false);
+  /** A card whose help chips appeared: its footer is scrolled into view (again once its height is known). */
+  const footerTarget = useRef<string | null>(null);
   const [away, setAway] = useState(false);
   // The button shows only once the card has been out of view for a while:
   // a quick look back at the statement does not cover it with a button.
@@ -405,14 +438,37 @@ export const LessonFeed = memo(function LessonFeedImpl({
   const currentRef = useRef(currentKey);
   currentRef.current = currentKey;
 
-  const scrollToKey = useCallback((key: string) => {
-    const l = layouts.current.get(key);
-    if (l) {
-      // Exactly the item's top: a margin above it would show a slice of the
-      // previous block (a stray mark under the header).
-      scroll.current?.scrollTo({ y: Math.max(0, l.y), animated: true });
+  const contentHeight = useRef(0);
+  /** Debug builds: the end of the feed, or `devScrollBack` pt above it. */
+  const devScrollNow = useCallback(() => {
+    if (devScrollBack > 0) {
+      scroll.current?.scrollTo({
+        y: Math.max(
+          0,
+          contentHeight.current - view.current.height - devScrollBack,
+        ),
+        animated: false,
+      });
+    } else {
+      scroll.current?.scrollToEnd({ animated: false });
     }
-  }, []);
+  }, [devScrollBack]);
+
+  const scrollToKey = useCallback(
+    (key: string) => {
+      if (devScrollToEnd) {
+        devScrollNow();
+        return;
+      }
+      const l = layouts.current.get(key);
+      if (l) {
+        // Exactly the item's top: a margin above it would show a slice of the
+        // previous block (a stray mark under the header).
+        scroll.current?.scrollTo({ y: Math.max(0, l.y), animated: true });
+      }
+    },
+    [devScrollToEnd, devScrollNow],
+  );
 
   const updateAway = useCallback(() => {
     const key = currentRef.current;
@@ -421,8 +477,46 @@ export const LessonFeed = memo(function LessonFeedImpl({
     setAway(prev => (prev === next ? prev : next));
   }, []);
 
+  const scrollToFooter = useCallback(
+    (key: string) => {
+      const y = devScrollToEnd
+        ? null
+        : footerScrollY(
+            layouts.current.get(key),
+            view.current,
+            userScrolled.current,
+            theme.space.md,
+          );
+      if (y !== null) {
+        scroll.current?.scrollTo({ y, animated: true });
+      }
+    },
+    [devScrollToEnd],
+  );
+
+  const revealFooter = useCallback(
+    (key: string) => {
+      footerTarget.current = key;
+      scrollToFooter(key);
+    },
+    [scrollToFooter],
+  );
+
+  const onScrollBeginDrag = useCallback(() => {
+    userScrolled.current = true;
+    onUserScroll?.();
+  }, [onUserScroll]);
+
   useEffect(() => {
     const fresh = items.find(i => !known.current.has(i.key));
+    if (fresh) {
+      userScrolled.current = false;
+      // A card's effects run before this one: keep a target the new items set.
+      const target = footerTarget.current;
+      if (target !== null && known.current.has(target)) {
+        footerTarget.current = null;
+      }
+    }
     if (fresh && known.current.size > 0) {
       scrollTarget.current = fresh.key;
       if (layouts.current.has(fresh.key)) {
@@ -440,11 +534,14 @@ export const LessonFeed = memo(function LessonFeedImpl({
         scrollToKey(key);
         scrollTarget.current = null;
       }
+      if (footerTarget.current === key) {
+        scrollToFooter(key);
+      }
       if (key === currentRef.current) {
         updateAway();
       }
     },
-    [scrollToKey, updateAway],
+    [scrollToKey, scrollToFooter, updateAway],
   );
 
   const onScroll = useCallback(
@@ -461,38 +558,58 @@ export const LessonFeed = memo(function LessonFeedImpl({
   return (
     <CardMemoryContext.Provider value={memory}>
       <SnapshotContext.Provider value={snapshots}>
-        <View style={styles.wrap}>
-          <ScrollView
-            ref={scroll}
-            style={styles.feed}
-            contentContainerStyle={styles.content}
-            keyboardShouldPersistTaps="handled"
-            onScroll={onScroll}
-            onScrollBeginDrag={onUserScroll}
-            scrollEventThrottle={SCROLL_THROTTLE_MS}
-            testID="lesson-feed"
-          >
-            <FeedRun
-              items={items}
-              visualsByCard={visualsByCard}
-              depth={0}
-              content={content}
-              handlers={handlers}
-              onLayoutKey={onLayoutKey}
-            />
-            {endCard}
-          </ScrollView>
-          {showJump && currentKey !== undefined && (
-            <Pressable
-              onPress={() => scrollToKey(currentKey)}
-              style={styles.jump}
-              accessibilityRole="button"
-              testID="jump-to-current"
+        <FooterRevealContext.Provider value={revealFooter}>
+          <View style={styles.wrap}>
+            <PaperBackground style={paper} />
+            <ScrollView
+              ref={scroll}
+              style={styles.feed}
+              contentContainerStyle={styles.content}
+              keyboardShouldPersistTaps="handled"
+              onScroll={onScroll}
+              onScrollBeginDrag={onScrollBeginDrag}
+              onLayout={(e: LayoutChangeEvent) => {
+                view.current = {
+                  ...view.current,
+                  height: e.nativeEvent.layout.height,
+                };
+              }}
+              scrollEventThrottle={SCROLL_THROTTLE_MS}
+              {...(devScrollToEnd && {
+                onContentSizeChange: (_w: number, h: number) => {
+                  contentHeight.current = h;
+                  devScrollNow();
+                },
+              })}
+              testID="lesson-feed"
             >
-              <Text style={styles.jumpText}>{t('lesson.jumpToCurrent')}</Text>
-            </Pressable>
-          )}
-        </View>
+              <FeedRun
+                items={items}
+                visualsByCard={visualsByCard}
+                depth={0}
+                content={content}
+                handlers={handlers}
+                onLayoutKey={onLayoutKey}
+              />
+              {endCard}
+            </ScrollView>
+            {showJump && currentKey !== undefined && (
+              // Its own row under the feed: it never covers an option (round 1).
+              <View style={styles.jumpRow} testID="jump-row">
+                <Pressable
+                  onPress={() => scrollToKey(currentKey)}
+                  style={styles.jump}
+                  accessibilityRole="button"
+                  testID="jump-to-current"
+                >
+                  <Text style={styles.jumpText}>
+                    {t('lesson.jumpToCurrent')}
+                  </Text>
+                </Pressable>
+              </View>
+            )}
+          </View>
+        </FooterRevealContext.Provider>
       </SnapshotContext.Provider>
     </CardMemoryContext.Provider>
   );
@@ -585,13 +702,16 @@ function DetourSheet({ onLayoutKey, ...rest }: FeedRunProps) {
 const SCROLL_THROTTLE_MS = 100;
 
 const styles = StyleSheet.create({
-  wrap: { flex: 1 },
-  // Small, in the bottom corner at the reading end (Arabic lines start on the
-  // right), just above the ask bar.
+  wrap: { flex: 1, backgroundColor: theme.color.backgroundApp },
+  // Small, at the reading end (Arabic lines start on the right), in its own
+  // row just above the ask bar: never over the feed.
+  jumpRow: {
+    alignItems: theme.reading.endAlign,
+    paddingHorizontal: theme.layout.gutter,
+    paddingVertical: theme.space.xxs,
+    backgroundColor: theme.color.backgroundApp,
+  },
   jump: {
-    position: 'absolute',
-    bottom: theme.space.xs,
-    ...theme.reading.endEdge(theme.layout.gutter),
     minHeight: theme.size.touch,
     paddingHorizontal: theme.space.md,
     borderRadius: theme.radius.pill,
@@ -604,7 +724,8 @@ const styles = StyleSheet.create({
     color: theme.color.textOnAccent,
     writingDirection: 'rtl',
   },
-  feed: { flex: 1, backgroundColor: theme.color.backgroundApp },
+  // Transparent: the paper (flat, grid or ruled) is the wrap's background.
+  feed: { flex: 1 },
   content: {
     paddingHorizontal: theme.layout.gutter,
     paddingTop: theme.space.sm,
@@ -625,7 +746,8 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
     borderColor: theme.color.deepDive.edge,
     borderRadius: theme.radius.card,
-    marginTop: theme.space.lg,
+    // Clears its tab (theme.offset.cardTab, sitting on the top edge) by space.sm.
+    marginTop: theme.space.sheetTop,
     marginBottom: theme.space.xs,
     paddingHorizontal: theme.space.md,
     paddingBottom: theme.space.sm,

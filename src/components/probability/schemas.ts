@@ -15,6 +15,7 @@ import {
   enumerateOutcomes,
   EventSpecSchema,
   law,
+  validateUrn,
   ValueFnSchema,
   type EventSpec,
   type ValueFn,
@@ -81,6 +82,33 @@ function checkExperiment(
   }
 }
 
+/**
+ * E4: a view that lists no draws (Urn in display mode) is not capped. The urn
+ * and the draw are still checked, without enumerating the draws.
+ */
+function checkDrawable(
+  p: { balls: z.infer<typeof BallSchema>[]; draw: string; k: number },
+  ctx: Ctx,
+): boolean {
+  try {
+    validateUrn(p.balls);
+  } catch (e) {
+    if (e instanceof EngineError) {
+      ctx.addIssue({ code: 'custom', message: e.message });
+      return false;
+    }
+    throw e;
+  }
+  if (p.draw !== 'ordered_with_replacement' && p.k > p.balls.length) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'cannot draw more balls than the urn holds',
+    });
+    return false;
+  }
+  return true;
+}
+
 /** `value_eq` events need a valueFn, in the event or in the props. */
 function needsValueFn(event: EventSpec): boolean {
   switch (event.id) {
@@ -121,7 +149,11 @@ export const UrnPropsSchema = z
     insight: RichSchema.optional(),
   })
   .superRefine((p, ctx) => {
-    checkExperiment(p, ctx);
+    if (p.mode === 'display') {
+      checkDrawable(p, ctx);
+    } else {
+      checkExperiment(p, ctx);
+    }
     const ids = new Set(p.balls.map(b => b.id));
     if (p.selected?.some(id => !ids.has(id))) {
       ctx.addIssue({
@@ -264,8 +296,14 @@ export const LawChartPropsSchema = z
     draw: experimentFields.draw.optional(),
     k: experimentFields.k.optional(),
     valueFn: ValueFnSchema.optional(),
-    /** A law given directly (not about the urn). Must sum to 1. */
-    law: z.strictObject({ rows: LawRowsSchema }).optional(),
+    /**
+     * A law given directly. Must sum to 1. With `of` (E3), it is the law of
+     * that value function on the urn and the engine recomputes every row
+     * (draws are not listed, so the 60-draw cap does not apply).
+     */
+    law: z
+      .strictObject({ rows: LawRowsSchema, of: ValueFnSchema.optional() })
+      .optional(),
     /** Steps the student can reveal, in this order. */
     reveal: z.array(MomentStepSchema).max(3).default([]),
     showFormula: z.boolean().default(true),
@@ -292,6 +330,9 @@ export const LawChartPropsSchema = z
           message: 'probabilities must be >= 0 and sum to 1',
         });
       }
+      if (p.law.of !== undefined) {
+        checkLawOf(p.law.rows, p.law.of, p, ctx);
+      }
       return;
     }
     if (!p.valueFn || !p.balls || !p.draw || p.k === undefined) {
@@ -304,3 +345,47 @@ export const LawChartPropsSchema = z
     checkExperiment({ balls: p.balls, draw: p.draw, k: p.k }, ctx);
   });
 export type LawChartProps = z.output<typeof LawChartPropsSchema>;
+
+/** E3: every row of a given law equals the engine's law of `of` on the urn. */
+function checkLawOf(
+  rows: z.infer<typeof LawRowsSchema>,
+  of: ValueFn,
+  p: {
+    balls?: z.infer<typeof BallSchema>[] | undefined;
+    draw?: z.infer<typeof DrawSchema> | undefined;
+    k?: number | undefined;
+  },
+  ctx: Ctx,
+) {
+  if (!p.balls || !p.draw || p.k === undefined) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['law', 'of'],
+      message: 'law.of needs the urn (balls, draw, k)',
+    });
+    return;
+  }
+  let engine: { value: number; p: Fraction }[];
+  try {
+    engine = law(of, enumerateOutcomes(p.balls, p.draw, p.k));
+  } catch (e) {
+    if (e instanceof EngineError) {
+      ctx.addIssue({ code: 'custom', path: ['law', 'of'], message: e.message });
+      return;
+    }
+    throw e;
+  }
+  const agrees =
+    engine.length === rows.length &&
+    engine.every(r => {
+      const given = rows.find(g => g.value === r.value);
+      return given !== undefined && equals(r.p, frac(given.p[0], given.p[1]));
+    });
+  if (!agrees) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['law', 'rows'],
+      message: 'law disagrees with the engine',
+    });
+  }
+}

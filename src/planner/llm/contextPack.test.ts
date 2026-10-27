@@ -6,9 +6,11 @@ import {
   buildPlanPack,
   buildTutorPack,
   serializePack,
+  serializeStatic,
   solutionSoFar,
 } from './contextPack';
 import { fixtureSituation } from './fixtures/guardFixtures';
+import { planFormatFor } from './plannerClient';
 
 const r = loadExercise(ex2, ex2Misconceptions);
 if (!r.ok) {
@@ -91,5 +93,42 @@ describe('answer-leak fix A: the model only gets the solution so far', () => {
       studentText: 'كيفاش نعرف الحدث العكسي؟',
     });
     expect(serializePack(pack)).not.toContain('aucune des deux boules');
+  });
+});
+
+describe('per-step part: the components offered here (AI interface fixes, 2026-10-22)', () => {
+  it('lists exactly what the guard accepts, one line each, in the dynamic part only', () => {
+    for (const where of ['s3', 's5', '2a-s10', 'A1-s8'] as const) {
+      const { content, situation } = fixtureSituation(where);
+      const pack = buildPlanPack(content, situation);
+      const offered = pack.dynamic.offeredComponents;
+      expect(offered.map(o => o.component)).toEqual(
+        planFormatFor(pack).components,
+      );
+      for (const o of offered) {
+        expect(o.use.length).toBeGreaterThan(10);
+        expect(o.use.length).toBeLessThanOrEqual(200);
+      }
+      expect(JSON.stringify(pack.static)).not.toContain('offeredComponents');
+    }
+  });
+
+  it('names what would show the answer while hints are left (none once the ladder is used)', () => {
+    const { content, situation } = fixtureSituation('2a-s10');
+    const pack = buildPlanPack(content, situation);
+    expect(pack.dynamic.notWhileHintsLeft?.join(' ')).toMatch(/OutcomeSpace/);
+    const done = buildPlanPack(content, {
+      ...situation,
+      step: { ...situation.step, hintsUsed: situation.step.hintCount },
+    });
+    expect(done.dynamic.notWhileHintsLeft).toBeUndefined();
+  });
+
+  it('the cached parts are byte-identical across steps of a question, and the system prompt across all', () => {
+    const a = fixtureSituation('s3');
+    const b = fixtureSituation('s5');
+    expect(serializeStatic(buildPlanPack(a.content, a.situation))).toBe(
+      serializeStatic(buildPlanPack(b.content, b.situation)),
+    );
   });
 });

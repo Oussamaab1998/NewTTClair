@@ -14,6 +14,8 @@
  */
 import { z } from 'zod';
 
+import type { StructuredFormat } from './client';
+
 export type JsonSchema = { [key: string]: unknown };
 
 export class StrictSchemaError extends Error {}
@@ -363,6 +365,18 @@ function walk(s: unknown, v: unknown, root: JsonSchema): unknown {
  */
 export function denull(value: unknown, original: JsonSchema): unknown {
   return walk(original, value, original);
+}
+
+/**
+ * An answer as every transport reads it: the converter's nulls removed, then
+ * the format's own clean-up (`prepare`), then its zod schema.
+ */
+export function parseAnswer<T>(
+  format: Pick<StructuredFormat<T>, 'original' | 'zod' | 'prepare'>,
+  value: unknown,
+) {
+  const v = denull(value, format.original);
+  return format.zod.safeParse(format.prepare ? format.prepare(v) : v);
 }
 
 /** Removes $defs entries nothing references (e.g. left behind by an override). */

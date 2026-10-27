@@ -150,12 +150,22 @@ describe('LessonScreen (Exercise 4, A1)', () => {
     await tap('lines-active-check');
     expect(lastByTestId('lines-active-unreadable')).toBeOnTheScreen();
     expect(log.all().filter(e => e.t === 'answer')).toHaveLength(1);
-    expect(log.all().at(-1)).toMatchObject({
+    expect(log.all().at(-2)).toMatchObject({
       t: 'component_event',
       component: 'LinesEditor',
       name: 'invalid_input',
       payload: { reason: 'double_operator' },
     });
+    // A decision point for the AI tutor (D22); the rules change nothing.
+    expect(log.all().at(-1)).toMatchObject({
+      t: 'plan',
+      trigger: 'line_invalid',
+      decision: {
+        ruleId: 'rule.line_invalid.continue',
+        next: { kind: 'continue' },
+      },
+    });
+    expect(lastByTestId('lines-active-unreadable')).toBeOnTheScreen();
   });
   it('the PredictReveal holds the lesson until one tap; "show me" opens it, ungraded', async () => {
     await renderA1();

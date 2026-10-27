@@ -17,6 +17,17 @@ const STEPS_PROPS: JsonObject = {
 };
 const STEPS: ComponentSpec = { component: 'StepThrough', props: STEPS_PROPS };
 
+/** 2 red and 2 black balls, two drawn (twin of the red / black exercise). */
+const TWIN_2R2N: JsonObject = {
+  balls: [
+    { id: 'r1', value: 1, color: 'red' },
+    { id: 'r2', value: 1, color: 'red' },
+    { id: 'n1', value: 0, color: 'black' },
+    { id: 'n2', value: 0, color: 'black' },
+  ],
+  k: 2,
+};
+
 const CASES: DemoCase[] = [
   {
     title: 'FunctionPlot (f, asymptote, max point)',
@@ -191,6 +202,25 @@ const CASES: DemoCase[] = [
     title: 'StepThrough',
     spec: STEPS,
     replay: { snapshot: { shown: 3, why: [1] } },
+  },
+  {
+    // The intro of the red / black exercise (docs/exercises/EX_URN_RN.md), on the 2R 2N twin.
+    title: 'CompareTwo (2R 2N: at once vs one by one, put back)',
+    spec: {
+      component: 'CompareTwo',
+      props: {
+        leftLabel: { ar: [{ ar: 'نجبدو الزوز مع بعض' }] },
+        left: {
+          component: 'OutcomeSpace',
+          props: { ...TWIN_2R2N, draw: 'simultaneous' },
+        },
+        rightLabel: { ar: [{ ar: 'وحدة بوحدة، ونرجّعو الكورة' }] },
+        right: {
+          component: 'OutcomeSpace',
+          props: { ...TWIN_2R2N, draw: 'ordered_with_replacement' },
+        },
+      },
+    },
   },
 ];
 

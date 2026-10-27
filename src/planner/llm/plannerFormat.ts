@@ -21,7 +21,7 @@ import { CONTAINER_SLOTS } from '../../components/shared/schemas';
 import {
   blockBodies,
   ClarifyChoiceSchema,
-  RichSchema,
+  RichShapeSchema,
 } from '../../content/schema';
 import type { StructuredFormat } from './client';
 import {
@@ -45,6 +45,8 @@ const EXPERIMENT_FIELDS = ['balls', 'draw', 'k'];
 export const LLM_PROPS_EXCLUDED: Partial<Record<ComponentName, string[]>> = {
   // A given law (tuples); the engine law from the experiment is used instead.
   LawChart: ['law'],
+  // Simulation 2026-10-22: invented marker fields; the curve alone is enough.
+  FunctionPlot: ['markers'],
 };
 
 /** Placeholder whose JSON Schema is replaced by the per-component anyOf. */
@@ -54,7 +56,7 @@ const LlmComponentSpecSchema = z.strictObject({
 });
 
 const LlmBlockSchema = z.discriminatedUnion('type', [
-  z.strictObject({ type: z.literal('tutor_text'), text: RichSchema }),
+  z.strictObject({ type: z.literal('tutor_text'), text: RichShapeSchema }),
   blockBodies.math,
 ]);
 
@@ -62,7 +64,7 @@ export const LlmActionSchema = z.discriminatedUnion('kind', [
   z.strictObject({
     kind: z.literal('show_component'),
     component: LlmComponentSpecSchema,
-    instruction: RichSchema,
+    instruction: RichShapeSchema,
   }),
   z.strictObject({
     kind: z.literal('explain'),
@@ -84,7 +86,7 @@ export const LlmActionSchema = z.discriminatedUnion('kind', [
   }),
   z.strictObject({
     kind: z.literal('ask_clarify'),
-    options: z.array(RichSchema).min(2).max(3),
+    options: z.array(RichShapeSchema).min(2).max(3),
     choices: z.array(ClarifyChoiceSchema).min(2).max(3).optional(),
   }),
   z.strictObject({ kind: z.literal('revisit_prerequisite'), skillId: Id }),
@@ -107,6 +109,8 @@ export const LlmPlannerOutputSchema = z.strictObject({
   avoid: z.array(Id).max(10),
   next: LlmActionSchema,
   followUp: LlmActionSchema.optional(),
+  /** Wire format only: why this action (dev trace; never shown, removed before the Decision). */
+  why: z.string().max(200).optional(),
 });
 export type LlmPlannerOutput = z.infer<typeof LlmPlannerOutputSchema>;
 

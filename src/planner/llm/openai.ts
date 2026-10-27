@@ -23,7 +23,17 @@ import {
   readRateLimit,
   type ProviderErrorInfo,
 } from './providerErrors';
-import { denull } from './strictSchema';
+import { parseAnswer, toStrictSchema, type JsonSchema } from './strictSchema';
+
+const strictWire = new WeakMap<JsonSchema, JsonSchema>();
+function strictOfWire(schema: JsonSchema): JsonSchema {
+  let s = strictWire.get(schema);
+  if (!s) {
+    s = toStrictSchema(schema);
+    strictWire.set(schema, s);
+  }
+  return s;
+}
 
 export interface OpenAiTransportOptions {
   apiKey: string;
@@ -34,6 +44,11 @@ export interface OpenAiTransportOptions {
   now?: () => number;
   /** Keep the model's output text on results (dev screen; debug builds only). */
   captureRaw?: boolean;
+  /**
+   * Answer the flat wire format when the request's format has one (replay
+   * comparisons: the same output shape as the Anthropic transport).
+   */
+  useWire?: boolean;
 }
 
 type Json = { [key: string]: unknown };
@@ -209,10 +224,21 @@ export function createOpenAiTransport(
       return fail(stop.error, { detail: stop.detail });
     }
     const info = modelInfo(req.model);
+    const wire = opts.useWire ? req.format.wire : undefined;
+    const shape = wire
+      ? {
+          strict: strictOfWire(wire.schema),
+          original: wire.schema,
+          zod: wire.zod,
+        }
+      : req.format;
     const body = {
       model: req.model,
       instructions: req.instructions,
-      input: req.input,
+      input:
+        req.inputPrefix !== undefined
+          ? `${req.inputPrefix}\n${req.input}`
+          : req.input,
       store: false,
       max_output_tokens: req.maxOutputTokens,
       text: {
@@ -220,7 +246,7 @@ export function createOpenAiTransport(
           type: 'json_schema',
           name: req.format.name,
           strict: true,
-          schema: req.format.strict,
+          schema: shape.strict,
         },
       },
       ...(info?.reasoning && {
@@ -281,9 +307,7 @@ export function createOpenAiTransport(
     } catch {
       return { ...fail('invalid', { usage, detail: 'json_parse' }), ...raw };
     }
-    const checked = req.format.zod.safeParse(
-      denull(parsed, req.format.original),
-    );
+    const checked = parseAnswer(shape, parsed);
     if (!checked.success) {
       return {
         ...fail('invalid', {

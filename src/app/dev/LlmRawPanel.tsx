@@ -1,10 +1,5 @@
 import React, { useCallback, useState, useSyncExternalStore } from 'react';
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-} from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import type { DevRawLog, RawEntry } from '../../planner/llm/devRaw';
@@ -72,7 +67,6 @@ export function LlmRawPanel({
     </>
   );
 }
-
 
 const styles = StyleSheet.create({
   bar: {

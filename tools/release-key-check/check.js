@@ -13,6 +13,7 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '..', '..');
 const genPath = path.join(root, 'src', 'config', 'llmLocal.generated.ts');
 const SENTINEL = 'sk-proj-RELEASECHECKSENTINEL0123456789abcdef';
+const ANTHROPIC_SENTINEL = 'sk-ant-api03-RELEASECHECKSENTINEL0123456789abcdef';
 const KEY_SHAPED = /sk-[A-Za-z0-9_-]{16,}/g;
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'release-key-'));
@@ -21,7 +22,7 @@ let failed = false;
 try {
   fs.writeFileSync(
     genPath,
-    `export const LLM_LOCAL: { openaiApiKey: string; openaiBaseUrl: string } = {\n  openaiApiKey: '${SENTINEL}',\n  openaiBaseUrl: '',\n};\n`,
+    `export const LLM_LOCAL: { openaiApiKey: string; openaiBaseUrl: string; anthropicApiKey: string } = {\n  openaiApiKey: '${SENTINEL}',\n  openaiBaseUrl: '',\n  anthropicApiKey: '${ANTHROPIC_SENTINEL}',\n};\n`,
   );
   const env = { ...process.env };
   delete env.INCLUDE_KEY_IN_RELEASE;
@@ -48,7 +49,7 @@ try {
   );
   const text = fs.readFileSync(bundle, 'utf8');
   const hits = [...text.matchAll(KEY_SHAPED)].length;
-  if (text.includes(SENTINEL) || hits > 0) {
+  if (text.includes(SENTINEL) || text.includes(ANTHROPIC_SENTINEL) || hits > 0) {
     failed = true;
     process.stderr.write(
       `release-key-check: FAILED: the default Release bundle contains ${hits} key-shaped string(s)\n`,

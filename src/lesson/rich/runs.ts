@@ -187,3 +187,66 @@ export function spaceRunBoundaries(runs: ArRuns): ArRuns {
   }
   return out;
 }
+
+/** Longest stretch an LLM run may turn into one LTR run; longer is a formula for a math block. */
+export const MAX_ISOLATED_CHARS = 40;
+const LATEX = /\\[A-Za-z]|[{}]/;
+/** Kept on the Arabic side of an isolated stretch: spaces, sentence punctuation, quotes. */
+const EDGE = /^([\s.,:;!?«»“”"']*)([\s\S]*?)([\s.,:;!?«»“”"']*)$/;
+
+/**
+ * LLM text (tutor drawer, planner blocks): Latin letters, digits and short
+ * formulas the model left inside an Arabic run become their own `fr` run, as
+ * authored content writes them (`B`, `0`, `f(−x) = f(x)`). Returns null when
+ * that cannot be done safely: LaTeX in any run, a stretch longer than
+ * MAX_ISOLATED_CHARS (a formula belongs in a math block), or a bidi control.
+ */
+export function isolateLlmRuns(runs: ArRuns): ArRuns | null {
+  const out: ArRun[] = [];
+  const pushAr = (text: string) => {
+    if (text === '') {
+      return;
+    }
+    const last = out[out.length - 1];
+    if (last && 'ar' in last) {
+      out[out.length - 1] = { ar: last.ar + text };
+    } else {
+      out.push({ ar: text });
+    }
+  };
+  for (const run of runs) {
+    const text = 'ar' in run ? run.ar : run.fr;
+    if (BIDI_CONTROL.test(text) || LATEX.test(text)) {
+      return null;
+    }
+    if ('fr' in run) {
+      out.push({ fr: run.fr });
+      continue;
+    }
+    let at = 0;
+    for (const m of run.ar.matchAll(/[^؀-ۿ]+/g)) {
+      const chunk = m[0];
+      const start = m.index;
+      if (
+        !LATIN.test(chunk) &&
+        !DIGIT.test(chunk) &&
+        !MATH_SYMBOL.test(chunk)
+      ) {
+        continue;
+      }
+      const [, lead = '', core = '', trail = ''] = EDGE.exec(chunk) ?? [];
+      if (core.length > MAX_ISOLATED_CHARS) {
+        return null;
+      }
+      pushAr(run.ar.slice(at, start) + lead);
+      out.push({ fr: core });
+      pushAr(trail);
+      at = start + chunk.length;
+    }
+    pushAr(run.ar.slice(at));
+  }
+  // Arabic-Indic digits are Arabic script: still not allowed in a run.
+  return out.length > 0 && findRunIssues(out as ArRuns).length === 0
+    ? (out as ArRuns)
+    : null;
+}

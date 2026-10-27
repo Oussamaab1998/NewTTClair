@@ -76,6 +76,14 @@ export const color = {
   draft: { bg: p.amber50, border: p.amber500, text: p.amber900 },
   /** Deep-dive sheet: tinted fill, dashed pen edge. */
   deepDive: { bg: p.penTint, edge: p.pen },
+  /**
+   * Coloured urn balls: the letter (R, N) carries the meaning, the fill is
+   * secondary; never the error red (redBlack.test.tsx).
+   */
+  ball: {
+    red: { fill: p.ballRed, text: p.neutral0 },
+    black: { fill: p.ballBlack, text: p.neutral0 },
+  },
   /** Subject tag on picker cards. */
   subject: { analysis: p.pen, probability: p.teal700 },
   /** Behind the sheet and menus. */
@@ -113,6 +121,8 @@ export const space = {
   xxl: 16,
   section: 24,
   sheetBottom: 32,
+  /** Above a detour sheet: its tab rises 11 pt over the edge, 8 pt stay clear (round 1). */
+  sheetTop: 20,
   scrollEnd: 40,
   /** Indentation per deep-dive level. */
   depthIndent: 14,
@@ -231,6 +241,19 @@ export const font = {
   small: { fontFamily: family.ui.regular, fontSize: 13.5, lineHeight: 22 },
   /** Exam wording (statement card, the sheet). */
   paper: { fontFamily: family.math.family, fontSize: 16.5, lineHeight: 28 },
+  /** The exam paper screen (mockups 05 / 06): the exercise and part headings. */
+  paperHeading: {
+    fontFamily: family.math.family,
+    fontSize: 21,
+    lineHeight: 30,
+  },
+  /** Its source line: small, spaced capitals. */
+  paperSource: {
+    fontFamily: family.ui.regular,
+    fontSize: 12,
+    lineHeight: 20,
+    letterSpacing: 0.6,
+  },
   size: {
     micro: 10,
     tiny: 11,
@@ -290,6 +313,8 @@ export const size = {
   progressBar: 6,
   /** The number circle of a question row in the «الورقة» sheet. */
   paperNumber: 32,
+  /** The paper screen's current-question dot (mockup 07). */
+  paperDot: 12,
   /** Extra touch area around the small "..." button, each side. */
   blockMenuSlop: 8,
   reportInputMinHeight: 64,
@@ -306,9 +331,20 @@ export const size = {
 export const layout = {
   /** Side gutter of screens. */
   gutter: 16,
-  /** Paper grid cell, if the grid is used (DESIGN.md §6). */
+  /** Cahier squared paper (DESIGN.md §6, mockups 01, 02, 04, 09): 22 pt cells. */
   grid: 22,
+  /** Its lines: 1 pt (2 px in the 2× mockups), colour `color.gridLine`. */
+  gridLine: 1,
+  /** Ruled paper: horizontal lines only, this far apart. */
+  ruled: 28,
+  /**
+   * Background of the feed, picker and «الورقة» sheet (DESIGN.md §6): the
+   * Cahier grid. 'flat' is the fallback if a measurement shows a problem
+   * (`-devPaper` compares in debug builds).
+   */
+  paperStyle: 'grid' as PaperStyle,
 } as const;
+export type PaperStyle = 'flat' | 'grid' | 'ruled';
 
 /** Small position offsets of marks and badges. */
 export const offset = {

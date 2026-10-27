@@ -9,6 +9,7 @@ import {
   type FakeAnswer,
 } from '../../planner/llm/plannerClient';
 import { createLlmRuntime } from '../../planner/llm/runtime';
+import { DecisionTraceLog } from '../../planner/llm/trace';
 import { memoryStore } from '../../storage/kv';
 import { EventSchema, type Event } from '../../telemetry/events';
 import { fixedClock, type EventLog } from '../../telemetry/log';
@@ -45,6 +46,8 @@ function wiring(
     timeoutMs?: number;
     kill?: boolean;
     tutor?: () => FakeAnswer | Promise<FakeAnswer>;
+    /** Normal triggers only (no consultAll); optional every-mistake pilot cap. */
+    triggers?: { everyMistake?: number };
   } = {},
 ): LessonLlm {
   const runtime = createLlmRuntime({
@@ -55,6 +58,10 @@ function wiring(
     }),
     store: memoryStore(),
     dailyCap: o.cap ?? 10,
+    trace: new DecisionTraceLog(),
+    ...(o.triggers?.everyMistake !== undefined && {
+      everyMistake: { limit: o.triggers.everyMistake },
+    }),
   });
   if (o.kill) {
     runtime.flags.setKillSwitch(true);
@@ -64,7 +71,7 @@ function wiring(
     runtime,
     newRequestId: () => `req-${++n}`,
     timeoutMs: o.timeoutMs ?? 5000,
-    consultAll: true,
+    ...(!o.triggers && { consultAll: true }),
   };
 }
 
@@ -307,5 +314,95 @@ describe('dev status line (behind the dev flag only)', () => {
     expect(screen.getByTestId('llm-status')).toHaveTextContent(
       /rules_only \(kill_switch\)/,
     );
+  });
+
+  it('shows the model check result in the status line and the trace header; the first lesson logs it once', async () => {
+    const llm = wiring(() => ({ value: hint1 }));
+    llm.runtime.client!.checkModel = async () => ({
+      ok: false,
+      id: 'gpt-6-luna',
+      error: 'invalid',
+      status: 200,
+      returnedId: 'gpt-6-luna-2026',
+    });
+    await renderLesson(llm);
+    expect(of('llm_model_check')).toHaveLength(0);
+    await act(async () => llm.runtime.checkModel(100));
+    await act(async () => setDevTools(true));
+    expect(screen.getByTestId('llm-status')).toHaveTextContent(
+      /rules_only \(model_check_failed\)/,
+    );
+    expect(screen.getByTestId('llm-status')).toHaveTextContent(
+      /check: failed · invalid 2xx · gpt-6-luna → gpt-6-luna-2026/,
+    );
+    expect(screen.getByTestId('ai-trace-toggle')).toHaveTextContent(
+      /check: failed · invalid 2xx/,
+    );
+    expect(of('llm_model_check')).toMatchObject([
+      {
+        client: 'fake:gpt-6-luna',
+        model: 'gpt-6-luna',
+        result: 'invalid',
+        statusClass: '2xx',
+        returnedId: 'gpt-6-luna-2026',
+        stepId: 'none',
+      },
+    ]);
+    // Once per run: the next lesson does not log it again.
+    await renderLesson(llm);
+    expect(of('llm_model_check')).toHaveLength(0);
+  });
+});
+
+describe('AI tutor v2 triggers and trace (D22)', () => {
+  afterEach(() => act(() => setDevTools(false)));
+
+  it('a wrong answer with a known misconception: rules only, unless "AI on every mistake" is on (then capped)', async () => {
+    await renderLesson(wiring(() => ({ value: hint1 }), { triggers: {} }));
+    await tap('option-one'); // au_moins_direct_miscount: the rules know it
+    await flush();
+    expect(of('llm_call')).toHaveLength(0);
+
+    const pilot = wiring(() => ({ value: hint1 }), {
+      triggers: { everyMistake: 1 },
+    });
+    await renderLesson(pilot);
+    await tap('option-one');
+    await flush();
+    expect(of('llm_call')).toMatchObject([
+      { outcome: 'ok', trigger: 'every_mistake' },
+    ]);
+    expect(pilot.runtime.status().everyMistake).toEqual({
+      remaining: 0,
+      limit: 1,
+    });
+  });
+
+  it('the trace panel shows source, trigger, action, guard and the caps', async () => {
+    const llm = wiring(
+      () => ({ value: { ...hint1, why: 'next hint first' } }),
+      {
+        triggers: { everyMistake: 60 },
+      },
+    );
+    await renderLesson(llm);
+    await act(async () => setDevTools(true));
+    await tap('option-one');
+    await flush();
+    expect(screen.getByTestId('ai-trace-toggle')).toHaveTextContent(/59\/60/);
+    expect(screen.getByTestId('ai-trace-toggle')).toHaveTextContent(
+      /plan: 1 call · timeouts 0 \(0%\) · first \d+ ms · warm -/,
+    );
+    await tap('ai-trace-toggle');
+    const panel = screen.getByTestId('ai-trace-panel');
+    expect(panel).toHaveTextContent(/LLM every_mistake wrong@s3 → hint/);
+    expect(panel).toHaveTextContent(/guard: ok/);
+    expect(panel).toHaveTextContent(/why: next hint first/);
+    expect(llm.runtime.trace?.all().at(-1)).toMatchObject({
+      source: 'llm',
+      aiTrigger: 'every_mistake',
+      action: 'hint',
+      outcome: 'ok',
+    });
   });
 });

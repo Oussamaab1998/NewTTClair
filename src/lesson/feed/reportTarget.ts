@@ -154,6 +154,7 @@ export function reportPath(item: FeedItem): ReportPath | null {
     case 'answer':
     case 'ask_answer':
     case 'writeup':
+    case 'walkthrough':
     case 'component_fallback':
       return 'longpress';
     case 'choice_card':

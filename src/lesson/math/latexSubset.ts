@@ -107,6 +107,8 @@ const LIMIT_OPERATORS: Record<string, string> = {
   max: 'max',
   min: 'min',
   sum: '∑',
+  // Bounds stacked below / above, as on the exam paper (mockups 05, 06).
+  int: '∫',
 };
 const BLACKBOARD: Record<string, string> = {
   R: 'ℝ',
@@ -190,6 +192,19 @@ class Parser {
       const atom = this.parseAtom();
       if (atom) {
         children.push(this.parseScripts(atom));
+        // «ln x», «tan x»: a thin space between a function name and a letter
+        // or digit argument (as TeX does); none before «(».
+        this.skipSpaces();
+        const next = this.peek();
+        if (
+          atom.t === 'text' &&
+          !atom.italic &&
+          FUNCTIONS.has(atom.v) &&
+          next?.k === 'char' &&
+          /[A-Za-z0-9]/.test(next.v)
+        ) {
+          children.push({ t: 'text', v: '\u2009', italic: false });
+        }
       }
     }
     return { t: 'row', children };
@@ -307,8 +322,6 @@ class Parser {
         }
         return { t: 'fenced', open, close: this.parseDelimiter(), body };
       }
-      case 'int':
-        return { t: 'text', v: '∫', italic: false };
     }
     const limitOp = LIMIT_OPERATORS[name];
     if (limitOp) {

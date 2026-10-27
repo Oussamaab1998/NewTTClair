@@ -12,9 +12,11 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import type { LoadedExercise } from '../../content/loader';
+import { appPaperParts, appPaperQuestions } from '../../content/paper';
 import type { PaperQuestion, Rich } from '../../content/schema';
 import { partKey } from '../../state/doneParts';
-import { theme } from '../../theme';
+import { PaperBackground } from '../paper/PaperBackground';
+import { theme, type PaperStyle } from '../../theme';
 import { RichView } from './RichView';
 
 const CLOSE_MARK = '×';
@@ -34,6 +36,8 @@ interface PaperSheetProps {
   /** Done part keys (stored sessions + this one). */
   done: ReadonlySet<string>;
   onClose: (via: PaperCloseVia) => void;
+  /** The paper behind the sheet (DESIGN.md §6; default the theme's). */
+  paperStyle?: PaperStyle;
 }
 
 /**
@@ -48,6 +52,7 @@ export function PaperSheet({
   currentPartId,
   done,
   onClose,
+  paperStyle = theme.layout.paperStyle,
 }: PaperSheetProps) {
   const { t } = useTranslation();
   const ex = loaded.exercise;
@@ -69,14 +74,9 @@ export function PaperSheet({
       animated: false,
     });
   };
-  const questions: PaperQuestion[] =
-    ex.paper?.questions ??
-    ex.parts.map(p => ({
-      id: p.id,
-      label: p.id,
-      wording: [p.goal],
-      status: 'available' as const,
-    }));
+  // The parts the app teaches (Parts B / C of ex4 are on the paper screen only).
+  const questions = appPaperQuestions(ex);
+  const section = appPaperParts(ex)[0]?.heading;
   const isDone = (id: string) => done.has(partKey(ex.id, id));
   const stateOf = (q: PaperQuestion): RowState =>
     q.status === 'soon'
@@ -91,7 +91,10 @@ export function PaperSheet({
   );
   const subtitle = [
     t('lesson.exerciseLabel', { n: ex.number }),
-    ...(ex.paper?.section?.fr !== undefined ? [ex.paper.section.fr] : []),
+    ...(ex.section !== undefined
+      ? [t(`lesson.sectionShort.${ex.section}`)]
+      : []),
+    ...(section?.fr !== undefined ? [section.fr] : []),
   ].join(' · ');
 
   return (
@@ -113,6 +116,7 @@ export function PaperSheet({
           accessible={false}
           testID="paper-sheet"
         >
+          <PaperBackground style={paperStyle} />
           <View style={styles.handle} />
           <View style={styles.head}>
             <View style={styles.titles}>
@@ -250,6 +254,8 @@ const styles = StyleSheet.create({
     backgroundColor: theme.color.paper,
     borderTopLeftRadius: theme.radius.sheetTop,
     borderTopRightRadius: theme.radius.sheetTop,
+    // The paper lines stop at the rounded top.
+    overflow: 'hidden',
     paddingHorizontal: theme.layout.gutter,
     paddingBottom: theme.space.sheetBottom,
   },

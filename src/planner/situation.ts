@@ -16,6 +16,7 @@ import { parseNumeric } from '../engine/format';
 import type { Event } from '../telemetry/events';
 import type { ClarifyChoice, VariantKind } from '../content/schema';
 import type { ActionKind, Trigger } from './schema';
+import { attemptOutcomes, type OutcomeClass } from '../state/outcomes';
 
 export interface Detour {
   kind: 'deep_dive' | 'variant';
@@ -62,6 +63,19 @@ export interface Situation {
     };
     timeOnStepMs?: number;
     revealed: boolean;
+    /**
+     * Lines steps: the engine's verdict on the last checked line. `raw` is
+     * the typed math line (math characters only, else omitted); `at` the
+     * values at the first disagreeing sample point (wrong lines).
+     */
+    line?: {
+      verdict: 'wrong' | 'invalid';
+      raw?: string;
+      where?: string;
+      reason?: string;
+      parentheses?: string;
+      at?: { x: number; student: number; expected: number };
+    };
   };
   /** Open detours, innermost last (deep dives and variants). */
   stack: { kind: Detour['kind']; id: string; variantKind?: VariantKind }[];
@@ -80,6 +94,8 @@ export interface Situation {
   /** Planner decisions on this step, oldest first. */
   decisions: { ruleId: string; kind: ActionKind; representation?: string }[];
   requests: { kind: 'change_method' | 'simpler' | 'ask'; via?: string }[];
+  /** Repair offers on this step the student declined (variant ids): not proposed again. */
+  declinedOffers: string[];
   clarify: ClarifyChoice[];
   selfReports: {
     stepKey: string;
@@ -103,15 +119,85 @@ export interface Situation {
   };
   skills: Record<
     string,
-    { status: SkillStatus; representationsTried: string[] }
+    {
+      status: SkillStatus;
+      representationsTried: string[];
+      /** Misconception id -> times seen (all sessions), when any. */
+      misconceptions?: Record<string, number>;
+      /** "Change method" / "easier" taps on this skill (all sessions). */
+      helpRequests: { changeMethod: number; easier: number };
+    }
   >;
   /** Counts over the whole session (all questions). */
-  session: { selfReportsAsked: number };
+  session: {
+    selfReportsAsked: number;
+    /** D2: fresh variants opened after a reveal in this session (variant ids). */
+    freshAfterReveal?: string[];
+    /** E1: finished attempts in this session, in order. */
+    outcomes?: {
+      stepKey: string;
+      outcome: OutcomeClass;
+      skills: readonly string[];
+    }[];
+    /** E2: repeats and step-backs made (skills; question). */
+    moves?: {
+      move: 'repeat' | 'step_back';
+      skills: readonly string[];
+      questionId: string;
+    }[];
+  };
   /** The only field allowed to carry the student's own words (an ask). */
   request?: { text: string };
 }
 
 const COMPONENTS_KEPT = 8;
+
+/** A typed math line, kept only when it is math characters (never free text). */
+const MATH_LINE = /^[0-9xe+\-*/^().,\s]{1,80}$/;
+
+const num = (v: unknown): number | undefined =>
+  typeof v === 'number' && Number.isFinite(v) ? v : undefined;
+const str = (v: unknown, max: number): string | undefined =>
+  typeof v === 'string' && /^[A-Za-z0-9_.-]{1,40}$/.test(v)
+    ? v.slice(0, max)
+    : undefined;
+
+/** The engine's verdict on the last checked line of this step, if any. */
+function lineOf(onStep: readonly Event[]): Situation['step']['line'] {
+  const e = [...onStep]
+    .reverse()
+    .find(
+      x =>
+        x.t === 'component_event' &&
+        x.component === 'LinesEditor' &&
+        (x.name === 'line_wrong' || x.name === 'invalid_input'),
+    );
+  if (e?.t !== 'component_event') {
+    return undefined;
+  }
+  const p = e.payload;
+  const raw = typeof p.raw === 'string' && MATH_LINE.test(p.raw) ? p.raw : '';
+  const at =
+    p.at && typeof p.at === 'object' && !Array.isArray(p.at)
+      ? (p.at as Record<string, unknown>)
+      : undefined;
+  const x = num(at?.x);
+  const student = num(at?.student);
+  const expected = num(at?.expected);
+  const where = str(p.where, 20);
+  const reason = str(p.reason, 40);
+  const parentheses = str(p.parentheses, 20);
+  return {
+    verdict: e.name === 'line_wrong' ? 'wrong' : 'invalid',
+    ...(raw && { raw }),
+    ...(where && { where }),
+    ...(reason && { reason }),
+    ...(parentheses && { parentheses }),
+    ...(x !== undefined &&
+      student !== undefined &&
+      expected !== undefined && { at: { x, student, expected } }),
+  };
+}
 
 /** Option ids (content ids) for choices; typed input only when it is a number; never task objects. */
 function answerValue(a: Extract<Event, { t: 'answer' }>): string | null {
@@ -134,6 +220,21 @@ const TRIGGER_OF: Partial<Record<Event['t'], Trigger>> = {
   deepdive: 'detour_closed',
 };
 
+/** C3: the misconception the student picked on the probe card after this wrong answer. */
+function probedMisconception(
+  onStep: readonly Event[],
+  answer: Extract<Event, { t: 'answer' }>,
+): string | undefined {
+  const i = onStep.indexOf(answer);
+  const probe = onStep
+    .slice(i + 1)
+    .find(
+      (e): e is Extract<Event, { t: 'probe' }> =>
+        e.t === 'probe' && e.value === answer.value,
+    );
+  return probe?.choice ?? undefined;
+}
+
 /** The trigger an event stands for, if it is a decision point. */
 export function triggerOf(e: Event): Trigger | null {
   if (e.t === 'answer') {
@@ -151,6 +252,23 @@ export function triggerOf(e: Event): Trigger | null {
     e.name === 'closed'
   ) {
     return 'detour_closed';
+  }
+  // D2: a main step revealed (a variant's reveal closes it: detour_closed).
+  if (e.t === 'reveal') {
+    return e.stepId.startsWith('dd:') || e.stepId.startsWith('var:')
+      ? null
+      : 'revealed';
+  }
+  // C3: the planner reacts to a probed wrong answer once the card is answered.
+  if (e.t === 'probe') {
+    return e.movedOn ? null : 'wrong';
+  }
+  if (
+    e.t === 'component_event' &&
+    e.component === 'LinesEditor' &&
+    e.name === 'invalid_input'
+  ) {
+    return 'line_invalid';
   }
   return TRIGGER_OF[e.t] ?? null;
 }
@@ -188,6 +306,10 @@ export function buildSituation(
   );
   const wrongs = answers.filter(a => !a.correct);
   const notSure = onStep.filter(e => e.t === 'not_sure').length;
+  // Help taps and long-press asks with no verified answer: struggle signals.
+  const helpTaps = onStep.filter(
+    e => e.t === 'request' || (e.t === 'ask' && e.unanswered === true),
+  ).length;
   const lastAnswer = answers[answers.length - 1];
 
   // --- stack of open detours ----------------------------------------------------
@@ -197,6 +319,8 @@ export function buildSituation(
   const componentsShown: Situation['componentsShown'] = [];
   const decisions: Situation['decisions'] = [];
   const requests: Situation['requests'] = [];
+  const declinedOffers: string[] = [];
+  let pendingOffer: string | undefined;
   const clarify: ClarifyChoice[] = [];
   const selfReports: Situation['selfReports'] = [];
   const exampleRounds: Situation['question']['exampleRounds'] = [];
@@ -349,6 +473,9 @@ export function buildSituation(
           cleanStreakActed = false;
         }
         if (k === key) {
+          const n = e.decision.next;
+          pendingOffer =
+            n.kind === 'variant' && n.offer ? n.variantId : undefined;
           decisions.push({
             ruleId: e.decision.ruleId,
             kind: e.decision.next.kind,
@@ -356,11 +483,26 @@ export function buildSituation(
               representation: e.decision.representation,
             }),
           });
+          // A follow-up action counts too (B4: the silent teacher note).
+          if (e.decision.followUp) {
+            decisions.push({
+              ruleId: e.decision.ruleId,
+              kind: e.decision.followUp.kind,
+            });
+          }
         }
         break;
       case 'offer_response':
         if (e.offer === 'compress' && e.accepted) {
           compressed = true;
+        }
+        if (
+          e.offer === 'repair' &&
+          !e.accepted &&
+          k === key &&
+          pendingOffer !== undefined
+        ) {
+          pushOnce(declinedOffers, pendingOffer);
         }
         break;
       case 'request':
@@ -402,16 +544,37 @@ export function buildSituation(
   // --- skill state (all sessions up to now) --------------------------------------
   const state = deriveState(upTo, catalog);
   const skillIds = [...(info?.skills ?? [])];
+  // D1: the skills map also holds the own skills of misconceptions seen on
+  // the step (step.skills stays the step's own).
+  const shownSkillIds = [...skillIds];
+  for (const w of wrongs) {
+    const own =
+      w.misconceptionId !== undefined
+        ? catalog.misconceptions.get(w.misconceptionId)?.skillId
+        : undefined;
+    if (own !== undefined && !shownSkillIds.includes(own)) {
+      shownSkillIds.push(own);
+    }
+  }
   const skills: Situation['skills'] = {};
   const tried = new Set<string>();
-  for (const id of skillIds) {
+  for (const id of shownSkillIds) {
     const s = state.skills[id];
     if (s) {
+      const seen = Object.entries(s.misconceptions).filter(([, n]) => n > 0);
       skills[id] = {
         status: s.status,
         representationsTried: s.representationsTried,
+        helpRequests: {
+          changeMethod: s.evidence.changeMethod,
+          easier: s.evidence.easier,
+        },
+        ...(seen.length > 0 && { misconceptions: Object.fromEntries(seen) }),
       };
-      s.representationsTried.forEach(r => tried.add(r));
+      // Only the step's own skills say which forms were tried here.
+      if (skillIds.includes(id)) {
+        s.representationsTried.forEach(r => tried.add(r));
+      }
     }
   }
   // Representations of detours on this step count as tried even if their skills differ.
@@ -424,6 +587,7 @@ export function buildSituation(
     s => s.variantKind === 'prerequisite',
   ).length;
 
+  const line = lineOf(onStep);
   const situation: Situation = {
     trigger,
     exerciseId: trig.exerciseId,
@@ -435,15 +599,17 @@ export function buildSituation(
       skills: skillIds,
       wrong: wrongs.length,
       notSure,
-      struggle: wrongs.length + notSure,
+      // "Change method" / "easier" taps count like a "not sure" (help chips).
+      struggle: wrongs.length + notSure + helpTaps,
       hintsUsed: onStep.filter(e => e.t === 'hint').length,
       hintCount: info?.hintCount ?? 0,
-      wrongValues: wrongs.map(w => ({
-        value: answerValue(w),
-        ...(w.misconceptionId !== undefined && {
-          misconceptionId: w.misconceptionId,
-        }),
-      })),
+      wrongValues: wrongs.map(w => {
+        const m = probedMisconception(onStep, w) ?? w.misconceptionId;
+        return {
+          value: answerValue(w),
+          ...(m !== undefined && { misconceptionId: m }),
+        };
+      }),
       ...(lastAnswer && {
         last: {
           correct: lastAnswer.correct,
@@ -458,6 +624,7 @@ export function buildSituation(
       ...(onStep[0] && {
         timeOnStepMs: Math.max(0, trig.ts - onStep[0].ts),
       }),
+      ...(line && { line }),
       revealed: onStep.some(e => e.t === 'reveal'),
     },
     stack,
@@ -467,6 +634,7 @@ export function buildSituation(
     representationsTried: [...tried],
     decisions,
     requests,
+    declinedOffers,
     clarify,
     selfReports,
     question: {
@@ -490,6 +658,36 @@ export function buildSituation(
           e.sessionId === trig.sessionId &&
           e.decision.next.kind === 'self_report',
       ).length,
+      outcomes: attemptOutcomes(
+        upTo.filter(e => e.sessionId === trig.sessionId),
+        catalog,
+      ).map(o => ({
+        stepKey: o.stepKey,
+        outcome: o.outcome,
+        skills: o.skills,
+      })),
+      moves: upTo.flatMap(e =>
+        e.t === 'plan' &&
+        e.sessionId === trig.sessionId &&
+        e.decision.nextMove !== undefined &&
+        e.decision.nextMove.move !== 'move_on'
+          ? [
+              {
+                move: e.decision.nextMove.move,
+                skills: e.decision.diagnosis.skillIds,
+                questionId: e.questionId,
+              },
+            ]
+          : [],
+      ),
+      freshAfterReveal: upTo.flatMap(e =>
+        e.t === 'plan' &&
+        e.sessionId === trig.sessionId &&
+        e.decision.ruleId === 'rule.after_reveal.fresh' &&
+        e.decision.next.kind === 'variant'
+          ? [e.decision.next.variantId]
+          : [],
+      ),
     },
     ...(opts.requestText !== undefined && {
       request: { text: opts.requestText.slice(0, 500) },

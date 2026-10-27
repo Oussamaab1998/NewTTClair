@@ -3,8 +3,9 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { RichText } from '../../lesson/blocks/RichText';
+import { PaperBackground } from '../../lesson/paper/PaperBackground';
 import { MathBlock } from '../../lesson/math/MathBlock';
-import { doneParts, type DoneRecord } from '../../state/doneParts';
+import { doneParts, partKey, type DoneRecord } from '../../state/doneParts';
 import type { EventStore } from '../../telemetry/eventStore';
 import { theme } from '../../theme';
 import {
@@ -23,15 +24,28 @@ import {
   type PickerChip,
   type Opened,
 } from '../exercises';
+import type * as DevOnly from '../dev';
+import { paperStyle } from '../paperStyle';
+import { ResetDialog, ResetLink } from '../ResetDialog';
+
+/** Debug builds only (launch arguments); Metro drops it in release. */
+const devOnly: typeof DevOnly | null = __DEV__
+  ? (require('../dev') as typeof DevOnly)
+  : null;
 
 const DONE_MARK = '✓';
 
 interface ExercisePickerProps {
   onOpen: (opened: Opened) => void;
+  /** «شوف الورقة»: the whole exercise as printed (the paper screen). */
+  onPaper?: (exerciseId: string) => void;
   catalog?: readonly CatalogEntry[];
-  /** Stored sessions and the done-parts record: done parts are read on mount. */
-  eventStore?: Pick<EventStore, 'load'>;
-  doneRecord?: Pick<DoneRecord, 'all'>;
+  /**
+   * Stored sessions and the done-parts record: done parts are read on mount
+   * and again after «ابدا من جديد» (which needs both).
+   */
+  eventStore?: Pick<EventStore, 'load' | 'append'>;
+  doneRecord?: Pick<DoneRecord, 'all' | 'clearExercise'>;
 }
 
 /**
@@ -43,35 +57,69 @@ interface ExercisePickerProps {
  */
 export function ExercisePicker({
   onOpen,
+  onPaper,
   catalog = CATALOG,
   eventStore,
   doneRecord,
 }: ExercisePickerProps) {
   const { t } = useTranslation();
-  const [done] = useState(() =>
-    doneParts(eventStore?.load() ?? [], doneRecord),
+  const readDone = () => doneParts(eventStore?.load() ?? [], doneRecord);
+  const [done, setDone] = useState(readDone);
+  const [paper] = useState(paperStyle);
+  // «ابدا من جديد»: the exercise whose reset dialog is open (`-devDemo
+  // resetDialog` opens it for exercise 4, screenshots).
+  const [resetFor, setResetFor] = useState<CatalogEntry | null>(() =>
+    devOnly?.devDemoAtLaunch() === 'resetDialog'
+      ? catalog.find(e => e.id === 'bac2022c-ex4') ?? null
+      : null,
   );
+  const canReset = eventStore !== undefined && doneRecord !== undefined;
+  const resetExercise =
+    resetFor?.result.ok === true ? resetFor.result.loaded.exercise : null;
   return (
-    <ScrollView
-      style={styles.root}
-      contentContainerStyle={styles.list}
-      testID="exercise-picker"
-    >
-      <Pressable
-        disabled={!devRevealAvailable()}
-        delayLongPress={DEV_REVEAL_MS}
-        onLongPress={() => setDevTools(!devToolsEnabled())}
-        testID="picker-title"
+    <View style={styles.root}>
+      <PaperBackground style={paper} />
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.list}
+        testID="exercise-picker"
       >
-        <Text style={styles.heading}>{t('picker.title')}</Text>
-      </Pressable>
-      {catalog.map(e => (
-        <ExerciseCard key={e.id} entry={e} done={done} onOpen={onOpen} />
-      ))}
-      <View style={styles.more} testID="picker-more-soon">
-        <Text style={styles.moreText}>{t('picker.moreSoon')}</Text>
-      </View>
-    </ScrollView>
+        <Pressable
+          disabled={!devRevealAvailable()}
+          delayLongPress={DEV_REVEAL_MS}
+          onLongPress={() => setDevTools(!devToolsEnabled())}
+          testID="picker-title"
+        >
+          <Text style={styles.heading}>{t('picker.title')}</Text>
+        </Pressable>
+        {catalog.map(e => (
+          <ExerciseCard
+            key={e.id}
+            entry={e}
+            done={done}
+            onOpen={onOpen}
+            onPaper={onPaper}
+            onReset={canReset ? () => setResetFor(e) : undefined}
+          />
+        ))}
+        <View style={styles.more} testID="picker-more-soon">
+          <Text style={styles.moreText}>{t('picker.moreSoon')}</Text>
+        </View>
+      </ScrollView>
+      {canReset && (
+        <ResetDialog
+          exercise={resetExercise}
+          eventStore={eventStore}
+          doneRecord={doneRecord}
+          onClose={reset => {
+            setResetFor(null);
+            if (reset) {
+              setDone(readDone());
+            }
+          }}
+        />
+      )}
+    </View>
   );
 }
 
@@ -79,10 +127,15 @@ function ExerciseCard({
   entry,
   done,
   onOpen,
+  onPaper,
+  onReset,
 }: {
   entry: CatalogEntry;
   done: ReadonlySet<string>;
   onOpen: (opened: Opened) => void;
+  onPaper: ((exerciseId: string) => void) | undefined;
+  /** «ابدا من جديد» (shown only when a part of this exercise is done). */
+  onReset: (() => void) | undefined;
 }) {
   const { t } = useTranslation();
   if (!entry.result.ok) {
@@ -104,9 +157,10 @@ function ExerciseCard({
   const chips = pickerChips(exercise, done);
   const next = resumeTarget(exercise, done);
   const open = (partId: string) => onOpen({ exerciseId: entry.id, partId });
+  const anyDone = exercise.parts.some(p => done.has(partKey(entry.id, p.id)));
   return (
     <View style={styles.card} testID={`exercise-${entry.id}`}>
-      {/* Reading order: the tags (subject, draft), then «Exercice n». */}
+      {/* Reading order: the tags (subject, section, draft), then «Exercice n». */}
       <View style={styles.top}>
         <View style={styles.tags}>
           <Text
@@ -118,6 +172,11 @@ function ExerciseCard({
           >
             {t(`picker.subject.${exercise.subject}`)}
           </Text>
+          {exercise.section !== undefined && (
+            <Text style={styles.sectionTag} testID={`section-${entry.id}`}>
+              {t(`picker.section.${exercise.section}`)}
+            </Text>
+          )}
           {!exercise.reviewed && (
             <Text
               style={styles.draftTag}
@@ -146,6 +205,17 @@ function ExerciseCard({
           <PartChip key={c.id} chip={c} onOpen={open} />
         ))}
       </View>
+      {onPaper && (
+        // Quiet: the primary action stays the button below.
+        <Pressable
+          onPress={() => onPaper(entry.id)}
+          style={styles.quietLink}
+          accessibilityRole="button"
+          testID={`paper-screen-${entry.id}`}
+        >
+          <Text style={styles.quietLinkText}>{t('picker.viewPaper')}</Text>
+        </Pressable>
+      )}
       <Pressable
         onPress={() => open(next.partId)}
         style={styles.primary}
@@ -170,6 +240,9 @@ function ExerciseCard({
           <Text style={styles.primaryText}>{t('picker.start')}</Text>
         )}
       </Pressable>
+      {onReset && anyDone && (
+        <ResetLink exerciseId={entry.id} onPress={onReset} />
+      )}
     </View>
   );
 }
@@ -227,6 +300,8 @@ function PartChip({
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: theme.color.paper },
+  // Transparent: the paper (flat, grid or ruled) is the root's background.
+  scroll: { flex: 1 },
   list: {
     paddingHorizontal: theme.layout.gutter,
     paddingVertical: theme.space.lg,
@@ -268,6 +343,17 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.tag,
     overflow: 'hidden',
     paddingHorizontal: theme.space.md,
+    writingDirection: 'rtl',
+  },
+  /** The bac section: an outline tag, quieter than the subject's fill. */
+  sectionTag: {
+    ...theme.font.small,
+    color: theme.color.ink,
+    borderColor: theme.color.borderControl,
+    borderWidth: theme.border.line,
+    borderRadius: theme.radius.tag,
+    overflow: 'hidden',
+    paddingHorizontal: theme.space.xs,
     writingDirection: 'rtl',
   },
   draftTag: {
@@ -328,6 +414,19 @@ const styles = StyleSheet.create({
   chipTextSoon: {
     fontFamily: theme.font.family.ui.regular,
     color: theme.color.inkDisabled,
+  },
+  // Quiet links («شوف الورقة», «ابدا من جديد»): the primary action stays the button.
+  quietLink: {
+    minHeight: theme.size.touch,
+    alignSelf: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: theme.space.lg,
+  },
+  quietLinkText: {
+    ...theme.font.body,
+    fontFamily: theme.font.family.ui.bold,
+    color: theme.color.pen,
+    writingDirection: 'rtl',
   },
   primary: {
     minHeight: theme.size.touch,

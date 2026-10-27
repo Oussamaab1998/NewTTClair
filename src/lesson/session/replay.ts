@@ -58,6 +58,13 @@ export function actionsFromEvents(events: readonly Event[]): LessonAction[] {
         ) {
           actions.push({ type: 'leave_deep_dive', at });
         } else if (
+          e.component === 'Walkthrough' &&
+          e.name === 'line' &&
+          Number(e.payload.index) > 0
+        ) {
+          // B4: line 0 comes with the planner's decision; later lines are taps.
+          actions.push({ type: 'walkthrough_next', at });
+        } else if (
           e.component === 'NumericKeypad' &&
           e.name === 'input_trace'
         ) {

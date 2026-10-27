@@ -21,10 +21,19 @@ import {
   type Fraction,
 } from './rational';
 
+export const BallColorSchema = z.enum(['red', 'black']);
+export type BallColor = z.infer<typeof BallColorSchema>;
+
 // Ball ids are joined with '-' to build outcome ids.
 export const BallSchema = z.strictObject({
   id: z.string().regex(/^[A-Za-z0-9_]+$/),
   value: z.number().int(),
+  /**
+   * A coloured ball (red / black urns): shown by its letter, not its value.
+   * Events still read `value` (e.g. red = 1, count_value(1) = number of reds);
+   * the urn check makes each colour carry one value.
+   */
+  color: BallColorSchema.optional(),
 });
 export type Ball = z.infer<typeof BallSchema>;
 
@@ -83,7 +92,7 @@ export interface Outcome {
   balls: Ball[];
 }
 
-function validateUrn(urn: Ball[]): void {
+export function validateUrn(urn: readonly Ball[]): void {
   const ids = new Set<string>();
   for (const ball of urn) {
     if (!BallSchema.safeParse(ball).success) {
@@ -93,6 +102,22 @@ function validateUrn(urn: Ball[]): void {
       throw new EngineError(`duplicate ball id: ${ball.id}`);
     }
     ids.add(ball.id);
+  }
+  // Colours: on every ball or on none; one value per colour, one colour per value.
+  const colored = urn.filter(b => b.color !== undefined);
+  if (colored.length > 0 && colored.length < urn.length) {
+    throw new EngineError('a colour must be on every ball or on none');
+  }
+  const valueOfColor = new Map<string, number>();
+  const colorOfValue = new Map<number, string>();
+  for (const b of colored) {
+    const v = valueOfColor.get(b.color!);
+    const c = colorOfValue.get(b.value);
+    if ((v !== undefined && v !== b.value) || (c !== undefined && c !== b.color)) {
+      throw new EngineError('each colour needs its own value');
+    }
+    valueOfColor.set(b.color!, b.value);
+    colorOfValue.set(b.value, b.color!);
   }
 }
 

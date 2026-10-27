@@ -20,6 +20,12 @@ import {
   parseNumeric,
 } from '../engine/format';
 import { equals, type Fraction } from '../engine/rational';
+import { runProcedure, type ProcedureId } from '../engine/procedures';
+import {
+  enumerateOutcomes,
+  satisfies,
+  type EventSpec,
+} from '../engine/probability';
 import { parseLatexSubset } from '../lesson/math/latexSubset';
 import {
   ExerciseSchema,
@@ -36,9 +42,20 @@ import {
 
 export type ResolvedAnswer =
   | { kind: 'option'; optionId: string }
-  | { kind: 'number'; value: Fraction }
+  | {
+      kind: 'number';
+      value: Fraction;
+      /** Known wrong procedures with their engine values, in table order (C2). */
+      procedures?: ResolvedProcedure[];
+    }
   /** Line-by-line writing: the engine-checked spec the reducer checks lines with. */
   | { kind: 'lines'; spec: LinesSpec };
+
+export interface ResolvedProcedure {
+  id: ProcedureId;
+  misconceptionId: string;
+  values: Fraction[];
+}
 
 export type AskedStep = Extract<Step, { kind: 'choice' | 'typed' | 'lines' }>;
 export type LinesStep = Extract<Step, { kind: 'lines' }>;
@@ -319,6 +336,37 @@ function resolveAnswer(
     }
     return { kind: 'option', optionId: matches[0]!.id };
   }
+  if (step.kind === 'choice' && answer.type === 'complement') {
+    // C1: the option whose event holds exactly the draws outside `of`.
+    if (!ctx.experiment) {
+      errors.push(`${where}: a complement answer needs an urn`);
+      return null;
+    }
+    const all = enumerateOutcomes(
+      ctx.experiment.urn,
+      ctx.experiment.draw,
+      ctx.experiment.k,
+    );
+    const ids = (event: EventSpec) =>
+      all
+        .filter(o => satisfies(event, o))
+        .map(o => o.id)
+        .join(',');
+    const target = all
+      .filter(o => !satisfies(answer.of, o))
+      .map(o => o.id)
+      .join(',');
+    const matches = step.options.filter(
+      o => o.event !== undefined && ids(o.event) === target,
+    );
+    if (matches.length !== 1) {
+      errors.push(
+        `${where}: ${matches.length} options are the complement of the event`,
+      );
+      return null;
+    }
+    return { kind: 'option', optionId: matches[0]!.id };
+  }
   if (step.kind === 'choice' && answer.type === 'option') {
     if (!step.options.some(o => o.id === answer.id)) {
       errors.push(`${where}: answer ${answer.id} is not an option`);
@@ -359,12 +407,247 @@ function resolveAnswer(
   return { kind: 'option', optionId: matches[0]!.id };
 }
 
+/** The numeric value of a resolved answer (a typed value, or the chosen option's value). */
+function numericAnswer(
+  step: AskedStep,
+  a: ResolvedAnswer | undefined,
+): Fraction | undefined {
+  if (a?.kind === 'number') {
+    return a.value;
+  }
+  if (a?.kind === 'option' && step.kind === 'choice') {
+    const raw = step.options.find(o => o.id === a.optionId)?.value;
+    const v = raw === undefined ? null : parseNumeric(raw);
+    return v?.ok ? v.value : undefined;
+  }
+  return undefined;
+}
+
+/**
+ * C2: each typed step's procedure table, computed by the engine. "Earlier
+ * results" are the numeric answers before the step in its part; for a
+ * variant, those of the steps it is for, and their own answers.
+ */
+function resolveProcedures(
+  ex: Exercise,
+  ctx: CallContext,
+  answers: Map<string, ResolvedAnswer>,
+  errors: string[],
+) {
+  const earlier = new Map<string, Fraction[]>();
+  const own = new Map<string, Fraction>();
+  for (const q of ex.parts) {
+    const seen: Fraction[] = [];
+    for (const s of q.groups.flatMap(g => g.steps)) {
+      if (!isAsked(s)) {
+        continue;
+      }
+      const key = stepKey.main(q.id, s.id);
+      earlier.set(key, [...seen]);
+      const v = numericAnswer(s, answers.get(key));
+      if (v) {
+        own.set(key, v);
+        seen.push(v);
+      }
+    }
+  }
+  for (const v of ex.variants) {
+    earlier.set(
+      stepKey.variant(v.id),
+      v.forSteps.flatMap(f => [
+        ...(earlier.get(f) ?? []),
+        ...(own.has(f) ? [own.get(f)!] : []),
+      ]),
+    );
+  }
+  for (const { key, step, ctx: stepCtx } of askedSteps(ex)) {
+    const a = answers.get(key);
+    if (
+      step.kind !== 'typed' ||
+      !step.procedures ||
+      a?.kind !== 'number' ||
+      step.answer.type !== 'fraction'
+    ) {
+      continue;
+    }
+    const resolved: ResolvedProcedure[] = [];
+    for (const row of step.procedures) {
+      const r = runProcedure(
+        row.id,
+        step.answer.compute,
+        stepCtx ?? ctx,
+        earlier.get(key) ?? [],
+      );
+      if (!r.ok) {
+        errors.push(`${key}: procedure ${r.error}`);
+        continue;
+      }
+      if (r.value.some(v => equals(v, a.value))) {
+        errors.push(
+          `${key}: procedure ${row.id} gives the answer ${fractionToPlain(
+            a.value,
+          )}`,
+        );
+        continue;
+      }
+      resolved.push({
+        id: row.id,
+        misconceptionId: row.misconceptionId,
+        values: r.value,
+      });
+    }
+    answers.set(key, { ...a, procedures: resolved });
+  }
+}
+
+/**
+ * D2: a fresh variant (`afterReveal`) is a transfer on its own urn whose
+ * answer cannot be guessed from a step it is for: not that step's answer,
+ * not one of its known wrong values (authored or procedure values).
+ */
+function checkFreshVariants(
+  ex: Exercise,
+  answers: ReadonlyMap<string, ResolvedAnswer>,
+  errors: string[],
+) {
+  const asked = new Map(askedSteps(ex).map(a => [a.key, a.step]));
+  for (const v of ex.variants.filter(x => x.afterReveal)) {
+    const key = stepKey.variant(v.id);
+    if (v.kind !== 'transfer') {
+      errors.push(`${key}: a fresh variant must be a transfer`);
+    }
+    if (v.experiment === undefined) {
+      errors.push(`${key}: a fresh variant needs its own urn`);
+    }
+    const a = answers.get(key);
+    if (a?.kind === 'option' && v.step.kind === 'choice') {
+      checkFreshChoice(
+        key,
+        v.step,
+        a.optionId,
+        v.forSteps,
+        asked,
+        answers,
+        errors,
+      );
+    }
+    const value = freshValue(v.step, a);
+    if (!value) {
+      continue;
+    }
+    const plain = fractionToPlain(value);
+    for (const parentKey of v.forSteps) {
+      const p = answers.get(parentKey);
+      const pv = asked.get(parentKey)
+        ? freshValue(asked.get(parentKey)!, p)
+        : undefined;
+      if (pv && equals(pv, value)) {
+        errors.push(
+          `${key}: the answer ${plain} equals the answer of ${parentKey}`,
+        );
+      }
+      const step = asked.get(parentKey);
+      const wrong = [
+        ...(step?.kind === 'typed' ? step.wrongAnswers ?? [] : []).flatMap(
+          w => {
+            const x = parseNumeric(w.value);
+            return x.ok ? [x.value] : [];
+          },
+        ),
+        ...(step?.kind === 'choice' ? step.options : [])
+          .filter(o => p?.kind !== 'option' || o.id !== p.optionId)
+          .flatMap(o => {
+            const x = o.value === undefined ? null : parseNumeric(o.value);
+            return x?.ok ? [x.value] : [];
+          }),
+        ...(p?.kind === 'number' ? p.procedures ?? [] : []).flatMap(
+          x => x.values,
+        ),
+      ];
+      if (wrong.some(w => equals(w, value))) {
+        errors.push(
+          `${key}: the answer ${plain} equals a known wrong value of ${parentKey}`,
+        );
+      }
+    }
+  }
+}
+
+/** A step's numeric answer: a typed value, or the chosen option's value. */
+function freshValue(
+  step: AskedStep | Step,
+  a: ResolvedAnswer | undefined,
+): Fraction | undefined {
+  if (a?.kind === 'number') {
+    return a.value;
+  }
+  if (a?.kind === 'option' && step.kind === 'choice') {
+    const raw = step.options.find(o => o.id === a.optionId)?.value;
+    const x = raw === undefined ? null : parseNumeric(raw);
+    return x?.ok ? x.value : undefined;
+  }
+  return undefined;
+}
+
+/** C1: a fresh choice's correct option must not repeat its parent's (same words). */
+function checkFreshChoice(
+  key: string,
+  step: Extract<Step, { kind: 'choice' }>,
+  optionId: string,
+  forSteps: readonly string[],
+  asked: ReadonlyMap<string, AskedStep>,
+  answers: ReadonlyMap<string, ResolvedAnswer>,
+  errors: string[],
+) {
+  const words = (o: { label?: unknown } | undefined) =>
+    o?.label === undefined ? undefined : JSON.stringify(o.label);
+  const mine = words(step.options.find(o => o.id === optionId));
+  for (const parentKey of forSteps) {
+    const parent = asked.get(parentKey);
+    const pa = answers.get(parentKey);
+    if (parent?.kind !== 'choice' || pa?.kind !== 'option') {
+      continue;
+    }
+    const theirs = words(parent.options.find(o => o.id === pa.optionId));
+    if (mine !== undefined && mine === theirs) {
+      errors.push(
+        `${key}: the correct option repeats the answer of ${parentKey}`,
+      );
+    }
+  }
+}
+
 const sortedSet = (xs: readonly number[]) =>
   [...new Set(xs)].sort((a, b) => a - b);
 
 /** `{-2 ; -1 ; 0 ; 2}` */
 const setLatex = (xs: readonly number[]) =>
   `\\{${sortedSet(xs).join(' ; ')}\\}`;
+
+/**
+ * E3: a LawChart in content that gives its `law` must name it (`law.of`), so
+ * the engine recomputes every row; a container's inner specs are checked too.
+ */
+function checkLawCharts(spec: ComponentSpec, where: string, errors: string[]) {
+  const props = (spec.props ?? {}) as Record<string, unknown>;
+  if (spec.component === 'LawChart') {
+    const law = props.law as { of?: unknown } | undefined;
+    if (law !== undefined && law.of === undefined) {
+      errors.push(
+        `${where}: a LawChart law in content needs law.of (checked by the engine)`,
+      );
+    }
+  }
+  for (const v of Object.values(props)) {
+    if (
+      v !== null &&
+      typeof v === 'object' &&
+      typeof (v as { component?: unknown }).component === 'string'
+    ) {
+      checkLawCharts(v as ComponentSpec, where, errors);
+    }
+  }
+}
 
 /** Every component spec must render: registered name, props valid for this exercise. */
 function checkComponents(
@@ -374,6 +657,7 @@ function checkComponents(
   errors: string[],
 ) {
   const check = (spec: ComponentSpec, where: string) => {
+    checkLawCharts(spec, where, errors);
     const r = resolveSpec(spec, ctx.experiment);
     if (!r.ok) {
       errors.push(`${where}: ${spec.component} ${r.reason} (${r.detail})`);
@@ -429,6 +713,7 @@ function checkComponents(
     const where = stepKey.variant(v.id);
     const vctx = variantContext(ex, v);
     const checkIn = (spec: ComponentSpec, at: string) => {
+      checkLawCharts(spec, at, errors);
       const r = resolveSpec(spec, vctx.experiment);
       if (!r.ok) {
         errors.push(`${at}: ${spec.component} ${r.reason} (${r.detail})`);
@@ -479,6 +764,7 @@ function checkDeepDive(
   const where = `dd:${d.id}`;
   const ctx = deepDiveContext(ex, d);
   const check = (spec: ComponentSpec, at: string) => {
+    checkLawCharts(spec, at, errors);
     const r = resolveSpec(spec, ctx.experiment);
     if (!r.ok) {
       errors.push(`${at}: ${spec.component} ${r.reason} (${r.detail})`);
@@ -689,7 +975,7 @@ export function loadExercise(
         ? step.options
         : step.kind === 'lines'
         ? step.knownWrong
-        : step.wrongAnswers ?? []),
+        : [...(step.wrongAnswers ?? []), ...(step.procedures ?? [])]),
     ]
       .map(o => o.misconceptionId)
       .filter((id): id is string => id !== undefined);
@@ -704,6 +990,16 @@ export function loadExercise(
     ) {
       errors.push(`${key}: unknown deep dive ${step.deepDiveId}`);
     }
+    if ('link' in step && step.link) {
+      if (!values.has(step.link.resultRef)) {
+        errors.push(`${key}: link uses unknown value ${step.link.resultRef}`);
+      }
+      if (step.link.text.math !== undefined) {
+        errors.push(
+          `${key}: link text has math (the value comes from the engine)`,
+        );
+      }
+    }
     if ('check' in step && step.check && !values.has(step.check.known)) {
       errors.push(
         `${key}: numeric check uses unknown value ${step.check.known}`,
@@ -715,6 +1011,8 @@ export function loadExercise(
     }
   }
 
+  resolveProcedures(exercise, ctx, answers, errors);
+  checkFreshVariants(exercise, answers, errors);
   checkComponents(exercise, ctx, misconceptionIds, errors);
 
   // 4. Every formula renders natively, and nothing is left unresolved.

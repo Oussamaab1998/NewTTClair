@@ -5,6 +5,20 @@
     "description": "Counts balls instead of draws (pairs).",
     "signature": "answers 5 pairs, or divides by 5",
     "repairComponent": "OutcomeSpace",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "عدّيت الكور ولا التيراجات؟ كل تيراج هو زوز كور مع بعض: عدّ الأزواج."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "عدّيت الكور، والمطلوب التيراجات. كل تيراج هو زوز كور مع بعض: عدّ الأزواج."
+        }
+      ]
+    },
     "trust": {
       "reviewed": false,
       "contentVersion": "ex2-0.3.0",
@@ -18,6 +32,32 @@
     "description": "Counts ordered pairs in a simultaneous draw.",
     "signature": "answers 20 for C(5,2)",
     "repairComponent": "OutcomeSpace",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "حسبت الترتيب؟ في التيراج "
+        },
+        {
+          "fr": "simultané"
+        },
+        {
+          "ar": " ما فمّاش كورة أولى وكورة ثانية: عاود عدّ بلا ترتيب."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "حسبت الترتيب، أما في التيراج "
+        },
+        {
+          "fr": "simultané"
+        },
+        {
+          "ar": " الترتيب ما يهمّش: عاود عدّ بلا ترتيب."
+        }
+      ]
+    },
     "trust": {
       "reviewed": false,
       "contentVersion": "ex2-0.3.0",
@@ -31,6 +71,16 @@
     "description": "Reads 'au moins un' as 'exactly one' and forgets the pair {0;0'}.",
     "signature": "6 outcomes with a 0, p(B)=6/10",
     "repairComponent": "EventPicker",
+    "feedback": {
+      "ar": [
+        {
+          "fr": "au moins une"
+        },
+        {
+          "ar": " معناها وحدة ولا أكثر: حسبت الحالة اللي فيها الزوز؟"
+        }
+      ]
+    },
     "trust": {
       "reviewed": false,
       "contentVersion": "ex2-0.3.0",
@@ -56,6 +106,13 @@
     "skillId": "complement-event",
     "description": "Takes a sub-case of the event as its complement.",
     "signature": "complement of 'au moins un 0' = 'two 0'",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "هذي حالة وحدة من الحدث. العكس فيه الحالات الكل اللي الحدث ما يصيرش فيها: شنوّة هي؟"
+        }
+      ]
+    },
     "trust": {
       "reviewed": false,
       "contentVersion": "ex2-0.3.0",
@@ -69,6 +126,20 @@
     "description": "Gives p of the event when the complement is asked, or the reverse.",
     "signature": "p(not B)=7/10 or p(B)=3/10",
     "repairComponent": "ComplementView",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "حسبت الحدث المطلوب ولا العكس متاعو؟ ارجع اقرا شنوّة المطلوب بالضبط."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "حسبت العكس متاع الحدث المطلوب. ارجع اقرا المطلوب، وعدّ الحالات متاعو هو."
+        }
+      ]
+    },
     "trust": {
       "reviewed": false,
       "contentVersion": "ex2-0.3.0",
@@ -81,6 +152,20 @@
     "skillId": "counting-pairs",
     "description": "Counts all outcomes instead of the favourable ones.",
     "signature": "answers 10 for the complement count",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "عدّيت التيراجات الكل؟ المطلوب كان التيراجات اللي فيهم الشرط برك."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "عدّيت التيراجات الكل. خوذ كان اللي فيهم الشرط، ونحّي البقية."
+        }
+      ]
+    },
     "trust": {
       "reviewed": false,
       "contentVersion": "ex2-0.3.0",
@@ -94,6 +179,19 @@
     "description": "Lists the numbers on the balls instead of the products.",
     "signature": "answers {-1, 0, 1, 2} for the values of X",
     "repairComponent": "OutcomeSpace",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "هاذوما الأرقام اللي على الكور؟ "
+        },
+        {
+          "fr": "X"
+        },
+        {
+          "ar": " هو الجداء متاع الزوز أرقام: احسب الجداء في كل تيراج."
+        }
+      ]
+    },
     "trust": {
       "reviewed": false,
       "contentVersion": "ex2-0.3.0",
@@ -107,6 +205,13 @@
     "description": "Thinks the product 1 is possible (needs two balls 1 or two balls -1).",
     "signature": "lists 1 as a value of X",
     "repairComponent": "OutcomeSpace",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "باش يجي الجداء هذا، تلزمك زوز كور عليهم نفس الرقم. ثبّت في الكور اللي في الصندوق: موجودين؟"
+        }
+      ]
+    },
     "trust": {
       "reviewed": false,
       "contentVersion": "ex2-0.3.0",
@@ -159,6 +264,58 @@
     "description": "Fills a law whose probabilities do not sum to 1.",
     "signature": "LawBuilder: complete table, sum != 1",
     "repairComponent": "LawBuilder",
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "merges_identical_balls",
+    "skillId": "counting-pairs",
+    "description": "Takes balls with the same number as one ball (the two 0 balls counted once).",
+    "signature": "transfer of 1b/s5: 3 draws with no negative number (pairs of {0, 1, 2})",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "الكور اللي عليهم نفس الرقم حسبتهم كورة وحدة؟ هوما كور مختلفين، حتى كان الرقم كيف كيف."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "حسبت الكور اللي عليهم نفس الرقم كورة وحدة. هوما كور مختلفين: كل وحدة تعطي تيراجات متاعها."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "ex2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "reuses_earlier_result",
+    "skillId": "counting-pairs",
+    "description": "Gives an earlier result of the question again instead of computing the new one.",
+    "signature": "transfer of 1b/s5: 3 (the answer of 1b/s5)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "هذي النتيجة متاع سؤال قبل؟ السؤال تبدّل: عاود احسب بالشرط الجديد."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "عاودت النتيجة اللي قبل، أما السؤال تبدّل. اقرا الشرط الجديد واحسب من جديد."
+        }
+      ]
+    },
     "trust": {
       "reviewed": false,
       "contentVersion": "ex2-0.3.0",

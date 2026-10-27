@@ -7,7 +7,9 @@ import {
   type FakeAnswer,
 } from '../planner/llm/plannerClient';
 import { createLlmRuntime } from '../planner/llm/runtime';
-import type { TutorBlock } from '../planner/llm/tutorFormat';
+import { LIVE_TUTOR_OUTPUT } from '../planner/llm/fixtures/liveOutputs';
+import { parseAnswer } from '../planner/llm/strictSchema';
+import { tutorFormat, type TutorBlock } from '../planner/llm/tutorFormat';
 import { memoryStore } from '../storage/kv';
 import { answerQuestion, matchChip } from './tutor';
 import { latexToPlain, verifyTutorBlocks } from './verify';
@@ -98,6 +100,81 @@ describe('verifyTutorBlocks: the engine checks every claim it can', () => {
     expect(latexToPlain('\\dfrac{1}{2} \\times 0{,}5')).toBe('((1)/(2)) * 0.5');
     expect(latexToPlain('p(B)')).toBeNull();
     expect(latexToPlain('\\binom{5}{2}')).toBeNull();
+  });
+});
+
+describe('verifyTutorBlocks: no answer leak (D16) and RTL, per block', () => {
+  const s3 = { content, stepKey: '1b/s3', hintsUsed: 0, hintCount: 3 };
+  const text = (...runs: ({ ar: string } | { fr: string })[]): TutorBlock => ({
+    type: 'text',
+    text: { ar: runs as [{ ar: string }] },
+  });
+  const live = (() => {
+    const p = parseAnswer(tutorFormat(), LIVE_TUTOR_OUTPUT);
+    if (!p.success) {
+      throw new Error('live output does not parse');
+    }
+    return p.data.blocks;
+  })();
+
+  it('the live answer at s3 (no hint used): the "aucune" block, the Arabic paraphrase and the complement math are dropped; the pointer stays', () => {
+    const v = verifyTutorBlocks(live, s3);
+    expect(v.dropped).toEqual([
+      { index: 0, reason: 'final_answer_early' },
+      { index: 1, reason: 'final_answer_early' },
+      { index: 3, reason: 'final_answer_early' },
+    ]);
+    expect(v.blocks).toHaveLength(1);
+    // The kept block: its "0" is now its own run.
+    const kept = v.blocks[0]!;
+    expect(kept.type === 'text' && kept.text.ar).toContainEqual({ fr: '0' });
+  });
+
+  it('once the ladder is used up, the same answer may be stated', () => {
+    const v = verifyTutorBlocks(live, { ...s3, hintsUsed: 3 });
+    expect(v.dropped.filter(d => d.reason === 'final_answer_early')).toEqual(
+      [],
+    );
+  });
+
+  it('after s3 (now at s5), "aucune" is no longer the current answer', () => {
+    const v = verifyTutorBlocks([text({ ar: 'العكس هو ' }, { fr: 'aucune' })], at);
+    expect(v.dropped).toEqual([]);
+  });
+
+  it('near-misses stay: a question pointing at the cases, a wrong option named', () => {
+    const v = verifyTutorBlocks(
+      [
+        text({ ar: 'شنوّة الحالات اللي ' }, { fr: 'B' }, { ar: ' ما يصيرش فيها؟' }),
+        text({ ar: 'هل ' }, { fr: 'exactement une' }, { ar: ' تغطّي الحالات الكل؟' }),
+      ],
+      s3,
+    );
+    expect(v.dropped).toEqual([]);
+    expect(v.blocks).toHaveLength(2);
+  });
+
+  it('Latin or a digit inside an Arabic run is isolated; a formula in LaTeX inside it drops that block only', () => {
+    const v = verifyTutorBlocks(
+      [
+        text({ ar: 'الحدث B ما يصيرش.' }),
+        text({ ar: 'نحسبو \\frac{3}{10} توّا' }),
+      ],
+      s3,
+    );
+    expect(v.blocks).toEqual([
+      {
+        type: 'text',
+        text: { ar: [{ ar: 'الحدث ' }, { fr: 'B' }, { ar: ' ما يصيرش.' }] },
+        check: 'none',
+      },
+    ]);
+    expect(v.dropped).toEqual([{ index: 1, reason: 'rtl_formula_in_text' }]);
+  });
+
+  it('numbers in words: "ثلاثة" at s5 is the answer', () => {
+    const v = verifyTutorBlocks([text({ ar: 'لقيت ثلاثة تيراجات؟' })], at);
+    expect(v.dropped).toEqual([{ index: 0, reason: 'final_answer_early' }]);
   });
 });
 

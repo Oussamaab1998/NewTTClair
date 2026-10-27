@@ -270,3 +270,34 @@ describe('EventSpecSchema (JSON from content and planner)', () => {
     ).toBe(false);
   });
 });
+
+describe('coloured balls (red / black urns)', () => {
+  const red = (id: string) => ({ id, value: 1, color: 'red' as const });
+  const black = (id: string) => ({ id, value: 0, color: 'black' as const });
+  it('colours do not change the draws: 4 red, 6 black, 3 at once = 120', () => {
+    const urn = [
+      ...['r1', 'r2', 'r3', 'r4'].map(red),
+      ...['n1', 'n2', 'n3', 'n4', 'n5', 'n6'].map(black),
+    ];
+    expect(enumerateOutcomes(urn, 'simultaneous', 3)).toHaveLength(120);
+  });
+  it('a colour must be on every ball, and carry one value', () => {
+    expect(() =>
+      enumerateOutcomes([red('r1'), { id: 'x', value: 0 }], 'simultaneous', 1),
+    ).toThrow(/every ball or on none/);
+    expect(() =>
+      enumerateOutcomes(
+        [red('r1'), { ...red('r2'), value: 2 }],
+        'simultaneous',
+        1,
+      ),
+    ).toThrow(/its own value/);
+    expect(() =>
+      enumerateOutcomes(
+        [red('r1'), { ...black('n1'), value: 1 }],
+        'simultaneous',
+        1,
+      ),
+    ).toThrow(/its own value/);
+  });
+});

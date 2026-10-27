@@ -66,4 +66,8 @@ export const palette = {
   series4: '#8e24aa',
   series5: '#c62828',
   series6: '#00838f',
+
+  /** Red / black urn balls (white letter 6.53:1; hue 26° from redPencil, not an error red). */
+  ballRed: '#9c4221',
+  ballBlack: '#22252b',
 } as const;

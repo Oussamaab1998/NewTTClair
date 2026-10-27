@@ -41,8 +41,12 @@ export type LlmErrorKind =
   | 'config';
 
 export interface LlmUsage {
+  /** All input tokens (uncached + cache read + cache write). */
   inputTokens: number;
+  /** Cache reads. */
   cachedInputTokens: number;
+  /** Cache writes (Anthropic only; billed above the input rate). */
+  cacheWriteInputTokens?: number;
   outputTokens: number;
   reasoningTokens: number;
 }
@@ -53,11 +57,27 @@ interface ResultBase {
   latencyMs: number;
   /** Present whenever the provider reported it (also on refused/incomplete/invalid). */
   usage: LlmUsage | null;
+  /** The provider's request id header (an opaque id, for support), when present. */
+  providerRequestId?: string;
   /**
    * Debug builds only (`captureRaw`): the model's output text, for the dev
    * screen. Never logged, queued or exported.
    */
   raw?: string;
+  /** Where the time went (2026-10-22, Anthropic transport). */
+  timing?: LlmTiming;
+}
+
+/**
+ * prepMs: building the request before fetch; headersMs: fetch until the
+ * response headers (connection, upload, the model's work; fetch exposes no
+ * separate connect time); bodyMs: reading the response body. A call that
+ * timed out has prepMs only.
+ */
+export interface LlmTiming {
+  prepMs: number;
+  headersMs?: number;
+  bodyMs?: number;
 }
 
 export type LlmResult<T> =
@@ -80,8 +100,16 @@ export interface StructuredFormat<T> {
   strict: JsonSchema;
   /** Pre-conversion schema; `denull` walks it. */
   original: JsonSchema;
-  /** Validates every answer after denull. */
+  /** Validates every answer after denull (and `prepare`). */
   zod: z.ZodType<T>;
+  /** Clean-up before zod (the tutor: "" in an optional field means absent). */
+  prepare?: (value: unknown) => unknown;
+  /**
+   * Optional flat "wire" format (wireFormat.ts): the provider fills in
+   * `schema` and `zod` maps the answer to T. Anthropic always uses it when
+   * present (its grammar limits); OpenAI only when asked (`useWire`).
+   */
+  wire?: { schema: JsonSchema; zod: z.ZodType<T> };
 }
 
 export interface LlmRequest<T> {
@@ -89,6 +117,11 @@ export interface LlmRequest<T> {
   model: string;
   /** System-level instructions. */
   instructions: string;
+  /**
+   * Optional stable start of the user input (the static pack). Anthropic sends
+   * it as its own block with a cache breakpoint; OpenAI prepends it to `input`.
+   */
+  inputPrefix?: string;
   /** User-level input (the context pack, serialized). Student text only inside it, as data. */
   input: string;
   format: StructuredFormat<T>;
@@ -105,7 +138,16 @@ export type ModelCheck =
       error: LlmErrorKind;
       status?: number;
       provider?: ProviderErrorInfo;
+      /** A 200 for another model id: that id (model-id characters only). */
+      returnedId?: string;
     };
+
+/** A model id as a provider returns it, or undefined when it does not look like one. */
+export function modelIdOrUndefined(v: unknown): string | undefined {
+  return typeof v === 'string' && /^[A-Za-z0-9._:@-]{1,100}$/.test(v)
+    ? v
+    : undefined;
+}
 
 export interface LlmTransport {
   readonly provider: string;

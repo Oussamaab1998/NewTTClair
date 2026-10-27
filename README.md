@@ -4,7 +4,7 @@ This is a new [**React Native**](https://reactnative.dev) project, bootstrapped 
 
 Dev mode (the 5 dev tabs, the LLM status line, stored-event and event counters, export buttons, the part switch) is **off on every launch** and never shown in release builds.
 Turn it on for one run with the launch argument `-devMode on` (e.g. `xcrun simctl launch booted org.reactjs.native.example.NewTTClair -devMode on`), or hold the screen title (picker or lesson) for **2 seconds**; hold again to turn it off.
-`-devPart A1` opens a part directly in normal mode (`-devActions answerAll` plays it to its end; add `-devUntil sum` to stop at that step's card); `-devTab` / `-devComponent` open a dev tab (and so turn dev mode on). All arguments: `src/app/dev/launch.ts`. The Proba tab has a perf panel (React commit times, keypad height).
+`-devPart A1` opens a part directly in normal mode (`-devPart bac2022c-sc-ex2/1` when two exercises share a part id; `-devThen type:720,notSure` acts once `-devUntil` is reached) (`-devActions answerAll` plays it to its end; add `-devUntil sum` to stop at that step's card); `-devReset bac2022c-ex4` resets that exercise's progress at launch, `-devDemo resetDialog` shows the reset dialog; `-devPaperScreen bac2022c-ex4` opens the exam paper screen (`-devScroll 640` scrolls it); `-devTab` / `-devComponent` open a dev tab (and so turn dev mode on). All arguments: `src/app/dev/launch.ts`. The Proba tab has a perf panel (React commit times, keypad height).
 
 # Getting Started
 

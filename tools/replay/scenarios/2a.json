@@ -1,0 +1,161 @@
+{
+  "part": "2a",
+  "exercise": "bac2022c-ex2",
+  "teacherReviewed": false,
+  "note": "Hand-written typical mistakes for Exercise 2 question 2.a (law of X = product of the two balls). Same rules as A1.json.",
+  "scenarios": [
+    {
+      "id": "2a-s6-ordered",
+      "goTo": "s6",
+      "actions": [
+        {
+          "type": "answer",
+          "value": {
+            "raw": "20"
+          }
+        }
+      ],
+      "note": "Counts ordered pairs (counts_ordered_pairs).",
+      "preferred": ["show_component"],
+      "sample": true
+    },
+    {
+      "id": "2a-s6-balls",
+      "goTo": "s6",
+      "actions": [
+        {
+          "type": "answer",
+          "value": {
+            "raw": "5"
+          }
+        }
+      ],
+      "note": "Counts balls instead of pairs.",
+      "preferred": ["show_component"]
+    },
+    {
+      "id": "2a-s6-unknown",
+      "goTo": "s6",
+      "actions": [
+        {
+          "type": "answer",
+          "value": {
+            "raw": "25"
+          }
+        }
+      ],
+      "note": "A count no misconception explains (5 x 5).",
+      "preferred": ["show_component", "ask_clarify"],
+      "sample": true
+    },
+    {
+      "id": "2a-s9-balls",
+      "goTo": "s9",
+      "actions": [
+        {
+          "type": "answer",
+          "value": {
+            "optionId": "balls"
+          }
+        }
+      ],
+      "note": "Lists the values of the balls, not the products.",
+      "preferred": ["show_component"],
+      "sample": true
+    },
+    {
+      "id": "2a-s9-with1",
+      "goTo": "s9",
+      "actions": [
+        {
+          "type": "answer",
+          "value": {
+            "optionId": "with1"
+          }
+        }
+      ],
+      "note": "Includes the product 1 (values_include_product_1).",
+      "preferred": ["show_component"]
+    },
+    {
+      "id": "2a-s10-complement",
+      "goTo": "s10",
+      "actions": [
+        {
+          "type": "component_result",
+          "correct": false,
+          "details": {
+            "selected": ["a-d", "a-e", "d-e"]
+          },
+          "misconceptionHints": ["selects_complement"]
+        }
+      ],
+      "note": "Picks the pairs whose product is NOT 0 (selects_complement).",
+      "preferred": ["show_component", "explain"],
+      "sample": true
+    },
+    {
+      "id": "2a-s10-partial",
+      "goTo": "s10",
+      "actions": [
+        {
+          "type": "component_result",
+          "correct": false,
+          "details": {
+            "selected": ["a-b", "b-c"]
+          }
+        }
+      ],
+      "note": "Picks only some pairs with a 0 (no misconception given).",
+      "preferred": ["show_component", "ask_clarify"]
+    },
+    {
+      "id": "2a-s10-wrong-then-not-sure",
+      "goTo": "s10",
+      "actions": [
+        {
+          "type": "component_result",
+          "correct": false,
+          "details": {
+            "selected": ["a-b"]
+          }
+        },
+        {
+          "type": "not_sure"
+        }
+      ],
+      "note": "A wrong pick on the X = 0 event, then \"not sure\" (second struggle).",
+      "preferred": ["example", "variant"],
+      "sample": true
+    },
+    {
+      "id": "2a-sum-not-one",
+      "goTo": "sum",
+      "actions": [
+        {
+          "type": "answer",
+          "value": {
+            "raw": "9/10"
+          }
+        }
+      ],
+      "note": "Forgot a cell when adding the law (law_sum_not_one).",
+      "preferred": ["explain", "show_component"],
+      "sample": true
+    },
+    {
+      "id": "2a-sum-unknown",
+      "goTo": "sum",
+      "actions": [
+        {
+          "type": "answer",
+          "value": {
+            "raw": "3/5"
+          }
+        }
+      ],
+      "note": "A sum no misconception explains.",
+      "preferred": ["ask_clarify", "explain"]
+    }
+  ]
+}

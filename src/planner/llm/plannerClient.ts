@@ -15,16 +15,21 @@ import type {
   StructuredFormat,
 } from './client';
 import type { PlanContextPack, TutorContextPack } from './contextPack';
-import { serializePack } from './contextPack';
+import {
+  serializeDynamic,
+  serializePack,
+  serializeStatic,
+} from './contextPack';
 import { plannerFormat, type LlmPlannerOutput } from './plannerFormat';
 import {
-  PLAN_INSTRUCTIONS,
+  planInstructions,
   PROMPT_VERSION,
   TUTOR_INSTRUCTIONS,
 } from './prompts';
 import { issueCodes } from './openai';
-import { denull } from './strictSchema';
+import { parseAnswer } from './strictSchema';
 import { tutorFormat, type TutorOutput } from './tutorFormat';
+import { plannerWire } from './wireFormat';
 
 export interface CallOptions {
   requestId: string;
@@ -47,14 +52,21 @@ export interface PlannerClient {
   checkModel(timeoutMs: number): Promise<ModelCheck>;
 }
 
-/** Planner format for a pack: only components teaching the step's skills. */
-const formats = new Map<string, ReturnType<typeof plannerFormat>>();
-export function planFormatFor(pack: PlanContextPack) {
+/**
+ * Planner format for a pack: only components teaching the step's skills
+ * (offered list and per-component schema), plus the flat wire format (the
+ * same for every step).
+ */
+type PlanFormat = ReturnType<typeof plannerFormat> & {
+  wire: ReturnType<typeof plannerWire>;
+};
+const formats = new Map<string, PlanFormat>();
+export function planFormatFor(pack: PlanContextPack): PlanFormat {
   const skills = [...pack.dynamic.situation.step.skills].sort();
   const key = skills.join('|');
   let f = formats.get(key);
   if (!f) {
-    f = plannerFormat(skills);
+    f = { ...plannerFormat(skills), wire: plannerWire() };
     formats.set(key, f);
   }
   return f;
@@ -74,8 +86,9 @@ export function createDirectClient(o: DirectClientOptions): PlannerClient {
       o.transport.respond({
         requestId: c.requestId,
         model: o.model,
-        instructions: PLAN_INSTRUCTIONS,
-        input: serializePack(pack),
+        instructions: planInstructions(),
+        inputPrefix: serializeStatic(pack),
+        input: serializeDynamic(pack),
         format: planFormatFor(pack),
         maxOutputTokens: o.maxOutputTokens.plan,
         timeoutMs: c.timeoutMs,
@@ -186,8 +199,9 @@ export function createProxyClient(o: ProxyClientOptions): PlannerClient {
           typeof e.error === 'string' ? (e.error as LlmErrorKind) : 'provider',
         );
       }
-      const checked = format.zod.safeParse(
-        denull((json as { value?: unknown }).value, format.original),
+      const checked = parseAnswer(
+        format,
+        (json as { value?: unknown }).value,
       );
       if (!checked.success) {
         return fail('invalid', res.status);
@@ -260,7 +274,7 @@ export function createFakeClient(o: FakeClientOptions): PlannerClient {
         ...(answer.status !== undefined && { status: answer.status }),
       };
     }
-    const r = format.zod.safeParse(denull(answer.value, format.original));
+    const r = parseAnswer(format, answer.value);
     const raw = { raw: JSON.stringify(answer.value) };
     return r.success
       ? { ...base, ok: true, value: r.data, latencyMs, ...raw }

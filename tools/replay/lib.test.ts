@@ -94,7 +94,9 @@ describe('replay', () => {
     expect(rows[8]).toMatchObject({
       step: '1b/s8',
       trigger: 'not_sure',
-      ruleId: 'rule.deep_dive_repeat',
+      // B2 (2026-10-22): the second failure on 1b/s8 with nothing tried there;
+      // same action as before (rule.deep_dive_repeat).
+      ruleId: 'rule.second_failure',
       action: 'variant alt-1b-s8-complement',
       representation: 'ComplementView',
     });
@@ -131,6 +133,30 @@ describe('replay', () => {
     ];
     const [row] = replayDecisions(withPlan as never, loaded);
     expect(row?.logged).toBe('rule.other');
+  });
+  it('ignores exercise_reset (no decision point, nothing else changes)', () => {
+    const plain = replayDecisions(legacy.events, loaded);
+    const first = legacy.events[0]!;
+    const resetEvent = {
+      ...first,
+      id: 'ev-reset',
+      sessionId: 'reset-1',
+      questionId: 'exercise',
+      stepId: 'reset',
+      t: 'exercise_reset' as const,
+    };
+    const mid = Math.floor(legacy.events.length / 2);
+    const withReset = [
+      ...legacy.events.slice(0, mid),
+      resetEvent,
+      ...legacy.events.slice(mid),
+    ];
+    const rows = replayDecisions(withReset as never, loaded);
+    const strip = (row: (typeof plain)[number]) => ({
+      ...row,
+      eventIndex: 0,
+    });
+    expect(rows.map(strip)).toEqual(plain.map(strip));
   });
 });
 

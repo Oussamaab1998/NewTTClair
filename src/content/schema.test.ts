@@ -46,6 +46,26 @@ describe('ExerciseSchema', () => {
     firstSteps(ex)[1]!.answer = { type: 'option', id: 'seven' };
     expect(messages(ex)).toContain('answer is not one of the options');
   });
+  it('solution phrases (D16): French words in fr, Arabic script in ar, no bidi controls', () => {
+    const withPhrases = (p: unknown) => {
+      const ex = ex2q1b();
+      firstSteps(ex)[1]!.solutionPhrases = p;
+      return ex;
+    };
+    expect(
+      messages(withPhrases({ fr: ['aucune'], ar: ['ولا وحدة'] })),
+    ).toEqual([]);
+    for (const bad of [
+      { ar: ['ولا B'] },
+      { ar: ['حتى 0'] },
+      { fr: ['ولا وحدة'] },
+      { fr: [''] },
+      { fr: ['a\u2066b'] },
+      { fr: [] },
+    ]) {
+      expect(valid(withPhrases(bad))).toBe(false);
+    }
+  });
   it('rejects more than 3 hints', () => {
     const ex = ex2q1b();
     firstSteps(ex)[1]!.hints = [

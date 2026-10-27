@@ -1,6 +1,7 @@
 /**
  * Small planner card: a question with 2-3 one-tap answers (what is unclear,
- * understood or guessed, compress, a repair picture, a note for the teacher).
+ * understood or guessed, compress, a repair picture, a note for the teacher,
+ * how a typed value was found).
  * Labels come from i18n; the choice ids route the answer.
  */
 import React, { memo } from 'react';
@@ -17,6 +18,8 @@ const TITLES = {
   compress: 'lesson.card.compress.title',
   repair: 'lesson.card.repair.title',
   teacher_note: 'lesson.card.teacher_note.title',
+  probe: 'lesson.card.probe.title',
+  ask_next: 'lesson.card.ask_next.title',
 } as const;
 
 const LABELS = {
@@ -26,6 +29,24 @@ const LABELS = {
   understood: 'lesson.selfReport.understood',
   guessed: 'lesson.selfReport.guessed',
   dismissed: 'lesson.selfReport.dismissed',
+} as const;
+
+const PROBE = {
+  counts_balls_not_pairs: 'lesson.card.probe.counts_balls_not_pairs',
+  confuses_event_and_complement:
+    'lesson.card.probe.confuses_event_and_complement',
+  counts_all_outcomes: 'lesson.card.probe.counts_all_outcomes',
+  counts_ordered_pairs: 'lesson.card.probe.counts_ordered_pairs',
+  complement_ordered: 'lesson.card.probe.counts_ordered_pairs',
+  merges_identical_balls: 'lesson.card.probe.merges_identical_balls',
+  reuses_earlier_result: 'lesson.card.probe.reuses_earlier_result',
+  dismissed: 'lesson.card.probe.dismissed',
+} as const;
+
+const ASK_NEXT = {
+  hint: 'lesson.card.ask_next.hint',
+  deep_dive: 'lesson.card.ask_next.deep_dive',
+  dismissed: 'lesson.card.ask_next.dismissed',
 } as const;
 
 const YES_NO = {
@@ -44,6 +65,15 @@ function labelKey(purpose: CardPurpose, choice: string) {
     purpose === 'teacher_note'
   ) {
     return YES_NO[purpose][choice === 'yes' ? 'yes' : 'no'];
+  }
+  if (purpose === 'ask_next') {
+    return ASK_NEXT[choice as keyof typeof ASK_NEXT] ?? ASK_NEXT.dismissed;
+  }
+  if (purpose === 'probe') {
+    // C3: one short line per candidate misconception; unknown ids fall back to "not now".
+    return choice in PROBE
+      ? PROBE[choice as keyof typeof PROBE]
+      : PROBE.dismissed;
   }
   return LABELS[choice as keyof typeof LABELS] ?? LABELS.why;
 }

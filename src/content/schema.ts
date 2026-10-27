@@ -11,6 +11,8 @@ import {
 } from '../components/contract';
 import { FN_IDS } from '../engine/analysis';
 import { ExperimentSchema } from '../engine/calls';
+import { EventSpecSchema } from '../engine/probability';
+import { PROCEDURE_IDS } from '../engine/procedures';
 import { parseExpression } from '../engine/expression';
 import { ArRunsSchema, findRunIssues } from '../lesson/rich/runs';
 
@@ -48,6 +50,23 @@ export const RichSchema = z
     }
   });
 export type Rich = z.infer<typeof RichSchema>;
+
+/**
+ * Rich text by shape only (RichSchema without its RTL checks): what LLM
+ * answers are parsed with. The pipeline then isolates Latin, digits and short
+ * formulas into their own runs, rejects what it cannot fix, and checks the
+ * result with RichSchema (planner: consult.ts; tutor drawer: verify.ts).
+ */
+export const RichShapeSchema = z
+  .strictObject({
+    ar: ArRunsSchema.optional(),
+    fr: z.string().min(1).optional(),
+    math: z.string().min(1).optional(),
+  })
+  .refine(
+    r => r.ar !== undefined || r.fr !== undefined || r.math !== undefined,
+    { message: 'Rich needs ar, fr or math' },
+  );
 
 export const TrustSchema = z
   .strictObject({
@@ -89,6 +108,11 @@ export const AnswerSpecSchema = z.discriminatedUnion('type', [
   z.strictObject({ type: z.literal('order'), ids: z.array(Id).min(2) }),
   /** The correct option is the one whose `parity` the engine finds for `fn`. */
   z.strictObject({ type: z.literal('parity'), fn: z.enum(FN_IDS) }),
+  /**
+   * C1 (2026-10-23): the correct option is the one whose `event` holds
+   * exactly the draws outside `of` (computed on the step's urn).
+   */
+  z.strictObject({ type: z.literal('complement'), of: EventSpecSchema }),
 ]);
 export type AnswerSpec = z.infer<typeof AnswerSpecSchema>;
 
@@ -112,6 +136,8 @@ export const OptionSchema = z
     set: z.array(z.number().int()).min(1).optional(),
     /** Answers of type `parity`: the conclusion this option states. */
     parity: z.enum(['even', 'odd', 'neither']).optional(),
+    /** Answers of type `complement`: the event this option describes. */
+    event: EventSpecSchema.optional(),
     misconceptionId: Id.optional(),
     feedback: RichSchema.optional(),
   })
@@ -127,6 +153,17 @@ export const WrongAnswerSchema = z.strictObject({
   feedback: RichSchema.optional(),
 });
 
+/**
+ * A known wrong procedure for a typed step (C2): the engine computes its
+ * value (src/engine/procedures.ts); the loader rejects it when it does not
+ * fit the answer or gives the correct answer. Rows are in priority order.
+ */
+export const ProcedureRowSchema = z.strictObject({
+  id: z.enum(PROCEDURE_IDS),
+  misconceptionId: Id,
+  reviewed: z.boolean(),
+});
+
 /** Verified answers for the long-press menu (اشرحلي / علاش؟ / مثال). */
 export const AsksSchema = z.strictObject({
   explain: z.array(RichSchema).min(1).optional(),
@@ -135,11 +172,28 @@ export const AsksSchema = z.strictObject({
 });
 export type Asks = z.infer<typeof AsksSchema>;
 
+/** Answers to ask_clarify ("what is unclear?"). */
+export const ClarifyChoiceSchema = z.enum(['counting', 'why', 'link']);
+export type ClarifyChoice = z.infer<typeof ClarifyChoiceSchema>;
+
 /** Starter chip of the ask field, with a verified canned answer. */
 export const AskChipSchema = z.strictObject({
   id: Id,
   label: RichSchema,
   answer: z.array(RichSchema).min(1),
+  /** B3: which ask_clarify answers its verified answer can serve. */
+  addresses: z.array(ClarifyChoiceSchema).optional(),
+});
+export type AskChip = z.infer<typeof AskChipSchema>;
+
+/**
+ * B3, ask_clarify "link": the earlier result this step builds on. The text
+ * says what it is; the value is the engine's (`resultRef` names an entry of
+ * `values`), shown as its own math line, so the text carries no math.
+ */
+export const StepLinkSchema = z.strictObject({
+  resultRef: Id,
+  text: RichSchema,
 });
 
 /** Feedback shown when a task component reports this misconception. */
@@ -165,12 +219,43 @@ export const NumericCheckSchema = z.strictObject({
 });
 export type NumericCheck = z.infer<typeof NumericCheckSchema>;
 
+/**
+ * How the step's answer can be said in words (D16): an AI block must not say
+ * it while hints are left (src/planner/llm/solutionConcepts.ts). French in
+ * `fr`, Arabic script only in `ar`; reviewed with the step (its `trust`).
+ */
+const NO_BIDI = /[\u200E\u200F\u202A-\u202E\u2066-\u2069]/;
+const FrPhrase = z
+  .string()
+  .min(1)
+  .max(80)
+  .refine(t => !ARABIC.test(t) && !NO_BIDI.test(t), 'fr phrase: French only');
+const ArPhrase = z
+  .string()
+  .min(1)
+  .max(80)
+  .regex(/^[\u0600-\u06FF\s«».,:;!?]+$/, 'ar phrase: Arabic script only');
+export const SolutionPhrasesSchema = z.strictObject({
+  fr: z.array(FrPhrase).min(1).optional(),
+  ar: z.array(ArPhrase).min(1).optional(),
+});
+
 const stepBase = { id: Id, ...envelope, skills: z.array(Id) };
 const asked = {
   prompt: RichSchema,
   hints: z.array(RichSchema).max(3).optional(),
   deepDiveId: Id.optional(),
   check: NumericCheckSchema.optional(),
+  solutionPhrases: SolutionPhrasesSchema.optional(),
+  link: StepLinkSchema.optional(),
+  /**
+   * B4 (2026-10-22): a guided walk-through for a stuck student, instead of
+   * the teacher-note card. 2 lines (3 only where needed), each saying what to
+   * look at or do; never the answer (checked, lesson/walkthroughCheck.ts).
+   */
+  walkthrough: z
+    .strictObject({ lines: z.array(RichSchema).min(2).max(3) })
+    .optional(),
 };
 
 const ChoiceStep = z.strictObject({
@@ -186,6 +271,8 @@ const TypedStep = z.strictObject({
   kind: z.literal('typed'),
   answer: AnswerSpecSchema,
   wrongAnswers: z.array(WrongAnswerSchema).optional(),
+  /** Known wrong procedures, tried after `wrongAnswers` (C2). */
+  procedures: z.array(ProcedureRowSchema).optional(),
   /** Keys shown; default from the answer's engine call (loader `keypadFor`). */
   keypad: KeypadKindSchema.optional(),
 });
@@ -232,7 +319,10 @@ const LinesStep = z.strictObject({
   ...stepBase,
   ...asked,
   kind: z.literal('lines'),
-  variables: z.array(z.string().regex(/^[a-z]$/)).min(1).default(['x']),
+  variables: z
+    .array(z.string().regex(/^[a-z]$/))
+    .min(1)
+    .default(['x']),
   /** LaTeX written before the first line ("f(-x)"). */
   lhs: z.string().min(1).optional(),
   /** Where the student starts (shown); absent: every line is compared with the goal. */
@@ -271,6 +361,7 @@ const ComponentStep = z.strictObject({
   optional: z.boolean().optional(),
   /** EventPicker: once solved (or revealed), fill this value's cell in the progressive LawBuilder with this blockId. */
   fillsLaw: Id.optional(),
+  solutionPhrases: SolutionPhrasesSchema.optional(),
 });
 
 export const StepSchema = z
@@ -461,6 +552,8 @@ export const BlockSchema: z.ZodType<Block> = z.lazy(() =>
 export const DeepDiveSchema = z.strictObject({
   id: Id,
   ...envelope,
+  /** B3: which ask_clarify answers it serves beyond its own step ("counting"). */
+  addresses: z.array(ClarifyChoiceSchema).optional(),
   experiment: ExperimentSchema.optional(),
   blocks: z.array(BlockSchema).min(1),
   mini: z
@@ -481,6 +574,12 @@ export const MisconceptionSchema = z.strictObject({
    * 2026-10-18): uses the student's value when possible, ends with an action.
    */
   feedback: RichSchema.optional(),
+  /**
+   * Round 1 "dead ends" (2026-10-22): the same mistake named plainly, shown
+   * after the student confirmed it on the probe card (`feedback` asks, as
+   * only a value was typed). Says what to do next, never the answer.
+   */
+  feedbackConfirmed: RichSchema.optional(),
   trust: TrustSchema,
 });
 export const MisconceptionLibrarySchema = z.array(MisconceptionSchema);
@@ -500,8 +599,6 @@ export const VariantKindSchema = z.enum([
 export type VariantKind = z.infer<typeof VariantKindSchema>;
 
 /** Answer to "what exactly is unclear?" (ask_clarify). */
-export const ClarifyChoiceSchema = z.enum(['counting', 'why', 'link']);
-export type ClarifyChoice = z.infer<typeof ClarifyChoiceSchema>;
 
 /**
  * Authored content the rules planner may choose from. The student always acts
@@ -522,6 +619,12 @@ export const VariantSchema = z
     /** Simpler twins: order in the mini-example loop (1 = first, each simpler). */
     round: z.number().int().min(1).max(3).optional(),
     experiment: ExperimentSchema.optional(),
+    /**
+     * D2 (2026-10-22): a fresh variant, opened only after a reveal of a step
+     * it is for (never the normal transfer). A transfer on its own urn; the
+     * loader checks it cannot be guessed from the parent.
+     */
+    afterReveal: z.literal(true).optional(),
     /** Shown before the step (text, math, visual components). */
     intro: z.array(BlockSchema).default([]),
     step: StepSchema,
@@ -554,24 +657,49 @@ export type Variant = z.infer<typeof VariantSchema>;
 export const ResultSchema = z.strictObject({ id: Id, statement: RichSchema });
 
 /**
- * One question of the exam paper (the «الورقة» sheet, the picker chips).
- * `wording` is the exam's own French, in sentence order, exactly as
- * transcribed (never paraphrased); absent when it is not transcribed yet.
- * `available`: authored (a part of this exercise); `soon`: not built yet.
+ * One question of the exam paper (the paper screen, the «الورقة» sheet, the
+ * picker chips). `wording` and sub-question wording are the exam's own French,
+ * in sentence order, exactly as transcribed (never paraphrased); absent when
+ * not transcribed yet. `available`: authored (a part of this exercise);
+ * `soon`: not built yet.
  */
 export const PaperQuestionSchema = z.strictObject({
   id: Id,
   /** How the exam numbers it: "1", "2", "3.a". */
   label: z.string().min(1),
   wording: z.array(RichSchema).min(1).optional(),
+  /** The exam's a) b) c) items, each with its own wording. */
+  subs: z
+    .array(
+      z.strictObject({
+        label: z.string().min(1),
+        wording: z.array(RichSchema).min(1),
+      }),
+    )
+    .min(1)
+    .optional(),
   status: z.enum(['available', 'soon']),
 });
-export const PaperSchema = z.strictObject({
-  /** The exam's section heading, e.g. «Partie A». */
-  section: RichSchema.optional(),
+/** A part of the exam exercise («Partie A»), its opening sentence, its questions. */
+export const PaperPartSchema = z.strictObject({
+  heading: RichSchema.optional(),
+  intro: z.array(RichSchema).min(1).optional(),
   questions: z.array(PaperQuestionSchema).min(1),
 });
+export const PaperSchema = z.strictObject({
+  /** The exam's source line, in French (never an emblem). */
+  source: z.string().min(1).optional(),
+  /** The exercise's points on the exam, when confirmed. */
+  points: z.number().positive().optional(),
+  parts: z.array(PaperPartSchema).min(1),
+});
 export type PaperQuestion = z.infer<typeof PaperQuestionSchema>;
+export type PaperPart = z.infer<typeof PaperPartSchema>;
+export type Paper = z.infer<typeof PaperSchema>;
+
+/** Every question of the paper, part after part. */
+export const allPaperQuestions = (paper: Paper): PaperQuestion[] =>
+  paper.parts.flatMap(p => p.questions);
 
 function collectBlockIds(blocks: readonly Block[], out: string[]): string[] {
   for (const b of blocks) {
@@ -592,8 +720,13 @@ export const ExerciseSchema = z
     number: z.number().int().min(1),
     /** Picker subject tag. */
     subject: z.enum(['analysis', 'probability']),
+    /**
+     * The bac section of the exam paper: two papers of the same session both
+     * have an «Exercice 2» (picker tag, lesson and sheet subtitles).
+     */
+    section: z.enum(['mathematiques', 'sciences-experimentales']).optional(),
     statement: RichSchema,
-    /** The exam paper's question list (optional; see PaperQuestionSchema). */
+    /** The exam paper: parts, questions, sub-questions (optional; see PaperSchema). */
     paper: PaperSchema.optional(),
     parts: z.array(QuestionSchema).min(1),
     results: z.array(ResultSchema),
@@ -659,12 +792,13 @@ export const ExerciseSchema = z
     // The paper list: unique ids; authored parts are available, the rest soon.
     if (ex.paper) {
       const partIds = new Set(ex.parts.map(q => q.id));
-      const paperIds = ex.paper.questions.map(q => q.id);
-      ex.paper.questions.forEach((q, i) => {
+      const questions = allPaperQuestions(ex.paper);
+      const paperIds = questions.map(q => q.id);
+      questions.forEach((q, i) => {
         if (paperIds.indexOf(q.id) !== i) {
           ctx.addIssue({
             code: 'custom',
-            path: ['paper', 'questions', i],
+            path: ['paper', 'parts'],
             message: `duplicate paper question ${q.id}`,
           });
         }
@@ -672,7 +806,7 @@ export const ExerciseSchema = z
         if (authored !== (q.status === 'available')) {
           ctx.addIssue({
             code: 'custom',
-            path: ['paper', 'questions', i],
+            path: ['paper', 'parts'],
             message: authored
               ? `paper question ${q.id} is authored: status must be available`
               : `paper question ${q.id} is not authored: status must be soon`,

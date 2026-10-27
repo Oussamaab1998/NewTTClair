@@ -44,18 +44,27 @@
     "start": "Commencer",
     "soon": "Bientôt",
     "moreSoon": "D’autres exercices bientôt",
+    "section": {
+      "mathematiques": "Maths",
+      "sciences-experimentales": "Sc. exp."
+    },
     "subject": {
       "analysis": "Analyse",
       "probability": "Probabilités"
     },
     "done": "fait",
-    "current": "suivant"
+    "current": "suivant",
+    "viewPaper": "Voir l'énoncé"
   },
   "lesson": {
     "title": "Exercice 2 : probabilités",
     "unreviewed": "Brouillon : contenu non relu par un enseignant.",
     "draftTag": "Brouillon",
     "exerciseLabel": "Exercice {{n}}",
+    "sectionShort": {
+      "mathematiques": "Maths",
+      "sciences-experimentales": "Sc. exp."
+    },
     "progress": "Progression dans la question",
     "questionTab": "Question",
     "correct": "C'est juste.",
@@ -65,6 +74,7 @@
     "ladderEnd": "Tu as vu tous les indices. Tu peux voir la réponse.",
     "revealed": "Voici la réponse :",
     "noCannedAnswer": "Pas encore de réponse prête pour ça. Ta question est enregistrée.",
+    "noCannedAnswerField": "Écris ta question dans le champ « Demander » maintenant.",
     "deepDiveTitle": "Pas à pas",
     "returnToQuestion": "On revient à la question ↓",
     "askMode": {
@@ -137,7 +147,23 @@
         "yes": "Oui",
         "no": "Non"
       },
-      "closed": "Passé"
+      "closed": "Passé",
+      "probe": {
+        "title": "Comment as-tu trouvé ce résultat ?",
+        "counts_balls_not_pairs": "J'ai compté les boules",
+        "confuses_event_and_complement": "J'ai compté le contraire",
+        "counts_all_outcomes": "J'ai compté tous les tirages",
+        "counts_ordered_pairs": "J'ai tenu compte de l'ordre",
+        "merges_identical_balls": "Les boules de même numéro comptées une fois",
+        "reuses_earlier_result": "J'ai repris le résultat d'avant",
+        "dismissed": "Pas maintenant"
+      },
+      "ask_next": {
+        "title": "Un indice, ou on comprend l'idée ensemble ?",
+        "hint": "Un indice",
+        "deep_dive": "Comprendre l'idée",
+        "dismissed": "Pas maintenant"
+      }
     },
     "variantStart": {
       "alternative": "Autrement",
@@ -178,7 +204,11 @@
       "tapKill": "Toucher pour couper / rétablir",
       "rawTitle": "Sorties brutes du modèle",
       "rawEmpty": "Aucune sortie",
-      "stored": "Événements stockés"
+      "stored": "Événements stockés",
+      "traceTitle": "Trace des décisions IA",
+      "traceEmpty": "Aucune décision",
+      "everyMistake": "Chaque erreur",
+      "spend": "Dépense"
     },
     "exportEvents": "Exporter les événements",
     "feedbackCard": {
@@ -190,9 +220,31 @@
       "send": "Envoyer",
       "noNote": "Sans note",
       "thanks": "Merci !"
+    },
+    "helpReason": {
+      "alternative": "On essaie la même idée autrement.",
+      "deepDive": "D'abord l'idée, puis on revient à la question.",
+      "simpler": "On commence par un exemple plus petit.",
+      "prerequisite": "On recule d'un pas, vers plus simple.",
+      "hint": "Pas d'autre façon ici : essaie l'indice.",
+      "reveal": "Pas d'autre façon ici : tu peux voir la réponse."
+    },
+    "helpChoice": {
+      "notSureOnly": "Je ne sais pas, c'est tout"
+    },
+    "afterRevealReason": "Un autre exemple, pour être sûr.",
+    "freshNotNow": "Pas maintenant",
+    "walkthrough": {
+      "title": "Pas à pas",
+      "next": "Suivant",
+      "number": "{{n}}."
     }
   },
   "proba": {
+    "ball": {
+      "red": "boule rouge {{n}}",
+      "black": "boule noire {{n}}"
+    },
     "urn": {
       "pick": "Choisis les boules tirées.",
       "draw": "Tirage :"
@@ -383,5 +435,15 @@
     "here": "Vous êtes ici",
     "proven": "Résultats démontrés",
     "open": "La feuille"
+  },
+  "examPaper": {
+    "points": "{{n}} points",
+    "heading": "Exercice {{n}} ({{points}} points)"
+  },
+  "reset": {
+    "link": "Recommencer",
+    "question": "Recommencer cet exercice ? Les marques de progression seront effacées.",
+    "confirm": "Recommencer",
+    "cancel": "Non"
   }
 }

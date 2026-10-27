@@ -406,6 +406,271 @@ The header progress test (new in D1) moved to acting-step numbers.
 - The sum-card gesture check and the VoiceOver order (header, ask bar) by hand (MANUAL_TESTS.md).
 - Small: the law table's active line has no spoken label; «Σ p» upright p; the ask-chips row starts at the left.
 
+## D6: the exam paper screen (2026-10-21)
+**Built:**
+- **Paper screen** (`ExamPaperScreen.tsx`, DESIGN.md §4.4, mockups 05 / 06 / 07 without any gating):
+  - opened from the picker's quiet «شوف الورقة» link; back returns to the picker;
+  - source line, «Exercice 4 (7 points)», the statement, Parties A / B / C with intros, «1)» and hanging «a) b) c)»;
+  - ✓ on done questions, the current one highlighted with a dot, «قريبا» where there is no transcribed wording;
+  - the picker's own bottom button.
+- **Content:** `paper` is now `{ source?, points?, parts[{ heading?, intro?, questions[{ …, subs? }] }] }`.
+  - ex4: Partie A migrated (A3's two lines are now sub-questions a / b), `points: 7`, Parties B and C added (all `soon`).
+  - ex2: one part, same questions; `points` waits for confirmation.
+  - The same `source` line on both. Nothing else in the JSON changed; content versions unbumped (D23).
+- **Picker chips and «الورقة»:** show only the parts the app teaches (`appPaperParts`, `src/content/paper.ts`). The sheet is pixel-identical in A1 and 2.a (before / after diff).
+- **EX4_ANALYSIS.md:** Parties B and C verbatim ("verified by the product owner against the PDF on 2026-10-21"), with their content forms; the source line and «Partie A».
+- **Wording guard:** now covers every paper string (source, headings, intros, questions, sub-questions); a new test shows it rejects an invented sub-question and a changed word.
+- **Math renderer:**
+  - `\int` keeps its bounds below / above and is drawn taller (1.6×);
+  - spoken «intégrale de 0 à … de»;
+  - a thin space between a function name and a letter argument («ln x», «tan x»; none before «(»). This also improves `\ln x` anywhere in lessons.
+- **New i18n** (reviewed: false): `picker.viewPaper` «شوف الورقة», `examPaper.points` «{{n}} نقاط». `examPaper.heading` is French exam text.
+- **Events:** `ExamPaper opened / closed { via: back } / start { partId }`, in its own `paper-…` session (DATA.md).
+- **Debug only:** `-devPaperScreen <exerciseId>`; `-devScroll` also scrolls this screen. Release bundle: only dead call-site names.
+
+**Tests changed:**
+- `paper.test.ts`: the same assertions on the new paths (`paper.parts[0].questions`); the guard extended to every paper string.
+- `ExercisePicker.test` "one card per exercise": soon chips come from the app scope (same assertion), plus B1 / C2 never on the picker.
+- `latexSubset` / `spoken` tests: new cases only. No assertion weakened.
+
+**New tests:** `ExamPaperScreen.test.tsx` (structure, marks, ex2 «قريبا», start → the right part, back, events, spoken integral); paper app scope; formula parse in sub-questions and intros.
+
+**Checked on the simulator** (iPhone 17 Pro 402 pt; iPhone 16e 390 pt): the ex4 paper screen (top, Partie B, Partie C, with A1 done), the ex2 paper screen (1.b done, 2.a current), the picker with «شوف الورقة», «الورقة» in A1 and 2.a unchanged (pixel diff). Screenshots `docs/screens/design/d6-*`. **Tests only:** taps, back, events.
+
+**Open:**
+- ex2's points;
+- ex2's exam numbering on the paper (its labels stay «1.a», «1.b» until its wording is transcribed);
+- «]0, π/2[» can break after «π/» at the line end (the wording is kept verbatim);
+- teacher review of the two new Arabic strings.
+**Run:** `npm run check` (83 suites, 920 tests + 11 todo).
+
+## «ابدا من جديد»: start an exercise from scratch (2026-10-21)
+**Built:**
+- **`exercise_reset`** (events schema, DATA.md); replay ignores it (test).
+- **`doneParts`:** a `part_done` counts only if its session started at or after the exercise's latest reset.
+  - The record gets `clearExercise` (that exercise only); stale record entries before a reset are ignored too.
+  - `resetExercise` logs the event and clears the marks; nothing is deleted.
+- **Planner keeps the history (D25):** test: after a reset, the second wrong answer still avoids the deep dive shown before it.
+- **UI:**
+  - a quiet «ابدا من جديد» under the primary button of a picker card and of the paper screen, only with a done part;
+  - `ResetDialog` (Modal): «لا» filled and focused, «ابدا من جديد» outlined in red;
+  - 3 ways to cancel (`no` / `scrim` / `back_gesture`);
+  - the screen refreshes at once;
+  - events `ResetDialog opened / cancelled { via } / confirmed { exerciseId }`.
+- **New i18n** (reviewed: false): `reset.link`, `reset.question`, `reset.confirm`, `reset.cancel`.
+- **Debug only:** `-devReset <exerciseId>` (the real reset, that exercise only) and `-devDemo resetDialog`. Release bundle: dead call-site names only.
+
+**Tests changed:**
+- `events.test`: the sample record gained `exercise_reset` (required for every type).
+- `LessonScreen.history.test`: the deep-dive history test became an `it.each` over "earlier session" and "earlier session then reset". Same assertions.
+- No assertion weakened.
+
+**New tests:**
+- `doneParts` (before / after a reset, a session spanning it, latest reset wins, other exercise untouched, record cleared and stale entry ignored, `resetExercise`);
+- `ResetDialog.test` (link only with a done part; confirm refreshes chips and the resume label; 3 cancels logged; focus on «لا»; the paper screen after a reset; the next lesson's progress bar at 0);
+- replay ignores the event.
+
+**Simulator** (iPhone 17 Pro): the picker before, the dialog (`-devDemo resetDialog`), the picker after `-devReset bac2022c-ex4`; then ex4's A1 restored with `-devActions answerAll`. Screenshots `docs/screens/design/reset-*`.
+- **Note:** someone confirmed a reset by tapping on the simulator at 21:27 (ex2, and a second dialog session), so the "after" shot also shows ex2 reset. ex2's 1.b was not restored.
+- **Tests only:** every tap flow.
+**Run:** `npm run check` (86 suites, 954 tests + 11 todo; includes `src/planner/llm/*.test.ts`, added in parallel, not part of this change).
+
+## Tutor intelligence 1, A1 + A1b: model check visible (2026-10-22)
+- The startup model check saves its result (MMKV `llm.modelCheck.v1`: time, client, model, result class, status class, latency, allowlisted provider `error.type`, the returned id when a 200 names another model). The dev status line and the AI trace header show it (`check: ok · 2xx · claude-haiku-5-5 · 572 ms · api.anthropic.com 2026-10-21`); while a check is pending, the previous run's result. New event `llm_model_check`, once per app run (DATA.md).
+- The Anthropic adapter now keeps the returned model id when a 200 answers for another id (it already counted that as `invalid`, which turned the app to rules only without saying why).
+- `anthropic-version`: we send `2026-10-21`, listed as the latest version on platform.claude.com/docs/en/api/versioning (checked 2026-10-22); its breaking changes (sampling parameters, document / citation placement) concern nothing we send.
+- **Simulator** (iPhone 17 Pro, `-devMode on -devPart 1b`, Metro on port 8082 via `-RCT_jsLocation`): check ok, 2xx, 572 ms, mode `llm`; the event is in the store. The earlier rules-only session (09:14, 6 `disabled` calls) ran on the key generated 2026-10-21 21:27, before `.env.llm.local` changed at 10:39; its check result was not saved then, so the exact cause is not recorded. No planner or tutor call was made.
+- **Tests:** runtime (saved, read back, damaged value ignored, logged once), adapter (returned id kept, non-ids dropped), event schema (no message field, codes only), lesson screen (status line, trace header, one event per run).
+
+## Tutor intelligence 1, A: first live Anthropic run (2026-10-22, `-devScenario live1`, 1.b)
+- Model check ok (2xx, 870 ms). **Planner:** timed out at 3535 ms (limit 3.5 s), no output; the rules answer stayed (`rule.first_wrong.repair`, source fallback, trigger forced). **Tutor:** 5362 ms, input 4718 tokens (3356 uncached + 1362 cache write, 0 cache read), output 494, $0.000753; rejected as `invalid` because the model filled the optional `fr` / `math` fields with "" (our schema needs them absent or non-empty), so the drawer showed the saved line. Ledger $0.00291 of the $0.01 scenario cap (the planner counted at its worst case, $0.00215, since a timeout returns no usage).
+- Raw tutor text read: it names the active question's answer ("aucune", and a math block with the complement) while no hint was used (D16 still open); non-Tunisian words (شحال, الكرات, الكيس); Latin letters and digits inside Arabic runs.
+- Read through the Hermes inspector (in-memory trace and raw log); console lines from the scenario no longer reach the Metro terminal (RN 0.77+).
+
+## Fixes after the live run (2026-10-22): tests first, no model call
+1. **Tutor "" fields:** the tutor format cleans the answer before validation (`prepare`: "" in `fr` / `math` / `resultId`, empty runs and an empty run list mean absent), as the planner's wire format does. All transports parse through one helper (`parseAnswer`). The exact live output is a fixture (`fixtures/liveOutputs.ts`) and now parses.
+2. **D16 answer leak:** `solutionConcepts.ts` (DECISIONS D16 B). 6 new guard fixtures (live «aucune» + complement, Arabic paraphrase, number in words, 2 near-misses kept, Latin isolated) plus drawer tests on the live answer. `one-idea-with-math` reworded: its Arabic («… ما يصيرش فيه حتى صفر») stated s3's answer.
+3. **RTL:** `isolateLlmRuns` (runs.ts) in the drawer (per block) and the planner (consult.ts, before content validation). Changed expectations: the wire-format test now expects «عندك 3» to pass the parse (the rule moved to consult.ts); fixture `digit-inside-arabic` is still rejected, now for `number_not_allowed` after isolation.
+4. **Darija word list** in both prompts (`DARIJA_LEXICON`, `reviewed: false`); prompt version p4. No other prompt change.
+5. **Latency:** per-run timeout rate, first call apart, warm p50 / p95 in the dev runtime and the AI trace header (`plan: … · tutor: …`), and a "Latency (planner)" table in the eval report. The 3.5 s timeout is unchanged.
+**Tests only (no live call this round):** all of the above. Not verified live: the cleaned tutor answer reaching the drawer, isolation on real model text other than the live sample, the Darija list's effect, the new latency lines on the simulator.
+**Run:** `npm run check` (93 suites, 1034 tests + 11 todo).
+
+## Before the simulation (2026-10-22)
+- **Solution phrases:** every main step with a final answer in 1.b, 2.a and A1 (15 steps; `2a/law` is filled by the EventPickers, not asked) has French and Arabic `solutionPhrases` (`reviewed: false`), enforced by a test. Dev report: `npm run replay -- phrases` (variants and deep-dive minis still have none: 13 + 2 in 1.b, 12 + 2 in 2.a, 8 + 3 in A1). Phrases shown in a hint the student already used no longer count as a leak.
+- **Option-list rule:** a leak that also names a wrong option is `option_list` (guard and drawer; fixture `lists-all-options`).
+- **Simulation report:** a "Rejection reasons" table per model (leak, option list, RTL, others, and failure outcomes) and a "Near misses" list (passed blocks with a misspelled answer word, half of an answer phrase, a part of the answer value, or its complement; report only).
+- **Live re-check** (`-devScenario live1`, 1.b, same tutor question): planner timed out again (3524 ms, first call); tutor ok in 4397 ms, input 4946 tokens (3356 uncached + 1590 cache write, 0 read), output 459, $0.00076. The model sent no empty fields this time. The drawer dropped block 0 («aucun», «ما فمّاش حتى وحدة») and the complement math (both `final_answer_early`) and kept the pointer block, its «0» isolated into its own run. Run total $0.00294 (the timed-out planner call counted at its worst case, $0.00218).
+
+## Planner on a device: not seen yet (2026-10-22)
+- **The planner timed out on both live calls** (3535 ms and 3524 ms, limit 3.5 s, `-devScenario live1`, 1.b s3, Haiku 5.5, first call of each run). **No planner answer has been seen on a device yet**; its real token usage is unknown (a timeout returns none). The app's 3.5 s timeout stays until the simulation measures latency (eval-only limit `--timeout-ms 15000`).
+- Transfer variants (1.b, 2.a, A1: 6) now have `solutionPhrases` (`reviewed: false`); simpler twins and deep-dive minis wait for the simulation.
+- Report additions: "within 3.5 s" per model, and the planner's real token usage (uncached / cache read / cache write / output) of the first successful calls.
+
+## Simulation run 1 (2026-10-22): Haiku 5.5, 27 points x 2, eval timeout 15 s, cap $0.25
+- **Cost:** $0.0225 (list price x usage; estimate was $0.0236 typical / $0.0755 worst). Output 426 tokens on average; one call hit the 600 cap (`incomplete`).
+- **Latency:** p50 3140 ms, p95 3778 ms; first (cold) call 3080 ms, no slower than warm; 43 of 54 (80%) within 3.5 s, 11 over (two near 7.3 s). No call reached 15 s.
+- **Cache works:** the system prompt (6346 tokens) is shared by every exercise; each question's static pack (about 3000 tokens) is written once, then read (warm calls read 8717-9417 tokens, uncached 556-1300).
+- **Valid 14 / 54 (26%).** Rejections: NumericTwin / Urn / FunctionPlot / OutcomeSpace props invalid 17, component not offered 10, ask_clarify with more than 3 options 5, LaTeX inside a text run 6, one leak caught («المجموع يساوي 1» at 2.a sum), one number not allowed, one output cut off.
+- Files (gitignored): `tools/replay/out/eval-2026-10-22T11-29-24-554Z.{md,jsonl,review.md,sidebyside.md}`.
+- **Still unexplained:** both in-app planner calls timed out at 3.5 s while 80% of eval calls arrive in time.
+
+## AI interface fixes + simulation run 2 (2026-10-22)
+- **Built (tests first):** per-step `offeredComponents` and `notWhileHintsLeft` in the uncached pack; one example per action kind in the cached prompt (`wireExamples.ts`, validated by test; Arabic `reviewed: false`); catalog "Props rules" (NumericTwin calculator syntax, insight RTL rule, OutcomeSpace showCount, FunctionPlot without markers); prompt p5 rules (no LaTeX in runs, no English words, no praise of a wrong value, ask_clarify options only). Guard: `component_reveals_answer` (derived from the answer spec, `revealing.ts`), `props_not_allowed`, `praise_wrong_value`. Near misses only for phrases of 3+ meaningful words. Request timing (prep / headers / body) in the transport, `llm_call`, the trace and the eval report; dev scenario `-devScenario timing` (own $0.01 ledger).
+- **In-app timing** (3 lesson calls + 1 direct 15 s measurement): prep 0-2 ms, body 0-1 ms, headers 2140-3157 ms; one lesson call timed out (33%). **The first planner answer on a device:** CompareTwo, 3168 ms, swapped in. No app-side overhead found; latency follows output length (about 2.2 s + 2 ms per output token in run 1).
+- **Run 2 vs run 1** (same 27 points, Haiku 5.5): valid 78% (26%), within 3.5 s 98% (80%), p50 2548 ms (3140), output 349 tokens (426), $0.0216 ($0.0225). Rejections: PredictReveal props 4, leak caught 3, output cut 2, RTL 1, not offered 1, no student action 1.
+- **Gaps seen in passed answers (not fixed):** text inside component props is not leak-checked (PredictReveal options «ثلاثة / ستّة / سبعة» at 2.a/s10); a NumericTwin `compare` equal to the A1 goal; «الإسم الصحيح كان 1 + e^(2x)» (part of the target); LawChart at 2.a/s10 (event steps do not forbid it); «إنت قريب» without a value; English inside fr runs ("order"); «الكورة» for a curve.
+
+## Answer checks round + simulation runs 3-4 (2026-10-22)
+- **Built (tests first):** props leak check on every props string and NumericTwin expressions (`props_leak`), goal parts (`target_part`), LawChart / ComplementView displayed values (engine) in the reveal check, counting formulas (`formula_answer` evaluated by the engine; `method_early` from a list), "close" about a wrong answer, English words in fr runs and «الكورة» in an exercise with no urn (lists), line_invalid: explain or hint only; the tutor drawer drops blocks on the same text rules. Prompt p6. Planner timeout 5000 ms (swap rule unchanged); trace shows the share within the limit. Eval `--max-output`. DECISIONS D27.
+- **Run 3** (600 output tokens, guard as built): valid 30/54 (56%; run 2: 78%), within 5 s 98%, within 3.5 s 85%, p50 2590 ms, $0.0228. The new rules rejected 4 answers (LawChart at 2.a/s10 x2, NumericTwin with the target denominator, «الكورة»); the other rejections are PredictReveal props 5, no_student_action 4 (example / explain at the converted log's points, scope unknown), leaks 3, cut off 3, others 5. No passed answer states the answer; borderline: a NumericTwin at A1/s8 that shows the multiply-by-e^(2x) step, «برافو … صحيحة فكرة» about a wrong line.
+- **Run 4** (same, `--max-output 400`): 14 of 54 cut off (26%; 3 at 600), valid 52%, $0.0203. Keep 600.
+
+## Tutor intelligence 1: B1 + B2 (2026-10-22)
+- **Regression fixture:** the real 1.b session (sess-mvj9lr9w) as a scripted student (`src/lesson/session/fixtures/realSession1b.ts`, test `realSession1b.test.ts`): the student's own inputs per card, the choices on planner cards, detours answered right; the rules decide the rest. Baseline = the real session's rules, decision for decision.
+- **B1:** a variant step that uses the exercise's urn looks up alternatives, simpler twins and the deep dive of the steps it is for (`Rules.keysFor`); a variant with its own urn inherits nothing. In the real session: "not sure" on the transfer opens the `pairs_listing` deep dive (was hint 1); "counting" leads to `alt-1b-s5-pick` (was hint 2); the escalation goes through `sim-pairs-1`, `sim-pairs-2`, then `pre-simultaneous` (no teacher note). No hint is given on the transfer any more, so "reveal" stays locked there (rule 6).
+- **B2:** `rule.second_failure`: the second failure with a "not sure" in it, nothing tried on the step yet, changes the representation before asking what is unclear (two wrong answers keep `rule.second_wrong`). It does not change the real session (B1's deep dive already is that change).
+- **Changed test expectations (none weakened):** (1) rules.test `"not sure" twice … also asks`: now with an earlier detour (with nothing tried, B2 changes the form first; covered by the new B2 tests); (2) rules.test `skips a deep dive that targets another skill`: with nothing tried, `rule.second_failure` picks the same alternative; the mismatch rule is asserted after an earlier detour; (3) tools/replay lib.test row 8 (1b/s8, not sure): rule `rule.second_failure` instead of `rule.deep_dive_repeat`, same action; (4) the real-session regression (B1 rows, listed in the test).
+- **Run:** `npm run check` (96 suites, 1105 tests + 11 todo). No model call.
+
+## Help chips «غيّر الطريقة» / «حاجة أسهل» (2026-10-22)
+- **Built (tests first):** `helpChipsState` (`src/lesson/feed/helpChips.ts`): chips under the active question after a wrong answer or a "not sure"; idle alone only with `THRESHOLDS.helpChipsIdleAlone` (off); hidden while the repair offer is open, on minis and readonly cards, without an authored target, at the cap. Layout A (two quiet chips) and layout B («ما نعرفش» opens: change / easier / hint / «ما نعرفش برك»), dev `-devHelpLayout`; both entries stay in "⋯". `request` events now carry `attempt` and `via` (menu / chip / choice); a tap is a struggle signal (situation `struggle`, derived `changeMethod` / `easier` per skill, `Situation.skills[id].helpRequests`). Reason line after a request (`lesson.helpReason.*`, Arabic `reviewed: false`). At most 3 detours per step (`THRESHOLDS.maxDetoursPerStep`, transfers not counted), from the log, so it survives leaving and returning; at the cap a request is `rule.request.none`: the lesson goes on and the line points to the hint, or to "show the answer" once the ladder is used up. A declined repair offer is not proposed again. Usage: `helpUsage` (dev line, `npm run replay -- help-usage <log.jsonl>`). Fix: the lesson's first card had no help targets (no event yet); the probe now uses the lesson's ids.
+- **Changed tests:** rules.test "change method with nothing left" and "something simpler with nothing authored" (teacher-note card → `rule.request.none`, no dead end); rules.test mini-example loop (3 rounds = the cap: no prerequisite after them; with 2 rounds it still steps down); lesson.test busy session (the earlier "easier" tap counts as struggle: the "not sure" at 1b/s8 asks what is unclear, «counting» reaches the same bar); real 1.b regression (the transfer's escalation stops at 3 detours: teacher note, then hint 1).
+- **Simulator** (iPhone 16e 390 pt, `-devWidth 360` clamp; dev `-devActions wrong,declineOffer`, `-devHelpChoiceOpen on`, `-devScrollEnd on`): `docs/screens/help-chips/`. Seen: the feed scrolls to the newest item's top, so on a 360 pt column the chips row can be below the fold after a wrong answer (screenshots use the dev scroll to end).
+- **Run:** `npm run check` (100 suites, 1128 tests + 11 todo). No model call.
+
+## Help chips follow-up (2026-10-22)
+- **Built (tests first), DECISIONS D28:** footer scroll when the chips appear, unless the student dragged the feed since the last new item (`footerScrollY` in `jump.ts`, `FooterRevealContext`). A cap exemption: one prerequisite step back beyond the 3 detours, once per skill. Reveal on variant and transfer steps after 2 closed detours (`Frame.detoursClosed`, card `revealUnlocked`; main steps keep rule 6). It was decided before but **had not been built**. A declined repair offer holds the chips until the next wrong answer or "not sure" on that step (`chipsHold`; "not sure" now counted on the frame, so a card shown again keeps it). Chip border `borderControl` (3.65:1 on white) and label `inkMuted` (6.11:1), in `src/theme/contrast.test.ts`. One spelling «حاجة أسهل» (two comments and a heading fixed; the i18n already used it). New teacher review list in D28. Dev action `back` (leaves the detour).
+- **Changed tests:**
+  1. `LessonScreen.help.test.tsx`: chips hidden after «لا» on the offer; shown after the next wrong answer (s3 «les deux», then back to s3); the chip-tap, menu and usage tests use that path.
+  2. `helpChips.test.ts`: the hold case.
+  3. `rules.test.ts`: the mini-example loop (a step back after 3 rounds again: the exemption); "after 3 detours" (easier keeps its one step back, then nothing); a new exemption block.
+  4. The real 1.b regression: the escalation's 4th detour is `pre-simultaneous` (was the teacher note), then the teacher note (was hint 1); the student's reveal is allowed with 1 of 2 hints used, after 4 closed detours (was refused).
+- **New tests:** `revealUnlock.test.ts`, `jump.test.ts`, `LessonScreen.footer.test.tsx` (360 and 390 pt viewports, and no scroll after a drag), `contrast.test.ts`.
+- **Simulator** (iPhone 16e, `-devActions wrong,declineOffer,wrong,back`, without `-devScrollEnd`): `docs/screens/help-chips-2/A-390-chips.png`, `A-360-chips.png`.
+
+## Tutor intelligence 1: reveal rule, tall cards, C1–C3, B3 (2026-10-22)
+- **Reveal unlock:** a detour counts only if the student acted in it or finished it (D29). New action `detour_acted` for component taps in a detour. The real 1.b regression does not change (every detour there was answered).
+- **360 pt:** on a tall card the footer scroll stops at the card top (the question stays visible). Screenshot `docs/screens/help-chips-2/A-360-chips-question-first.png`.
+- **C1:** `src/engine/procedures.ts`. **C2:** per-step `procedures` tables (1b/s5, 1b/s8, 2a/s6, the transfers of 1b/s5 and 1b/s8), checked by the loader; new misconceptions `merges_identical_balls`, `reuses_earlier_result`. **C3:** the answer event has `inferredBy` and `candidates`; the new `probe` event and card. **B3:** `CLARIFY_LADDER`; content `addresses` (deep dives, ask chips) and `link` (1b/s7, the transfer).
+- **Changed tests:**
+  1. `revealUnlock.test.ts`: the second detour was left at once and counted. Now it does not count; a tap or a hint in it does.
+  2. `jump.test.ts`: a tall card was "the footer wins". Now the question wins.
+  3. `loader.test.ts`: the 1b/s5 and 1b/s8 answers use `toMatchObject` (they now carry their procedure table, checked in `procedures.test.ts`; same values).
+  4. `events.test.ts`: samples for `probe`, `inferredBy` and `candidates`.
+  5. `rules.test.ts` "why": the second case now records that the why chip was shown (B3 puts the chip before the alternative).
+  6. The real 1.b regression: the first "answer 4" on the transfer now shows a probe card and the planner waits (was `rule.first_wrong -> continue`). The scripted student leaves it open (`REAL_CARDS.probe = null`), as the real student acted next. A new test: 4 and 5 are diagnosed `counts_balls_not_pairs`, the probe is logged once as skipped, and "counting" reaches `alt-1b-s5-pick`.
+- **Run:** `npm run check` (108 suites, 1193 tests + 11 todo). No model call.
+
+## Round 1 "dead ends", items 1–3 (2026-10-22)
+- **Built (tests first), D30:**
+  - The rules' safety net `rule.first_wrong.diagnosed`.
+  - Misconception lines: `feedback` / `feedbackConfirmed` on 10 Ex 2 entries (the four asked for, and six more the coverage test found with no line where they are reached through procedures or variant options). All `reviewed: false`.
+  - The probe answer shows its line.
+  - `misconceptionCoverage.test.ts`: 68 places, each with the probe confirmed and dismissed.
+- **Changed tests:**
+  1. `rules.test.ts` "specific feedback is the authored one…" renamed to "undiagnosed (no misconception)…": its situation has no misconception, and the expectation (continue) is unchanged.
+  2. New rules tests for `rule.first_wrong.diagnosed` (hint; detour at the end of the ladder; continue only with nothing authored left).
+  3. New probe-outcome tests in `inference.test.ts`.
+  No existing expectation changed. The 1.b regression decisions are unchanged; row 8 ("answer 5" on the transfer) now also shows the counting-balls line before the clarify card.
+- **Run:** `npm run check` (109 suites, 1337 tests + 11 todo). No model call.
+
+## Round 1 "dead ends", item 4 + probe rule (2026-10-22)
+- **Built (tests first), D31:** probe card only when its answers lead to different actions (`settleProbe` in orchestrate, used by `stepSync` and `useLesson`); long-press dead end (offer card `ask_next`, once per block, `ask.unanswered` as a struggle signal); quotes render their formula as math; jump button in its own row; detour tab clearance; a done typed answer shown once. Debug only: `-devLongPress blockId:mode`, `-devScroll N` with `-devScrollEnd on`, `-devActions acceptOffer`, `-devLlm off`.
+- **Changed tests:**
+  1. `lesson.test.ts` "falls back to a canned message": the line is still shown, now followed by the `ask_next` offer card (it was the last item before the card).
+  2. `inference.test.ts` "at most one probe per step": the second value is 4 again (3 no longer gets a probe).
+  3. `inference.test.ts` "3 (merged / earlier result)": now no probe, the merged-balls question line, then hint 1 (was a probe, each answer with its line and hint 1).
+- **New tests:** `askDeadEnd.test.ts`, `visibleBugs.test.tsx`, and "a probe card only when its answers lead to different next actions" in `misconceptionCoverage.test.ts`.
+- **Simulator** (iPhone 16e, 390 pt, rules only with `-devLlm off`): `docs/screens/round1/`.
+- **Model calls:** one live planner call happened during this round's simulator checks, before `-devLlm off` existed (the debug build has the AI planner on; about $0.001, shown in the dev panel). Earlier rounds' simulator screenshots also made calls the same way. From now on, simulator checks of rules-only rounds use `-devLlm off`.
+- **Run:** `npm run check` (111 suites, 1355 tests + 11 todo).
+
+## Round 2: D3 + D2 + B4 (2026-10-22)
+- **Built (tests first), DECISIONS D32:**
+  - D3: `part_done.revealed` counts detour steps revealed.
+  - D2: the `revealed` trigger, `rule.after_reveal.fresh/none`, fresh variants `tr-1b-s5-fresh` and `tr-1b-s8-fresh` on a new urn with loader checks, the reason line and the quiet exit, the per-skill cap, and the skill state held after a reveal.
+  - B4: `walkthrough` content on 1b/s5, 1b/s8 and the transfer of 1b/s5; the rules action, `WalkthroughCard`, `walkthrough_next`; a silent `teacher_note`; the answer check after loading.
+- **Release:** `npm run check:release-dev` (new): no debug launch option is readable in a Release bundle (19 options); a debug bundle fails it. Wording: «اللوطة» → «توّا» in `lesson.noCannedAnswerField`.
+- **Changed tests (none weakened):**
+  1. `lesson.test.ts` "gives up to 3 levels": a reveal is now followed by the planner's decision (`rule.after_reveal.none` on s3).
+  2. `lesson.test.ts` 2.a "rebuilds the same feed": the reveal at s15 opens the fresh variant `tr-2a-s10-urn`; the script leaves it («موش توّا») and goes on.
+  3. `LessonScreen.test.tsx` "walks the hint ladder": the event list ends with `plan` (the after-reveal decision).
+  4. `rules.test.ts` escalate "… then a teacher note": now the next hint plus a silent note (`dd:pairs_listing` has no walk-through).
+  5. `rules.test.ts` example-loop end: now the walk-through of 1b/s8 plus a silent note.
+  6. The real 1.b regression (rows below).
+- **D3 side check:** the suspected "skip in a variant logged as revealed" cannot happen: the loader already rejects optional variant steps (test added).
+- **Replay harness:** `tools/replay` tests pass. `npm run replay -- table docs/samples/ex2_session_1.converted.jsonl` is identical after D2 and after B4 (that log has no reveal or teacher-note point). The real 1.b session is the scripted fixture.
+- **Open question (product owner):** should a part done with many reveals show a different mark? Today "done" is `answered >= 1`; `revealed` is logged but not shown.
+- **Simulator** (iPhone 16e, 390 pt, `-devLlm off`, `-devScript real1b -devStopAt …`, debug only): `docs/screens/round2/`.
+- **Run:** `npm run check` (117 suites). No model call.
+
+## Round 3: D1 + E1 + E2 (2026-10-22)
+- **Built (tests first), DECISIONS D33:**
+  - D1: `derive.ts` counts misconceptions under their own skill and adds `misconceptionSignals`; the situation's skills map includes that skill.
+  - E1: `src/state/outcomes.ts` and `SkillState.outcomes`.
+  - E2: `src/planner/nextMove.ts`, wired in `rules.ts` (`afterAttempt`, `afterReveal`, the step's own transfer closing); `rule.next_move.step_back`; the `next_move` event; the dev line `next-moves` (`src/telemetry/moves.ts`).
+  - Also: 1b/s5's walk-through line 1 no longer lists the balls (product owner).
+- **The 1.b session:**
+  - Outcome classes: s3 `first_try`, s5 `guessed`, the transfer `revealed`, the fresh variant `transfer_ok`, s7 `after_detour`, s8 `first_try`.
+  - Decision rows unchanged.
+  - Moves: repeat, repeat, then the repeat cap is used up (2/2 on counting-pairs). s7 wanted a repeat, stopped by `no_content`.
+- **Changed tests (none weakened):**
+  1. `rules.test.ts` "self-report already asked: a transfer variant instead" and "at most 2 self-reports per session": the situations now give the skill the "shaky" status a wrong answer gives in a real session (`after_retry` repeats only on a shaky skill).
+  2. `rules.test.ts` "after the self-report: the transfer": «خمّنت» still gets the transfer; «فهمت علاش» after a first try now moves on (behaviour change, D33).
+  3. `lesson.test.ts` "logs the typed keystrokes" and "hint ladder": the logged events now include `next_move`.
+  4. `LessonScreen.test.tsx` "walks the hint ladder": the event list ends with `next_move`; `studentEvents()` leaves out `next_move` like `plan` (both are planner records).
+- **New tests:** `misconceptionSkill.test.ts`, `outcomes.test.ts`, `nextMove.test.ts` (the table, caps, the property test), the E2 rules block, `moves.test.ts`.
+- **Run:** `npm run check` (121 suites, 1449 tests + 11 todo); `npm run check:release-dev` ok; the replay table identical after D1, E1 and E2. No model call; no screenshot (nothing visible changed for students).
+
+## Content round C1: finish 1.b (2026-10-23)
+- **Built (tests first), DECISIONS D34:**
+  - Walk-throughs for 1b/s3 and 1b/s7 (2 lines each).
+  - The simpler twin `sim-1b-s7-1`.
+  - Fresh choice variants `tr-1b-s3-fresh` (new answer type `complement`, engine-computed) and `tr-1b-s7-fresh` (engine probability 15/28).
+  - Loader checks for fresh choice variants (correct option, values).
+  - `npm run replay -- coverage`.
+  - Earlier (2026-10-23): the dev line `answer-timing` and D33's open question.
+- **1.b regression:** no row changed (the real session reveals neither s3 nor s7).
+- **Changed tests (none weakened):**
+  1. `rules.test.ts` "nothing authored": 2a/sum instead of 1b/s7 (which now has a fresh variant).
+  2. `freshVariants.test.ts` coverage list: + 1b/s3, 1b/s7.
+  3. `lesson.test.ts` "hint ladder" (s3 reveal) and the busy session (s7 reveal): the reveal now opens the fresh variant, which the script answers.
+  4. `LessonScreen.test.tsx` "walks the hint ladder": the event list adds the fresh variant's two shown events.
+- **Run:** `npm run check` (124 suites). No model call.
+
+## New exercise `bac2022c-sc-ex2`, milestone 1 (2026-10-23)
+- **Built (tests first), DECISIONS D35:**
+  - E1: the `with_replacement` procedure.
+  - E2: coloured balls R / N.
+  - E3: `LawChart.law.of`, plus the loader rule.
+  - E4: `Urn` display mode past the 60-draw cap.
+  - E5: the `section` tag and subtitles, `partLabel`, `findPart` with `exerciseId/partId`, `-devThen`, replay registration.
+  - Question 1 of the new exercise:
+    - 12 main steps: Urn, the CompareTwo intro, the «how we draw» choice, the typed steps 120 / 60 / 1/2 with 3 hints and 2 walk-through lines each, and the ordered alternative.
+    - 3 deep dives, 4 simpler twins, 2 transfers.
+    - 14 misconceptions.
+    - 3 new skills: `combinations-count`, `multiplication-principle`, `probability-by-counting`.
+- **Changed tests (none weakened):**
+  1. `ExercisePicker.test.tsx` "one card per exercise": «Exercice n» is now looked up inside each card, because two cards read «Exercice 2».
+  2. `contrast.test.ts`: `contrast()` moved to `src/theme/contrast.ts` (same code), so other tests can use it.
+- **New tests:**
+  - `redBlack.test.tsx`: labels, colour checks, contrast and hue, VoiceOver labels, the cap on both sides, the `law.of` checks.
+  - `procedures.test.ts`: the red / black block.
+  - `probability.test.ts`: colours.
+  - `loader.test.ts`: E3 in content, also nested.
+  - `ExercisePicker.test.tsx`: E5.
+  - `scEx2.test.ts`: engine values, the happy path, the ordered method accepted, the 720 line, E1 diagnoses, every wrong value of the brief, twins, transfers, minis.
+  - `misconceptionCoverage.test.ts` now includes the new exercise.
+- **Simulator** (iPhone 16e, 390 pt, `-devLlm off`, no model call; screenshots in `docs/screens/urn-rn/`):
+  - **E2, pixel proof:** 14 screens before (two identical baseline runs) and after are identical; the perf-timing text line of the demo panel is masked. Positive control: the new R / N demo cases render, so the bundle was current.
+  - **E5, intended diffs:** the lesson subtitles (rows 256–331 only), the picker (tag + new card), the «الورقة» subtitle. Every component and the Ex 2 paper screen are unchanged (`after-e5-*`).
+  - **Question 1** (`m1-*`): picker, top with the real urn, the CompareTwo + choice, each typed card, 720 typed, the deep dive from step a, the paper screen, the sheet, the end with the write-up.
+  - **CompareTwo intro at 390 pt** (`demo-compare-2r2n*.png`): the two lists stack; the right one shows 12 of 16 with «ورّيني الكل»; nothing clips.
+  - **Seen:** the subscript digits on ball faces come from a fallback font (Tajawal has none) and sit slightly low.
+- **Tests only:** taps inside CompareTwo / OutcomeSpace, Urn select with coloured balls, VoiceOver reading.
+- **Run:** `npm run check` (126 suites, 1607 tests + 11 todo); `npm run check:release-dev` ok (22 options).
+
 ## Next step
 Phase 5 (product owner, 2026-10-20), in order:
 1. Done 2026-10-20: exam wording, engine-derived A1 conclusion, exercise picker.

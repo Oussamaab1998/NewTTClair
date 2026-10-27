@@ -32,7 +32,16 @@ import {
 import { ExercisePicker } from './ExercisePicker';
 import { AskField } from '../../lesson/feed/AskField';
 import { LessonFeed, type FeedHandlers } from '../../lesson/feed/LessonFeed';
-import { HelpContext } from '../../lesson/feed/help';
+import { HelpContext, HelpUiContext } from '../../lesson/feed/help';
+import { stepForRef } from '../../lesson/session/lesson';
+import { formatMoves } from '../../telemetry/moves';
+import {
+  answerTimingStats,
+  formatAnswerTiming,
+} from '../../telemetry/answerTiming';
+import type { Catalog } from '../../state/catalog';
+import { formatHelpUsage, helpUsage } from '../../telemetry/helpUsage';
+import { richToQuote, type Quote } from '../../lesson/feed/RichView';
 import { LongPressMenu } from '../../lesson/feed/LongPressMenu';
 import {
   FeedbackCard,
@@ -49,8 +58,10 @@ import type { LocalQueue } from '../../telemetry/reports';
 import { appQueue } from '../appQueue';
 import { appEventStore } from '../appEventStore';
 import { appDoneRecord } from '../appDoneRecord';
-import { doneParts } from '../../state/doneParts';
+import { doneParts, resetExercise } from '../../state/doneParts';
 import { PaperSheet, type PaperCloseVia } from '../../lesson/feed/PaperSheet';
+import { ExamPaperScreen } from './ExamPaperScreen';
+import { paperStyle } from '../paperStyle';
 import type { EventStore } from '../../telemetry/eventStore';
 import type { DoneRecord } from '../../state/doneParts';
 import { appLessonLlm, appLlmRuntime } from '../appLlm';
@@ -64,6 +75,8 @@ import { LLM_CONFIG } from '../../config/llm';
 import { opensGate } from '../../components/registry';
 import type { JsonObject } from '../../components/contract';
 import type { TutorTurn } from '../../planner/llm/contextPack';
+import { consultWith } from '../../planner/llm/consult';
+import { buildSituation } from '../../planner/situation';
 import { contextFor } from '../../telemetry/reports';
 import { answerQuestion } from '../../tutor/tutor';
 import {
@@ -90,7 +103,7 @@ const devOnly: typeof DevOnly | null = __DEV__
 
 /** Debug launch: the scripted live check plays 1.b; `-devPart` opens a part. */
 const launchPart = (): string | undefined =>
-  devOnly?.devScenario() === 'live1'
+  devOnly?.devScenario() !== null && devOnly?.devScenario() !== undefined
     ? '1b'
     : devOnly?.devPartAtLaunch() ?? undefined;
 
@@ -109,6 +122,8 @@ interface LessonScreenProps {
   eventStore?: EventStore;
   /** Done-parts record (MMKV by default; tests inject a memory one). */
   doneRecord?: DoneRecord;
+  /** Help under the active question: chips (default) or the «ما نعرفش» choice (tests; dev `-devHelpLayout`). */
+  helpLayout?: 'chips' | 'choice';
 }
 
 /** The exercise picker, then a part played from JSON. */
@@ -119,14 +134,48 @@ export function LessonScreen({
   const [opened, setOpened] = useState<Opened | null>(() =>
     initialPart === undefined ? null : findPart(initialPart),
   );
+  const eventStore = props.eventStore ?? appEventStore();
+  const doneRecord = props.doneRecord ?? appDoneRecord();
+  // `-devReset <exerciseId>` (debug builds): the real reset, once, before the
+  // picker reads its done parts (screenshots).
+  useState(() => {
+    const id = devOnly?.devResetAtLaunch();
+    const entry = CATALOG.find(e => e.id === id)?.result;
+    if (entry?.ok) {
+      resetExercise(entry.loaded.exercise, { eventStore, doneRecord });
+    }
+    return null;
+  });
+  // The exam paper screen of this exercise (from the picker, or
+  // `-devPaperScreen` in debug builds).
+  const [paperFor, setPaperFor] = useState<string | null>(
+    () => devOnly?.devPaperScreenAtLaunch() ?? null,
+  );
   const result = CATALOG.find(e => e.id === opened?.exerciseId)?.result;
+  const paperEntry = CATALOG.find(e => e.id === paperFor)?.result;
+  if ((!opened || !result?.ok) && paperEntry?.ok) {
+    return (
+      <ExamPaperScreen
+        loaded={paperEntry.loaded}
+        eventStore={eventStore}
+        doneRecord={doneRecord}
+        onBack={() => setPaperFor(null)}
+        onStart={partId => {
+          setPaperFor(null);
+          setOpened({ exerciseId: paperEntry.loaded.exercise.id, partId });
+        }}
+        {...(props.clock && { clock: props.clock })}
+      />
+    );
+  }
   if (!opened || !result?.ok) {
     // Mounted again after each lesson: done parts are read fresh then.
     return (
       <ExercisePicker
         onOpen={setOpened}
-        eventStore={props.eventStore ?? appEventStore()}
-        doneRecord={props.doneRecord ?? appDoneRecord()}
+        onPaper={setPaperFor}
+        eventStore={eventStore}
+        doneRecord={doneRecord}
       />
     );
   }
@@ -171,6 +220,7 @@ function Lesson({
   llm: injectedLlm,
   eventStore: injectedStore,
   doneRecord: injectedDone,
+  helpLayout,
 }: LessonProps) {
   const { t } = useTranslation();
   const [sessionId] = useState(newSessionId);
@@ -194,6 +244,20 @@ function Lesson({
     },
   );
   const { dispatch, logUi, logError, log, state, content, report } = lesson;
+  // Help chips (2026-10-22): layout, and no chips while a repair offer is open.
+  const helpUi = useMemo(
+    () => ({
+      layout: helpLayout ?? devOnly?.devHelpLayoutAtLaunch() ?? 'chips',
+      ...(devOnly?.devHelpChoiceOpenAtLaunch() && { choiceOpen: true }),
+      offerOpen: state.items.some(
+        i =>
+          i.kind === 'choice_card' &&
+          i.purpose === 'repair' &&
+          i.status === 'open',
+      ),
+    }),
+    [helpLayout, state.items],
+  );
   const { studentScrolled, sendFeedback } = lesson;
   // D19: after the question's done line, non-blocking.
   const showFeedback = state.finished && feedbackCardAllowed(state.items);
@@ -205,6 +269,8 @@ function Lesson({
   // «الورقة»: done parts read when it opens (stored sessions incl. this one,
   // plus the done record), focus back on its header button when it closes.
   const [paper, setPaper] = useState<ReadonlySet<string> | null>(null);
+  // Read once per mount (theme, or `-devPaper` in debug builds).
+  const [paperBackground] = useState(paperStyle);
   const paperButton = useRef<React.ComponentRef<typeof View>>(null);
   const openPaper = () => {
     logUi('PaperSheet', 'opened', {});
@@ -230,12 +296,14 @@ function Lesson({
   const devTools = useDevTools();
   const [menu, setMenu] = useState<{
     blockId: string;
-    quoted: string;
+    quote: Quote;
     target: ReportTarget | null;
   } | null>(null);
   /** Report chosen in the long-press menu: opened once that menu is gone (iOS: one modal at a time). */
   const pendingReport = useRef<ReportTarget | null>(null);
 
+  const stateRef = useRef(state);
+  stateRef.current = state;
   const handlers = useMemo<FeedHandlers>(
     () => ({
       onSelect: optionId => dispatch({ type: 'answer', value: { optionId } }),
@@ -249,9 +317,9 @@ function Lesson({
       onHint: () => dispatch({ type: 'hint' }),
       onReveal: () => dispatch({ type: 'reveal' }),
       onBack: () => dispatch({ type: 'leave_deep_dive' }),
-      onLongPress: (blockId, quoted, target) => {
+      onLongPress: (blockId, quote, target) => {
         logUi('LongPressMenu', 'opened', { blockId });
-        setMenu({ blockId, quoted, target });
+        setMenu({ blockId, quote, target });
       },
       // Component taps are logged only: the feed does not re-render, except
       // the tap that opens a gate (PredictReveal), which lets the lesson go on.
@@ -265,6 +333,12 @@ function Lesson({
         if (opensGate(e.component, e.name)) {
           dispatch({ type: 'gate_passed', stepId });
         }
+        // A component tap while a detour is open (its visuals carry the parent's
+        // stepId): the detour counts for the reveal unlock (once per detour).
+        const top = stateRef.current.stack[stateRef.current.stack.length - 1];
+        if (top && top.ref.scope !== 'main' && !top.acted) {
+          dispatch({ type: 'detour_acted' });
+        }
       },
       onComponentResult: r =>
         dispatch({
@@ -277,9 +351,13 @@ function Lesson({
         }),
       onComponentError: logError,
       onSkip: reason => dispatch({ type: 'skip', reason }),
-      onRequest: kind => dispatch({ type: 'request', kind }),
+      onRequest: (kind, via) => dispatch({ type: 'request', kind, via }),
+      // Help chips / choice: UI-only events, counted in the usage log.
+      onHelpUi: (stepId, component, name, payload) =>
+        logUi(component, name, payload, stepId),
       onCardChoice: (purpose, choice) =>
         dispatch({ type: 'card_choice', purpose, choice }),
+      onWalkthroughNext: () => dispatch({ type: 'walkthrough_next' }),
       onKeypadHeight: h => probe.layout('keypad', h),
       onBlockMenu: (target, via) => {
         logUi('BlockMenu', 'opened', {
@@ -418,10 +496,63 @@ function Lesson({
       if (a === 'notSure') {
         dispatch({ type: 'not_sure' });
       }
+      // `wrong` / `declineOffer` / `back` (help chips screenshots): a wrong
+      // option on the active choice card; «لا» on the repair offer; leave the detour.
+      if (a === 'wrong') {
+        const ref = state.stack[state.stack.length - 1]?.ref;
+        const step = ref ? stepForRef(content, ref) : undefined;
+        const right =
+          step?.kind === 'choice' && step.answer.type === 'option'
+            ? step.answer.id
+            : undefined;
+        const option =
+          step?.kind === 'choice'
+            ? step.options.find(o => o.id !== right)
+            : undefined;
+        if (option) {
+          dispatch({ type: 'answer', value: { optionId: option.id } });
+        }
+      }
+      if (a === 'declineOffer') {
+        dispatch({ type: 'card_choice', purpose: 'repair', choice: 'no' });
+      }
+      if (a === 'acceptOffer') {
+        dispatch({ type: 'card_choice', purpose: 'repair', choice: 'yes' });
+      }
+      if (a === 'back') {
+        dispatch({ type: 'leave_deep_dive' });
+      }
     }
     // `-devDemo paperSheet`: «الورقة» open from the start (screenshots).
     if (devOnly?.devDemoAtLaunch() === 'paperSheet') {
       openPaper();
+    }
+    if (devOnly?.devScenario() === 'timing' && part === '1b' && llm) {
+      const rt = llm.runtime;
+      devOnly.runTiming({
+        runtime: rt,
+        actions: [
+          () => dispatch({ type: 'answer', value: { optionId: 'one' } }),
+          () => dispatch({ type: 'answer', value: { optionId: 'two' } }),
+          () => dispatch({ type: 'not_sure' }),
+        ],
+        // Outside the lesson: the same request, with a longer limit to see its full time.
+        measurePlan: async timeoutMs => {
+          const situation = buildSituation(log.all(), content.catalog);
+          if (!rt.client || !situation) {
+            throw new Error('no client or situation');
+          }
+          const r = await consultWith(rt.client, content, situation, {
+            requestId: llm.newRequestId(),
+            timeoutMs,
+            reason: 'forced',
+            devRaw: rt.devRaw,
+          });
+          return r.record;
+        },
+        showDevTools: () => setDevTools(true),
+      });
+      return;
     }
     if (devOnly?.devScenario() !== 'live1' || part !== '1b' || !llm) {
       return;
@@ -446,6 +577,8 @@ function Lesson({
     devOnly?.devActionsAtLaunch().includes('answerAll') ?? false,
   );
   const until = useRef(devOnly?.devUntilAtLaunch() ?? null);
+  // `-devThen` (debug builds): played once answerAll stopped at -devUntil.
+  const then = useRef(devOnly?.devThenAtLaunch() ?? []);
   useEffect(() => {
     if (!answerAll.current || !devOnly) {
       return;
@@ -453,6 +586,13 @@ function Lesson({
     const ref = state.stack[state.stack.length - 1]?.ref;
     if (ref?.scope === 'main' && ref.stepId === until.current) {
       answerAll.current = false;
+      for (const a of then.current) {
+        dispatch(
+          a.type === 'notSure'
+            ? { type: 'not_sure' }
+            : { type: 'answer', value: { raw: a.raw }, keys: [...a.raw] },
+        );
+      }
       return;
     }
     const next = devOnly.nextRightAction(state, loaded);
@@ -462,6 +602,62 @@ function Lesson({
       answerAll.current = false;
     }
   }, [state, loaded, dispatch]);
+
+  // `-devScript real1b` (debug builds): the real 1.b session, one action per
+  // state, paused at `-devStopAt` (screenshots of round 2).
+  const script = useRef(
+    devOnly?.devScriptAtLaunch() === 'real1b'
+      ? devOnly.realSessionPlayer(loaded)
+      : null,
+  );
+  const stopAt = useRef(devOnly?.devStopAtLaunch() ?? null);
+  useEffect(() => {
+    const player = script.current;
+    if (!player || state.pending || state.finished) {
+      return;
+    }
+    const walk = state.items.find(i => i.kind === 'walkthrough');
+    const ref = state.stack[state.stack.length - 1]?.ref;
+    const stop =
+      (stopAt.current === 'walkthrough' &&
+        walk?.kind === 'walkthrough' &&
+        !walk.done) ||
+      (stopAt.current === 'walkthroughDone' &&
+        walk?.kind === 'walkthrough' &&
+        walk.done) ||
+      (stopAt.current === 'fresh' &&
+        ref?.scope === 'variant' &&
+        ref.variantId === 'tr-1b-s5-fresh');
+    const next = stop ? null : player.next(state);
+    if (next) {
+      dispatch(next.act as Parameters<typeof dispatch>[0]);
+    } else {
+      script.current = null;
+    }
+  }, [state, loaded, dispatch]);
+
+  // `-devLongPress blockId:mode` (debug builds): once, after answerAll if any.
+  const devLongPress = useRef(devOnly?.devLongPressAtLaunch() ?? null);
+  useEffect(() => {
+    const lp = devLongPress.current;
+    if (!lp || answerAll.current || state.pending) {
+      return;
+    }
+    const block = state.items.find(
+      i => i.kind === 'tutor' && i.blockId === lp.blockId,
+    );
+    if (block?.kind === 'tutor') {
+      devLongPress.current = null;
+      const quote = richToQuote(block.rich);
+      dispatch({
+        type: 'ask_longpress',
+        blockId: lp.blockId,
+        mode: lp.mode,
+        quoted: quote.text,
+        ...(quote.math !== undefined && { quotedMath: quote.math }),
+      });
+    }
+  }, [state, dispatch]);
 
   const dismissSheet = () => {
     if (sheet?.stage === 'menu' && sheet.card) {
@@ -493,7 +689,8 @@ function Lesson({
         type: 'ask_longpress',
         blockId: menu.blockId,
         mode,
-        quoted: menu.quoted,
+        quoted: menu.quote.text,
+        ...(menu.quote.math !== undefined && { quotedMath: menu.quote.math }),
         ...(components && { components }),
       });
     }
@@ -525,9 +722,14 @@ function Lesson({
     }
   };
 
+  // `-devWidth 360` (debug builds): a narrow column for screenshots.
+  const devWidth = devOnly?.devWidthAtLaunch() ?? null;
   return (
     <KeyboardAvoidingView
-      style={styles.root}
+      style={[
+        styles.root,
+        devWidth !== null && [styles.devColumn, { width: devWidth }],
+      ]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       testID="lesson-screen"
     >
@@ -561,6 +763,10 @@ function Lesson({
               <Text style={styles.subtitleText}>
                 {t('lesson.exerciseLabel', { n: loaded.exercise.number })}
                 {SUBTITLE_SEPARATOR}
+                {loaded.exercise.section !== undefined &&
+                  `${t(
+                    `lesson.sectionShort.${loaded.exercise.section}`,
+                  )}${SUBTITLE_SEPARATOR}`}
               </Text>
               <Text
                 style={styles.subtitleText}
@@ -630,6 +836,16 @@ function Lesson({
         </View>
       )}
       {devTools && <LlmStatusLine runtime={llm?.runtime ?? appLlmRuntime()} />}
+      {devTools && devOnly && (llm?.runtime ?? appLlmRuntime()).trace && (
+        <devOnly.AiTracePanel
+          runtime={llm?.runtime ?? appLlmRuntime()}
+          initiallyOpen={
+            // A scripted AI opens its trace; `-devLlm off` has nothing to trace.
+            devOnly.devLlmAtLaunch() !== null &&
+            devOnly.devLlmAtLaunch() !== 'off'
+          }
+        />
+      )}
       {devTools && devOnly && (llm?.runtime ?? appLlmRuntime()).devRaw && (
         <devOnly.LlmRawPanel
           log={(llm?.runtime ?? appLlmRuntime()).devRaw!}
@@ -639,16 +855,30 @@ function Lesson({
       {devTools && (
         <StoredEvents store={injectedStore ?? appEventStore()} log={log} />
       )}
+      {devTools && (
+        <AnswerTimingLine
+          store={injectedStore ?? appEventStore()}
+          log={log}
+          catalog={content.catalog}
+        />
+      )}
+      {devTools && <HelpUsageLine log={log} />}
+      {devTools && <MovesLine log={log} />}
       {devTools && showEvents && <EventPanel log={log} />}
       <HelpContext.Provider value={lesson.help}>
-        <LessonFeed
-          items={state.items}
-          content={content}
-          handlers={handlers}
-          snapshots={snapshots}
-          onUserScroll={studentScrolled}
-          endCard={endCard}
-        />
+        <HelpUiContext.Provider value={helpUi}>
+          <LessonFeed
+            items={state.items}
+            content={content}
+            handlers={handlers}
+            snapshots={snapshots}
+            onUserScroll={studentScrolled}
+            endCard={endCard}
+            paper={paperBackground}
+            devScrollToEnd={devOnly?.devScrollEndAtLaunch() ?? false}
+            devScrollBack={devOnly?.devScrollAtLaunch() ?? 0}
+          />
+        </HelpUiContext.Provider>
       </HelpContext.Provider>
       <AskField
         // Collapsed while a question card is on screen (DESIGN.md §3).
@@ -665,7 +895,7 @@ function Lesson({
         onSend={askTutor}
       />
       <LongPressMenu
-        quoted={menu?.quoted ?? null}
+        quote={menu?.quote ?? null}
         {...(menu?.target && {
           trust: t(`lesson.trust.${menu.target.trust}`),
           onReport: reportFromMenu,
@@ -687,6 +917,7 @@ function Lesson({
         currentPartId={part}
         done={paper ?? NOTHING_DONE}
         onClose={closePaper}
+        paperStyle={paperBackground}
       />
       <ReportSheet
         state={sheet}
@@ -764,6 +995,53 @@ const ExportEvents = memo(function ExportEventsImpl({
     </Pressable>
   );
 });
+
+/** Dev tools: how often the help paths were used in this lesson (help chips). */
+function HelpUsageLine({ log }: { log: EventLog }) {
+  useEventCount(log);
+  return (
+    <Text style={[styles.mono, styles.storedLine]} testID="help-usage">
+      {formatHelpUsage(helpUsage(log.all()))}
+    </Text>
+  );
+}
+
+/**
+ * Dev only: how often the "unusual answer time" self-report could fire, over
+ * every stored event on this device (all sessions, dev runs included).
+ */
+function AnswerTimingLine({
+  store,
+  log,
+  catalog,
+}: {
+  store: EventStore;
+  log: EventLog;
+  catalog: Catalog;
+}) {
+  const count = useEventCount(log);
+  const line = useMemo(
+    () => formatAnswerTiming(answerTimingStats(store.load(), catalog)),
+    // Recount when the session logs something new.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [store, catalog, count],
+  );
+  return (
+    <Text style={[styles.mono, styles.storedLine]} testID="answer-timing">
+      {line}
+    </Text>
+  );
+}
+
+/** E2: the last nextMove decisions and the caps used (debug tools only). */
+function MovesLine({ log }: { log: EventLog }) {
+  useEventCount(log);
+  return (
+    <Text style={[styles.mono, styles.storedLine]} testID="next-moves">
+      {formatMoves(log.all())}
+    </Text>
+  );
+}
 
 function useEventCount(log: EventLog): number {
   return useSyncExternalStore(
@@ -849,6 +1127,8 @@ function ProgressBar({
 }
 
 const styles = StyleSheet.create({
+  // `-devWidth` (debug builds): the narrow column is centred.
+  devColumn: { alignSelf: 'center' },
   root: { flex: 1, backgroundColor: theme.color.backgroundApp },
   // Cahier header (DESIGN.md §3), in reading order: the back button at the
   // reading start (right), the title block, the «الورقة» button at the end.

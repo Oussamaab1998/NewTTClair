@@ -1,0 +1,39 @@
+New exercise to add: a probability exercise (urn with 4 red and 6 black balls, 3 drawn at once, then binomial). Do NOT author content yet. Steps: (1) write the source file docs/exercises/EX_URN_RN.md from the brief below; (2) feasibility check against the engine and components; (3) a plan. Wait for my OK.
+
+SOURCE LINE: <exam, year, session, section: to be supplied by the product owner>. Until then the paper field has no source line. Do not copy any official correction text; only the mathematics below was taken from it (it is facts, not wording).
+
+EXAM WORDING (transcribed from the paper, "to verify against the PDF" until I confirm):
+Exercice 2 (4 points)
+Une urne contient quatre boules rouges et six boules noires, indiscernables au toucher.
+Une épreuve consiste à tirer simultanément trois boules de l'urne.
+1. On considère l'événement A : « Obtenir une seule boule rouge ».
+Montrer que P(A)= 0.5, où P(A) est la probabilité de A.
+2. Calculer la probabilité de l'événement B : « Obtenir aucune boule rouge ».
+3. On répète l'épreuve précédente n fois de suite, n ≥ 2, en remettant à chaque fois les boules tirées dans l'urne.
+On désigne par X la variable aléatoire égale au nombre de fois où l'on a obtenu une seule boule rouge.
+a) Déterminer la loi de probabilité de X.
+b) Exprimer en fonction de n l'espérance mathématique de X, ainsi que sa variance.
+
+VERIFIED FACTS (exact arithmetic, the engine must recompute them, never hard-code):
+C(10,3)=120. A: C(4,1)*C(6,2)=4*15=60, P(A)=1/2. B: C(6,3)=20, P(B)=1/6.
+Reds in one draw: k=0,1,2,3 -> 20, 60, 36, 4 draws (sum 120); probabilities 1/6, 1/2, 3/10, 1/30 (sum 1). Note 1-P(A)=1/2: the complement of A is NOT B (B is only the 20-draw slice).
+Part 3: success = "exactly one red", p=P(A)=1/2, trials independent because balls are put back. X~B(n,1/2); P(X=k)=C(n,k)(1/2)^k(1/2)^(n-k)=C(n,k)/2^n, 0<=k<=n. E(X)=n/2, V(X)=n*(1/2)*(1/2)=n/4. Numeric: n=3 -> 1/8,3/8,3/8,1/8 (E 3/2, V 3/4); n=4 -> 1/16,1/4,3/8,1/4,1/16 (E 2, V 1).
+
+SKILLS (to map to the existing skill map, new ones reviewed:false): counting simultaneous draws (combinations); multiplication principle (choose reds AND blacks); probability by counting (favourable/total); event vs complement (B is not the complement of A); independence with replacement; recognising a binomial (n, p, what counts as success); binomial law formula; E and V of a binomial. Prerequisite chain: counting -> probability by counting -> binomial.
+
+STEP PLAN (typed unless noted; wrong values are what procedures.ts should diagnose):
+Part 1: (a) number of possible draws=120; wrong 720 ordered 10*9*8, 10 balls, 30 =10*3, 1000 with replacement. (b) favourable draws=60; wrong 19 =4+15 added, 24 =4*6 one black, 4 only reds, 120 ordered blacks 4*30. (c) P(A)=1/2 (show-that write-up in French); wrong 2/5 one ball 4/10, 5/6 at-least-one, 54/125 with replacement, 1/12 =60/720, 19/120.
+Part 2: (d) choice: what B means -> "the three balls are black" correct; "not exactly one red (the opposite of A)" and "at least one black" wrong. (e) favourable=20; wrong 6 balls, 120 ordered 6*5*4, 15 =C(6,2), 60 copy of A. (f) P(B)=1/6; wrong 1/2 =1-P(A), 3/5 one ball, 27/125 with replacement. (g) prediction gate then visual: is B the complement of A? (the 20/60/36/4 bar).
+Part 3.a: (h) choice: repeated with replacement -> independent trials; (i) success probability=1/2; wrong 1/6 (took B), 2/5; (j) choice: X follows B(n;1/2); wrong B(3;1/2) (3 balls), B(n;1/6), X counts red balls (0..3) not successes; (k) numeric twin: law for n=3 (typed 1/8,3/8,3/8,1/8); (l) choose the general formula: C(n,k)/2^n correct; wrong C(n,k)(1/2)^k only, (1/2)^n only, C(n,k)(1/2)^(n-k) mislabelled.
+Part 3.b: (m) n=4: E=2; (n) n=4: V=1; (o) general: E=n/2, V=n/4; wrong V=n/2 (=np), V=1/4, E=1/2.
+Simpler twins / transfers / fresh variants (new urns, engine-computed): twin 2R 2N draw 2: total 6, exactly one red 4 -> 2/3; twin 3R 2N draw 2: total 10, exactly one red 6 -> 3/5, none red 1/10; transfer 5R 5N draw 2: total 45, exactly one red 25 -> 5/9, none red 10 -> 2/9; fresh-after-reveal 3R 5N draw 3: total 56, exactly one red 30 -> 15/28, none red 10 -> 5/28. The loader rules for fresh variants apply (different answer from the parent and from the parent's known wrong values).
+
+FEASIBILITY CHECKS (report, do not fix yet): (1) coloured balls and an event "exactly k red among the drawn" in the engine (today numbered balls); (2) OutcomeSpace and Urn limits with 120 draws (earlier a 60-outcome limit was mentioned: verify) and a grouped alternative (by number of reds: 20/60/36/4, or the 4x15 product); (3) can the line editor or LawBuilder handle C(n,k) with symbolic n,k, else a numeric-first path (n=3, n=4) then choice of the formula; (4) binomial LawChart with an n slider, which components exist; (5) the picker shows «Exercice n»: two exercises would both read «Exercice 2»; propose how the card shows the source (reviewed:false); (6) the paper screen and sheet need the exam wording as above plus the source line.
+
+PLAN to deliver: per part, which steps/components/visuals, which deep dives, twins, walk-throughs, procedure tables, solutionPhrases, fresh variants, the volume compared with Ex2 (counts of steps, deep dives, alternatives, variants, misconception ids), engine additions needed with effort, the teacher-review load, and a proposal to build Parts 1 and 2 first. All Arabic reviewed:false. Stop after the plan.
+Amendments to the new-exercise brief:
+1. SOURCE LINE: "Examen du baccalauréat · Session de contrôle 2022 · Section Sciences expérimentales" (the product owner wrote "bac sc contrôle 2022"; confirm the exact section name with me before it goes into content). Content id suggestion: ex_sc_2022c_ex2, number 2, subject probability. The existing Ex2 is the Mathématiques contrôle 2022 paper, so the picker card and the paper screen must show the section/source to tell them apart; propose how (reviewed:false), and tell me what else in the app assumes a single "Exercice 2".
+2. CONSTRAINT: NO new components in this round. Use only existing ones (Urn, OutcomeSpace, EventPicker, ComplementView, LawBuilder, LawChart, PredictReveal, StepThrough, CompareTwo, NumericTwin, ExampleGenerator, keypads, choice steps). Show ideas on small urns (twins 2R2N, 3R2N); never list the 120 draws; big numbers are typed answers checked by the engine. Map every step to an existing component; if a step cannot be built that way, say so and propose a plain step without the visual, and list the gap for later. Engine data additions (e.g. a coloured-ball property or combination counts) are allowed only if they need no new UI; report each with effort.
+3. FEASIBILITY (replaces item 4 of the earlier list): confirm CompareTwo can show two draw settings (with / without replacement); confirm the safe expression parser accepts C(n,k) (and with symbolic n,k in a typed or line answer), else use the numeric-first path.
+4. First round scope: Parts 1 and 2 only (steps a-g); Part 3 in a second round.
+Stop after the plan.

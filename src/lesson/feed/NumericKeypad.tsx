@@ -86,6 +86,8 @@ export function NumericKeypad({
   const keys = useRef<string[]>([]);
   const shown = readonly ? value ?? '' : raw;
   const preview = useMemo(() => previewLatex(shown), [shown]);
+  /** A formula unlike the typed text (a fraction): shown beside it, or alone once done. */
+  const rendered = preview !== null && preview !== shown;
   const checkLabel = `${CHECK_MARK} ${t('lesson.check')}`;
 
   useImperativeHandle(ref, () => ({ getStateSnapshot: () => ({ raw }) }), [
@@ -160,11 +162,14 @@ export function NumericKeypad({
           </Pressable>
         )}
         <View style={styles.display}>
-          <Text style={styles.raw} testID={`${testID}-display`}>
-            {shown.length > 0 ? shown : ' '}
-          </Text>
-          {preview && preview !== shown && (
-            <View style={styles.preview}>
+          {/* Done: the value once, rendered (round 1: "7/10" showed twice). */}
+          {!(readonly && rendered) && (
+            <Text style={styles.raw} testID={`${testID}-display`}>
+              {shown.length > 0 ? shown : ' '}
+            </Text>
+          )}
+          {rendered && (
+            <View style={styles.preview} testID={`${testID}-preview`}>
               <MathBlock latex={preview} fontSize={theme.font.size.body} />
             </View>
           )}

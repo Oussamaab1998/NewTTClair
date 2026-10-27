@@ -2,7 +2,7 @@ import React, { useCallback, useSyncExternalStore } from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import type { LlmRuntime } from '../planner/llm/runtime';
+import { modelCheckLine, type LlmRuntime } from '../planner/llm/runtime';
 import { theme } from '../theme';
 
 /**
@@ -25,7 +25,7 @@ export function LlmStatusLine({ runtime }: { runtime: LlmRuntime }) {
     'lesson.devLlm.last',
   )}: ${last} · ${t('lesson.devLlm.cap')}: ${s.capRemaining}/${
     s.capLimit
-  } · check: ${s.modelCheck}`;
+  } · ${modelCheckLine(s)}`;
   return (
     <Pressable
       onPress={() => runtime.flags.setKillSwitch(!runtime.flags.killSwitch())}

@@ -20,6 +20,8 @@ export type UiMessage =
   | 'ladderEnd'
   | 'revealed'
   | 'noCannedAnswer'
+  | 'noCannedAnswerField'
+  | 'afterRevealReason'
   | 'deepDiveTitle'
   | 'returnToQuestion'
   | 'askMode.explain'
@@ -37,7 +39,14 @@ export type UiMessage =
   | 'clarify.link'
   | 'selfReport.understood'
   | 'selfReport.guessed'
-  | 'selfReport.dismissed';
+  | 'selfReport.dismissed'
+  /** After a help request: what happens now (help chips, reviewed: false). */
+  | 'helpReason.alternative'
+  | 'helpReason.deepDive'
+  | 'helpReason.simpler'
+  | 'helpReason.prerequisite'
+  | 'helpReason.hint'
+  | 'helpReason.reveal';
 
 export type AskMode = 'explain' | 'why' | 'example';
 export type SkipReason = 'knows_it' | 'not_now';
@@ -54,7 +63,11 @@ export type CardPurpose =
   | 'self_report'
   | 'compress'
   | 'repair'
-  | 'teacher_note';
+  | 'teacher_note'
+  /** C3: which wrong procedure gave the typed value (choices: misconception ids + dismissed). */
+  | 'probe'
+  /** A long-press ask with no verified answer: the next hint or the deep dive (round 1). */
+  | 'ask_next';
 
 export type RequestKind = 'change_method' | 'simpler';
 
@@ -70,7 +83,8 @@ export type StudentContent =
   | { kind: 'rich'; rich: Rich }
   | { kind: 'typed'; raw: string }
   | { kind: 'message'; message: UiMessage }
-  | { kind: 'quote'; mode: AskMode; quoted: string }
+  /** A long-pressed block: its text, and its formula rendered apart (never raw LaTeX). */
+  | { kind: 'quote'; mode: AskMode; quoted: string; math?: string }
   | { kind: 'text'; text: string };
 
 /** docs/FEEDBACK_AND_TRUST.md trust labels; never "verified". */
@@ -122,6 +136,14 @@ export type FeedItem = ItemBase &
         status: QuestionStatus;
         /** Wrong attempts so far (drives the card's readonly marks). */
         attempts: number;
+        /** "Not sure" taps on this card (help chips show after one). */
+        notSure?: number;
+        /** Help chips wait for a struggle signal beyond this count (wrongs + "not sure"): set when the repair offer was declined. */
+        chipsHold?: number;
+        /** Variant step with 2+ closed detours: reveal is offered before the ladder ends. */
+        revealUnlocked?: boolean;
+        /** D2: a fresh variant after a reveal: a quiet «موش توّا» exit (closes it, no failure). */
+        freshExit?: boolean;
         hintLevel: number;
         hintCount: number;
         /** Set when done: what the student chose/typed and whether it was right. */
@@ -165,12 +187,23 @@ export type FeedItem = ItemBase &
         variantId?: string;
         skillIds?: string[];
         misconceptionIds?: string[];
+        /** Probe cards: the typed value they ask about. */
+        value?: string;
       }
     | { kind: 'variant_start'; variantKind: VariantKind }
     | { kind: 'deep_dive_start'; deepDiveId: string }
     | { kind: 'return' }
     | { kind: 'component_fallback'; component: string }
     | { kind: 'writeup'; lines: string[] }
+    /** B4: a guided walk-through, its lines revealed one tap at a time, then the card again. */
+    | {
+        kind: 'walkthrough';
+        stepId: string;
+        lines: Rich[];
+        /** Lines revealed so far (1..lines.length). */
+        shown: number;
+        done: boolean;
+      }
     | { kind: 'done' }
     /** UI only: a provisional answer may still change ("..."); never in the reducer's state. */
     | { kind: 'thinking' }
@@ -201,6 +234,18 @@ export interface Frame {
   lines?: string[];
   /** Misconceptions whose message this card already showed (each once). */
   misconceptionsShown?: string[];
+  /** "Not sure" taps on this step (kept when the card is shown again). */
+  notSures?: number;
+  /** See the question item's `chipsHold`. */
+  chipsHold?: number;
+  /** Detours (variants, deep dives) opened from this frame and closed after the student acted in them. */
+  detoursClosed?: number;
+  /** D2: a fresh variant opened after a reveal (its card has a quiet exit). */
+  fresh?: boolean;
+  /** C3: this step already showed its probe card (at most one per step). */
+  probed?: boolean;
+  /** Detour frames: the student acted here (answer, tap, hint, "not sure", request, ask). */
+  acted?: boolean;
 }
 
 export interface LessonState {
@@ -211,6 +256,8 @@ export interface LessonState {
   cursor: { group: number; step: number };
   shownDeepDives: string[];
   shownVariants: string[];
+  /** Blocks a long-press ask found no verified answer for (the dead-end line is shown once per block). */
+  deadEndBlocks?: string[];
   seq: number;
   finished: boolean;
   /** A decision point waits for the planner (`apply_plan`). */
@@ -237,7 +284,10 @@ export type LessonAction =
       type: 'ask_longpress';
       blockId: string;
       mode: AskMode;
+      /** The block's text (no formula). */
       quoted: string;
+      /** The block's formula, if any (LaTeX; rendered as math). */
+      quotedMath?: string;
       /** Mounted components' state, collected by the UI and capped (feed/snapshots.ts). */
       components?: JsonObject;
       at: number;
@@ -252,7 +302,19 @@ export type LessonAction =
   | { type: 'skip'; reason: SkipReason; at: number }
   /** The gating component of this step got its tap (ungraded). */
   | { type: 'gate_passed'; stepId: string; at: number }
-  | { type: 'request'; kind: RequestKind; at: number }
+  /** A tap inside a detour's component (logged as a UI event; marks the detour as acted in). */
+  | { type: 'detour_acted'; at: number }
+  /** B4: «التالي» on the open walk-through. */
+  | { type: 'walkthrough_next'; at: number }
+  /** Internal (orchestrate `settleProbe`): the open probe card's answers would all lead to the same action. */
+  | { type: 'probe_drop'; at: number }
+  | {
+      type: 'request';
+      kind: RequestKind;
+      /** Where the tap came from (help chips, 2026-10-22). */
+      via?: 'menu' | 'chip' | 'choice';
+      at: number;
+    }
   /** A tap on a planner card (the latest open card of that purpose). */
   | { type: 'card_choice'; purpose: CardPurpose; choice: string; at: number }
   /** The planner's decision for the pending decision point. */

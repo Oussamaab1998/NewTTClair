@@ -46,16 +46,19 @@ export function helpTargetsAt(
   const frame = state.stack[state.stack.length - 1];
   const events = log.all();
   const last = events[events.length - 1];
-  if (!frame || frame.ref.scope === 'mini' || !last) {
+  if (!frame || frame.ref.scope === 'mini') {
     return null;
   }
+  // The lesson's first card has no event yet (help chips, 2026-10-22): the
+  // probe takes the lesson's own ids, so "⋯" and the choice know the targets.
   const probe: Event = {
     id: 'help-probe',
-    ts: last.ts,
-    sessionId: last.sessionId,
-    studentId: last.studentId,
-    exerciseId: last.exerciseId,
-    contentVersion: last.contentVersion,
+    ts: last?.ts ?? 0,
+    sessionId: last?.sessionId ?? 'help-probe',
+    studentId: last?.studentId ?? 'help-probe',
+    exerciseId: last?.exerciseId ?? content.loaded.exercise.id,
+    contentVersion:
+      last?.contentVersion ?? content.loaded.exercise.contentVersion,
     questionId: state.questionId,
     stepId: frame.stepId,
     t: 'request',
@@ -75,6 +78,67 @@ export function decideSync(
   return situation ? planner.decideSync(situation) : continueDecision();
 }
 
+/**
+ * A probe card only when its answers lead to different next actions
+ * (product owner, 2026-10-22). Right after an answer opened one, the rules
+ * decide once per candidate (a hypothetical probe answer, never logged); if
+ * they all give the same action, the card is dropped before it is shown.
+ */
+export function settleProbe(
+  content: LessonContent,
+  before: LessonState,
+  state: LessonState,
+  log: LogLike,
+  planner: RulesPlanner,
+  at: number,
+): StepLike {
+  const isOpenProbe = (s: LessonState) =>
+    s.items.find(
+      i =>
+        i.kind === 'choice_card' &&
+        i.purpose === 'probe' &&
+        i.status === 'open',
+    );
+  const card = isOpenProbe(state);
+  if (card?.kind !== 'choice_card' || isOpenProbe(before)?.key === card.key) {
+    return { state, events: [] };
+  }
+  const events = log.all();
+  const last = events[events.length - 1];
+  if (!last) {
+    return { state, events: [] };
+  }
+  const nexts = new Set(
+    card.choices
+      .filter(c => c !== 'dismissed')
+      .map(choice => {
+        const probe: Event = {
+          ...last,
+          id: 'probe-check',
+          ts: last.ts + 1,
+          stepId: card.stepId,
+          t: 'probe',
+          value: card.value ?? '',
+          candidates: card.misconceptionIds ?? [],
+          choice,
+        } as Event;
+        const situation = buildSituation([...events, probe], content.catalog);
+        const d = situation
+          ? planner.decideSync(situation)
+          : continueDecision();
+        return JSON.stringify([d.next, d.followUp ?? null]);
+      }),
+  );
+  return nexts.size > 1
+    ? { state, events: [] }
+    : reduce(content, state, { type: 'probe_drop', at });
+}
+
+interface StepLike {
+  state: LessonState;
+  events: EventDraft[];
+}
+
 /** Bound on apply rounds per action (a decision never creates a new decision point). */
 const MAX_ROUNDS = 4;
 
@@ -88,6 +152,9 @@ export function stepSync(
 ): LessonState {
   let r = reduce(content, state, action);
   log.append(r.events);
+  const settled = settleProbe(content, state, r.state, log, planner, action.at);
+  log.append(settled.events);
+  r = { ...r, state: settled.state };
   for (let i = 0; r.state.pending && i < MAX_ROUNDS; i += 1) {
     const decision = decideSync(content, log, planner);
     r = reduce(content, r.state, {

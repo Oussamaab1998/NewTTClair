@@ -7,16 +7,27 @@
  *   value: equal -> verified, different -> dropped;
  * - anything else that shows numbers is kept and marked "may contain a
  *   mistake", unless every number is one the lesson already shows;
- * - the current step's final answer is dropped while hints are left (rule 6).
+ * - the current step's final answer is dropped while hints are left (rule 6):
+ *   values, also in words, the correct option's words and the step's
+ *   authored solution phrases (solutionConcepts.ts, D16);
+ * - Latin, digits and short formulas inside an Arabic run get their own run;
+ *   a text block that cannot be fixed that way is dropped (RTL rules).
  */
 import { equals, type Fraction } from '../engine/rational';
 import { parseNumeric } from '../engine/format';
 import type { LessonContent } from '../lesson/session/lesson';
 import { parseLatexSubset } from '../lesson/math/latexSubset';
-import { spaceRunBoundaries } from '../lesson/rich/runs';
-import type { Rich } from '../content/schema';
+import { isolateLlmRuns, spaceRunBoundaries } from '../lesson/rich/runs';
+import { RichSchema, type Rich } from '../content/schema';
 import { numbersIn } from '../planner/llm/numbers';
-import { answerTokensFor, shownValues, valueKey } from '../planner/llm/shown';
+import { ballWordIn, englishIn } from '../planner/llm/guard';
+import { linePartIn, shownValues, valueKey } from '../planner/llm/shown';
+import {
+  formulaLeak,
+  leaksSolution,
+  listsOptions,
+  solutionConcepts,
+} from '../planner/llm/solutionConcepts';
 import type { TutorBlock } from '../planner/llm/tutorFormat';
 
 export type Check = 'verified' | 'unverified' | 'none';
@@ -105,7 +116,9 @@ export function verifyTutorBlocks(
   });
   const early =
     ctx.hintsUsed < ctx.hintCount
-      ? answerTokensFor(ctx.content, ctx.stepKey)
+      ? solutionConcepts(ctx.content, ctx.stepKey, {
+          hintsUsed: ctx.hintsUsed,
+        })
       : null;
   const out: CheckedBlock[] = [];
   const dropped: VerifyResult['dropped'] = [];
@@ -118,20 +131,61 @@ export function verifyTutorBlocks(
   blocks.forEach((b, index) => {
     const nums = b.type === 'math' ? numbersIn(b.latex) : richNumbers(b.text);
     const raw = b.type === 'math' ? b.latex : richPlain(b.text);
+    if (early !== null && listsOptions(early, raw)) {
+      drop(index, 'option_list');
+      return;
+    }
     if (
       early !== null &&
       (nums.some(f => early.values.has(key(f))) ||
         early.ids.some(id => raw.includes(id)) ||
-        early.texts.some(t => raw.toLowerCase().includes(t)))
+        leaksSolution(early, raw))
     ) {
       drop(index, 'final_answer_early');
       return;
     }
+    // The planner guard's text rules (2026-10-22), per block.
+    const frRuns =
+      b.type === 'text'
+        ? [
+            ...(b.text.ar ?? []).flatMap(r => ('fr' in r ? [r.fr] : [])),
+            ...(b.text.fr ? [b.text.fr] : []),
+          ]
+        : [];
+    if (early !== null && linePartIn(ctx.content, ctx.stepKey, raw)) {
+      drop(index, 'target_part');
+      return;
+    }
+    const formula = formulaLeak(ctx.content, ctx.stepKey, raw, ctx.hintsUsed);
+    if (formula === 'method_early' || (formula && early !== null)) {
+      drop(index, formula);
+      return;
+    }
+    if (frRuns.some(englishIn)) {
+      drop(index, 'english_word');
+      return;
+    }
+    if (!ctx.content.loaded.exercise.experiment && ballWordIn(raw)) {
+      drop(index, 'wrong_word');
+      return;
+    }
     if (b.type === 'text') {
+      // RTL: Latin, digits and short formulas get their own run; a block
+      // that cannot be fixed (LaTeX or a long formula in a run) is dropped.
+      const runs = b.text.ar ? isolateLlmRuns(b.text.ar) : undefined;
+      if (runs === null) {
+        drop(index, 'rtl_formula_in_text');
+        return;
+      }
+      const text: Rich = runs ? { ...b.text, ar: runs } : b.text;
+      if (!RichSchema.safeParse(text).success) {
+        drop(index, 'rtl_in_text');
+        return;
+      }
       const unknown = nums.some(f => !shown.has(key(f)));
-      if (b.text.math !== undefined) {
+      if (text.math !== undefined) {
         try {
-          parseLatexSubset(b.text.math);
+          parseLatexSubset(text.math);
         } catch {
           drop(index, 'latex_unparseable');
           return;
@@ -142,7 +196,7 @@ export function verifyTutorBlocks(
       if (check !== 'none') {
         counts[check] += 1;
       }
-      out.push({ type: 'text', text: spaced(b.text), check });
+      out.push({ type: 'text', text: spaced(text), check });
       return;
     }
     try {

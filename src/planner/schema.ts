@@ -66,8 +66,10 @@ export const ActionSchema = z.discriminatedUnion('kind', [
   /** "Your value + known = sum", computed by the engine from the last answer. */
   z.strictObject({ kind: z.literal('numeric_check') }),
   z.strictObject({ kind: z.literal('self_report') }),
-  /** Offer to save a note for the teacher, then move on. */
+  /** A note for the teacher, queued silently (B4, 2026-10-22: no card any more). */
   z.strictObject({ kind: z.literal('teacher_note') }),
+  /** B4: the step's authored guided walk-through (rules only; lines by tap, then the card again). */
+  z.strictObject({ kind: z.literal('walkthrough') }),
   /** Nothing special: the next authored step (or the card stays as it is). */
   z.strictObject({ kind: z.literal('continue') }),
 ]);
@@ -101,6 +103,10 @@ export const TriggerSchema = z.enum([
   'clarify',
   'self_report',
   'offer_response',
+  /** Lines: a line the editor cannot read or the engine cannot check (not graded). */
+  'line_invalid',
+  /** D2: a main step's answer was revealed (end of the ladder); the lesson waits for the planner. */
+  'revealed',
 ]);
 export type Trigger = z.infer<typeof TriggerSchema>;
 
@@ -112,6 +118,15 @@ export const DecisionSchema = PlannerOutputSchema.extend({
   representation: Id.optional(),
   /** LLM decisions: the request that produced it (reports on AI blocks point here). */
   llmRequestId: Id.optional(),
+  /** E2 (rules): the nextMove behind this decision (logged as a `next_move` event). */
+  nextMove: z
+    .strictObject({
+      outcome: Id,
+      wanted: z.enum(['move_on', 'repeat', 'step_back']),
+      move: z.enum(['move_on', 'repeat', 'step_back']),
+      stoppedBy: Id.optional(),
+    })
+    .optional(),
 });
 export type Decision = z.infer<typeof DecisionSchema>;
 

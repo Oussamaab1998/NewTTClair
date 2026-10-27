@@ -27,3 +27,15 @@ npm run replay -- agree docs/samples/ex2_session_1.converted.jsonl docs/samples/
 ## Output guard (Phase 4)
 
 `npm run replay -- guard` runs the hand-written planner answers in `src/planner/llm/fixtures/guardFixtures.ts` (valid and invalid) through the same pipeline as live answers (schema, content, guard) and prints one row per fixture, the rejection rate, and the rejection reasons (to tune the number allowlist and limits).
+
+## AI tutor v2 evaluation (D26)
+
+```sh
+npm run replay -- eval --estimate                       # free: Anthropic token counts, no generation
+npm run replay -- eval --live --cap-usd 5               # paid; the first run is capped at $5
+npm run replay -- eval --live --cap-usd 5 --models claude-haiku-5-5,gpt-6-luna --no-log
+npm run replay -- eval --live --cap-usd 0.25 --models claude-haiku-5-5 --timeout-ms 15000   # eval-only call limit (default 30 s); the app keeps 3.5 s
+npm run replay -- phrases                               # free, offline: steps with a final answer and their solution phrases
+```
+
+Decision points: the hand-written scenarios in `scenarios/A1.json` (11) and `scenarios/2a.json` (10), played through the real reducer and rules (`teacherReviewed: false`), plus the points of `docs/samples/ex2_session_1.converted.jsonl` where the normal triggers ask. Each point is sent twice per model (cold, then warm cache). No retries; a 429, no credit, auth or a failed model check stops that model; the run cap stops everything (worst case reserved before each call, ledger in `out/spend.json`). Keys from the shell or `.env.llm.local`, never printed. Outputs in `out/` (gitignored): `eval-<time>.md` (valid rate, usable at 3.5 s, rejection reasons, latency, cost cold vs warm, an empty darija column), `.jsonl` (every call, raw outputs for local review), `.review.md` (12 sampled points side by side with a score line).

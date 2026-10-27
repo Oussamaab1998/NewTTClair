@@ -6,7 +6,8 @@
  *   -devComponent X    dev tools on, open the demo tab holding component X,
  *                      showing only X's demo cases (screenshots);
  *                      X#n shows only X's n-th case (from 0)
- *   -devScroll 600     demo screens start scrolled by this many points
+ *   -devScroll 600     demo screens and the exam paper screen start scrolled
+ *                      by this many points
  *   -devPart A1        the lesson opens on this part (1b, 2a, A1), in normal mode
  *   -devActions notSure  the opened lesson plays these actions at start
  *                      (comma-separated), e.g. a deep dive in the real lesson
@@ -14,13 +15,30 @@
  *                      content's right answers (a real stored part_done)
  *   -devUntil sum      with answerAll: stop when this main step's card is open
  *                      (screenshots of a card mid-part, e.g. 2.a's sum)
+ *   -devThen type:720,notSure  once answerAll stopped at -devUntil: type this
+ *                      value on the open card / open «ما نعرفش» (comma-separated)
  *   -devDemo paperSheet  the opened lesson starts with «الورقة» open
+ *   -devReset bac2022c-ex4  "start from scratch" for this exercise at launch
+ *                      (the real reset: an exercise_reset event, its done
+ *                      marks cleared; other exercises untouched)
+ *   -devDemo resetDialog  the picker starts with exercise 4's reset dialog open
+ *   -devPaperScreen bac2022c-ex4  the exam paper screen of this exercise
+ *                      opens at launch (normal mode)
+ *   -devPaper grid     the paper behind the feed, picker and «الورقة» sheet
+ *                      (flat | grid | ruled) instead of theme.layout.paperStyle
  *   -devDemo cardMenu  the Composants tab opens with a question card's "⋯"
  *                      menu shown (screenshots of the open sheet)
  *   -devDemo longPressMenu | longPressMenuPlain  the tutor long-press menu
  *                      open, with / without its trust label and Report
  *   -devBench events   time 1,000 single-event appends + a reload in a
  *                      throwaway MMKV instance (deleted afterwards)
+ *   -aiEveryMistake on  the AI tutor pilot flag on for this run (D22)
+ *   -devLlm fake|fakeSlow  a scripted, free AI planner instead of the live
+ *                      one (trace panel, provisional answer, fallback)
+ *   -devScript real1b  the real 1.b session, played live (rules only with -devLlm off)
+ *   -devStopAt walkthrough|walkthroughDone|fresh  where -devScript pauses
+ *   -devLlm off        no AI client at all: rules only, never a model call
+ *                      (screenshots of rules-only rounds)
  */
 import { Settings } from 'react-native';
 
@@ -38,6 +56,13 @@ const arg = (name: string): unknown => {
 };
 
 export const devModeAtLaunch = () => String(arg('devMode')) === 'on';
+export const aiEveryMistakeAtLaunch = () =>
+  String(arg('aiEveryMistake')) === 'on';
+/** `-devLlm fake|fakeSlow|off`: known names only. */
+export const devLlmAtLaunch = (): 'fake' | 'fakeSlow' | 'off' | null => {
+  const v = String(arg('devLlm'));
+  return v === 'fake' || v === 'fakeSlow' || v === 'off' ? v : null;
+};
 
 const stringArg = (name: string): string | null => {
   const v = arg(name);
@@ -48,13 +73,85 @@ export const devComponentAtLaunch = () => stringArg('devComponent');
 export const devPartAtLaunch = () => stringArg('devPart');
 export const devDemoAtLaunch = () => stringArg('devDemo');
 export const devUntilAtLaunch = () => stringArg('devUntil');
-type DevAction = 'notSure' | 'answerAll';
+export type DevThen = { type: 'type'; raw: string } | { type: 'notSure' };
+/** `-devThen type:720,notSure`: known forms only; anything else is ignored. */
+export const devThenAtLaunch = (): DevThen[] =>
+  (stringArg('devThen') ?? '').split(',').flatMap((a): DevThen[] => {
+    const t = a.trim();
+    if (t === 'notSure') {
+      return [{ type: 'notSure' }];
+    }
+    return t.startsWith('type:') && t.length > 5
+      ? [{ type: 'type', raw: t.slice(5) }]
+      : [];
+  });
+/** `-devScript real1b` (screenshots): the real 1.b session played live by the scripted student. */
+export const devScriptAtLaunch = (): 'real1b' | null =>
+  stringArg('devScript') === 'real1b' ? 'real1b' : null;
+/** `-devStopAt walkthrough|walkthroughDone|fresh`: where `-devScript` pauses. */
+export const devStopAtLaunch = ():
+  | 'walkthrough'
+  | 'walkthroughDone'
+  | 'fresh'
+  | null => {
+  const v = stringArg('devStopAt');
+  return v === 'walkthrough' || v === 'walkthroughDone' || v === 'fresh'
+    ? v
+    : null;
+};
+/** `-devLongPress blockId:mode` (screenshots): that tutor block's ask, as a long-press would send it. */
+export const devLongPressAtLaunch = (): {
+  blockId: string;
+  mode: 'explain' | 'why' | 'example';
+} | null => {
+  const [blockId, mode] = (stringArg('devLongPress') ?? '').split(':');
+  return blockId && (mode === 'explain' || mode === 'why' || mode === 'example')
+    ? { blockId, mode }
+    : null;
+};
+export const devPaperScreenAtLaunch = () => stringArg('devPaperScreen');
+/** `-devHelpLayout chips|choice`: the help layout under the active question (screenshots). */
+export const devHelpLayoutAtLaunch = (): 'chips' | 'choice' | null => {
+  const v = stringArg('devHelpLayout');
+  return v === 'chips' || v === 'choice' ? v : null;
+};
+/** `-devHelpChoiceOpen on`: the «ما نعرفش» choice starts open (screenshots). */
+export const devHelpChoiceOpenAtLaunch = () =>
+  String(arg('devHelpChoiceOpen')) === 'on';
+/** `-devScrollEnd on`: the lesson feed stays at its end (screenshots of the footer). */
+export const devScrollEndAtLaunch = () => String(arg('devScrollEnd')) === 'on';
+/** `-devWidth 360`: clamps the lesson column (screenshots of a narrow phone; not a real device). */
+export const devWidthAtLaunch = (): number | null => {
+  const v = Number(arg('devWidth'));
+  return Number.isFinite(v) && v >= 280 && v <= 600 ? v : null;
+};
+export const devResetAtLaunch = () => stringArg('devReset');
+/** `-devPaper flat|grid|ruled`: known names only; anything else is ignored. */
+export const devPaperAtLaunch = (): 'flat' | 'grid' | 'ruled' | null => {
+  const v = stringArg('devPaper');
+  return v === 'flat' || v === 'grid' || v === 'ruled' ? v : null;
+};
+type DevAction =
+  | 'notSure'
+  | 'answerAll'
+  | 'wrong'
+  | 'declineOffer'
+  | 'acceptOffer'
+  | 'back';
 /** `-devActions notSure|answerAll[,…]`: known names only; anything else is ignored. */
 export const devActionsAtLaunch = (): DevAction[] =>
   (stringArg('devActions') ?? '')
     .split(',')
     .map(a => a.trim())
-    .filter((a): a is DevAction => a === 'notSure' || a === 'answerAll');
+    .filter(
+      (a): a is DevAction =>
+        a === 'notSure' ||
+        a === 'answerAll' ||
+        a === 'wrong' ||
+        a === 'declineOffer' ||
+        a === 'acceptOffer' ||
+        a === 'back',
+    );
 export const devScrollAtLaunch = (): number => {
   const v = Number(arg('devScroll'));
   return Number.isFinite(v) && v > 0 ? v : 0;

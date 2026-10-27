@@ -5,12 +5,14 @@ import { useTranslation } from 'react-i18next';
 import type { AskMode } from '../session/types';
 import { theme } from '../../theme';
 import { isolateInline } from '../rich/runs';
+import { MathBlock } from '../math/MathBlock';
+import type { Quote } from './RichView';
 
 export const ASK_MODES: readonly AskMode[] = ['explain', 'why', 'example'];
 
 interface LongPressMenuProps {
-  /** The quoted text; the menu is hidden when null. */
-  quoted: string | null;
+  /** The quoted block (text, formula apart); the menu is hidden when null. */
+  quote: Quote | null;
   /** The block's trust label, shown above its Report row. */
   trust?: string;
   /** «بلّغ على غلطة», the last row, apart from the ask modes. */
@@ -26,7 +28,7 @@ interface LongPressMenuProps {
  * trust label and «بلّغ على غلطة» (DESIGN.md §3).
  */
 export function LongPressMenu({
-  quoted,
+  quote,
   trust,
   onReport,
   onChoose,
@@ -36,7 +38,7 @@ export function LongPressMenu({
   const { t } = useTranslation();
   return (
     <Modal
-      visible={quoted !== null}
+      visible={quote !== null}
       transparent
       animationType="fade"
       onRequestClose={onDismiss}
@@ -50,14 +52,19 @@ export function LongPressMenu({
       >
         <View style={styles.sheet} testID="longpress-menu">
           <Text style={styles.title}>{t('lesson.menuTitle')}</Text>
-          {quoted !== null && (
+          {quote !== null && quote.text.length > 0 && (
             <Text
               style={styles.quote}
               numberOfLines={3}
               testID="longpress-quote"
             >
-              {isolateInline(quoted)}
+              {isolateInline(quote.text)}
             </Text>
+          )}
+          {quote?.math !== undefined && (
+            <View testID="longpress-quote-math">
+              <MathBlock latex={quote.math} fontSize={theme.font.size.body} />
+            </View>
           )}
           {ASK_MODES.map(mode => (
             <Pressable

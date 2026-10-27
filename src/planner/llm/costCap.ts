@@ -9,9 +9,9 @@ import type { KeyValueStore } from '../../storage/kv';
 import type { LlmResult } from './client';
 import type { PlanContextPack, TutorContextPack } from './contextPack';
 import { serializePack } from './contextPack';
-import { estimateCostUsd, modelInfo } from './models';
+import { estimateCostUsd, modelInfo, worstCaseCostUsd } from './models';
 import { planFormatFor, type PlannerClient } from './plannerClient';
-import { PLAN_INSTRUCTIONS, TUTOR_INSTRUCTIONS } from './prompts';
+import { planInstructions, TUTOR_INSTRUCTIONS } from './prompts';
 import { tutorFormat } from './tutorFormat';
 
 export interface CostCap {
@@ -65,13 +65,11 @@ export function withCostCap(
   const ledger = o.ledger ?? memoryLedger();
   const info = modelInfo(inner.model);
 
+  // Worst case: every input token at the highest input rate (a cache write
+  // costs more than plain input on Anthropic).
   const worst = (chars: number, out: number) =>
     info
-      ? estimateCostUsd(info, {
-          inputTokens: Math.ceil(chars / 2.5),
-          cachedInputTokens: 0,
-          outputTokens: out,
-        })
+      ? worstCaseCostUsd(info, Math.ceil(chars / 2.5), out)
       : Number.POSITIVE_INFINITY;
 
   async function guarded<T>(
@@ -102,8 +100,12 @@ export function withCostCap(
 
   const planChars = (p: PlanContextPack) =>
     serializePack(p).length +
-    JSON.stringify(planFormatFor(p).strict).length +
-    PLAN_INSTRUCTIONS.length;
+    // The larger of the two formats a transport may send.
+    Math.max(
+      JSON.stringify(planFormatFor(p).strict).length,
+      JSON.stringify(planFormatFor(p).wire.schema).length,
+    ) +
+    planInstructions().length;
   const tutorChars = (p: TutorContextPack) =>
     serializePack(p).length +
     JSON.stringify(tutorFormat().strict).length +

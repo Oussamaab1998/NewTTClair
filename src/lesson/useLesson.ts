@@ -1,10 +1,15 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { LoadedExercise } from '../content/loader';
 import { continueDecision } from '../planner/planner';
 import type { Decision } from '../planner/schema';
 import { buildSituation } from '../planner/situation';
-import { consultPlanner, shouldConsult } from '../planner/llm/consult';
+import {
+  consultPlanner,
+  consultReason,
+  type ConsultReason,
+} from '../planner/llm/consult';
+import { actionLabel } from '../planner/llm/trace';
 import type { LlmCallRecord, LlmRuntime } from '../planner/llm/runtime';
 import { createRulesPlanner, type HelpTargets } from '../planner/rules';
 import { nowMs } from '../telemetry/clock';
@@ -28,6 +33,7 @@ import {
 import {
   decideSync,
   helpTargetsAt,
+  settleProbe,
   withHistory,
 } from './session/orchestrate';
 import type { LessonAction, LessonState } from './session/types';
@@ -209,12 +215,58 @@ export function useLesson(
 
   const apply = useCallback(
     (action: LessonAction) => {
-      const r = reduce(content, stateRef.current!, action);
-      stateRef.current = r.state;
+      const before = stateRef.current!;
+      const r = reduce(content, before, action);
       log.append(r.events);
+      // A probe card only when its answers lead to different actions.
+      const settled = settleProbe(
+        content,
+        before,
+        r.state,
+        log,
+        rules,
+        action.at,
+      );
+      log.append(settled.events);
+      stateRef.current = settled.state;
     },
-    [content, log],
+    [content, log, rules],
   );
+
+  // The startup model check, once per app run: the first lesson that sees it
+  // settled logs it (A1b), whether it settled before or during this lesson.
+  useEffect(() => {
+    const rt = llm?.runtime;
+    if (!rt) {
+      return;
+    }
+    const logCheck = () => {
+      const c = rt.modelCheckToLog();
+      if (!c) {
+        return;
+      }
+      const apiVersion = rt.status().endpoint?.apiVersion;
+      log.append([
+        {
+          t: 'llm_model_check',
+          questionId: stateRef.current!.questionId,
+          stepId: 'none',
+          client: c.client,
+          model: c.model,
+          result: c.result,
+          statusClass: c.statusClass,
+          latencyMs: c.latencyMs,
+          ...(c.providerType !== undefined && {
+            providerType: c.providerType,
+          }),
+          ...(c.returnedId !== undefined && { returnedId: c.returnedId }),
+          ...(apiVersion !== undefined && { apiVersion }),
+        },
+      ]);
+    };
+    logCheck();
+    return rt.subscribe(logCheck);
+  }, [llm, log]);
 
   const logCall = useCallback(
     (record: LlmCallRecord, stepId: string) => {
@@ -233,10 +285,25 @@ export function useLesson(
           ...(u && {
             inputTokens: u.inputTokens,
             cachedInputTokens: u.cachedInputTokens,
+            ...(u.cacheWriteInputTokens !== undefined && {
+              cacheWriteInputTokens: u.cacheWriteInputTokens,
+            }),
             outputTokens: u.outputTokens,
+          }),
+          ...(record.trigger && {
+            trigger: record.trigger as ConsultReason,
           }),
           ...(record.costUsd !== undefined && { costUsd: record.costUsd }),
           ...(record.reasons && { reasons: record.reasons }),
+          ...(record.timing && {
+            prepMs: record.timing.prepMs,
+            ...(record.timing.headersMs !== undefined && {
+              headersMs: record.timing.headersMs,
+            }),
+            ...(record.timing.bodyMs !== undefined && {
+              bodyMs: record.timing.bodyMs,
+            }),
+          }),
         },
       ]);
       llm?.runtime.note(record);
@@ -304,11 +371,32 @@ export function useLesson(
     const rulesDecision = situation
       ? rules.decideSync(situation)
       : continueDecision();
-    const wanted =
-      llm !== undefined &&
-      situation !== null &&
-      (llm.consultAll === true || shouldConsult(situation, rulesDecision));
-    if (!wanted || !situation) {
+    const trace = llm?.runtime.trace ?? null;
+    const traceBase = {
+      stepId: pending.stepId,
+      lessonTrigger: pending.trigger,
+      ruleId: rulesDecision.ruleId,
+    };
+    let reason: ConsultReason | null = null;
+    if (llm && situation) {
+      reason = llm.consultAll
+        ? 'forced'
+        : consultReason(situation, rulesDecision, {
+            everyMistake:
+              llm.runtime.everyMistakeOn() && llm.runtime.mode() === 'llm',
+          });
+      // The pilot's own cap: once used up, only the normal triggers ask.
+      if (reason === 'every_mistake' && !llm.runtime.takeEveryMistake()) {
+        reason = null;
+      }
+    }
+    if (!llm || !situation || reason === null) {
+      trace?.add({
+        ...traceBase,
+        at: now(),
+        source: 'rules',
+        action: actionLabel(rulesDecision.next),
+      });
       settleRules();
       return;
     }
@@ -323,9 +411,18 @@ export function useLesson(
           outcome: 'disabled',
           statusClass: 'none',
           latencyMs: 0,
+          trigger: reason,
         },
         pending.stepId,
       );
+      trace?.add({
+        ...traceBase,
+        at: now(),
+        source: 'rules',
+        aiTrigger: reason,
+        action: actionLabel(rulesDecision.next),
+        outcome: 'disabled',
+      });
       settleRules();
       return;
     }
@@ -343,11 +440,33 @@ export function useLesson(
       requestId,
       timeoutMs: llm.timeoutMs,
       signal: abort.signal,
-    }).then(({ decision, record }) => {
+      reason,
+    }).then(({ decision, record, trace: ai }) => {
       const p = provisional.current;
+      const row = (source: 'rules' | 'llm' | 'fallback', outcome: string) =>
+        trace?.add({
+          ...traceBase,
+          at: now(),
+          source,
+          aiTrigger: reason!,
+          action: actionLabel(
+            source === 'llm' && decision ? decision.next : rulesDecision.next,
+          ),
+          ...(ai?.action && { aiAction: ai.action }),
+          ...(ai?.diagnosis && { diagnosis: ai.diagnosis }),
+          ...(ai?.why && { why: ai.why }),
+          model: record.model,
+          outcome,
+          latencyMs: record.latencyMs,
+          ...(record.usage && { usage: record.usage }),
+          ...(record.costUsd !== undefined && { costUsd: record.costUsd }),
+          ...(record.reasons && { reasons: record.reasons }),
+          ...(record.timing && { timing: record.timing }),
+        });
       if (!p || p.requestId !== requestId) {
         // The student acted or scrolled first: the rules answer stayed.
         logCall({ ...record, outcome: 'stale' }, stepId);
+        row('rules', 'stale');
         return;
       }
       logCall(record, stepId);
@@ -355,6 +474,10 @@ export function useLesson(
       if (!swapped) {
         commit({ ...p.rules, source: 'fallback' }, 'rules');
       }
+      row(
+        swapped ? 'llm' : 'fallback',
+        decision !== null && !swapped ? 'not_applicable' : record.outcome,
+      );
       setState(stateRef.current!);
     });
   }, [

@@ -11,6 +11,7 @@ import { buildContent, startLesson } from '../../lesson/session/lesson';
 import { stepSync } from '../../lesson/session/orchestrate';
 import { createRulesPlanner } from '../../planner/rules';
 import { memoryStore } from '../../storage/kv';
+import { createDoneRecord, resetExercise } from '../../state/doneParts';
 import { createKvEventStore } from '../../telemetry/eventStore';
 import {
   EventLog,
@@ -58,36 +59,59 @@ function earlierSession() {
   return store;
 }
 
+/** After a reset ("start from scratch"): progress is wiped, history is not (D25). */
+function earlierSessionThenReset() {
+  const store = earlierSession();
+  resetExercise(
+    { id: 'bac2022c-ex2', contentVersion: 'v' },
+    {
+      eventStore: store,
+      doneRecord: createDoneRecord(memoryStore()),
+      clock: fixedClock(1_760_050_000_000),
+    },
+  );
+  return store;
+}
+
 describe('the lesson reads stored history (event store, earlier session)', () => {
-  it('a second wrong answer avoids the deep dive tried in the earlier session', async () => {
-    let log!: Log;
-    await render(
-      <GestureHandlerRootView>
-        <LessonScreen
-          initialPart="1b"
-          clock={fixedClock(1_760_100_000_000)}
-          queue={new LocalQueue(memoryStore())}
-          llm={null}
-          eventStore={earlierSession()}
-          onLog={l => {
-            log = l;
-          }}
-        />
-      </GestureHandlerRootView>,
-    );
-    await fireEvent.press(screen.getAllByTestId('option-one').at(-1)!);
-    // The first wrong offers a repair; decline it to stay on the question.
-    const decline = screen.queryAllByTestId('card-repair-no').at(-1);
-    if (decline) {
-      await fireEvent.press(decline);
-    }
-    await fireEvent.press(screen.getAllByTestId('option-two').at(-1)!);
-    const plans = log.all().filter(e => e.t === 'plan');
-    expect(plans.at(-1)).toMatchObject({
-      decision: { ruleId: 'rule.second_wrong', next: { kind: 'variant' } },
-    });
-    expect(screen.queryByTestId('deep-dive-start')).toBeNull();
-  });
+  it.each([
+    ['an earlier session', earlierSession],
+    [
+      'an earlier session, then «ابدا من جديد» (history kept, D25)',
+      earlierSessionThenReset,
+    ],
+  ])(
+    'a second wrong answer avoids the deep dive tried in %s',
+    async (_, stored) => {
+      let log!: Log;
+      await render(
+        <GestureHandlerRootView>
+          <LessonScreen
+            initialPart="1b"
+            clock={fixedClock(1_760_100_000_000)}
+            queue={new LocalQueue(memoryStore())}
+            llm={null}
+            eventStore={stored()}
+            onLog={l => {
+              log = l;
+            }}
+          />
+        </GestureHandlerRootView>,
+      );
+      await fireEvent.press(screen.getAllByTestId('option-one').at(-1)!);
+      // The first wrong offers a repair; decline it to stay on the question.
+      const decline = screen.queryAllByTestId('card-repair-no').at(-1);
+      if (decline) {
+        await fireEvent.press(decline);
+      }
+      await fireEvent.press(screen.getAllByTestId('option-two').at(-1)!);
+      const plans = log.all().filter(e => e.t === 'plan');
+      expect(plans.at(-1)).toMatchObject({
+        decision: { ruleId: 'rule.second_wrong', next: { kind: 'variant' } },
+      });
+      expect(screen.queryByTestId('deep-dive-start')).toBeNull();
+    },
+  );
 });
 
 describe('event export (dev tools)', () => {

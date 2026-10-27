@@ -4,7 +4,8 @@ Goal: students **act on the picture** (tap outcomes, build the law) so the answe
 
 ## Engine (build first, with tests)
 ```ts
-type Ball = { id: string; value: number };                        // two balls may share a value (0 and 0) but have different ids
+type Ball = { id: string; value: number; color?: "red" | "black" }; // two balls may share a value (0 and 0) but have different ids;
+                                                                    // a coloured ball is shown by its letter R / N (R₁, N₂), events still read `value` (D35)
 type Draw = "simultaneous" | "ordered" | "ordered_with_replacement";
 enumerateOutcomes(urn: Ball[], draw: Draw, k: number): Outcome[]   // for [-1,0,0,1,2], k=2, simultaneous -> 10 outcomes
 valueFns: product | sum | max | min | identity | count_value(v)
@@ -23,6 +24,7 @@ interface UrnProps { balls: Ball[]; draw: Draw; k: number; mode: "display"|"sele
   markDuplicates?: boolean /* subtle mark so two "0" balls are distinguishable */ }
 ```
 Events: `ball_toggled {ballId, selected}`, `selection_complete {ballIds, value?}`.
+Cap (D35): every urn component refuses more than 60 draws, except `Urn` in `display` mode, which lists none (the 10-ball, 120-draw urn of `bac2022c-sc-ex2`).
 Teaches: sample space, simultaneous draw. Insight slot: "the pair (a,b) is the same as (b,a)".
 
 ## 2. `OutcomeSpace`
@@ -69,6 +71,8 @@ Always show "sum = 1" as a habit check. Teaches: law of a random variable, compl
 Bar chart of a law with E(X) marker and step-by-step reveal of E(X), E(X²), V(X).
 ```ts
 interface LawChartProps { law: LawSpec | { balls, draw, k, valueFn }; reveal: ("E"|"E2"|"V")[]; showFormula: boolean }
+// D35: a given law may name itself, `law: { rows, of: <valueFn> }`; the engine recomputes the rows on the urn
+// (no draws listed, so no 60-draw cap). The content loader requires `of` on every given law.
 ```
 Events: `step_revealed {step}`. Use after the law is known; mind that E(X)=-1/10 and V(X)=89/100 (decimal 0.89).
 

@@ -77,7 +77,8 @@ describe('Exercise 2 question 1.b content', () => {
       kind: 'option',
       optionId: 'none',
     });
-    expect(loaded.answers.get(stepKey.main('1b', 's5'))).toEqual({
+    // The procedure table (C2) rides along: procedures.test.ts checks it.
+    expect(loaded.answers.get(stepKey.main('1b', 's5'))).toMatchObject({
       kind: 'number',
       value: [3, 1],
     });
@@ -85,7 +86,8 @@ describe('Exercise 2 question 1.b content', () => {
       kind: 'option',
       optionId: 'p3_10',
     });
-    expect(loaded.answers.get(stepKey.main('1b', 's8'))).toEqual({
+    // The procedure table (C2) rides along: procedures.test.ts checks it.
+    expect(loaded.answers.get(stepKey.main('1b', 's8'))).toMatchObject({
       kind: 'number',
       value: [7, 10],
     });
@@ -170,5 +172,56 @@ describe('loader rejects bad content', () => {
     const raw = clone(ex2);
     (raw.values as Record<string, unknown>).pB = { fn: 'magic', args: {} };
     expect(errorsOf(raw)).toContain('values.pB: unknown engine call magic');
+  });
+});
+
+describe('E3: a LawChart law in content is checked by the engine', () => {
+  /** Ex 2 with an extra LawChart step after 1.b's first step (the urn: law of the product). */
+  const withChart = (law: Record<string, unknown>, nested = false) => {
+    const raw = clone(ex2) as Raw;
+    const chart = { component: 'LawChart', props: { law } };
+    const spec = nested
+      ? {
+          component: 'CompareTwo',
+          props: {
+            left: chart,
+            right: { component: 'LawChart', props: { valueFn: 'product' } },
+          },
+        }
+      : chart;
+    steps(raw).splice(1, 0, {
+      id: 'chart',
+      blockId: 'q-chart',
+      trust: steps(raw)[0]!.trust,
+      skills: [],
+      kind: 'component',
+      component: spec,
+    });
+    return errorsOf(raw);
+  };
+  // The law of the product X (Ex 2, 2.a): -2, -1, 0, 2 with 1/10, 1/10, 7/10, 1/10.
+  const rows = [
+    { value: -2, p: [1, 10] },
+    { value: -1, p: [1, 10] },
+    { value: 0, p: [7, 10] },
+    { value: 2, p: [1, 10] },
+  ];
+  it('accepts a law named by `of` that the engine finds', () => {
+    expect(withChart({ rows, of: 'product' })).toEqual([]);
+  });
+  it('rejects a law without `of`, also inside a container', () => {
+    expect(withChart({ rows })).toEqual([
+      expect.stringMatching(/needs law.of/),
+    ]);
+    expect(withChart({ rows }, true)).toEqual([
+      expect.stringMatching(/needs law.of/),
+    ]);
+  });
+  it('rejects a law the engine disagrees with', () => {
+    const wrong = rows.map(r => (r.value === 0 ? { value: 0, p: [6, 10] } : r));
+    wrong[0] = { value: -2, p: [2, 10] };
+    expect(withChart({ rows: wrong, of: 'product' })).toEqual([
+      expect.stringMatching(/disagrees with the engine/),
+    ]);
   });
 });

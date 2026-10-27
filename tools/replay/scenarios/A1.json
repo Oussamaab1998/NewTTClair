@@ -1,0 +1,177 @@
+{
+  "part": "A1",
+  "exercise": "bac2022c-ex4",
+  "teacherReviewed": false,
+  "note": "Hand-written typical mistakes for Exercise 4 A1 (parity). Each scenario plays the right answers up to `goTo`, then `actions` through the real reducer and rules; the AI is asked at the last decision point with the trigger it would get (every_mistake when only the pilot flag would ask). `preferred` is a guess of a good reaction, not teacher labels.",
+  "scenarios": [
+    {
+      "id": "A1-s3-no-negative",
+      "goTo": "s3",
+      "actions": [
+        {
+          "type": "answer",
+          "value": {
+            "optionId": "no_negative"
+          }
+        }
+      ],
+      "note": "Thinks the domain must have no negative numbers (domain_symmetry_meaning).",
+      "preferred": ["show_component", "ask_clarify"],
+      "sample": true
+    },
+    {
+      "id": "A1-s3-not-needed",
+      "goTo": "s3",
+      "actions": [
+        {
+          "type": "answer",
+          "value": {
+            "optionId": "not_needed"
+          }
+        }
+      ],
+      "note": "Skips the domain check (domain_check_skipped).",
+      "preferred": ["explain", "example"]
+    },
+    {
+      "id": "A1-s3-twice",
+      "goTo": "s3",
+      "actions": [
+        {
+          "type": "answer",
+          "value": {
+            "optionId": "no_negative"
+          }
+        },
+        {
+          "type": "answer",
+          "value": {
+            "optionId": "not_needed"
+          }
+        }
+      ],
+      "note": "Second wrong answer on the domain question (second struggle).",
+      "preferred": ["show_component", "ask_clarify"]
+    },
+    {
+      "id": "A1-s8-exp-gap",
+      "goTo": "s8",
+      "actions": [
+        {
+          "type": "answer",
+          "value": {
+            "line": "((e^(-2x))/(e^(2x)+1))"
+          }
+        }
+      ],
+      "note": "Multiplied but added the exponents wrongly (exponent_rules_gap).",
+      "preferred": ["show_component", "explain"],
+      "sample": true
+    },
+    {
+      "id": "A1-s8-distribution",
+      "goTo": "s8",
+      "actions": [
+        {
+          "type": "answer",
+          "value": {
+            "line": "((e^(x))/(2))"
+          }
+        }
+      ],
+      "note": "Distributed e^(2x) only on part of the denominator (distribution_partial).",
+      "preferred": ["show_component", "explain"]
+    },
+    {
+      "id": "A1-s8-missing-parentheses",
+      "goTo": "s8",
+      "actions": [
+        {
+          "type": "answer",
+          "value": {
+            "line": "e^(-x)/1+e^(-2x)"
+          }
+        }
+      ],
+      "note": "Writing habit: no parentheses around the denominator.",
+      "preferred": ["explain"],
+      "sample": true
+    },
+    {
+      "id": "A1-s8-unknown-line",
+      "goTo": "s8",
+      "actions": [
+        {
+          "type": "answer",
+          "value": {
+            "line": "((e^(x))/(e^(2x)+2))"
+          }
+        }
+      ],
+      "note": "A wrong line no misconception knows (denominator ends in +2).",
+      "preferred": ["show_component", "explain"],
+      "sample": true
+    },
+    {
+      "id": "A1-s8-unreadable",
+      "goTo": "s8",
+      "actions": [
+        {
+          "type": "answer",
+          "value": {
+            "line": "e^(x)++1"
+          }
+        }
+      ],
+      "note": "A line that cannot be read (two operators).",
+      "preferred": ["explain", "continue"],
+      "sample": true
+    },
+    {
+      "id": "A1-s8-wrong-then-not-sure",
+      "goTo": "s8",
+      "actions": [
+        {
+          "type": "answer",
+          "value": {
+            "line": "((e^(x))/(e^(2x)+2))"
+          }
+        },
+        {
+          "type": "not_sure"
+        }
+      ],
+      "note": "A wrong line, then \"not sure\" (second struggle on the lines step). (\"Not sure\" first opens a deep dive: a later line belongs to its mini question.)",
+      "preferred": ["show_component", "example"]
+    },
+    {
+      "id": "A1-s9-odd",
+      "goTo": "s9",
+      "actions": [
+        {
+          "type": "answer",
+          "value": {
+            "optionId": "impaire"
+          }
+        }
+      ],
+      "note": "Confuses even and odd (parity_odd_even_confusion).",
+      "preferred": ["show_component"],
+      "sample": true
+    },
+    {
+      "id": "A1-s9-nothing",
+      "goTo": "s9",
+      "actions": [
+        {
+          "type": "answer",
+          "value": {
+            "optionId": "nothing"
+          }
+        }
+      ],
+      "note": "Does not conclude after the computation (conclusion_missing).",
+      "preferred": ["explain", "ask_clarify"]
+    }
+  ]
+}

@@ -11,11 +11,11 @@
 import { Settings } from 'react-native';
 
 import type { CostCap } from '../../planner/llm/costCap';
-import type { LlmRuntime } from '../../planner/llm/runtime';
+import type { LlmCallRecord, LlmRuntime } from '../../planner/llm/runtime';
 import type { Event } from '../../telemetry/events';
 import type { EventLog } from '../../telemetry/log';
 
-export type DevScenario = 'live1';
+export type DevScenario = 'live1' | 'timing';
 
 export const SCENARIO_CAP_USD = 0.01;
 
@@ -24,7 +24,8 @@ export function devScenario(): DevScenario | null {
     return null;
   }
   try {
-    return Settings.get('devScenario') === 'live1' ? 'live1' : null;
+    const v = Settings.get('devScenario');
+    return v === 'live1' || v === 'timing' ? v : null;
   } catch {
     return null; // no native Settings module (Jest)
   }
@@ -114,6 +115,60 @@ export function runLive1(a: Live1Api) {
     await sleep(8000);
     a.closeDrawer();
     scenarioLog('raw-ready');
+  })().catch(e =>
+    scenarioLog('crash', { name: e instanceof Error ? e.name : typeof e }),
+  );
+}
+
+export interface TimingApi {
+  runtime: Pick<LlmRuntime, 'status'>;
+  /** Student actions in 1.b that each ask the planner (consultAll). */
+  actions: (() => void)[];
+  /** One direct planner call on the current situation with this limit (ms), outside the lesson. */
+  measurePlan: (timeoutMs: number) => Promise<LlmCallRecord>;
+  showDevTools: () => void;
+}
+
+/**
+ * timing (2026-10-22): why in-app planner calls are slower than the eval's.
+ * Three planner calls through the lesson (the app's 3.5 s limit, unchanged),
+ * then one direct call with a 15 s limit outside the lesson, so the full
+ * time of the same request is seen. Its own $0.01 cap (appLlm.ts). The
+ * records (with timing) are kept on globalThis.__tteTiming for the dev
+ * inspector and printed as [dev-scenario] lines. Once per app process.
+ */
+export function runTiming(a: TimingApi): Promise<void> {
+  const g = globalThis as {
+    __tteTimingRan?: boolean;
+    __tteTiming?: LlmCallRecord[];
+  };
+  if (g.__tteTimingRan) {
+    scenarioLog('skip', { reason: 'already ran in this app process' });
+    return Promise.resolve();
+  }
+  g.__tteTimingRan = true;
+  const records: LlmCallRecord[] = [];
+  g.__tteTiming = records;
+  const calls = () => a.runtime.status().calls;
+  return (async () => {
+    a.showDevTools();
+    await waitUntil(() => a.runtime.status().modelCheck !== 'pending', 10000);
+    for (const act of a.actions) {
+      const before = calls();
+      await sleep(1500);
+      act();
+      await waitUntil(() => calls() > before, 15000);
+    }
+    await sleep(1500);
+    const r = await a.measurePlan(15000);
+    records.push(r);
+    scenarioLog('measured', {
+      outcome: r.outcome,
+      latencyMs: r.latencyMs,
+      timing: r.timing,
+      usage: r.usage,
+    });
+    scenarioLog('timing-done');
   })().catch(e =>
     scenarioLog('crash', { name: e instanceof Error ? e.name : typeof e }),
   );

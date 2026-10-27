@@ -51,7 +51,9 @@ const longPress = (id: string) =>
 const eventTypes = () => log.all().map(e => e.t);
 /** Student-side events only (without planner records and component traces). */
 const studentEvents = () =>
-  eventTypes().filter(t => t !== 'plan' && t !== 'component_event');
+  eventTypes().filter(
+    t => t !== 'plan' && t !== 'next_move' && t !== 'component_event',
+  );
 const lastOf = (t: string) =>
   log
     .all()
@@ -145,7 +147,22 @@ describe('LessonScreen (Exercise 2, 1.b)', () => {
     }
     await tap('reveal');
     expect(screen.getByTestId('revealed-answer')).toBeOnTheScreen();
-    expect(eventTypes()).toEqual(['hint', 'hint', 'hint', 'reveal']);
+    // D2 (round 2): the planner now decides after a reveal; E2 (round 3):
+    // the move is logged too. C1 (2026-10-23): s3 now has a fresh variant
+    // (was: none), so it opens (variant shown, its urn shown).
+    expect(eventTypes()).toEqual([
+      'hint',
+      'hint',
+      'hint',
+      'reveal',
+      'plan',
+      'next_move',
+      'component_event',
+      'component_event',
+    ]);
+    expect(
+      log.all().find(e => e.t === 'plan' && e.trigger === 'revealed'),
+    ).toMatchObject({ decision: { ruleId: 'rule.after_reveal.fresh' } });
   });
 
   it('shows feedback on a wrong option and keeps the question active', async () => {

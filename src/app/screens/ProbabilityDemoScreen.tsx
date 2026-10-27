@@ -28,6 +28,19 @@ const EXPERIMENT: Experiment = {
   k: 2,
 };
 const X0 = { id: 'value_eq', args: { value: 0 } };
+/** The red / black exercise urn (docs/exercises/EX_URN_RN.md): 4 red, 6 black, 3 drawn. */
+const RED_BLACK = {
+  balls: [
+    ...['r1', 'r2', 'r3', 'r4'].map(id => ({ id, value: 1, color: 'red' })),
+    ...['n1', 'n2', 'n3', 'n4', 'n5', 'n6'].map(id => ({
+      id,
+      value: 0,
+      color: 'black',
+    })),
+  ],
+  draw: 'simultaneous',
+  k: 3,
+};
 const B = { id: 'any_value', args: { value: 0 } };
 
 export interface DemoCase {
@@ -112,6 +125,29 @@ const CASES: DemoCase[] = [
     title: 'fallback test (intentional: k = 9 > 5 balls)',
     spec: { component: 'Urn', props: { k: 9 } },
     expectError: true,
+  },
+  {
+    // Red / black exercise urn: 120 draws, shown because display mode lists none (E4).
+    title: 'Urn (4 red, 6 black, display)',
+    spec: { component: 'Urn', props: { ...RED_BLACK, mode: 'display' } },
+  },
+  {
+    title: 'LawChart (number of reds, checked law, E3)',
+    spec: {
+      component: 'LawChart',
+      props: {
+        ...RED_BLACK,
+        law: {
+          of: { id: 'count_value', args: { value: 1 } },
+          rows: [
+            { value: 0, p: [1, 6] },
+            { value: 1, p: [1, 2] },
+            { value: 2, p: [3, 10] },
+            { value: 3, p: [1, 30] },
+          ],
+        },
+      },
+    },
   },
 ];
 

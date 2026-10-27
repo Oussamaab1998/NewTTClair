@@ -12,62 +12,235 @@
   },
   "number": 4,
   "subject": "analysis",
+  "section": "mathematiques",
   "statement": {
     "fr": "Soit f la fonction définie sur ℝ par f(x) = eˣ / (1 + e²ˣ). On note (ζ) sa courbe représentative dans un repère orthonormé (O, i⃗, j⃗).",
     "math": "f(x)=\\frac{e^{x}}{1+e^{2x}}"
   },
   "paper": {
-    "section": {
-      "fr": "Partie A"
-    },
-    "questions": [
+    "source": "Examen du baccalauréat · Session de contrôle 2022 · Mathématiques",
+    "points": 7,
+    "parts": [
       {
-        "id": "A1",
-        "label": "1",
-        "wording": [
+        "heading": {
+          "fr": "Partie A"
+        },
+        "questions": [
           {
-            "fr": "Montrer que f est paire."
-          }
-        ],
-        "status": "available"
-      },
-      {
-        "id": "A2",
-        "label": "2",
-        "wording": [
-          {
-            "fr": "Montrer que",
-            "math": "\\lim_{x\\to+\\infty} f(x) = 0"
+            "id": "A1",
+            "label": "1",
+            "wording": [
+              {
+                "fr": "Montrer que f est paire."
+              }
+            ],
+            "status": "available"
           },
           {
-            "fr": "Interpréter."
-          }
-        ],
-        "status": "soon"
-      },
-      {
-        "id": "A3",
-        "label": "3",
-        "wording": [
-          {
-            "fr": "a) Montrer que, pour tout réel x,",
-            "math": "f'(x)=\\frac{(1-e^{2x})e^{x}}{(1+e^{2x})^{2}}"
+            "id": "A2",
+            "label": "2",
+            "wording": [
+              {
+                "fr": "Montrer que",
+                "math": "\\lim_{x\\to+\\infty} f(x) = 0"
+              },
+              {
+                "fr": "Interpréter."
+              }
+            ],
+            "status": "soon"
           },
           {
-            "fr": "b) Dresser le tableau de variation de f."
+            "id": "A3",
+            "label": "3",
+            "subs": [
+              {
+                "label": "a",
+                "wording": [
+                  {
+                    "fr": "Montrer que, pour tout réel x,",
+                    "math": "f'(x)=\\frac{(1-e^{2x})e^{x}}{(1+e^{2x})^{2}}"
+                  }
+                ]
+              },
+              {
+                "label": "b",
+                "wording": [
+                  {
+                    "fr": "Dresser le tableau de variation de f."
+                  }
+                ]
+              }
+            ],
+            "status": "soon"
+          },
+          {
+            "id": "A4",
+            "label": "4",
+            "wording": [
+              {
+                "fr": "Tracer (ζ)."
+              }
+            ],
+            "status": "soon"
           }
-        ],
-        "status": "soon"
+        ]
       },
       {
-        "id": "A4",
-        "label": "4",
-        "wording": [
+        "heading": {
+          "fr": "Partie B"
+        },
+        "intro": [
           {
-            "fr": "Tracer (ζ)."
+            "fr": "Soit F la fonction définie sur ]0, +∞[ par",
+            "math": "F(x)=\\int_{0}^{\\ln x} f(t)\\,dt"
           }
         ],
-        "status": "soon"
+        "questions": [
+          {
+            "id": "B1",
+            "label": "1",
+            "wording": [
+              {
+                "fr": "Montrer que F est dérivable sur ]0, +∞[ et calculer F'(x) pour tout x > 0."
+              }
+            ],
+            "status": "soon"
+          },
+          {
+            "id": "B2",
+            "label": "2",
+            "subs": [
+              {
+                "label": "a",
+                "wording": [
+                  {
+                    "fr": "Montrer que la fonction g définie par g(x) = tan x est une bijection de ]0, π/2[ sur ]0, +∞[. On note g⁻¹ la fonction réciproque de g."
+                  }
+                ]
+              },
+              {
+                "label": "b",
+                "wording": [
+                  {
+                    "fr": "Déterminer g⁻¹(1) et lim g⁻¹(x) quand x → +∞."
+                  }
+                ]
+              },
+              {
+                "label": "c",
+                "wording": [
+                  {
+                    "fr": "Montrer que g⁻¹ est dérivable sur ]0, +∞[ et que (g⁻¹)'(x) = 1 / (1 + x²), pour tout x > 0."
+                  }
+                ]
+              }
+            ],
+            "status": "soon"
+          },
+          {
+            "id": "B3",
+            "label": "3",
+            "wording": [
+              {
+                "fr": "Montrer que F(x) = g⁻¹(x) − π/4, pour tout x > 0."
+              }
+            ],
+            "status": "soon"
+          },
+          {
+            "id": "B4",
+            "label": "4",
+            "wording": [
+              {
+                "fr": "Soit λ > 0. On désigne par A(λ) l'aire de la partie du plan limitée par la courbe (ζ), l'axe des abscisses et les droites d'équations x = −λ et x = λ."
+              }
+            ],
+            "subs": [
+              {
+                "label": "a",
+                "wording": [
+                  {
+                    "fr": "Montrer que",
+                    "math": "A(\\lambda) = 2F(e^{\\lambda})"
+                  }
+                ]
+              },
+              {
+                "label": "b",
+                "wording": [
+                  {
+                    "fr": "Déterminer lim A(λ) quand λ → +∞."
+                  }
+                ]
+              }
+            ],
+            "status": "soon"
+          }
+        ]
+      },
+      {
+        "heading": {
+          "fr": "Partie C"
+        },
+        "intro": [
+          {
+            "fr": "Pour tout n ∈ ℕ*, on pose",
+            "math": "I_{n} = \\int_{0}^{1} t^{n} F(e^{t})\\,dt"
+          }
+        ],
+        "questions": [
+          {
+            "id": "C1",
+            "label": "1",
+            "subs": [
+              {
+                "label": "a",
+                "wording": [
+                  {
+                    "fr": "Montrer que pour tout réel t ≥ 0,",
+                    "math": "0 \\le F(e^{t}) \\le \\frac{\\pi}{4}"
+                  }
+                ]
+              },
+              {
+                "label": "b",
+                "wording": [
+                  {
+                    "fr": "En déduire",
+                    "math": "\\lim I_{n}"
+                  }
+                ]
+              }
+            ],
+            "status": "soon"
+          },
+          {
+            "id": "C2",
+            "label": "2",
+            "subs": [
+              {
+                "label": "a",
+                "wording": [
+                  {
+                    "fr": "À l'aide d'une intégration par parties, montrer que",
+                    "math": "I_{n} = \\frac{F(e)}{n+1} - \\frac{1}{n+1} \\times \\int_{0}^{1} t^{n+1} f(t)\\,dt"
+                  }
+                ]
+              },
+              {
+                "label": "b",
+                "wording": [
+                  {
+                    "fr": "En déduire que",
+                    "math": "\\lim n I_{n} = g^{-1}(e) - \\frac{\\pi}{4}"
+                  }
+                ]
+              }
+            ],
+            "status": "soon"
+          }
+        ]
       }
     ]
   },
@@ -693,6 +866,16 @@
                   "math": "D_f = \\mathbb{R}"
                 }
               ],
+              "solutionPhrases": {
+                "fr": [
+                  "−x est aussi un réel",
+                  "est bien symétrique"
+                ],
+                "ar": [
+                  "المقابل متاعو زادة",
+                  "زادة عدد حقيقي"
+                ]
+              },
               "deepDiveId": "domain_symmetric"
             }
           ]
@@ -945,6 +1128,16 @@
                   "math": "e^{a} \\times e^{b} = e^{a+b}"
                 }
               ],
+              "solutionPhrases": {
+                "fr": [
+                  "e puissance x sur un plus e puissance deux x",
+                  "e puissance x sur 1 plus e puissance 2x"
+                ],
+                "ar": [
+                  "على واحد زائد",
+                  "على واحد زايد"
+                ]
+              },
               "variables": [
                 "x"
               ],
@@ -1091,6 +1284,16 @@
                   ]
                 }
               ],
+              "solutionPhrases": {
+                "fr": [
+                  "est paire",
+                  "fonction paire"
+                ],
+                "ar": [
+                  "دالة زوجية",
+                  "زوجية"
+                ]
+              },
               "deepDiveId": "parity_meaning"
             },
             {
@@ -1768,6 +1971,15 @@
             "math": "e^{4x}"
           }
         ],
+        "solutionPhrases": {
+          "fr": [
+            "e puissance deux x sur un plus e puissance quatre x"
+          ],
+          "ar": [
+            "على واحد زائد",
+            "على واحد زايد"
+          ]
+        },
         "variables": [
           "x"
         ],

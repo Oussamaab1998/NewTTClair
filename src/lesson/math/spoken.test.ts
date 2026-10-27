@@ -11,6 +11,10 @@ describe('spokenMath: formulas get a readable label, never raw LaTeX', () => {
     ],
     ['e^{2x}', 'e puissance 2 x'],
     ['\\binom{4}{2}', '2 parmi 4'],
+    [
+      'F(x)=\\int_{0}^{\\ln x} f(t)\\,dt',
+      'F de x égale intégrale de 0 à l n x de f de t d t',
+    ],
   ])('%s', (latex, words) => {
     const said = spokenMath(latex);
     expect(said).toBe(words);

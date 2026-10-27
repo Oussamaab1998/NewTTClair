@@ -27,7 +27,9 @@ import type {
 import { keypadFor, linesSpecOf, stepKey } from '../../content/loader';
 import type { JsonObject } from '../../components/contract';
 import { LinesCard, LinesSnapshotSchema } from '../lines/LinesCard';
-import { HelpContext } from './help';
+import { FooterRevealContext, HelpContext, HelpUiContext } from './help';
+import { helpChipsState } from './helpChips';
+import { THRESHOLDS } from '../../state/config';
 import type { Experiment } from '../../engine/calls';
 import type { FrameStep } from '../session/lesson';
 import type { FeedItemOf, RequestKind, SkipReason } from '../session/types';
@@ -57,7 +59,15 @@ export interface QuestionHandlers {
   onBack: () => void;
   onSkip: (reason: SkipReason) => void;
   /** "غيّر الطريقة" / "حاجة أسهل" (main and variant cards). */
-  onRequest: (kind: RequestKind) => void;
+  /** "Change method" / "easier", from the "⋯", a help chip or the «ما نعرفش» choice. */
+  onRequest: (kind: RequestKind, via: 'menu' | 'chip' | 'choice') => void;
+  /** Help chips / choice: UI-only events (shown, opened, picked) for the usage log. */
+  onHelpUi: (
+    stepId: string,
+    component: 'HelpChips' | 'HelpChoice',
+    name: string,
+    payload: Record<string, string>,
+  ) => void;
   /** Keypad height on screen (dev perf panel). */
   onKeypadHeight?: (height: number) => void;
   /** Component interactions (logged, never stored in lesson state: no feed re-render). */
@@ -126,9 +136,43 @@ export const QuestionCard = memo(function QuestionCardImpl({
       ? stepKey.mini(item.ref.deepDiveId)
       : stepKey.variant(item.ref.variantId);
   const help = useContext(HelpContext);
+  const helpUi = useContext(HelpUiContext);
   const canRequest = item.ref.scope !== 'mini';
   const canChange = canRequest && help?.changeMethod === true;
   const canSimpler = canRequest && help?.simpler === true;
+  // Help chips (2026-10-22): idle time counts only with the idle-alone flag.
+  const [idle, setIdle] = useState(false);
+  useEffect(() => {
+    setIdle(false);
+    if (!active || !THRESHOLDS.helpChipsIdleAlone) {
+      return;
+    }
+    const timer = setTimeout(() => setIdle(true), THRESHOLDS.helpChipsIdleMs);
+    return () => clearTimeout(timer);
+  }, [active, item.attempts, item.notSure, item.hintLevel]);
+  const chips = helpChipsState({
+    active,
+    scope: item.ref.scope,
+    wrongs: item.attempts,
+    notSures: item.notSure ?? 0,
+    idleMs: idle ? THRESHOLDS.helpChipsIdleMs : 0,
+    targets: help,
+    offerOpen: helpUi.offerOpen,
+    ...(item.chipsHold !== undefined && { hold: item.chipsHold }),
+  });
+  const showChips = helpUi.layout === 'chips' && chips.visible;
+  const [choiceOpen, setChoiceOpen] = useState(helpUi.choiceOpen === true);
+  const { onHelpUi } = h;
+  // One "shown" event per card and reason (usage log).
+  const shownFor = useRef<string | null>(null);
+  const revealFooter = useContext(FooterRevealContext);
+  useEffect(() => {
+    if (showChips && chips.reason && shownFor.current !== chips.reason) {
+      shownFor.current = chips.reason;
+      onHelpUi(stepId, 'HelpChips', 'shown', { reason: chips.reason });
+      revealFooter(item.key);
+    }
+  }, [showChips, chips.reason, onHelpUi, stepId, revealFooter, item.key]);
   const handle = useRef<ComponentHandle>(null);
   const [restored] = useState(() =>
     active ? memory?.restore(memoryKey, item.key) : undefined,
@@ -163,7 +207,7 @@ export const QuestionCard = memo(function QuestionCardImpl({
                 {
                   label: t('lesson.changeMethod'),
                   testID: 'request-change-method',
-                  onPress: () => h.onRequest('change_method'),
+                  onPress: () => h.onRequest('change_method', 'menu'),
                 },
               ]
             : []),
@@ -172,7 +216,7 @@ export const QuestionCard = memo(function QuestionCardImpl({
                 {
                   label: t('lesson.simpler'),
                   testID: 'request-simpler',
-                  onPress: () => h.onRequest('simpler'),
+                  onPress: () => h.onRequest('simpler', 'menu'),
                 },
               ]
             : []),
@@ -323,7 +367,19 @@ export const QuestionCard = memo(function QuestionCardImpl({
             </Pressable>
           )}
           <Pressable
-            onPress={h.onNotSure}
+            onPress={
+              helpUi.layout === 'choice'
+                ? () => {
+                    if (!choiceOpen) {
+                      onHelpUi(stepId, 'HelpChoice', 'opened', {});
+                    }
+                    setChoiceOpen(o => !o);
+                  }
+                : h.onNotSure
+            }
+            accessibilityState={
+              helpUi.layout === 'choice' ? { expanded: choiceOpen } : {}
+            }
             {...(fit && { onLayout: fit.onChild('not-sure') })}
             style={[styles.button, styles.notSure]}
             accessibilityRole="button"
@@ -349,7 +405,7 @@ export const QuestionCard = memo(function QuestionCardImpl({
               />
             </Pressable>
           )}
-          {!hintsLeft && (
+          {(!hintsLeft || item.revealUnlocked) && (
             <Pressable
               onPress={h.onReveal}
               {...(fit && { onLayout: fit.onChild('reveal') })}
@@ -361,6 +417,105 @@ export const QuestionCard = memo(function QuestionCardImpl({
             </Pressable>
           )}
           {menu}
+        </View>
+      )}
+      {active && item.freshExit && (
+        // D2: a fresh variant after a reveal can be left quietly (no failure).
+        <View style={styles.helpRow}>
+          <Pressable
+            onPress={h.onBack}
+            style={styles.helpChip}
+            accessibilityRole="button"
+            testID="fresh-not-now"
+          >
+            <Text style={styles.helpChipText}>{t('lesson.freshNotNow')}</Text>
+          </Pressable>
+        </View>
+      )}
+      {active && showChips && (
+        <View style={styles.helpRow} testID="help-chips">
+          {chips.changeMethod && (
+            <Pressable
+              onPress={() => h.onRequest('change_method', 'chip')}
+              style={styles.helpChip}
+              accessibilityRole="button"
+              testID="help-chip-change"
+            >
+              <Text style={styles.helpChipText}>
+                {t('lesson.changeMethod')}
+              </Text>
+            </Pressable>
+          )}
+          {chips.simpler && (
+            <Pressable
+              onPress={() => h.onRequest('simpler', 'chip')}
+              style={styles.helpChip}
+              accessibilityRole="button"
+              testID="help-chip-simpler"
+            >
+              <Text style={styles.helpChipText}>{t('lesson.simpler')}</Text>
+            </Pressable>
+          )}
+        </View>
+      )}
+      {active && helpUi.layout === 'choice' && choiceOpen && (
+        <View style={styles.helpRow} testID="help-choice">
+          {canChange && (
+            <Pressable
+              onPress={() => {
+                setChoiceOpen(false);
+                h.onRequest('change_method', 'choice');
+              }}
+              style={styles.helpChip}
+              accessibilityRole="button"
+              testID="help-choice-change"
+            >
+              <Text style={styles.helpChipText}>
+                {t('lesson.changeMethod')}
+              </Text>
+            </Pressable>
+          )}
+          {canSimpler && (
+            <Pressable
+              onPress={() => {
+                setChoiceOpen(false);
+                h.onRequest('simpler', 'choice');
+              }}
+              style={styles.helpChip}
+              accessibilityRole="button"
+              testID="help-choice-simpler"
+            >
+              <Text style={styles.helpChipText}>{t('lesson.simpler')}</Text>
+            </Pressable>
+          )}
+          {hintsLeft && item.hintCount > 0 && (
+            <Pressable
+              onPress={() => {
+                setChoiceOpen(false);
+                onHelpUi(stepId, 'HelpChoice', 'picked', { choice: 'hint' });
+                h.onHint();
+              }}
+              style={styles.helpChip}
+              accessibilityRole="button"
+              testID="help-choice-hint"
+            >
+              <Text style={styles.helpChipText}>{t('lesson.hint')}</Text>
+            </Pressable>
+          )}
+          <Pressable
+            onPress={() => {
+              setChoiceOpen(false);
+              onHelpUi(stepId, 'HelpChoice', 'picked', { choice: 'not_sure' });
+              h.onNotSure();
+            }}
+            style={styles.helpChip}
+            accessibilityRole="button"
+            testID="help-choice-not-sure"
+          >
+            <Text style={styles.helpChipText}>
+              {t('lesson.helpChoice.notSureOnly')}
+            </Text>
+          </Pressable>
         </View>
       )}
     </View>
@@ -453,6 +608,28 @@ const styles = StyleSheet.create({
     ...theme.font.body,
     fontFamily: theme.font.family.ui.medium,
     color: theme.color.ink,
+    writingDirection: 'rtl',
+  },
+  // Help chips (2026-10-22): quiet secondary chips, never a primary.
+  helpRow: {
+    flexDirection: theme.reading.row,
+    flexWrap: 'wrap',
+    gap: theme.space.sm,
+    marginTop: theme.space.sm,
+  },
+  helpChip: {
+    minHeight: theme.size.touch,
+    paddingHorizontal: theme.space.lg,
+    borderRadius: theme.radius.tag,
+    borderWidth: theme.border.line,
+    borderColor: theme.color.borderControl,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  helpChipText: {
+    ...theme.font.small,
+    fontFamily: theme.font.family.ui.medium,
+    color: theme.color.inkMuted,
     writingDirection: 'rtl',
   },
   // Solid colours, not opacity: the label stays readable (4.59:1).

@@ -8,6 +8,7 @@ import type { StudentContent, UiMessage } from '../session/types';
 import { RichView } from './RichView';
 import { theme, type FeedbackTone } from '../../theme';
 import { isolateInline } from '../rich/runs';
+import { MathBlock } from '../math/MathBlock';
 
 /**
  * Feed pencils (DESIGN.md §3): green = correct, red pencil = a wrong answer's
@@ -61,9 +62,17 @@ export const StudentBubble = memo(function StudentBubbleImpl({
     case 'quote':
       body = (
         <>
-          <Text style={[styles.rtl, styles.quote]} numberOfLines={3}>
-            {isolateInline(content.quoted)}
-          </Text>
+          {content.quoted.length > 0 && (
+            <Text style={[styles.rtl, styles.quote]} numberOfLines={3}>
+              {isolateInline(content.quoted)}
+            </Text>
+          )}
+          {content.math !== undefined && (
+            // The block's formula as math, never raw LaTeX (round 1).
+            <View style={styles.quoteMath} testID="student-quote-math">
+              <MathBlock latex={content.math} fontSize={theme.font.size.body} />
+            </View>
+          )}
           <Text style={styles.rtl}>{t(`lesson.askMode.${content.mode}`)}</Text>
         </>
       );
@@ -188,10 +197,18 @@ export function AskAnswer({ parts }: { parts: Rich[] }) {
   );
 }
 
-export function DeepDiveStart() {
+/**
+ * A detour's tab. In a sheet it sits on the sheet's top edge (negative
+ * margin, cleared by the sheet's own top margin); outside a sheet it never
+ * reaches the item above (round 1: it overlapped the feedback card).
+ */
+export function DeepDiveStart({ inSheet = false }: { inSheet?: boolean }) {
   const { t } = useTranslation();
   return (
-    <View style={styles.diveStart} testID="deep-dive-start">
+    <View
+      style={[styles.diveStart, inSheet && styles.diveStartOnEdge]}
+      testID="deep-dive-start"
+    >
       <Text style={[styles.rtl, styles.diveTitle]}>
         {t('lesson.deepDiveTitle')}
       </Text>
@@ -200,10 +217,19 @@ export function DeepDiveStart() {
 }
 
 /** Header of an authored variant (another way, a simpler example, a changed question, a base first). */
-export function VariantStart({ kind }: { kind: VariantKind }) {
+export function VariantStart({
+  kind,
+  inSheet = false,
+}: {
+  kind: VariantKind;
+  inSheet?: boolean;
+}) {
   const { t } = useTranslation();
   return (
-    <View style={styles.diveStart} testID={`variant-start-${kind}`}>
+    <View
+      style={[styles.diveStart, inSheet && styles.diveStartOnEdge]}
+      testID={`variant-start-${kind}`}
+    >
       <Text style={[styles.rtl, styles.diveTitle]}>
         {t(`lesson.variantStart.${kind}`)}
       </Text>
@@ -264,6 +290,7 @@ const styles = StyleSheet.create({
     color: theme.color.pen,
   },
   quote: { color: theme.color.inkMuted, fontStyle: theme.font.style.italic },
+  quoteMath: { alignSelf: 'stretch', alignItems: 'center' },
   tone: {
     borderWidth: theme.border.line,
     borderRadius: theme.radius.card,
@@ -317,12 +344,13 @@ const styles = StyleSheet.create({
   // The detour's start item is the tab on its sheet's top edge.
   diveStart: {
     alignSelf: theme.reading.startAlign,
-    marginTop: theme.offset.cardTab,
+    marginTop: theme.space.sm,
     marginBottom: theme.space.xs,
     backgroundColor: theme.color.pen,
     borderRadius: theme.radius.tag,
     paddingHorizontal: theme.space.md,
   },
+  diveStartOnEdge: { marginTop: theme.offset.cardTab },
   diveTitle: {
     ...theme.font.small,
     fontFamily: theme.font.family.ui.bold,

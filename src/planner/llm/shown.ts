@@ -23,6 +23,11 @@ import {
   type EventSpec,
   type ValueFn,
 } from '../../engine/probability';
+import {
+  checkEquivalence,
+  parseExpression,
+  sameForm,
+} from '../../engine/expression';
 import { frac, type Fraction } from '../../engine/rational';
 import type { LessonContent } from '../../lesson/session/lesson';
 import { numbersIn } from './numbers';
@@ -275,4 +280,138 @@ export function answerTokensFor(
     ids.push(...task.ids);
   }
   return { values, texts, ids };
+}
+
+// ---------------------------------------------------------------------------
+// Lines steps (D22): a correct transformed line is the answer.
+
+/** LaTeX (or a typed-like line) -> the safe parser's syntax; null if it has other commands. */
+export function latexToLine(latex: string): string | null {
+  let s = latex
+    .replace(/−/g, '-')
+    .replace(/\\left|\\right/g, '')
+    .replace(/\\[,;!: ]/g, '')
+    .replace(/\\mathrm\{e\}/g, 'e')
+    .replace(/\\times|\\cdot/g, '*');
+  // Innermost first: exponent groups and fractions without braces inside.
+  for (let i = 0; i < 16 && /[{}]/.test(s); i += 1) {
+    const before = s;
+    s = s
+      .replace(/\^\s*\{([^{}]*)\}/g, (_m, a: string) => `^(${a})`)
+      .replace(
+        /\\[dt]?frac\s*\{([^{}]*)\}\s*\{([^{}]*)\}/g,
+        (_m, a: string, b: string) => `((${a})/(${b}))`,
+      )
+      .replace(/\{([^{}]*)\}/g, (_m, a: string) => `(${a})`);
+    if (s === before) {
+      break;
+    }
+  }
+  return /[\\{}]/.test(s) ? null : s.trim();
+}
+
+/**
+ * Does this text write a correct transformed line of the current lines step
+ * (the final line or an intermediate one): an expression in the step's
+ * variables, equivalent to the goal by the engine, but not in the start's
+ * written form? The start (on the card) and general rules in other letters
+ * (e^a e^b = e^{a+b}) are allowed.
+ */
+export function lineAnswerIn(
+  content: LessonContent,
+  key: string | null,
+  text: string,
+): boolean {
+  const answer = key === null ? undefined : content.loaded.answers.get(key);
+  if (answer?.kind !== 'lines') {
+    return false;
+  }
+  const spec = answer.spec;
+  const vars = { variables: spec.variables };
+  const goal = parseExpression(spec.goal, vars);
+  const start =
+    spec.start !== undefined ? parseExpression(spec.start, vars) : null;
+  if (!goal.ok) {
+    return false;
+  }
+  const plain = latexToLine(text);
+  if (plain === null) {
+    return false;
+  }
+  for (const side of plain.split('=')) {
+    const p = parseExpression(side.trim(), vars);
+    if (!p.ok || p.variables.length === 0) {
+      continue;
+    }
+    if (start?.ok && sameForm(p.ast, start.ast)) {
+      continue;
+    }
+    const eq = checkEquivalence(p.ast, goal.ast, {
+      variables: [...spec.variables],
+    });
+    if (eq.verdict === 'equivalent') {
+      return true;
+    }
+  }
+  return false;
+}
+
+/** Numerator and denominator of a quotient (the goal's parts), or []. */
+function partsOf(ast: unknown): unknown[] {
+  const n = ast as { type?: string; op?: string; left?: unknown; right?: unknown };
+  return n.type === 'binary' && n.op === '/' ? [n.left, n.right] : [];
+}
+
+/**
+ * Does this text write a part of the current lines step's target: an
+ * expression equivalent to the goal's numerator or denominator, but not to
+ * the start's (2026-10-22: «الإسم الصحيح كان 1 + e^(2x)»)? Only quotient
+ * goals have parts.
+ */
+export function linePartIn(
+  content: LessonContent,
+  key: string | null,
+  text: string,
+): boolean {
+  const answer = key === null ? undefined : content.loaded.answers.get(key);
+  if (answer?.kind !== 'lines') {
+    return false;
+  }
+  const spec = answer.spec;
+  const vars = { variables: spec.variables };
+  const goal = parseExpression(spec.goal, vars);
+  const start =
+    spec.start !== undefined ? parseExpression(spec.start, vars) : null;
+  if (!goal.ok) {
+    return false;
+  }
+  const goalParts = partsOf(goal.ast);
+  const startParts = start?.ok ? partsOf(start.ast) : [];
+  if (goalParts.length === 0) {
+    return false;
+  }
+  const plain = latexToLine(text);
+  if (plain === null) {
+    return false;
+  }
+  const same = (a: unknown, b: unknown) =>
+    checkEquivalence(a as never, b as never, {
+      variables: [...spec.variables],
+    }).verdict === 'equivalent';
+  for (const side of plain.split('=')) {
+    const p = parseExpression(side.trim(), vars);
+    if (!p.ok || p.variables.length === 0) {
+      continue;
+    }
+    for (let i = 0; i < goalParts.length; i += 1) {
+      const startPart = startParts[i];
+      if (
+        same(p.ast, goalParts[i]) &&
+        !(startPart !== undefined && same(p.ast, startPart))
+      ) {
+        return true;
+      }
+    }
+  }
+  return false;
 }

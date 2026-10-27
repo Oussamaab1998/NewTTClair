@@ -18,7 +18,8 @@
     "pods": "cd ios && bundle exec pod install",
     "replay": "tsx tools/replay/cli.ts",
     "postinstall": "node tools/llm-config/gen.js",
-    "check:release-key": "node tools/release-key-check/check.js"
+    "check:release-key": "node tools/release-key-check/check.js",
+    "check:release-dev": "node tools/release-dev-check/check.js"
   },
   "dependencies": {
     "@react-native/new-app-screen": "0.88.0",

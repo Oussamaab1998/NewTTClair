@@ -43,6 +43,10 @@ export const EventSchema = z.discriminatedUnion('t', [
     value: z.json(),
     correct: z.boolean(),
     misconceptionId: Id.optional(),
+    /** Typed values (C3): an authored wrong answer, or the engine's wrong procedures. */
+    inferredBy: z.enum(['authored', 'procedure']).optional(),
+    /** Procedure matches' misconceptions, in table order (the first is misconceptionId). */
+    candidates: z.array(Id).max(7).optional(),
     attempt,
     /** Lines: the goal form typed as the first line (no reasoning shown). */
     jumped: z.literal(true).optional(),
@@ -101,6 +105,8 @@ export const EventSchema = z.discriminatedUnion('t', [
     text: ShortText.optional(),
     source: z.enum(['local', 'ai']),
     snapshot: JsonObjectSchema.optional(),
+    /** Long-press with no verified answer (round 1): a struggle signal. */
+    unanswered: z.literal(true).optional(),
   }),
   z.strictObject({
     ...base,
@@ -140,6 +146,9 @@ export const EventSchema = z.discriminatedUnion('t', [
     answered: z.number().int().min(0),
     revealed: z.number().int().min(0),
   }),
+  // "Start the exercise from scratch" (docs/DATA.md "Done parts"): progress of
+  // this exercise (`exerciseId`) counts again from here; history is kept.
+  z.strictObject({ ...base, t: z.literal('exercise_reset') }),
   z.strictObject({
     ...base,
     t: z.literal('report'),
@@ -162,6 +171,9 @@ export const EventSchema = z.discriminatedUnion('t', [
     ...base,
     t: z.literal('request'),
     kind: z.enum(['change_method', 'simpler']),
+    /** Help chips (2026-10-22): the card's attempt number and where the tap came from (absent in older logs). */
+    attempt: attempt.optional(),
+    via: z.enum(['menu', 'chip', 'choice']).optional(),
   }),
   // Answer to ask_clarify ("what exactly is unclear?").
   z.strictObject({
@@ -169,11 +181,33 @@ export const EventSchema = z.discriminatedUnion('t', [
     t: z.literal('clarify'),
     choice: ClarifyChoiceSchema,
   }),
+  // E2 (round 3): the move after an attempt and, when a cap stopped the
+  // wanted move, which one. Planner-internal; never shown to the student.
+  z.strictObject({
+    ...base,
+    t: z.literal('next_move'),
+    outcome: Id,
+    wanted: z.enum(['move_on', 'repeat', 'step_back']),
+    move: z.enum(['move_on', 'repeat', 'step_back']),
+    stoppedBy: Id.optional(),
+    ruleId: Id,
+  }),
+  // Answer to the probe card (C3) after a typed value two procedures explain;
+  // choice null = skipped ("not now", or the student acted on the step).
+  z.strictObject({
+    ...base,
+    t: z.literal('probe'),
+    value: z.string().max(40),
+    candidates: z.array(Id).min(2).max(7),
+    choice: Id.nullable(),
+    /** Closed because the student acted on the step (not a decision point). */
+    movedOn: z.literal(true).optional(),
+  }),
   // Opt-in offers: compress steps, a repair picture, a note for the teacher.
   z.strictObject({
     ...base,
     t: z.literal('offer_response'),
-    offer: z.enum(['compress', 'repair', 'teacher_note']),
+    offer: z.enum(['compress', 'repair', 'teacher_note', 'ask_next']),
     accepted: z.boolean(),
   }),
   // What the planner decided at a decision point. Replay re-applies it, so a
@@ -216,11 +250,70 @@ export const EventSchema = z.discriminatedUnion('t', [
     latencyMs: z.number().nonnegative(),
     inputTokens: z.number().int().nonnegative().optional(),
     cachedInputTokens: z.number().int().nonnegative().optional(),
+    /** Anthropic: tokens written to the prompt cache (billed above input). */
+    cacheWriteInputTokens: z.number().int().nonnegative().optional(),
     outputTokens: z.number().int().nonnegative().optional(),
+    /** Timing (2026-10-22): request building, fetch until headers, body read (ms). */
+    prepMs: z.number().nonnegative().optional(),
+    headersMs: z.number().nonnegative().optional(),
+    bodyMs: z.number().nonnegative().optional(),
+    /** Why the AI was asked (D22). */
+    trigger: z
+      .enum([
+        'unknown_wrong',
+        'second_struggle',
+        'line_wrong',
+        'line_invalid',
+        'every_mistake',
+        'request',
+        'rules_fallback',
+        'forced',
+      ])
+      .optional(),
     /** List-price estimate (models.ts). */
     costUsd: z.number().nonnegative().optional(),
     /** Our own codes: guard / schema reasons, never model text. */
     reasons: z.array(z.string().max(80)).max(10).optional(),
+  }),
+  // The startup model check, once per app run (Tutor intelligence 1, A1b):
+  // our result class, status class, allowlisted provider error type and, for
+  // a 200 naming another model, that id. Never message text or a key.
+  z.strictObject({
+    ...base,
+    t: z.literal('llm_model_check'),
+    client: Id,
+    model: Id,
+    result: z.enum([
+      'ok',
+      'timeout',
+      'network',
+      'rate_limited',
+      'no_credit',
+      'spend_limit',
+      'auth',
+      'provider',
+      'refused',
+      'incomplete',
+      'invalid',
+      'disabled',
+      'capped',
+      'config',
+    ]),
+    statusClass: z.enum(['none', '2xx', '4xx', '5xx']),
+    latencyMs: z.number().nonnegative(),
+    providerType: z
+      .string()
+      .regex(/^[a-z0-9_]{1,60}$/)
+      .optional(),
+    returnedId: z
+      .string()
+      .regex(/^[A-Za-z0-9._:@-]{1,100}$/)
+      .optional(),
+    /** The `anthropic-version` header the transport sends (Anthropic only). */
+    apiVersion: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/)
+      .optional(),
   }),
   // End-of-question feedback card (D19): one tap on a face, optional short note.
   z.strictObject({
@@ -248,6 +341,8 @@ export const EventSchema = z.discriminatedUnion('t', [
     skillIds: z.array(Id).max(10),
     misconceptionIds: z.array(Id).max(10),
     ruleId: Id,
+    /** B4 (2026-10-22): queued by the rules with no card (the walk-through replaced it). */
+    silent: z.literal(true).optional(),
   }),
 ]);
 export type Event = z.infer<typeof EventSchema>;
