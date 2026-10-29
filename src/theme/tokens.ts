@@ -327,6 +327,40 @@ export const size = {
   demoWidthNarrow: 360,
 } as const;
 
+/**
+ * probability2 components (docs/COMPONENTS_PROBABILITY_V2.md): balls inside a
+ * box or a chip, the cells of the product picture. 26 pt balls keep three
+ * boxes of three on a 308 pt panel (360 pt phone); 18 pt cells keep 15
+ * columns plus gaps inside it.
+ */
+export const pv2 = {
+  /** A ball in a box or a chip. */
+  dot: 26,
+  /** A ball in the list of orderings. */
+  orderingDot: 22,
+  /** A cell of the rows x columns picture; display only. */
+  cell: 18,
+  cellGap: 2,
+  /** Minimum width of a slice of the slice bar (a touch target). */
+  sliceMinWidth: size.touch,
+  /** The drawn shape of a slot, inside its 44 pt hit area (SlotsPattern). */
+  slotShape: 36,
+  /** A ball label above a slot (SlotsPattern, bridge mode). */
+  bridgeBall: 28,
+  /** Height of the bar (PartWholeBar). */
+  bar: 28,
+  /** Space each side of the bar so it lines up with the stepped control (half its thumb). */
+  barInset: 12,
+  /** SpreadSlider: the side of the square of the largest possible distance (one scale for every position). */
+  spreadSquare: 56,
+  /** SpreadSlider: height of a distance bar and of the stacked bar. */
+  spreadBar: 16,
+  /** BinomialExplorer: height of the chart of bars. */
+  barChart: 96,
+  /** VariableTable: width of a column of the law (value, outcomes, probability). */
+  tableCol: 72,
+} as const;
+
 /** Screen layout (Cahier). */
 export const layout = {
   /** Side gutter of screens. */

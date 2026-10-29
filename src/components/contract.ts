@@ -14,6 +14,16 @@ export const COMPONENT_NAMES = [
   'LawBuilder',
   'LawChart',
   'BinomialExplorer',
+  // probability2 (docs/COMPONENTS_PROBABILITY_V2.md)
+  'GroupBoxes',
+  'ChoiceProduct',
+  'SlotsPattern',
+  'PartWholeBar',
+  'SpreadSlider',
+  'RepeatedRuns',
+  'VariableTable',
+  'EventAreaModel',
+  'UrnTemplate',
   // Analyse
   'FunctionPlot',
   'PointOnCurve',

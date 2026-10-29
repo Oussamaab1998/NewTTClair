@@ -50,7 +50,12 @@ export function actionsFromEvents(events: readonly Event[]): LessonAction[] {
       case 'component_event':
         if (opensGate(e.component, e.name)) {
           // A no-op when that step is not waiting (later taps on the same component).
-          actions.push({ type: 'gate_passed', stepId: e.stepId, at });
+          actions.push({
+            type: 'gate_passed',
+            stepId: e.stepId,
+            at,
+            ...(e.payload.how === 'skipped' && { how: 'skipped' as const }),
+          });
         } else if (
           e.component === 'Variant' &&
           e.name === 'closed' &&

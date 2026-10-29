@@ -7,7 +7,7 @@
  */
 import { runEngineCall, type CallContext, type CallResult } from './calls';
 import type { EventSpec } from './probability';
-import { equals, type Fraction } from './rational';
+import { div, equals, frac, type Fraction } from './rational';
 
 export const PROCEDURE_IDS = [
   /** A simultaneous draw counted as an ordered one. */
@@ -26,6 +26,19 @@ export const PROCEDURE_IDS = [
   'earlier_result',
   /** The balls drawn one by one, each put back before the next (10 × 10 × 10). */
   'with_replacement',
+  /**
+   * The ordered count divided by the balls in a box (720 / 3 = 240), not by
+   * the orderings of a box (720 / 3! = 120). For k = 2 the two coincide, so a
+   * step with k = 2 cannot carry this row (the loader refuses a row that
+   * equals the answer).
+   */
+  'ordered_divided_by_k',
+  /**
+   * A probability written upside down: total / favourable (120 / 60 = 2), a
+   * "probability" above 1. Only for a probability; the loader refuses a row
+   * that equals the answer (a probability of 1).
+   */
+  'total_over_favourable',
 ] as const;
 export type ProcedureId = (typeof PROCEDURE_IDS)[number];
 
@@ -86,6 +99,32 @@ export function runProcedure(
             }),
           )
         : notApplicable(id, 'the balls are already put back');
+    case 'ordered_divided_by_k': {
+      if (call.fn !== 'outcomeCount') {
+        return notApplicable(id, 'only for the number of draws');
+      }
+      if (ex.draw !== 'simultaneous' || ex.k < 2) {
+        return notApplicable(id, 'needs a simultaneous draw of 2+ balls');
+      }
+      const ordered = runEngineCall(call, {
+        experiment: { ...ex, draw: 'ordered' },
+      });
+      return ordered.ok
+        ? { ok: true, value: [div(ordered.value, frac(ex.k))] }
+        : ordered;
+    }
+    case 'total_over_favourable': {
+      if (call.fn !== 'probability') {
+        return notApplicable(id, 'only for a probability');
+      }
+      const p = runEngineCall(call, ctx);
+      if (!p.ok) {
+        return p;
+      }
+      return p.value[0] === 0
+        ? notApplicable(id, 'no draw has the event')
+        : { ok: true, value: [div(frac(1), p.value)] };
+    }
     case 'balls_in_event':
       if (ex.k < 2 || call.fn === 'outcomeCount') {
         return notApplicable(id, 'needs an event on a draw of 2+ balls');

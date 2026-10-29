@@ -7,6 +7,7 @@ import type { z } from 'zod';
 
 import type { Experiment } from '../engine/calls';
 import type { ComponentName, ComponentSpec, RegistryEntry } from './contract';
+import type { RevealRule } from './reveals';
 import {
   ComplementViewPropsSchema,
   EventPickerPropsSchema,
@@ -15,6 +16,30 @@ import {
   OutcomeSpacePropsSchema,
   UrnPropsSchema,
 } from './probability/schemas';
+import {
+  CHOICE_PRODUCT_REVEALS,
+  GROUP_BOXES_REVEALS,
+} from './probability2/logic';
+import { EVENT_AREA_REVEALS } from './probability2/area';
+import { BINOMIAL_EXPLORER_REVEALS } from './probability2/binomial';
+import { PART_WHOLE_REVEALS } from './probability2/partWhole';
+import { REPEATED_RUNS_REVEALS } from './probability2/runsModel';
+import {
+  BinomialExplorerPropsSchema,
+  ChoiceProductPropsSchema,
+  EventAreaModelPropsSchema,
+  GroupBoxesPropsSchema,
+  PartWholeBarPropsSchema,
+  RepeatedRunsPropsSchema,
+  SlotsPatternPropsSchema,
+  SpreadSliderPropsSchema,
+  UrnTemplatePropsSchema,
+  VariableTablePropsSchema,
+} from './probability2/schemas';
+import { SLOTS_PATTERN_REVEALS } from './probability2/slots';
+import { SPREAD_SLIDER_REVEALS } from './probability2/spread';
+import { VARIABLE_TABLE_REVEALS } from './probability2/table';
+import { URN_TEMPLATE_REVEALS } from './probability2/urnExample';
 import {
   FoldSymmetryPropsSchema,
   FunctionPlotPropsSchema,
@@ -44,6 +69,25 @@ interface Entry extends RegistryEntry<unknown> {
    * the first of these events opens the gate (it is not graded).
    */
   gate?: readonly string[];
+  /**
+   * With `gate`: the gate holds the lesson only for props where this is true
+   * (a readonly picture that asks nothing must never hold it). Missing means
+   * always.
+   */
+  gateIf?: (props: Record<string, unknown>) => boolean;
+  /**
+   * What the component puts on screen by construction (hard rule 9). Required
+   * for every probability2 component (an empty list says "nothing"); the AI
+   * guard reads it (planner/llm/revealing.ts). Older components are covered by
+   * the hand-written rules there.
+   */
+  reveals?: readonly RevealRule[];
+  /**
+   * false keeps the component out of the AI planner's menu and prompt
+   * (docs/COMPONENTS_PROBABILITY_V2_DECISIONS.md, Q3). Missing means offered, so
+   * nothing registered before this field changes.
+   */
+  offeredToPlanner?: boolean;
   /** Containers: inner specs (by slot), each resolved with its own schema. */
   nested?: (props: Record<string, unknown>) => {
     slot: string;
@@ -99,6 +143,110 @@ export const REGISTRY: Partial<Record<ComponentName, Entry>> = {
     weight: 'light',
     teaches: ['random-variable-law', 'expectation', 'variance'],
     usesExperiment: true,
+  }),
+  // probability2 (docs/COMPONENTS_PROBABILITY_V2.md): visuals with an `explored`
+  // gate (one tap or one pick, or the escape), not offered to the AI planner yet.
+  GroupBoxes: entry({
+    schema: GroupBoxesPropsSchema,
+    kind: 'visual',
+    weight: 'light',
+    teaches: ['ordering-vs-choosing', 'combinations-count'],
+    usesExperiment: false,
+    gate: ['explored'],
+    reveals: GROUP_BOXES_REVEALS,
+    offeredToPlanner: false,
+  }),
+  ChoiceProduct: entry({
+    schema: ChoiceProductPropsSchema,
+    kind: 'visual',
+    weight: 'light',
+    teaches: ['choices-and-product', 'multiplication-principle'],
+    usesExperiment: false,
+    gate: ['explored'],
+    reveals: CHOICE_PRODUCT_REVEALS,
+    offeredToPlanner: false,
+  }),
+  SlotsPattern: entry({
+    schema: SlotsPatternPropsSchema,
+    kind: 'visual',
+    weight: 'light',
+    teaches: ['combinations-count', 'ordering-vs-choosing'],
+    usesExperiment: false,
+    gate: ['explored'],
+    reveals: SLOTS_PATTERN_REVEALS,
+    offeredToPlanner: false,
+  }),
+  PartWholeBar: entry({
+    schema: PartWholeBarPropsSchema,
+    kind: 'visual',
+    weight: 'light',
+    teaches: ['probability-by-counting'],
+    usesExperiment: false,
+    gate: ['explored'],
+    // feedback mode only draws the value the student wrote: nothing to act on, so no gate
+    gateIf: p => p.mode !== 'feedback',
+    reveals: PART_WHOLE_REVEALS,
+    offeredToPlanner: false,
+  }),
+  SpreadSlider: entry({
+    schema: SpreadSliderPropsSchema,
+    kind: 'visual',
+    weight: 'light',
+    teaches: ['variance', 'expectation'],
+    usesExperiment: false,
+    gate: ['explored'],
+    reveals: SPREAD_SLIDER_REVEALS,
+    offeredToPlanner: false,
+  }),
+  RepeatedRuns: entry({
+    schema: RepeatedRunsPropsSchema,
+    kind: 'visual',
+    weight: 'light',
+    teaches: ['expectation', 'probability-by-counting'],
+    usesExperiment: false,
+    gate: ['explored'],
+    reveals: REPEATED_RUNS_REVEALS,
+    offeredToPlanner: false,
+  }),
+  VariableTable: entry({
+    schema: VariableTablePropsSchema,
+    kind: 'visual',
+    weight: 'light',
+    teaches: ['random-variable-law', 'law-sum-one'],
+    usesExperiment: false,
+    gate: ['explored'],
+    reveals: VARIABLE_TABLE_REVEALS,
+    offeredToPlanner: false,
+  }),
+  BinomialExplorer: entry({
+    schema: BinomialExplorerPropsSchema,
+    kind: 'visual',
+    weight: 'light',
+    teaches: ['binomial-law', 'expectation', 'variance'],
+    usesExperiment: false,
+    gate: ['explored'],
+    reveals: BINOMIAL_EXPLORER_REVEALS,
+    offeredToPlanner: false,
+  }),
+  EventAreaModel: entry({
+    schema: EventAreaModelPropsSchema,
+    kind: 'visual',
+    weight: 'light',
+    teaches: ['complement', 'probability-by-counting'],
+    usesExperiment: false,
+    gate: ['explored'],
+    reveals: EVENT_AREA_REVEALS,
+    offeredToPlanner: false,
+  }),
+  UrnTemplate: entry({
+    schema: UrnTemplatePropsSchema,
+    kind: 'visual',
+    weight: 'light',
+    teaches: ['probability-by-counting', 'combinations-count'],
+    usesExperiment: false,
+    gate: ['explored'],
+    reveals: URN_TEMPLATE_REVEALS,
+    offeredToPlanner: false,
   }),
   // Analysis (COMPONENTS_ANALYSIS.md).
   FunctionPlot: entry({
@@ -207,10 +355,25 @@ export function componentMeta(name: string): Entry | undefined {
     : undefined;
 }
 
+/** May the AI planner be offered this component? Missing means yes. */
+export const isOfferedToPlanner = (
+  meta: Pick<Entry, 'offeredToPlanner'> | undefined,
+): boolean => meta !== undefined && meta.offeredToPlanner !== false;
+
 /** "task" blocks the lesson path like a question; "visual" is a feed block. */
 /** The component holds the lesson until one of its gate events. */
-export const isGate = (component: string): boolean =>
-  (componentMeta(component)?.gate?.length ?? 0) > 0;
+export const isGate = (
+  component: string,
+  props?: Record<string, unknown>,
+): boolean => {
+  const meta = componentMeta(component);
+  if ((meta?.gate?.length ?? 0) === 0) {
+    return false;
+  }
+  return meta?.gateIf === undefined || props === undefined
+    ? true
+    : meta.gateIf(props);
+};
 
 /** This event of this component opens its gate. */
 export const opensGate = (component: string, name: string): boolean =>

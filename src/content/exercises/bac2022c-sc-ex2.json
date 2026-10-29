@@ -1,6 +1,6 @@
 {
   "id": "bac2022c-sc-ex2",
-  "contentVersion": "exsc2-0.1.0",
+  "contentVersion": "exsc2-0.3.0",
   "reviewed": false,
   "title": {
     "fr": "Exercice 2 : probabilités (urne rouge et noire)",
@@ -215,6 +215,16 @@
           5
         ]
       }
+    },
+    "perBox": {
+      "fn": "product",
+      "args": {
+        "factors": [
+          3,
+          2,
+          1
+        ]
+      }
     }
   },
   "results": [
@@ -320,7 +330,7 @@
               "blockId": "qsc1-s1",
               "trust": {
                 "reviewed": false,
-                "contentVersion": "exsc2-0.1.0",
+                "contentVersion": "exsc2-0.3.0",
                 "source": "authored",
                 "status": "ok"
               },
@@ -347,7 +357,7 @@
               "blockId": "qsc1-urn",
               "trust": {
                 "reviewed": false,
-                "contentVersion": "exsc2-0.1.0",
+                "contentVersion": "exsc2-0.3.0",
                 "source": "authored",
                 "status": "ok"
               },
@@ -365,7 +375,7 @@
               "blockId": "qsc1-s2",
               "trust": {
                 "reviewed": false,
-                "contentVersion": "exsc2-0.1.0",
+                "contentVersion": "exsc2-0.3.0",
                 "source": "authored",
                 "status": "ok"
               },
@@ -386,7 +396,7 @@
               "blockId": "qsc1-compare",
               "trust": {
                 "reviewed": false,
-                "contentVersion": "exsc2-0.1.0",
+                "contentVersion": "exsc2-0.3.0",
                 "source": "authored",
                 "status": "ok"
               },
@@ -484,7 +494,7 @@
               "blockId": "qsc1-s3",
               "trust": {
                 "reviewed": false,
-                "contentVersion": "exsc2-0.1.0",
+                "contentVersion": "exsc2-0.3.0",
                 "source": "authored",
                 "status": "ok"
               },
@@ -564,10 +574,89 @@
               ]
             },
             {
+              "blockId": "qsc1-boxes-intro",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "exsc2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "id": "boxes-intro",
+              "skills": [
+                "ordering-vs-choosing"
+              ],
+              "kind": "text",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "نجرّبو على صندوق صغير فيه ثلاثة حمر وأربعة كحل. نجبدو ثلاثة كور: كل ثلاثة كور يكوّنو علبة، والعلبة الوحدة تتعدّ برشا مرّات كي نعدّو بالترتيب. حلّ علبة وشوف."
+                  }
+                ]
+              }
+            },
+            {
+              "blockId": "qsc1-boxes",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "exsc2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "id": "boxes",
+              "skills": [
+                "ordering-vs-choosing",
+                "combinations-count"
+              ],
+              "kind": "component",
+              "component": {
+                "component": "GroupBoxes",
+                "props": {
+                  "balls": [
+                    {
+                      "id": "r1",
+                      "value": 1,
+                      "color": "red"
+                    },
+                    {
+                      "id": "r2",
+                      "value": 1,
+                      "color": "red"
+                    },
+                    {
+                      "id": "r3",
+                      "value": 1,
+                      "color": "red"
+                    },
+                    {
+                      "id": "n1",
+                      "value": 0,
+                      "color": "black"
+                    },
+                    {
+                      "id": "n2",
+                      "value": 0,
+                      "color": "black"
+                    },
+                    {
+                      "id": "n3",
+                      "value": 0,
+                      "color": "black"
+                    },
+                    {
+                      "id": "n4",
+                      "value": 0,
+                      "color": "black"
+                    }
+                  ],
+                  "k": 3
+                }
+              }
+            },
+            {
               "blockId": "qsc1-s4",
               "trust": {
                 "reviewed": false,
-                "contentVersion": "exsc2-0.1.0",
+                "contentVersion": "exsc2-0.3.0",
                 "source": "authored",
                 "status": "ok"
               },
@@ -625,16 +714,20 @@
                   "id": "all_balls",
                   "misconceptionId": "counts_balls_not_draws",
                   "reviewed": false
+                },
+                {
+                  "id": "ordered_divided_by_k",
+                  "misconceptionId": "divides_by_balls_not_orderings",
+                  "reviewed": false
                 }
               ],
               "hints": [
                 {
                   "ar": [
                     {
-                      "ar": "نختارو ثلاثة كور من العشرة، والترتيب ما يهمّش:"
+                      "ar": "شوف العلبة في الصورة: فيها ثلاثة كور، والعلبة الوحدة تتعدّ ستّة مرّات كي نعدّو بالترتيب."
                     }
-                  ],
-                  "math": "\\binom{10}{3}"
+                  ]
                 },
                 {
                   "ar": [
@@ -650,7 +743,7 @@
                       "ar": "اقسم على عدد الترتيبات متاع ثلاثة كور:"
                     }
                   ],
-                  "math": "\\frac{10 \\times 9 \\times 8}{3 \\times 2 \\times 1}"
+                  "math": "C_{10}^{3} = \\frac{\\val{nOrd}}{\\val{perBox}}"
                 }
               ],
               "walkthrough": {
@@ -688,7 +781,7 @@
               "blockId": "qsc1-s5",
               "trust": {
                 "reviewed": false,
-                "contentVersion": "exsc2-0.1.0",
+                "contentVersion": "exsc2-0.3.0",
                 "source": "authored",
                 "status": "ok"
               },
@@ -697,13 +790,115 @@
                 "combinations-count"
               ],
               "kind": "math",
-              "latex": "\\binom{10}{3} = \\val{nTotal}"
+              "latex": "C_{10}^{3} = \\val{nTotal}"
+            },
+            {
+              "blockId": "qsc1-choice-intro",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "exsc2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "id": "choice-intro",
+              "skills": [
+                "choices-and-product"
+              ],
+              "kind": "text",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "في نفس الصندوق الصغير، نحبّو تيراج فيه كورة حمراء وحدة وزوج كور كحل. اختار كورة حمراء، ومعاها زوج كحل، وشوف الخانة اللي تطلع."
+                  }
+                ]
+              }
+            },
+            {
+              "blockId": "qsc1-choice",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "exsc2-0.3.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "id": "choice",
+              "skills": [
+                "choices-and-product",
+                "multiplication-principle"
+              ],
+              "kind": "component",
+              "component": {
+                "component": "ChoiceProduct",
+                "props": {
+                  "stages": [
+                    {
+                      "title": {
+                        "ar": [
+                          {
+                            "ar": "كورة حمراء"
+                          }
+                        ]
+                      },
+                      "balls": [
+                        {
+                          "id": "r1",
+                          "value": 1,
+                          "color": "red"
+                        },
+                        {
+                          "id": "r2",
+                          "value": 1,
+                          "color": "red"
+                        },
+                        {
+                          "id": "r3",
+                          "value": 1,
+                          "color": "red"
+                        }
+                      ],
+                      "size": 1
+                    },
+                    {
+                      "title": {
+                        "ar": [
+                          {
+                            "ar": "زوج كور كحل"
+                          }
+                        ]
+                      },
+                      "balls": [
+                        {
+                          "id": "n1",
+                          "value": 0,
+                          "color": "black"
+                        },
+                        {
+                          "id": "n2",
+                          "value": 0,
+                          "color": "black"
+                        },
+                        {
+                          "id": "n3",
+                          "value": 0,
+                          "color": "black"
+                        },
+                        {
+                          "id": "n4",
+                          "value": 0,
+                          "color": "black"
+                        }
+                      ],
+                      "size": 2
+                    }
+                  ]
+                }
+              }
             },
             {
               "blockId": "qsc1-s6",
               "trust": {
                 "reviewed": false,
-                "contentVersion": "exsc2-0.1.0",
+                "contentVersion": "exsc2-0.3.0",
                 "source": "authored",
                 "status": "ok"
               },
@@ -761,6 +956,10 @@
                 {
                   "value": "24",
                   "misconceptionId": "wrong_group_size"
+                },
+                {
+                  "value": "48",
+                  "misconceptionId": "reads_choose_as_product"
                 }
               ],
               "procedures": [
@@ -779,17 +978,16 @@
                 {
                   "ar": [
                     {
-                      "ar": "كورة حمراء وحدة من الأربعة، والزوز الأخرين لازم يكونو كحل من الستّة."
+                      "ar": "في الصورة، كل تيراج فيه كورة حمراء وحدة وزوج كور كحل. شوف الحمر، وشوف الأزواج الكحل الكل."
                     }
                   ]
                 },
                 {
                   "ar": [
                     {
-                      "ar": "نختارو الحمراء، ومعاها نختارو الزوز الكحل: «ومعاها» معناها نضربو."
+                      "ar": "نختارو الحمراء، ومعاها نختارو الزوج الكحل: «ومعاها» معناها نضربو، عدد الحمر في عدد الأزواج."
                     }
-                  ],
-                  "math": "\\binom{4}{1} \\times \\binom{6}{2}"
+                  ]
                 },
                 {
                   "ar": [
@@ -797,7 +995,7 @@
                       "ar": "عدد الطرق باش نختارو زوز كحل:"
                     }
                   ],
-                  "math": "\\binom{6}{2} = \\val{c62}"
+                  "math": "C_{6}^{2} = \\val{c62}"
                 }
               ],
               "walkthrough": {
@@ -833,7 +1031,7 @@
               "blockId": "qsc1-s7",
               "trust": {
                 "reviewed": false,
-                "contentVersion": "exsc2-0.1.0",
+                "contentVersion": "exsc2-0.3.0",
                 "source": "authored",
                 "status": "ok"
               },
@@ -842,13 +1040,13 @@
                 "multiplication-principle"
               ],
               "kind": "math",
-              "latex": "\\binom{4}{1} \\times \\binom{6}{2} = \\val{c41} \\times \\val{c62} = \\val{nA}"
+              "latex": "C_{4}^{1} \\times C_{6}^{2} = \\val{c41} \\times \\val{c62} = \\val{nA}"
             },
             {
               "blockId": "qsc1-s8",
               "trust": {
                 "reviewed": false,
-                "contentVersion": "exsc2-0.1.0",
+                "contentVersion": "exsc2-0.3.0",
                 "source": "authored",
                 "status": "ok"
               },
@@ -921,6 +1119,11 @@
                 {
                   "id": "earlier_result",
                   "misconceptionId": "count_given_as_probability",
+                  "reviewed": false
+                },
+                {
+                  "id": "total_over_favourable",
+                  "misconceptionId": "probability_above_one",
                   "reviewed": false
                 }
               ],
@@ -995,7 +1198,7 @@
               "blockId": "qsc1-s9",
               "trust": {
                 "reviewed": false,
-                "contentVersion": "exsc2-0.1.0",
+                "contentVersion": "exsc2-0.3.0",
                 "source": "authored",
                 "status": "ok"
               },
@@ -1034,11 +1237,93 @@
   ],
   "deepDives": [
     {
+      "id": "dd_choose_bridge",
+      "blockId": "dd-cb",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "exsc2-0.3.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "addresses": [
+        "counting"
+      ],
+      "blocks": [
+        {
+          "type": "tutor_text",
+          "blockId": "dd-cb-1",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "exsc2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "text": {
+            "ar": [
+              {
+                "ar": "نفس الصندوق الصغير: ثلاثة حمر وأربعة كحل، ونختارو ثلاثة كور. علّم الكور المختارة وزيد كل طريقة تنجّم تختارها. وبعد بدّل وشوف الكور اللي تبقى في الصندوق."
+              }
+            ]
+          }
+        },
+        {
+          "type": "component",
+          "blockId": "dd-cb-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "exsc2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "SlotsPattern",
+            "props": {
+              "n": 7,
+              "k": 3,
+              "mode": "bridge",
+              "bridge": {
+                "balls": [
+                  {
+                    "id": "b1",
+                    "label": "R1"
+                  },
+                  {
+                    "id": "b2",
+                    "label": "R2"
+                  },
+                  {
+                    "id": "b3",
+                    "label": "R3"
+                  },
+                  {
+                    "id": "b4",
+                    "label": "N1"
+                  },
+                  {
+                    "id": "b5",
+                    "label": "N2"
+                  },
+                  {
+                    "id": "b6",
+                    "label": "N3"
+                  },
+                  {
+                    "id": "b7",
+                    "label": "N4"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
       "id": "dd_count_draws",
       "blockId": "dd-cd",
       "trust": {
         "reviewed": false,
-        "contentVersion": "exsc2-0.1.0",
+        "contentVersion": "exsc2-0.3.0",
         "source": "authored",
         "status": "ok"
       },
@@ -1082,7 +1367,7 @@
           "blockId": "dd-cd-1",
           "trust": {
             "reviewed": false,
-            "contentVersion": "exsc2-0.1.0",
+            "contentVersion": "exsc2-0.3.0",
             "source": "authored",
             "status": "ok"
           },
@@ -1099,7 +1384,7 @@
           "blockId": "dd-cd-2",
           "trust": {
             "reviewed": false,
-            "contentVersion": "exsc2-0.1.0",
+            "contentVersion": "exsc2-0.3.0",
             "source": "authored",
             "status": "ok"
           },
@@ -1110,7 +1395,7 @@
           "blockId": "dd-cd-os",
           "trust": {
             "reviewed": false,
-            "contentVersion": "exsc2-0.1.0",
+            "contentVersion": "exsc2-0.3.0",
             "source": "authored",
             "status": "ok"
           },
@@ -1126,7 +1411,7 @@
         "blockId": "dd-cd-mini",
         "trust": {
           "reviewed": false,
-          "contentVersion": "exsc2-0.1.0",
+          "contentVersion": "exsc2-0.3.0",
           "source": "authored",
           "status": "ok"
         },
@@ -1190,7 +1475,7 @@
       "blockId": "dd-at",
       "trust": {
         "reviewed": false,
-        "contentVersion": "exsc2-0.1.0",
+        "contentVersion": "exsc2-0.3.0",
         "source": "authored",
         "status": "ok"
       },
@@ -1234,7 +1519,7 @@
           "blockId": "dd-at-1",
           "trust": {
             "reviewed": false,
-            "contentVersion": "exsc2-0.1.0",
+            "contentVersion": "exsc2-0.3.0",
             "source": "authored",
             "status": "ok"
           },
@@ -1251,7 +1536,7 @@
           "blockId": "dd-at-os",
           "trust": {
             "reviewed": false,
-            "contentVersion": "exsc2-0.1.0",
+            "contentVersion": "exsc2-0.3.0",
             "source": "authored",
             "status": "ok"
           },
@@ -1279,18 +1564,18 @@
           "blockId": "dd-at-2",
           "trust": {
             "reviewed": false,
-            "contentVersion": "exsc2-0.1.0",
+            "contentVersion": "exsc2-0.3.0",
             "source": "authored",
             "status": "ok"
           },
-          "latex": "\\binom{3}{1} \\times \\binom{2}{1}"
+          "latex": "C_{3}^{1} \\times C_{2}^{1}"
         }
       ],
       "mini": {
         "blockId": "dd-at-mini",
         "trust": {
           "reviewed": false,
-          "contentVersion": "exsc2-0.1.0",
+          "contentVersion": "exsc2-0.3.0",
           "source": "authored",
           "status": "ok"
         },
@@ -1361,7 +1646,7 @@
       "blockId": "dd-ft",
       "trust": {
         "reviewed": false,
-        "contentVersion": "exsc2-0.1.0",
+        "contentVersion": "exsc2-0.3.0",
         "source": "authored",
         "status": "ok"
       },
@@ -1405,7 +1690,7 @@
           "blockId": "dd-ft-1",
           "trust": {
             "reviewed": false,
-            "contentVersion": "exsc2-0.1.0",
+            "contentVersion": "exsc2-0.3.0",
             "source": "authored",
             "status": "ok"
           },
@@ -1422,7 +1707,7 @@
           "blockId": "dd-ft-os",
           "trust": {
             "reviewed": false,
-            "contentVersion": "exsc2-0.1.0",
+            "contentVersion": "exsc2-0.3.0",
             "source": "authored",
             "status": "ok"
           },
@@ -1450,7 +1735,7 @@
           "blockId": "dd-ft-2",
           "trust": {
             "reviewed": false,
-            "contentVersion": "exsc2-0.1.0",
+            "contentVersion": "exsc2-0.3.0",
             "source": "authored",
             "status": "ok"
           },
@@ -1461,7 +1746,7 @@
         "blockId": "dd-ft-mini",
         "trust": {
           "reviewed": false,
-          "contentVersion": "exsc2-0.1.0",
+          "contentVersion": "exsc2-0.3.0",
           "source": "authored",
           "status": "ok"
         },
@@ -1529,7 +1814,7 @@
       "blockId": "var-sim-1-total-1",
       "trust": {
         "reviewed": false,
-        "contentVersion": "exsc2-0.1.0",
+        "contentVersion": "exsc2-0.3.0",
         "source": "authored",
         "status": "ok"
       },
@@ -1544,7 +1829,7 @@
           "blockId": "var-sim-1-total-1-c",
           "trust": {
             "reviewed": false,
-            "contentVersion": "exsc2-0.1.0",
+            "contentVersion": "exsc2-0.3.0",
             "source": "authored",
             "status": "ok"
           },
@@ -1560,7 +1845,7 @@
         "blockId": "var-sim-1-total-1-s",
         "trust": {
           "reviewed": false,
-          "contentVersion": "exsc2-0.1.0",
+          "contentVersion": "exsc2-0.3.0",
           "source": "authored",
           "status": "ok"
         },
@@ -1644,7 +1929,7 @@
       "blockId": "var-sim-1-total-2",
       "trust": {
         "reviewed": false,
-        "contentVersion": "exsc2-0.1.0",
+        "contentVersion": "exsc2-0.3.0",
         "source": "authored",
         "status": "ok"
       },
@@ -1659,7 +1944,7 @@
           "blockId": "var-sim-1-total-2-c",
           "trust": {
             "reviewed": false,
-            "contentVersion": "exsc2-0.1.0",
+            "contentVersion": "exsc2-0.3.0",
             "source": "authored",
             "status": "ok"
           },
@@ -1675,7 +1960,7 @@
         "blockId": "var-sim-1-total-2-s",
         "trust": {
           "reviewed": false,
-          "contentVersion": "exsc2-0.1.0",
+          "contentVersion": "exsc2-0.3.0",
           "source": "authored",
           "status": "ok"
         },
@@ -1764,7 +2049,7 @@
       "blockId": "var-sim-1-onered-1",
       "trust": {
         "reviewed": false,
-        "contentVersion": "exsc2-0.1.0",
+        "contentVersion": "exsc2-0.3.0",
         "source": "authored",
         "status": "ok"
       },
@@ -1778,7 +2063,7 @@
         "blockId": "var-sim-1-onered-1-s",
         "trust": {
           "reviewed": false,
-          "contentVersion": "exsc2-0.1.0",
+          "contentVersion": "exsc2-0.3.0",
           "source": "authored",
           "status": "ok"
         },
@@ -1884,7 +2169,7 @@
       "blockId": "var-sim-1-p-1",
       "trust": {
         "reviewed": false,
-        "contentVersion": "exsc2-0.1.0",
+        "contentVersion": "exsc2-0.3.0",
         "source": "authored",
         "status": "ok"
       },
@@ -1899,7 +2184,7 @@
           "blockId": "var-sim-1-p-1-c",
           "trust": {
             "reviewed": false,
-            "contentVersion": "exsc2-0.1.0",
+            "contentVersion": "exsc2-0.3.0",
             "source": "authored",
             "status": "ok"
           },
@@ -1927,7 +2212,7 @@
         "blockId": "var-sim-1-p-1-s",
         "trust": {
           "reviewed": false,
-          "contentVersion": "exsc2-0.1.0",
+          "contentVersion": "exsc2-0.3.0",
           "source": "authored",
           "status": "ok"
         },
@@ -2019,7 +2304,7 @@
       "blockId": "var-tr-1-onered-5r5n",
       "trust": {
         "reviewed": false,
-        "contentVersion": "exsc2-0.1.0",
+        "contentVersion": "exsc2-0.3.0",
         "source": "authored",
         "status": "ok"
       },
@@ -2034,7 +2319,7 @@
           "blockId": "var-tr-1-onered-5r5n-c",
           "trust": {
             "reviewed": false,
-            "contentVersion": "exsc2-0.1.0",
+            "contentVersion": "exsc2-0.3.0",
             "source": "authored",
             "status": "ok"
           },
@@ -2048,7 +2333,7 @@
         "blockId": "var-tr-1-onered-5r5n-s",
         "trust": {
           "reviewed": false,
-          "contentVersion": "exsc2-0.1.0",
+          "contentVersion": "exsc2-0.3.0",
           "source": "authored",
           "status": "ok"
         },
@@ -2190,7 +2475,7 @@
       "blockId": "var-tr-1-p-5r5n",
       "trust": {
         "reviewed": false,
-        "contentVersion": "exsc2-0.1.0",
+        "contentVersion": "exsc2-0.3.0",
         "source": "authored",
         "status": "ok"
       },
@@ -2204,7 +2489,7 @@
         "blockId": "var-tr-1-p-5r5n-s",
         "trust": {
           "reviewed": false,
-          "contentVersion": "exsc2-0.1.0",
+          "contentVersion": "exsc2-0.3.0",
           "source": "authored",
           "status": "ok"
         },
@@ -2328,6 +2613,563 @@
         "draw": "simultaneous",
         "k": 2
       }
+    },
+    {
+      "id": "alt-1-s4-boxes",
+      "blockId": "var-alt-1-s4-boxes",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "exsc2-0.3.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "alternative",
+      "forSteps": [
+        "1/s4"
+      ],
+      "representation": "GroupBoxes",
+      "intro": [
+        {
+          "type": "tutor_text",
+          "blockId": "var-alt-1-s4-boxes-i1",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "exsc2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "text": {
+            "ar": [
+              {
+                "ar": "نجرّبو بالعلب: صندوق فيه أربعة كور، ونجبدو ثلاثة. حلّ علبة وشوف شنوّة فيها."
+              }
+            ]
+          }
+        },
+        {
+          "type": "component",
+          "blockId": "var-alt-1-s4-boxes-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "exsc2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "GroupBoxes",
+            "props": {
+              "balls": [
+                {
+                  "id": "r1",
+                  "value": 1,
+                  "color": "red"
+                },
+                {
+                  "id": "r2",
+                  "value": 1,
+                  "color": "red"
+                },
+                {
+                  "id": "n1",
+                  "value": 0,
+                  "color": "black"
+                },
+                {
+                  "id": "n2",
+                  "value": 0,
+                  "color": "black"
+                }
+              ],
+              "k": 3
+            }
+          }
+        }
+      ],
+      "step": {
+        "blockId": "var-alt-1-s4-boxes-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "exsc2-0.3.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "id": "boxes",
+        "skills": [
+          "ordering-vs-choosing",
+          "combinations-count"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "قدّاش من علبة؟ يعني قدّاش من تيراج مع بعض؟"
+            }
+          ]
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "outcomeCount",
+            "args": {}
+          }
+        },
+        "keypad": "integer",
+        "procedures": [
+          {
+            "id": "ordered_draw",
+            "misconceptionId": "counts_ordered_draws",
+            "reviewed": false
+          },
+          {
+            "id": "ordered_divided_by_k",
+            "misconceptionId": "divides_by_balls_not_orderings",
+            "reviewed": false
+          },
+          {
+            "id": "with_replacement",
+            "misconceptionId": "draws_with_replacement",
+            "reviewed": false
+          }
+        ],
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "حلّ علبة وشوف قدّاش من ترتيب فيها."
+              }
+            ]
+          },
+          {
+            "ar": [
+              {
+                "ar": "التيراجات بالترتيب فيها كل علبة ستّ مرّات: اقسم عدد التيراجات بالترتيب على عدد الترتيبات."
+              }
+            ]
+          }
+        ]
+      },
+      "experiment": {
+        "urn": [
+          {
+            "id": "r1",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "r2",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "n1",
+            "value": 0,
+            "color": "black"
+          },
+          {
+            "id": "n2",
+            "value": 0,
+            "color": "black"
+          }
+        ],
+        "draw": "simultaneous",
+        "k": 3
+      },
+      "addresses": [
+        "counting",
+        "why"
+      ]
+    },
+    {
+      "id": "alt-1-s6-choice",
+      "blockId": "var-alt-1-s6-choice",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "exsc2-0.3.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "alternative",
+      "forSteps": [
+        "1/s6"
+      ],
+      "representation": "ChoiceProduct",
+      "intro": [
+        {
+          "type": "tutor_text",
+          "blockId": "var-alt-1-s6-choice-i1",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "exsc2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "text": {
+            "ar": [
+              {
+                "ar": "نجرّبو بالصورة: صندوق فيه زوز حمر وأربعة كحل. التيراج فيه كورة حمراء وحدة وزوج كور كحل."
+              }
+            ]
+          }
+        },
+        {
+          "type": "component",
+          "blockId": "var-alt-1-s6-choice-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "exsc2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "ChoiceProduct",
+            "props": {
+              "stages": [
+                {
+                  "title": {
+                    "ar": [
+                      {
+                        "ar": "كورة حمراء"
+                      }
+                    ]
+                  },
+                  "balls": [
+                    {
+                      "id": "r1",
+                      "value": 1,
+                      "color": "red"
+                    },
+                    {
+                      "id": "r2",
+                      "value": 1,
+                      "color": "red"
+                    }
+                  ],
+                  "size": 1
+                },
+                {
+                  "title": {
+                    "ar": [
+                      {
+                        "ar": "زوج كور كحل"
+                      }
+                    ]
+                  },
+                  "balls": [
+                    {
+                      "id": "n1",
+                      "value": 0,
+                      "color": "black"
+                    },
+                    {
+                      "id": "n2",
+                      "value": 0,
+                      "color": "black"
+                    },
+                    {
+                      "id": "n3",
+                      "value": 0,
+                      "color": "black"
+                    },
+                    {
+                      "id": "n4",
+                      "value": 0,
+                      "color": "black"
+                    }
+                  ],
+                  "size": 2
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "step": {
+        "blockId": "var-alt-1-s6-choice-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "exsc2-0.3.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "id": "choice",
+        "skills": [
+          "choices-and-product",
+          "multiplication-principle"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "قدّاش من تيراج فيه كورة حمراء وحدة بالضبط؟"
+            }
+          ]
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "count",
+            "args": {
+              "event": {
+                "id": "value_eq",
+                "args": {
+                  "valueFn": {
+                    "id": "count_value",
+                    "args": {
+                      "value": 1
+                    }
+                  },
+                  "value": 1
+                }
+              }
+            }
+          }
+        },
+        "keypad": "integer",
+        "wrongAnswers": [
+          {
+            "value": "8",
+            "misconceptionId": "adds_instead_of_multiplying"
+          },
+          {
+            "value": "16",
+            "misconceptionId": "reads_choose_as_product"
+          }
+        ],
+        "procedures": [
+          {
+            "id": "balls_in_event",
+            "misconceptionId": "counts_only_reds",
+            "reviewed": false
+          },
+          {
+            "id": "all_outcomes",
+            "misconceptionId": "gives_total_as_favourable",
+            "reviewed": false
+          }
+        ],
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "اختار كورة حمراء، ومعاها زوج كحل: كل خيار من الحمر مع كل زوج."
+              }
+            ]
+          },
+          {
+            "ar": [
+              {
+                "ar": "«ومعاها» معناها نضربو: عدد الحمر في عدد الأزواج الكحل."
+              }
+            ]
+          }
+        ]
+      },
+      "experiment": {
+        "urn": [
+          {
+            "id": "r1",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "r2",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "n1",
+            "value": 0,
+            "color": "black"
+          },
+          {
+            "id": "n2",
+            "value": 0,
+            "color": "black"
+          },
+          {
+            "id": "n3",
+            "value": 0,
+            "color": "black"
+          },
+          {
+            "id": "n4",
+            "value": 0,
+            "color": "black"
+          }
+        ],
+        "draw": "simultaneous",
+        "k": 3
+      },
+      "addresses": [
+        "why"
+      ]
+    },
+    {
+      "id": "alt-1-s8-partwhole",
+      "blockId": "var-alt-1-s8-partwhole",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "exsc2-0.3.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "alternative",
+      "forSteps": [
+        "1/s8"
+      ],
+      "representation": "PartWholeBar",
+      "intro": [
+        {
+          "type": "tutor_text",
+          "blockId": "var-alt-1-s8-partwhole-i1",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "exsc2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "text": {
+            "ar": [
+              {
+                "ar": "الاحتمال جزء من الكلّ. كي نكتبو الكسر مقلوب، يطلع الجزء أكبر من الكلّ. شوف الشريط."
+              }
+            ]
+          }
+        },
+        {
+          "type": "component",
+          "blockId": "var-alt-1-s8-partwhole-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "exsc2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "PartWholeBar",
+            "props": {
+              "whole": "6",
+              "part": "12",
+              "mode": "feedback"
+            }
+          }
+        }
+      ],
+      "step": {
+        "blockId": "var-alt-1-s8-partwhole-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "exsc2-0.3.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "id": "partwhole",
+        "skills": [
+          "probability-by-counting",
+          "equiprobability"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "في نفس الصندوق الصغير نجبدو ثلاثة كور. قدّاش الاحتمال باش يكون فيهم كورة حمراء وحدة بالضبط؟"
+            }
+          ]
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "probability",
+            "args": {
+              "event": {
+                "id": "value_eq",
+                "args": {
+                  "valueFn": {
+                    "id": "count_value",
+                    "args": {
+                      "value": 1
+                    }
+                  },
+                  "value": 1
+                }
+              }
+            }
+          }
+        },
+        "keypad": "probability",
+        "procedures": [
+          {
+            "id": "total_over_favourable",
+            "misconceptionId": "probability_above_one",
+            "reviewed": false
+          },
+          {
+            "id": "balls_in_event",
+            "misconceptionId": "single_ball_probability",
+            "reviewed": false
+          }
+        ],
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "الاحتمال جزء من الكلّ: ما ينجّمش يفوّت الواحد."
+              }
+            ]
+          },
+          {
+            "ar": [
+              {
+                "ar": "الملائمة فوق، والكل لوطة."
+              }
+            ]
+          }
+        ]
+      },
+      "experiment": {
+        "urn": [
+          {
+            "id": "r1",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "r2",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "r3",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "n1",
+            "value": 0,
+            "color": "black"
+          },
+          {
+            "id": "n2",
+            "value": 0,
+            "color": "black"
+          },
+          {
+            "id": "n3",
+            "value": 0,
+            "color": "black"
+          },
+          {
+            "id": "n4",
+            "value": 0,
+            "color": "black"
+          }
+        ],
+        "draw": "simultaneous",
+        "k": 3
+      },
+      "addresses": [
+        "why"
+      ]
     }
   ]
 }

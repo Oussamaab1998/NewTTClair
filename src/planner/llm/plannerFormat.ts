@@ -16,7 +16,11 @@ import {
   JsonObjectSchema,
   type ComponentName,
 } from '../../components/contract';
-import { componentMeta, REGISTRY } from '../../components/registry';
+import {
+  componentMeta,
+  isOfferedToPlanner,
+  REGISTRY,
+} from '../../components/registry';
 import { CONTAINER_SLOTS } from '../../components/shared/schemas';
 import {
   blockBodies,
@@ -125,7 +129,12 @@ const isContainer = (name: ComponentName) =>
 export function plannerComponents(skills?: readonly string[]): ComponentName[] {
   const leaves = COMPONENT_NAMES.filter(name => {
     const meta = componentMeta(name);
-    if (!meta || meta.kind !== 'visual' || isContainer(name)) {
+    if (
+      !meta ||
+      meta.kind !== 'visual' ||
+      isContainer(name) ||
+      !isOfferedToPlanner(meta)
+    ) {
       return false;
     }
     return skills === undefined || meta.teaches.some(s => skills.includes(s));

@@ -751,14 +751,14 @@ describe('fallbacks', () => {
       skills: [],
       kind: 'component',
       // A contract name with no registered view yet.
-      component: { component: 'BinomialExplorer', props: {} },
+      component: { component: 'InverseMirror', props: {} },
     });
     const s = new Session(loaded);
     expect(s.items.some(i => i.kind === 'component_fallback')).toBe(true);
     expect(s.log.all()).toMatchObject([
       {
         t: 'component_error',
-        component: 'BinomialExplorer',
+        component: 'InverseMirror',
         reason: 'unknown_component',
       },
     ]);

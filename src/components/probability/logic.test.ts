@@ -216,7 +216,7 @@ describe('registry specs', () => {
   });
   it('rejects unknown components, unknown props and engine-inconsistent values', () => {
     expect(
-      resolveSpec({ component: 'BinomialExplorer', props: {} }, experiment),
+      resolveSpec({ component: 'InverseMirror', props: {} }, experiment),
     ).toMatchObject({ ok: false, reason: 'unknown_component' });
     expect(
       resolveSpec({ component: 'Urn', props: { colour: 'red' } }, experiment),

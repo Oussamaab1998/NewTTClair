@@ -4,7 +4,7 @@
     "skillId": "simultaneous-draw",
     "description": "Counts ordered draws in a simultaneous draw (each group counted once per order).",
     "signature": "720 for C(10,3); 360 for the draws of A",
-    "repairComponent": "OutcomeSpace",
+    "repairComponent": "GroupBoxes",
     "feedback": {
       "ar": [
         {
@@ -21,7 +21,7 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.1.0",
+      "contentVersion": "exsc2-0.3.0",
       "source": "authored",
       "status": "ok"
     }
@@ -48,7 +48,7 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.1.0",
+      "contentVersion": "exsc2-0.3.0",
       "source": "authored",
       "status": "ok"
     }
@@ -75,7 +75,7 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.1.0",
+      "contentVersion": "exsc2-0.3.0",
       "source": "authored",
       "status": "ok"
     }
@@ -102,7 +102,7 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.1.0",
+      "contentVersion": "exsc2-0.3.0",
       "source": "authored",
       "status": "ok"
     }
@@ -112,7 +112,7 @@
     "skillId": "multiplication-principle",
     "description": "Adds the choices of reds and blacks instead of multiplying them.",
     "signature": "19 = 4 + 15; 19/120",
-    "repairComponent": "OutcomeSpace",
+    "repairComponent": "ChoiceProduct",
     "feedback": {
       "ar": [
         {
@@ -129,7 +129,7 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.1.0",
+      "contentVersion": "exsc2-0.3.0",
       "source": "authored",
       "status": "ok"
     }
@@ -156,7 +156,7 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.1.0",
+      "contentVersion": "exsc2-0.3.0",
       "source": "authored",
       "status": "ok"
     }
@@ -166,7 +166,7 @@
     "skillId": "multiplication-principle",
     "description": "Chooses the wrong number of balls of one colour.",
     "signature": "24 = 4 × 6 (one black); 15 = C(6,2) for no red",
-    "repairComponent": "OutcomeSpace",
+    "repairComponent": "ChoiceProduct",
     "feedback": {
       "ar": [
         {
@@ -183,7 +183,7 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.1.0",
+      "contentVersion": "exsc2-0.3.0",
       "source": "authored",
       "status": "ok"
     }
@@ -210,7 +210,7 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.1.0",
+      "contentVersion": "exsc2-0.3.0",
       "source": "authored",
       "status": "ok"
     }
@@ -237,7 +237,7 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.1.0",
+      "contentVersion": "exsc2-0.3.0",
       "source": "authored",
       "status": "ok"
     }
@@ -264,7 +264,7 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.1.0",
+      "contentVersion": "exsc2-0.3.0",
       "source": "authored",
       "status": "ok"
     }
@@ -291,7 +291,7 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.1.0",
+      "contentVersion": "exsc2-0.3.0",
       "source": "authored",
       "status": "ok"
     }
@@ -317,7 +317,7 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.1.0",
+      "contentVersion": "exsc2-0.3.0",
       "source": "authored",
       "status": "ok"
     }
@@ -344,7 +344,7 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.1.0",
+      "contentVersion": "exsc2-0.3.0",
       "source": "authored",
       "status": "ok"
     }
@@ -371,7 +371,88 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.1.0",
+      "contentVersion": "exsc2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "divides_by_balls_not_orderings",
+    "skillId": "ordering-vs-choosing",
+    "description": "Divides the ordered count by the number of balls in a box instead of the number of orderings of a box.",
+    "signature": "240 = 720 / 3 for C(10,3); 8 = 24 / 3 for 4 balls, 3 drawn",
+    "repairComponent": "GroupBoxes",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "قسمت على عدد الكور في العلبة؟ في العلبة ثلاثة كور، أما الترتيبات متاعها أكثر: حلّ علبة وعدّهم."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "قسمت على ثلاثة، وهذا عدد الكور في العلبة. اللازم تقسم على عدد الترتيبات اللي في العلبة."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "exsc2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "reads_choose_as_product",
+    "skillId": "choices-and-product",
+    "description": "Reads the number of ways to choose k of n as n times k (6 x 2 = 12; 4 x 12 = 48).",
+    "signature": "48 = 4 x 12 for the draws with one red; 12 for the pairs of 6 blacks",
+    "repairComponent": "ChoiceProduct",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "عدد الأزواج الكحل موش ستّة في زوز. عدّ الأزواج في الصورة."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "قرات عدد الأزواج كأنو ستّة في زوز. الأزواج الممكنة أقلّ من هذا: عدّهم واحد واحد في الصورة."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "exsc2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "probability_above_one",
+    "skillId": "probability-by-counting",
+    "description": "Writes the probability upside down (total over favourable): a value above 1.",
+    "signature": "120/60 = 2 for P(A); 35/18 on the small box",
+    "repairComponent": "PartWholeBar",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "الاحتمال ما ينجّمش يفوّت الكلّ، والقيمة اللي كتبتها تفوّتو. شوف الشريط، وبعد اكتب الكسر من جديد: الملائمة فوق والكل لوطة."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "قلبت الكسر: كتبت الكل فوق والملائمة لوطة. الملائمة هي اللي تمشي فوق."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "exsc2-0.3.0",
       "source": "authored",
       "status": "ok"
     }

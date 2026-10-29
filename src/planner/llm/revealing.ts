@@ -15,7 +15,8 @@
  * compared with the answer's values: LawChart shows p(X = 0) = 7/10, the
  * answer of 2.a/s10 and of 1.b/s8.
  */
-import { resolveSpec } from '../../components/registry';
+import { componentMeta, resolveSpec } from '../../components/registry';
+import { revealedByRules } from '../../components/reveals';
 import type { ComponentSpec } from '../../components/contract';
 import { CONTAINER_SLOTS } from '../../components/shared/schemas';
 import type { Experiment } from '../../engine/calls';
@@ -200,6 +201,16 @@ export function revealsAnswer(
     }
     if (displayedValues(content, key, s).some(f => answer.has(valueKey(f)))) {
       return `${s.component} (it displays the answer's value)`;
+    }
+    // A component that declares what it reveals (probability2, hard rule 9).
+    const declared = revealedByRules(
+      componentMeta(s.component)?.reveals,
+      s.props ?? {},
+      experimentOf(content, key),
+      f => answer.has(valueKey(f)),
+    );
+    if (declared) {
+      return `${s.component} (${declared.note})`;
     }
     for (const x of inner(s)) {
       const n = check(x);

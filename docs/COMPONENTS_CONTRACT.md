@@ -36,7 +36,7 @@ registry[name] = { component, schema: ZodSchema, kind: "visual" | "task", weight
 7. **Accessibility/i18n**: labels in ar-TN and fr; not color-only; respect reduce-motion; touch targets >= 44 pt.
 8. **Events** must include enough payload for diagnosis (selected ids, correct ids, values, parameters), not just "tapped".
 9. **Replay mode** renders a recorded interaction without side effects (for the replay harness and for showing a student's past work).
-10. **Performance**: precompute point arrays; avoid React state updates per drag tick (use Reanimated shared values); target smooth dragging on a cheap Android device (measure; do not assume).
+10. **Performance**: precompute point arrays (every frame of a stepped slider is computed once, so a drag tick is a lookup); avoid React state updates per drag tick: a stepped slider (`Slider`, `PanResponder`) updates local state only when the snapped value changes and logs once on release; the feed never re-renders on a tap or a drag. Reanimated is installed but no component uses it (corrected 2026-10-27: this rule used to say "use Reanimated shared values"); introduce it only if a measured continuous animation needs it. Target smooth dragging on a cheap Android device (measure; do not assume).
 11. Each component ships with: zod schema, demo screen, unit tests for any engine logic, and a short `teaches` list.
 12. Any component that can be asked for by the AI must also work when called with *only its required props* (sensible defaults).
 

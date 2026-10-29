@@ -9,6 +9,8 @@
     { "id": "equiprobability", "kind": "math", "requires": ["counting-pairs"] },
     { "id": "combinations-count", "kind": "math", "requires": ["simultaneous-draw", "sample-space"] },
     { "id": "multiplication-principle", "kind": "math", "requires": ["combinations-count"] },
+    { "id": "ordering-vs-choosing", "kind": "math", "requires": ["simultaneous-draw"] },
+    { "id": "choices-and-product", "kind": "math", "requires": ["combinations-count"] },
     { "id": "probability-by-counting", "kind": "math", "requires": ["combinations-count", "equiprobability"] },
     { "id": "probability-sure-event", "kind": "math", "requires": [] },
     { "id": "event-as-set", "kind": "math", "requires": ["sample-space"] },

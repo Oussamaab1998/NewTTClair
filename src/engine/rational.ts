@@ -77,7 +77,14 @@ export function ceil(a: Fraction): number {
   return (num - r) / den + (r === 0 ? 0 : 1);
 }
 
-/** C(n, k), exact. */
+/**
+ * C(n, k), exact whenever the result is a safe integer; an EngineError
+ * otherwise (never a rounded value). Each step is
+ * C(m + 1, i) = C(m, i - 1) (m + 1) / i with the common factor of C(m, i - 1)
+ * and i removed first, so the only product formed is the next coefficient
+ * itself. The coefficients grow with i (k is first reduced to min(k, n - k)),
+ * so every intermediate fits when the result does.
+ */
 export function choose(n: number, k: number): number {
   if (!Number.isInteger(n) || !Number.isInteger(k) || k < 0 || n < 0) {
     throw new EngineError('choose needs non-negative integers');
@@ -85,9 +92,13 @@ export function choose(n: number, k: number): number {
   if (k > n) {
     return 0;
   }
+  const small = Math.min(k, n - k);
   let out = 1;
-  for (let i = 1; i <= Math.min(k, n - k); i++) {
-    out = assertSafe((out * (n - i + 1)) / i);
+  for (let i = 1; i <= small; i++) {
+    const top = n - small + i;
+    const g = gcd(out, i);
+    // i / g divides top: i divides out x top and out / g is coprime to i / g.
+    out = assertSafe((out / g) * (top / (i / g)));
   }
   return out;
 }

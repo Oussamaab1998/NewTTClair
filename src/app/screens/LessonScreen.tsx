@@ -331,7 +331,11 @@ function Lesson({
           stepId,
         );
         if (opensGate(e.component, e.name)) {
-          dispatch({ type: 'gate_passed', stepId });
+          dispatch({
+            type: 'gate_passed',
+            stepId,
+            ...(e.payload.how === 'skipped' && { how: 'skipped' as const }),
+          });
         }
         // A component tap while a detour is open (its visuals carry the parent's
         // stepId): the detour counts for the reveal unlock (once per detour).
@@ -572,7 +576,8 @@ function Lesson({
 
   // `-devActions answerAll` (debug builds): one right action per state until
   // the done line, so a real part_done is stored (screenshots). With
-  // `-devUntil stepId`, it stops once that main step's card is open.
+  // `-devUntil stepId`, it stops once that main step's card is open (or, for a
+  // picture that holds the lesson, while its gate waits).
   const answerAll = useRef(
     devOnly?.devActionsAtLaunch().includes('answerAll') ?? false,
   );
@@ -584,7 +589,11 @@ function Lesson({
       return;
     }
     const ref = state.stack[state.stack.length - 1]?.ref;
-    if (ref?.scope === 'main' && ref.stepId === until.current) {
+    // A picture that holds the lesson (a gate) is a step too: stop while it waits.
+    if (
+      (ref?.scope === 'main' && ref.stepId === until.current) ||
+      (state.gate !== undefined && state.gate.stepId === until.current)
+    ) {
       answerAll.current = false;
       for (const a of then.current) {
         dispatch(

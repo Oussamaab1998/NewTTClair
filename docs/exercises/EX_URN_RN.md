@@ -1,6 +1,6 @@
 # Exercise 2 — Probabilités, urne rouge / noire (Bac Sciences expérimentales, session de contrôle 2022, 4 pts)
 
-Status (2026-10-23): milestone 1 built. Question 1 is authored in `src/content/exercises/bac2022c-sc-ex2.json` (DECISIONS D35); question 2 waits for the product owner's OK; question 3 is round 2. Do not copy the official correction wording: only the mathematics below came from it (facts, not text). All Arabic written from this file is `reviewed: false`.
+Status (2026-10-27): question 1 now has two predict-first pictures (GroupBoxes before s4, ChoiceProduct before s6, on a twin urn of 3 red and 4 black balls), hints meaning-first, content `exsc2-0.2.0` (DECISIONS D36). Status (2026-10-23): milestone 1 built. Question 1 is authored in `src/content/exercises/bac2022c-sc-ex2.json` (DECISIONS D35); question 2 waits for the product owner's OK; question 3 is round 2. Do not copy the official correction wording: only the mathematics below came from it (facts, not text). All Arabic written from this file is `reviewed: false`.
 
 ## Source
 - Paper source line (product owner, 2026-10-23; **exact section name to confirm before it goes into content**): « Examen du baccalauréat · Session de contrôle 2022 · Section Sciences expérimentales ». The product owner's note: "bac sc contrôle 2022".

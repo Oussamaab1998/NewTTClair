@@ -69,10 +69,10 @@ describe('ComponentHost', () => {
   });
   it('falls back and reports unknown components and invalid props', async () => {
     // A contract name with no registered view yet.
-    const a = await host({ component: 'BinomialExplorer', props: {} });
+    const a = await host({ component: 'InverseMirror', props: {} });
     expect(screen.getByTestId('component-fallback')).toBeOnTheScreen();
     expect(a.errors[0]?.slice(0, 2)).toEqual([
-      'BinomialExplorer',
+      'InverseMirror',
       'unknown_component',
     ]);
 

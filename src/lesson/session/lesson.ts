@@ -598,7 +598,7 @@ function advance(d: Draft) {
         }
         if (componentKind(step.component)) {
           appendComponent(d, step.component, step.blockId, 0, step.id);
-          if (isGate(step.component.component)) {
+          if (isGate(step.component.component, step.component.props)) {
             // Nothing after it appears before the student's tap.
             d.s.gate = { stepId: step.id };
             return;
@@ -648,7 +648,10 @@ function partCounts(d: Draft) {
         i.ref.scope === 'main' &&
         i.ref.stepId === s.id,
     );
-    if (cards.some(c => c.revealed === true)) {
+    if (
+      cards.some(c => c.revealed === true) ||
+      d.s.skippedGates?.includes(s.id)
+    ) {
       revealed += 1;
     } else {
       answered += 1;
@@ -2373,6 +2376,9 @@ export function reduce(
     case 'gate_passed':
       if (d.s.gate?.stepId === action.stepId) {
         delete d.s.gate;
+        if (action.how === 'skipped') {
+          d.s.skippedGates = [...(d.s.skippedGates ?? []), action.stepId];
+        }
         advance(d);
       }
       break;

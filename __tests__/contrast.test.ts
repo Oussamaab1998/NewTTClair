@@ -35,6 +35,11 @@ const TEXT: [string, string, string][] = [
   ['draft.text on draft.bg', C.draft.text, C.draft.bg],
   ['ink on highlighter (selected)', C.ink, C.highlighter],
   ['ink on highlighterSoft (hint)', C.ink, C.highlighterSoft],
+  // probability2: slice bar (GroupBoxes, ChoiceProduct), the lit cell and the product picture
+  ['ink on surfaceMuted (slice, cell tint, block)', C.ink, C.surfaceMuted],
+  // probability2 stop 2: S letter, chip text, a ball label and the duplicate mark on the selected fill; the F letter is inkMuted on card (above)
+  ['ink on surfaceSelected (S cell, chip, ball, duplicate mark)', C.ink, C.surfaceSelected],
+  ['textPrimary on card (chip, count, tick label)', C.textPrimary, C.card],
   ['white on subject analysis', C.textOnAccent, C.subject.analysis],
   ['white on subject probability', C.textOnAccent, C.subject.probability],
   ...(Object.entries(theme.feedback).map(([tone, f]) => [
@@ -47,6 +52,12 @@ const TEXT: [string, string, string][] = [
 const NON_TEXT: [string, string, string][] = [
   ['borderControl on card', C.borderControl, C.card],
   ['borderControl on paper', C.borderControl, C.paper],
+  // probability2: a box, a chip or a slice edge on the muted fill, and a lit cell's ink edge
+  ['borderControl on surfaceMuted (slice, cell)', C.borderControl, C.surfaceMuted],
+  ['ink edge on highlighter (open box, picked chip, lit cell)', C.ink, C.highlighter],
+  // probability2 stop 2: the dashed end past the whole and the whole mark, the part's ink edge, a Pascal cell
+  ['ink dashed end on card (more than the whole)', C.ink, C.card],
+  ['ink edge on surfaceSelected (S cell, duplicate row, bar part)', C.ink, C.surfaceSelected],
   ['slider track on card', theme.slider.color.track, C.card],
   ['slider fill on card', theme.slider.color.fill, C.card],
   ['plot curve on card', theme.plot.color.curve, C.card],

@@ -20,6 +20,7 @@ import {
   parseNumeric,
 } from '../engine/format';
 import { equals, type Fraction } from '../engine/rational';
+import { freshCandidateOk } from '../engine/urnVariants';
 import { runProcedure, type ProcedureId } from '../engine/procedures';
 import {
   enumerateOutcomes,
@@ -541,7 +542,7 @@ function checkFreshVariants(
       const pv = asked.get(parentKey)
         ? freshValue(asked.get(parentKey)!, p)
         : undefined;
-      if (pv && equals(pv, value)) {
+      if (!freshCandidateOk({ ...(pv && { answer: pv }) }, value).ok) {
         errors.push(
           `${key}: the answer ${plain} equals the answer of ${parentKey}`,
         );
@@ -564,7 +565,7 @@ function checkFreshVariants(
           x => x.values,
         ),
       ];
-      if (wrong.some(w => equals(w, value))) {
+      if (!freshCandidateOk({ wrong }, value).ok) {
         errors.push(
           `${key}: the answer ${plain} equals a known wrong value of ${parentKey}`,
         );

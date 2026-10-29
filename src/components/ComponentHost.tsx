@@ -27,6 +27,16 @@ import { LawBuilder } from './probability/LawBuilder';
 import { LawChart } from './probability/LawChart';
 import { OutcomeSpace } from './probability/OutcomeSpace';
 import { Urn } from './probability/Urn';
+import { BinomialExplorer } from './probability2/BinomialExplorer';
+import { ChoiceProduct } from './probability2/ChoiceProduct';
+import { EventAreaModel } from './probability2/EventAreaModel';
+import { GroupBoxes } from './probability2/GroupBoxes';
+import { PartWholeBar } from './probability2/PartWholeBar';
+import { RepeatedRuns } from './probability2/RepeatedRuns';
+import { SlotsPattern } from './probability2/SlotsPattern';
+import { SpreadSlider } from './probability2/SpreadSlider';
+import { UrnTemplate } from './probability2/UrnTemplate';
+import { VariableTable } from './probability2/VariableTable';
 import { resolveSpec } from './registry';
 import { CompareTwo } from './shared/CompareTwo';
 import { ExampleGenerator } from './shared/ExampleGenerator';
@@ -44,6 +54,16 @@ export const VIEWS: Partial<Record<ComponentName, AnyView>> = {
   ComplementView: ComplementView as AnyView,
   LawBuilder: LawBuilder as AnyView,
   LawChart: LawChart as AnyView,
+  GroupBoxes: GroupBoxes as AnyView,
+  ChoiceProduct: ChoiceProduct as AnyView,
+  SlotsPattern: SlotsPattern as AnyView,
+  PartWholeBar: PartWholeBar as AnyView,
+  SpreadSlider: SpreadSlider as AnyView,
+  RepeatedRuns: RepeatedRuns as AnyView,
+  VariableTable: VariableTable as AnyView,
+  BinomialExplorer: BinomialExplorer as AnyView,
+  EventAreaModel: EventAreaModel as AnyView,
+  UrnTemplate: UrnTemplate as AnyView,
   FunctionPlot: FunctionPlot as AnyView,
   PointOnCurve: PointOnCurve as AnyView,
   FoldSymmetry: FoldSymmetry as AnyView,

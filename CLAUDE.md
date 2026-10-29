@@ -28,7 +28,7 @@ Read before coding: `docs/ARCHITECTURE.md`, `docs/DATA.md`, `docs/COMPONENTS_CON
 8. Minors' data: store skill IDs and minimal text; no personal details in prompts. Check Tunisian rules before launch (unknown, needs legal advice).
 
 ## Stack (installed in Phase 0; open choices in `docs/DECISIONS.md`)
-Bare React Native 0.88 + TypeScript (strict + `noUncheckedIndexedAccess` + `exactOptionalPropertyTypes`), `react-native-svg`, `react-native-reanimated` 4 (+ `react-native-worklets`), `react-native-gesture-handler` 3, `zod` 4, `i18next`/`react-i18next`, `react-native-webview` + `katex` (math renderer spike), Jest + React Native Testing Library 14. Versions are pinned exactly. Storage (SQLite vs MMKV) and math renderer: Proposed in DECISIONS.md, not final.
+Bare React Native 0.88 + TypeScript (strict + `noUncheckedIndexedAccess` + `exactOptionalPropertyTypes`), `react-native-svg`, `react-native-reanimated` 4 (+ `react-native-worklets`), `react-native-gesture-handler` 3, `zod` 4, `i18next`/`react-i18next`, `react-native-webview` + `katex` (math renderer spike), Jest + React Native Testing Library 14. Versions are pinned exactly. Reanimated and worklets are installed but no component uses them yet (sliders are stepped `PanResponder` + state, DECISIONS D36). Storage (SQLite vs MMKV) and math renderer: Proposed in DECISIONS.md, not final.
 
 ## Performance targets (to be measured, not assumed)
 Many users have cheap Android phones. Interactive visuals should stay smooth while dragging a slider; precompute curve points; avoid re-rendering the whole lesson feed on each drag tick. Measure on a low-end Android device early.

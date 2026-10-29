@@ -167,14 +167,26 @@ describe('content shape', () => {
   });
 });
 
+/** The lesson waits on a picture: its tap opens the gate (the screen's `gate_passed`). */
+function passGate(s: Session, stepId: string) {
+  expect(s.state.gate).toEqual({ stepId });
+  s.act({ type: 'gate_passed', stepId });
+}
+
 describe('question 1, played', () => {
-  /** s3 (how we draw), s4 (120), s6 (60), s8 (P(A)). */
+  /**
+   * s3 (how we draw), the boxes picture (a gate), s4 (120), the choice picture
+   * (a gate), s6 (60), s8 (P(A)). The pictures hold the lesson until one tap
+   * (Phase 4a): the screen logs the component's `explored` and the lesson goes on.
+   */
   function upToProbability(): Session {
     const s = new Session();
     expect(s.activeStep()).toBe('s3');
     s.choose('at_once');
+    passGate(s, 'boxes');
     expect(s.activeStep()).toBe('s4');
     s.type('120');
+    passGate(s, 'choice');
     expect(s.activeStep()).toBe('s6');
     s.type('60');
     expect(s.activeStep()).toBe('s8');
@@ -205,6 +217,7 @@ describe('question 1, played', () => {
   it('change 1: 720 at step a says each group is counted 6 times (a valid ordered count)', () => {
     const s = new Session();
     s.choose('at_once');
+    passGate(s, 'boxes');
     s.type('720');
     expect(answer(s)).toMatchObject({
       correct: false,
@@ -218,6 +231,7 @@ describe('question 1, played', () => {
   it('E1: 1000 at step a and 54/125 at step c are diagnosed as drawing with replacement', () => {
     const s = new Session();
     s.choose('at_once');
+    passGate(s, 'boxes');
     s.type('1000');
     expect(answer(s)).toMatchObject({
       misconceptionId: 'draws_with_replacement',
@@ -239,8 +253,10 @@ describe('question 1, played', () => {
     ];
     for (const [raw, id] of cases) {
       const s = new Session();
-        s.choose('at_once');
+      s.choose('at_once');
+      passGate(s, 'boxes');
       s.type('120');
+      passGate(s, 'choice');
       s.type(raw);
       expect(answer(s)).toMatchObject({ correct: false, misconceptionId: id });
     }

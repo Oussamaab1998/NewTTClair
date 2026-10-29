@@ -21,7 +21,7 @@ export const countsForProgress = (s: Step): boolean => {
     case 'lines':
       return true;
     case 'component':
-      return !s.optional && (isTaskStep(s) || isGate(s.component.component));
+      return !s.optional && (isTaskStep(s) || isGate(s.component.component, s.component.props));
     default:
       return false;
   }

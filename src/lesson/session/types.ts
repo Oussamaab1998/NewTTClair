@@ -264,8 +264,14 @@ export interface LessonState {
   pending?: { trigger: Trigger; questionId: string; stepId: string };
   /** The student accepted "compress": explanation blocks are skipped until the next struggle. */
   compressed: boolean;
-  /** A main-path visual (PredictReveal) waits for one tap before the lesson goes on. */
+  /** A main-path visual (PredictReveal, GroupBoxes, ChoiceProduct) waits for one tap before the lesson goes on. */
   gate?: { stepId: string };
+  /**
+   * Gates the student left with the escape ("I do not know, show me",
+   * `how: 'skipped'`): they open the lesson like any gate but never count as a
+   * step the student did (part_done counts them as revealed).
+   */
+  skippedGates?: string[];
 }
 
 export type AnswerValue =
@@ -301,7 +307,7 @@ export type LessonAction =
     }
   | { type: 'skip'; reason: SkipReason; at: number }
   /** The gating component of this step got its tap (ungraded). */
-  | { type: 'gate_passed'; stepId: string; at: number }
+  | { type: 'gate_passed'; stepId: string; at: number; how?: 'done' | 'skipped' }
   /** A tap inside a detour's component (logged as a UI event; marks the detour as acted in). */
   | { type: 'detour_acted'; at: number }
   /** B4: «التالي» on the open walk-through. */
