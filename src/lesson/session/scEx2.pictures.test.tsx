@@ -6,12 +6,13 @@
  * its question; s4 and s6 hints with the meaning first and the notation
  * last, every value from the engine.
  */
+// Frozen copy of question 1 as it was in exsc2-0.3.0 (before the method-lesson slice, docs/METHOD_LESSON_PROGRESS.md). Its assertions are unchanged; the live content has its own tests (scEx2.method.test.ts).
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 
 import '../../i18n';
-import exSc2 from '../../content/exercises/bac2022c-sc-ex2.json';
-import exSc2Misconceptions from '../../content/exercises/bac2022c-sc-ex2.misconceptions.json';
+import exSc2 from '../../content/fixtures/scEx2.v030.json';
+import exSc2Misconceptions from '../../content/fixtures/scEx2Misconceptions.v030.json';
 import { ComponentHost } from '../../components/ComponentHost';
 import type { ComponentEvent, ComponentSpec } from '../../components/contract';
 import { boxesModel, choiceModel } from '../../components/probability2/logic';
@@ -104,7 +105,11 @@ class Session {
         stepId,
         component,
         name: 'explored',
-        payload: { instanceId: stepId, why: how === 'done' ? 'tap' : 'reveal', how },
+        payload: {
+          instanceId: stepId,
+          why: how === 'done' ? 'tap' : 'reveal',
+          how,
+        },
       },
     ]);
     return this.act({
@@ -266,8 +271,16 @@ describe('twin urns: no number on screen is an answer or a known wrong value of 
     expect(revealsAnswer(new Session().content, '1/s6', choice)).toBeNull();
     // negative controls: the same components on the exercise's own urn
     const real = (n: number, r: number) => [
-      ...Array.from({ length: r }, (_, i) => ({ id: `r${i + 1}`, value: 1, color: 'red' })),
-      ...Array.from({ length: n }, (_, i) => ({ id: `n${i + 1}`, value: 0, color: 'black' })),
+      ...Array.from({ length: r }, (_, i) => ({
+        id: `r${i + 1}`,
+        value: 1,
+        color: 'red',
+      })),
+      ...Array.from({ length: n }, (_, i) => ({
+        id: `n${i + 1}`,
+        value: 0,
+        color: 'black',
+      })),
     ];
     expect(
       revealsAnswer(new Session().content, '1/s4', {
@@ -291,9 +304,12 @@ describe('twin urns: no number on screen is an answer or a known wrong value of 
 
 describe('hints: the picture and the grouping first, the notation last, values from the engine', () => {
   const raw = (id: string) => {
-    const s = (exSc2.parts[0]!.groups[0]!.steps as { id: string; hints?: { math?: string; ar?: unknown }[] }[]).find(
-      x => x.id === id,
-    )!;
+    const s = (
+      exSc2.parts[0]!.groups[0]!.steps as {
+        id: string;
+        hints?: { math?: string; ar?: unknown }[];
+      }[]
+    ).find(x => x.id === id)!;
     return s.hints!;
   };
   const loadedHints = (id: string) => {
@@ -311,7 +327,9 @@ describe('hints: the picture and the grouping first, the notation last, values f
 
   it('s4: the last hint is written from the engine values (nOrd = 720, perBox = 6)', () => {
     expect(loadedHints('s4')[2]!.math).toBe('C_{10}^{3} = \\frac{720}{6}');
-    expect(raw('s4')[2]!.math).toBe('C_{10}^{3} = \\frac{\\val{nOrd}}{\\val{perBox}}');
+    expect(raw('s4')[2]!.math).toBe(
+      'C_{10}^{3} = \\frac{\\val{nOrd}}{\\val{perBox}}',
+    );
     expect(loaded.values.get('perBox')).toEqual([6, 1]);
   });
 
@@ -378,13 +396,20 @@ describe('the new wrong values are named', () => {
     s.explore('choice', 'ChoiceProduct');
     expect(s.where()).toBe('s6');
     s.type('48');
-    expect(answerOf(s)).toMatchObject({ t: 'answer', correct: false, misconceptionId: 'reads_choose_as_product' });
+    expect(answerOf(s)).toMatchObject({
+      t: 'answer',
+      correct: false,
+      misconceptionId: 'reads_choose_as_product',
+    });
   });
 
   it('720 keeps its authored line (a valid ordered count) and now offers the boxes', () => {
     const s = toS4();
     s.type('720');
-    expect(answerOf(s)).toMatchObject({ correct: false, misconceptionId: 'counts_ordered_draws' });
+    expect(answerOf(s)).toMatchObject({
+      correct: false,
+      misconceptionId: 'counts_ordered_draws',
+    });
     expect(JSON.stringify(s.items)).toContain('alt-1-s4-boxes');
   });
 });
@@ -394,17 +419,36 @@ describe('repair alternatives for the new components', () => {
 
   it('alt-1-s4-boxes: 4 balls, 3 at once: 4 boxes; 24 / 3 = 8 is a named slip', () => {
     const v = variant('alt-1-s4-boxes');
-    expect(v).toMatchObject({ kind: 'alternative', forSteps: ['1/s4'], representation: 'GroupBoxes' });
+    expect(v).toMatchObject({
+      kind: 'alternative',
+      forSteps: ['1/s4'],
+      representation: 'GroupBoxes',
+    });
     const a = loaded.answers.get('var:alt-1-s4-boxes');
     expect(a).toMatchObject({ kind: 'number', value: [4, 1] });
-    const slips = (a?.kind === 'number' ? a.procedures ?? [] : []).map(p => [p.id, frac(p.values[0]!)]);
-    expect(slips).toEqual(expect.arrayContaining([['ordered_draw', '24/1'], ['ordered_divided_by_k', '8/1']]));
+    const slips = (a?.kind === 'number' ? a.procedures ?? [] : []).map(p => [
+      p.id,
+      frac(p.values[0]!),
+    ]);
+    expect(slips).toEqual(
+      expect.arrayContaining([
+        ['ordered_draw', '24/1'],
+        ['ordered_divided_by_k', '8/1'],
+      ]),
+    );
   });
 
   it('alt-1-s6-choice: 2 red and 4 black, exactly one red: 2 x 6 = 12', () => {
     const v = variant('alt-1-s6-choice');
-    expect(v).toMatchObject({ kind: 'alternative', forSteps: ['1/s6'], representation: 'ChoiceProduct' });
-    expect(loaded.answers.get('var:alt-1-s6-choice')).toMatchObject({ kind: 'number', value: [12, 1] });
+    expect(v).toMatchObject({
+      kind: 'alternative',
+      forSteps: ['1/s6'],
+      representation: 'ChoiceProduct',
+    });
+    expect(loaded.answers.get('var:alt-1-s6-choice')).toMatchObject({
+      kind: 'number',
+      value: [12, 1],
+    });
   });
 
   it('their pictures are valid and use their own urn', () => {
@@ -413,7 +457,9 @@ describe('repair alternatives for the new components', () => {
       const comp = v.intro.find(b => b.type === 'component');
       expect(comp).toBeDefined();
       if (comp?.type === 'component') {
-        expect(resolveSpec(comp.spec, v.experiment ?? ex.experiment)).toMatchObject({ ok: true });
+        expect(
+          resolveSpec(comp.spec, v.experiment ?? ex.experiment),
+        ).toMatchObject({ ok: true });
       }
     }
   });
@@ -421,8 +467,12 @@ describe('repair alternatives for the new components', () => {
   it('the misconceptions point at the pictures', () => {
     const m = (id: string) => loaded.misconceptions.get(id);
     expect(m('counts_ordered_draws')?.repairComponent).toBe('GroupBoxes');
-    expect(m('divides_by_balls_not_orderings')?.repairComponent).toBe('GroupBoxes');
-    expect(m('adds_instead_of_multiplying')?.repairComponent).toBe('ChoiceProduct');
+    expect(m('divides_by_balls_not_orderings')?.repairComponent).toBe(
+      'GroupBoxes',
+    );
+    expect(m('adds_instead_of_multiplying')?.repairComponent).toBe(
+      'ChoiceProduct',
+    );
     expect(m('wrong_group_size')?.repairComponent).toBe('ChoiceProduct');
     expect(m('reads_choose_as_product')?.repairComponent).toBe('ChoiceProduct');
   });
@@ -430,7 +480,10 @@ describe('repair alternatives for the new components', () => {
 
 describe('the no-mistake path of question 1: interactions before and after', () => {
   /** Presses until the component emits `explored`; the number of presses is its cost. */
-  async function tapsToGate(spec: ComponentSpec, presses: string[]): Promise<number> {
+  async function tapsToGate(
+    spec: ComponentSpec,
+    presses: string[],
+  ): Promise<number> {
     const events: ComponentEvent[] = [];
     await render(
       <ComponentHost
@@ -453,7 +506,10 @@ describe('the no-mistake path of question 1: interactions before and after', () 
   it('before: 4 (a choice and three typed answers); after: 7, so +3 (the box tap and the two picks)', async () => {
     const asked = steps.filter(s => s.kind === 'choice' || s.kind === 'typed');
     expect(asked.map(s => s.id)).toEqual(['s3', 's4', 's6', 's8']);
-    const boxTaps = await tapsToGate(specOf('boxes'), ['group-next', 'group-next']);
+    const boxTaps = await tapsToGate(specOf('boxes'), [
+      'group-next',
+      'group-next',
+    ]);
     const choiceTaps = await tapsToGate(specOf('choice'), [
       'choice-option-0-0',
       'choice-option-1-0',
@@ -481,7 +537,11 @@ describe('the no-mistake path of question 1: interactions before and after', () 
     const ev = s.type('1/2');
     expect(s.state.finished).toBe(true);
     // the bar now counts the gates: s3, boxes, s4, choice, s6, s8
-    expect(ev.find(e => e.t === 'part_done')).toMatchObject({ counted: 6, answered: 6, revealed: 0 });
+    expect(ev.find(e => e.t === 'part_done')).toMatchObject({
+      counted: 6,
+      answered: 6,
+      revealed: 0,
+    });
   });
 
   it('a student who uses the escape on both pictures: the lesson goes on, and the steps count as revealed', () => {
@@ -493,7 +553,11 @@ describe('the no-mistake path of question 1: interactions before and after', () 
     s.explore('choice', 'ChoiceProduct', 'skipped');
     s.type('60');
     const ev = s.type('1/2');
-    expect(ev.find(e => e.t === 'part_done')).toMatchObject({ counted: 6, answered: 4, revealed: 2 });
+    expect(ev.find(e => e.t === 'part_done')).toMatchObject({
+      counted: 6,
+      answered: 4,
+      revealed: 2,
+    });
   });
 
   it('replays from the log to the same feed, with the escape recorded', () => {

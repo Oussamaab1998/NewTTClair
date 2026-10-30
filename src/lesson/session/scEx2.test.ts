@@ -3,8 +3,9 @@
  * question 1, played from its JSON with the rules planner. Every number is
  * the engine's; the comments say how it is worked out by hand.
  */
-import exSc2 from '../../content/exercises/bac2022c-sc-ex2.json';
-import exSc2Misconceptions from '../../content/exercises/bac2022c-sc-ex2.misconceptions.json';
+// Frozen copy of question 1 as it was in exsc2-0.3.0 (before the method-lesson slice, docs/METHOD_LESSON_PROGRESS.md). Its assertions are unchanged; the live content has its own tests (scEx2.method.test.ts).
+import exSc2 from '../../content/fixtures/scEx2.v030.json';
+import exSc2Misconceptions from '../../content/fixtures/scEx2Misconceptions.v030.json';
 import { resolveSpec } from '../../components/registry';
 import { loadExercise, type LoadedExercise } from '../../content/loader';
 import { runEngineCall } from '../../engine/calls';
@@ -110,7 +111,9 @@ describe('engine values (hard rule 1: computed, never authored)', () => {
     // 10 × 9 × 8 ordered draws; the red at one of 3 places: 3 × 4 × 6 × 5.
     expect(v('nOrd')).toEqual([720, 1]);
     expect(v('nAOrd')).toEqual([360, 1]);
-    const ordered = { experiment: { ...ex.experiment!, draw: 'ordered' as const } };
+    const ordered = {
+      experiment: { ...ex.experiment!, draw: 'ordered' as const },
+    };
     expect(runEngineCall({ fn: 'outcomeCount', args: {} }, ordered)).toEqual({
       ok: true,
       value: [720, 1],
@@ -200,9 +203,13 @@ describe('question 1, played', () => {
     const writeup = s.items.find(i => i.kind === 'writeup') as
       | FeedItemOf<'writeup'>
       | undefined;
-    expect(writeup?.lines.join('\n')).toMatch(/C\(10,3\) = 120 tirages possibles/);
+    expect(writeup?.lines.join('\n')).toMatch(
+      /C\(10,3\) = 120 tirages possibles/,
+    );
     expect(writeup?.lines.join('\n')).toMatch(/P\(A\) = 60\/120 = 1\/2 = 0,5/);
-    expect(writeup?.lines.join('\n')).toMatch(/360 tirages favorables sur .* = 720/);
+    expect(writeup?.lines.join('\n')).toMatch(
+      /360 tirages favorables sur .* = 720/,
+    );
   });
 
   it('change 1: an ordered count at step c is right (360/720), like every equivalent form', () => {
@@ -294,9 +301,9 @@ describe('twins, transfers and deep dives (engine answers on their own urns)', (
     expect(ans('dd:dd_fav_total')).toEqual([3, 5]);
   });
   it('every typed step of question 1 has a walk-through', () => {
-    const typed = ex.parts[0]!.groups
-      .flatMap(g => g.steps)
-      .filter(s => s.kind === 'typed');
+    const typed = ex.parts[0]!.groups.flatMap(g => g.steps).filter(
+      s => s.kind === 'typed',
+    );
     expect(typed.map(s => s.id)).toEqual(['s4', 's6', 's8']);
     for (const s of typed) {
       expect(s.kind === 'typed' && s.walkthrough?.lines.length).toBe(2);

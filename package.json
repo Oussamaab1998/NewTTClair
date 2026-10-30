@@ -17,6 +17,7 @@
     "build:katex-css": "node tools/katex/build-katex-css.js",
     "pods": "cd ios && bundle exec pod install",
     "replay": "tsx tools/replay/cli.ts",
+    "tutor": "tsx tools/tutor-harness/cli.ts",
     "postinstall": "node tools/llm-config/gen.js",
     "check:release-key": "node tools/release-key-check/check.js",
     "check:release-dev": "node tools/release-dev-check/check.js"

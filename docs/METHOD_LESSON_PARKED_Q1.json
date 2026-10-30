@@ -1,0 +1,2268 @@
+{
+  "note": "Question 1 of bac2022c-sc-ex2 before the method-lesson slice (exsc2-0.3.0). Parked verbatim, not deleted: the steps, variants and deep dives of the favourable and divide frames return when those frames are built (docs/METHOD_LESSON_PROGRESS.md).",
+  "from": "exsc2-0.3.0",
+  "steps": [
+    {
+      "blockId": "qsc1-urn",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "exsc2-0.3.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "id": "urn",
+      "skills": [
+        "sample-space"
+      ],
+      "kind": "component",
+      "component": {
+        "component": "Urn",
+        "props": {}
+      }
+    },
+    {
+      "blockId": "qsc1-s2",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "exsc2-0.3.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "id": "s2",
+      "skills": [
+        "simultaneous-draw"
+      ],
+      "kind": "text",
+      "text": {
+        "ar": [
+          {
+            "ar": "قبل ما نعدّو: الطريقة اللي نجبدو بيها تبدّل عدد التيراجات. شوف على صندوق صغير فيه زوز حمر وزوز كحل:"
+          }
+        ]
+      }
+    },
+    {
+      "blockId": "qsc1-compare",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "exsc2-0.3.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "id": "compare",
+      "skills": [
+        "simultaneous-draw"
+      ],
+      "kind": "component",
+      "component": {
+        "component": "CompareTwo",
+        "props": {
+          "leftLabel": {
+            "ar": [
+              {
+                "ar": "نجبدو الزوز مع بعض"
+              }
+            ]
+          },
+          "left": {
+            "component": "OutcomeSpace",
+            "props": {
+              "balls": [
+                {
+                  "id": "r1",
+                  "value": 1,
+                  "color": "red"
+                },
+                {
+                  "id": "r2",
+                  "value": 1,
+                  "color": "red"
+                },
+                {
+                  "id": "n1",
+                  "value": 0,
+                  "color": "black"
+                },
+                {
+                  "id": "n2",
+                  "value": 0,
+                  "color": "black"
+                }
+              ],
+              "draw": "simultaneous",
+              "k": 2
+            }
+          },
+          "rightLabel": {
+            "ar": [
+              {
+                "ar": "وحدة بوحدة، ونرجّعو الكورة"
+              }
+            ]
+          },
+          "right": {
+            "component": "OutcomeSpace",
+            "props": {
+              "balls": [
+                {
+                  "id": "r1",
+                  "value": 1,
+                  "color": "red"
+                },
+                {
+                  "id": "r2",
+                  "value": 1,
+                  "color": "red"
+                },
+                {
+                  "id": "n1",
+                  "value": 0,
+                  "color": "black"
+                },
+                {
+                  "id": "n2",
+                  "value": 0,
+                  "color": "black"
+                }
+              ],
+              "draw": "ordered_with_replacement",
+              "k": 2
+            }
+          },
+          "insight": {
+            "ar": [
+              {
+                "ar": "مع بعض: كل مجموعة تتعدّ مرّة وحدة. وكي نرجّعو الكورة، نجّمو نجبدو نفس الكورة زوز مرّات."
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "blockId": "qsc1-s3",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "exsc2-0.3.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "id": "s3",
+      "skills": [
+        "simultaneous-draw"
+      ],
+      "kind": "choice",
+      "prompt": {
+        "ar": [
+          {
+            "ar": "وفي التمرين متاعنا، كيفاش نجبدو الثلاثة كور؟"
+          }
+        ]
+      },
+      "options": [
+        {
+          "id": "at_once",
+          "label": {
+            "ar": [
+              {
+                "ar": "الثلاثة مع بعض، والترتيب ما يهمّش"
+              }
+            ]
+          }
+        },
+        {
+          "id": "put_back",
+          "label": {
+            "ar": [
+              {
+                "ar": "وحدة بوحدة، ونرجّعو الكورة كل مرّة"
+              }
+            ]
+          },
+          "misconceptionId": "draws_with_replacement",
+          "feedback": {
+            "ar": [
+              {
+                "ar": "ما نرجّعو حتى كورة: الثلاثة يخرجو مع بعض في نفس الوقت."
+              }
+            ]
+          }
+        },
+        {
+          "id": "ordered",
+          "label": {
+            "ar": [
+              {
+                "ar": "وحدة بوحدة، والترتيب يهمّ"
+              }
+            ]
+          },
+          "misconceptionId": "counts_ordered_draws",
+          "feedback": {
+            "ar": [
+              {
+                "ar": "الثلاثة يخرجو مع بعض: ما فمّاش كورة أولى وكورة ثانية."
+              }
+            ]
+          }
+        }
+      ],
+      "answer": {
+        "type": "option",
+        "id": "at_once"
+      },
+      "hints": [
+        {
+          "ar": [
+            {
+              "ar": "اقرا الجملة متاع التمرين:"
+            }
+          ],
+          "fr": "Une épreuve consiste à tirer simultanément trois boules de l'urne."
+        }
+      ]
+    },
+    {
+      "blockId": "qsc1-boxes-intro",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "exsc2-0.3.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "id": "boxes-intro",
+      "skills": [
+        "ordering-vs-choosing"
+      ],
+      "kind": "text",
+      "text": {
+        "ar": [
+          {
+            "ar": "نجرّبو على صندوق صغير فيه ثلاثة حمر وأربعة كحل. نجبدو ثلاثة كور: كل ثلاثة كور يكوّنو علبة، والعلبة الوحدة تتعدّ برشا مرّات كي نعدّو بالترتيب. حلّ علبة وشوف."
+          }
+        ]
+      }
+    },
+    {
+      "blockId": "qsc1-boxes",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "exsc2-0.3.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "id": "boxes",
+      "skills": [
+        "ordering-vs-choosing",
+        "combinations-count"
+      ],
+      "kind": "component",
+      "component": {
+        "component": "GroupBoxes",
+        "props": {
+          "balls": [
+            {
+              "id": "r1",
+              "value": 1,
+              "color": "red"
+            },
+            {
+              "id": "r2",
+              "value": 1,
+              "color": "red"
+            },
+            {
+              "id": "r3",
+              "value": 1,
+              "color": "red"
+            },
+            {
+              "id": "n1",
+              "value": 0,
+              "color": "black"
+            },
+            {
+              "id": "n2",
+              "value": 0,
+              "color": "black"
+            },
+            {
+              "id": "n3",
+              "value": 0,
+              "color": "black"
+            },
+            {
+              "id": "n4",
+              "value": 0,
+              "color": "black"
+            }
+          ],
+          "k": 3
+        }
+      }
+    },
+    {
+      "blockId": "qsc1-s4",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "exsc2-0.3.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "id": "s4",
+      "skills": [
+        "combinations-count",
+        "simultaneous-draw"
+      ],
+      "kind": "typed",
+      "prompt": {
+        "ar": [
+          {
+            "ar": "قدّاش من تيراج ممكن؟"
+          }
+        ]
+      },
+      "answer": {
+        "type": "fraction",
+        "compute": {
+          "fn": "outcomeCount",
+          "args": {}
+        }
+      },
+      "keypad": "integer",
+      "wrongAnswers": [
+        {
+          "value": "720",
+          "misconceptionId": "counts_ordered_draws",
+          "feedback": {
+            "ar": [
+              {
+                "ar": "عدّيت بالترتيب: هذي طريقة صحيحة، أما فيها كل مجموعة من ثلاثة كور تتعدّ ستّة مرّات، مرّة على كل ترتيب. السؤال على التيراجات مع بعض."
+              }
+            ],
+            "math": "3 \\times 2 \\times 1"
+          }
+        },
+        {
+          "value": "30",
+          "misconceptionId": "multiplies_balls_by_k"
+        }
+      ],
+      "procedures": [
+        {
+          "id": "ordered_draw",
+          "misconceptionId": "counts_ordered_draws",
+          "reviewed": false
+        },
+        {
+          "id": "with_replacement",
+          "misconceptionId": "draws_with_replacement",
+          "reviewed": false
+        },
+        {
+          "id": "all_balls",
+          "misconceptionId": "counts_balls_not_draws",
+          "reviewed": false
+        },
+        {
+          "id": "ordered_divided_by_k",
+          "misconceptionId": "divides_by_balls_not_orderings",
+          "reviewed": false
+        }
+      ],
+      "hints": [
+        {
+          "ar": [
+            {
+              "ar": "شوف العلبة في الصورة: فيها ثلاثة كور، والعلبة الوحدة تتعدّ ستّة مرّات كي نعدّو بالترتيب."
+            }
+          ]
+        },
+        {
+          "ar": [
+            {
+              "ar": "بالترتيب نلقاو هذا العدد، وفيه كل مجموعة من ثلاثة كور تتعدّ ستّة مرّات:"
+            }
+          ],
+          "math": "10 \\times 9 \\times 8"
+        },
+        {
+          "ar": [
+            {
+              "ar": "اقسم على عدد الترتيبات متاع ثلاثة كور:"
+            }
+          ],
+          "math": "C_{10}^{3} = \\frac{\\val{nOrd}}{\\val{perBox}}"
+        }
+      ],
+      "walkthrough": {
+        "lines": [
+          {
+            "ar": [
+              {
+                "ar": "ثبّت في المطلوب: نعدّو مجموعات من ثلاثة كور، موش الكور وحدهم."
+              }
+            ]
+          },
+          {
+            "ar": [
+              {
+                "ar": "كل مجموعة تتعدّ مرّة وحدة برك، مهما كان الترتيب متاعها."
+              }
+            ]
+          }
+        ]
+      },
+      "solutionPhrases": {
+        "fr": [
+          "cent vingt",
+          "cent-vingt"
+        ],
+        "ar": [
+          "مية وعشرين",
+          "ميا وعشرين",
+          "مائة وعشرين"
+        ]
+      },
+      "deepDiveId": "dd_count_draws"
+    },
+    {
+      "blockId": "qsc1-s5",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "exsc2-0.3.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "id": "s5",
+      "skills": [
+        "combinations-count"
+      ],
+      "kind": "math",
+      "latex": "C_{10}^{3} = \\val{nTotal}"
+    },
+    {
+      "blockId": "qsc1-choice-intro",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "exsc2-0.3.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "id": "choice-intro",
+      "skills": [
+        "choices-and-product"
+      ],
+      "kind": "text",
+      "text": {
+        "ar": [
+          {
+            "ar": "في نفس الصندوق الصغير، نحبّو تيراج فيه كورة حمراء وحدة وزوج كور كحل. اختار كورة حمراء، ومعاها زوج كحل، وشوف الخانة اللي تطلع."
+          }
+        ]
+      }
+    },
+    {
+      "blockId": "qsc1-choice",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "exsc2-0.3.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "id": "choice",
+      "skills": [
+        "choices-and-product",
+        "multiplication-principle"
+      ],
+      "kind": "component",
+      "component": {
+        "component": "ChoiceProduct",
+        "props": {
+          "stages": [
+            {
+              "title": {
+                "ar": [
+                  {
+                    "ar": "كورة حمراء"
+                  }
+                ]
+              },
+              "balls": [
+                {
+                  "id": "r1",
+                  "value": 1,
+                  "color": "red"
+                },
+                {
+                  "id": "r2",
+                  "value": 1,
+                  "color": "red"
+                },
+                {
+                  "id": "r3",
+                  "value": 1,
+                  "color": "red"
+                }
+              ],
+              "size": 1
+            },
+            {
+              "title": {
+                "ar": [
+                  {
+                    "ar": "زوج كور كحل"
+                  }
+                ]
+              },
+              "balls": [
+                {
+                  "id": "n1",
+                  "value": 0,
+                  "color": "black"
+                },
+                {
+                  "id": "n2",
+                  "value": 0,
+                  "color": "black"
+                },
+                {
+                  "id": "n3",
+                  "value": 0,
+                  "color": "black"
+                },
+                {
+                  "id": "n4",
+                  "value": 0,
+                  "color": "black"
+                }
+              ],
+              "size": 2
+            }
+          ]
+        }
+      }
+    },
+    {
+      "blockId": "qsc1-s6",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "exsc2-0.3.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "id": "s6",
+      "skills": [
+        "multiplication-principle",
+        "event-as-set"
+      ],
+      "kind": "typed",
+      "prompt": {
+        "ar": [
+          {
+            "ar": "قدّاش من تيراج فيه كورة حمراء وحدة بالضبط؟"
+          }
+        ],
+        "fr": "A : « Obtenir une seule boule rouge »"
+      },
+      "answer": {
+        "type": "fraction",
+        "compute": {
+          "fn": "count",
+          "args": {
+            "event": {
+              "id": "value_eq",
+              "args": {
+                "valueFn": {
+                  "id": "count_value",
+                  "args": {
+                    "value": 1
+                  }
+                },
+                "value": 1
+              }
+            }
+          }
+        }
+      },
+      "keypad": "integer",
+      "wrongAnswers": [
+        {
+          "value": "360",
+          "misconceptionId": "counts_ordered_draws",
+          "feedback": {
+            "ar": [
+              {
+                "ar": "عدّيت بالترتيب: كل تيراج يتعدّ فيه ستّة مرّات. كان تحب تخدم بالترتيب، لازم التيراجات الكل زادة بالترتيب."
+              }
+            ]
+          }
+        },
+        {
+          "value": "19",
+          "misconceptionId": "adds_instead_of_multiplying"
+        },
+        {
+          "value": "24",
+          "misconceptionId": "wrong_group_size"
+        },
+        {
+          "value": "48",
+          "misconceptionId": "reads_choose_as_product"
+        }
+      ],
+      "procedures": [
+        {
+          "id": "balls_in_event",
+          "misconceptionId": "counts_only_reds",
+          "reviewed": false
+        },
+        {
+          "id": "all_outcomes",
+          "misconceptionId": "gives_total_as_favourable",
+          "reviewed": false
+        }
+      ],
+      "hints": [
+        {
+          "ar": [
+            {
+              "ar": "في الصورة، كل تيراج فيه كورة حمراء وحدة وزوج كور كحل. شوف الحمر، وشوف الأزواج الكحل الكل."
+            }
+          ]
+        },
+        {
+          "ar": [
+            {
+              "ar": "نختارو الحمراء، ومعاها نختارو الزوج الكحل: «ومعاها» معناها نضربو، عدد الحمر في عدد الأزواج."
+            }
+          ]
+        },
+        {
+          "ar": [
+            {
+              "ar": "عدد الطرق باش نختارو زوز كحل:"
+            }
+          ],
+          "math": "C_{6}^{2} = \\val{c62}"
+        }
+      ],
+      "walkthrough": {
+        "lines": [
+          {
+            "ar": [
+              {
+                "ar": "قسّم التيراج على زوز: الكورة الحمراء، والكور الكحل."
+              }
+            ]
+          },
+          {
+            "ar": [
+              {
+                "ar": "عدّ الطرق متاع كل جزء وحدو، ومبعد اضربهم في بعضهم."
+              }
+            ]
+          }
+        ]
+      },
+      "solutionPhrases": {
+        "fr": [
+          "soixante"
+        ],
+        "ar": [
+          "ستّين",
+          "ستين"
+        ]
+      },
+      "deepDiveId": "dd_and_times"
+    },
+    {
+      "blockId": "qsc1-s7",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "exsc2-0.3.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "id": "s7",
+      "skills": [
+        "multiplication-principle"
+      ],
+      "kind": "math",
+      "latex": "C_{4}^{1} \\times C_{6}^{2} = \\val{c41} \\times \\val{c62} = \\val{nA}"
+    },
+    {
+      "blockId": "qsc1-s8",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "exsc2-0.3.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "id": "s8",
+      "skills": [
+        "probability-by-counting",
+        "equiprobability"
+      ],
+      "kind": "typed",
+      "prompt": {
+        "ar": [
+          {
+            "ar": "التيراجات الكل عندهم نفس الحظ. إذن قدّاش احتمال "
+          },
+          {
+            "fr": "A"
+          },
+          {
+            "ar": "؟"
+          }
+        ],
+        "math": "P(A) = ?"
+      },
+      "answer": {
+        "type": "fraction",
+        "compute": {
+          "fn": "probability",
+          "args": {
+            "event": {
+              "id": "value_eq",
+              "args": {
+                "valueFn": {
+                  "id": "count_value",
+                  "args": {
+                    "value": 1
+                  }
+                },
+                "value": 1
+              }
+            }
+          }
+        }
+      },
+      "keypad": "probability",
+      "wrongAnswers": [
+        {
+          "value": "5/6",
+          "misconceptionId": "at_least_one_instead_of_exactly"
+        },
+        {
+          "value": "1/12",
+          "misconceptionId": "mixed_order_count"
+        },
+        {
+          "value": "19/120",
+          "misconceptionId": "adds_instead_of_multiplying"
+        }
+      ],
+      "procedures": [
+        {
+          "id": "balls_in_event",
+          "misconceptionId": "single_ball_probability",
+          "reviewed": false
+        },
+        {
+          "id": "with_replacement",
+          "misconceptionId": "draws_with_replacement",
+          "reviewed": false
+        },
+        {
+          "id": "earlier_result",
+          "misconceptionId": "count_given_as_probability",
+          "reviewed": false
+        },
+        {
+          "id": "total_over_favourable",
+          "misconceptionId": "probability_above_one",
+          "reviewed": false
+        }
+      ],
+      "hints": [
+        {
+          "ar": [
+            {
+              "ar": "الاحتمال هو عدد التيراجات الملائمة على عدد التيراجات الكل."
+            }
+          ]
+        },
+        {
+          "ar": [
+            {
+              "ar": "اكتب الكسر:"
+            }
+          ],
+          "math": "P(A) = \\frac{\\text{tirages favorables}}{\\text{tirages possibles}}"
+        },
+        {
+          "ar": [
+            {
+              "ar": "استعمل الزوز نتايج اللي لقيتهم الفوق، ومبعد بسّط."
+            }
+          ]
+        }
+      ],
+      "walkthrough": {
+        "lines": [
+          {
+            "ar": [
+              {
+                "ar": "ثبّت: الاحتمال كسر. الفوق عدد التيراجات اللي فيهم كورة حمراء وحدة."
+              }
+            ]
+          },
+          {
+            "ar": [
+              {
+                "ar": "اللوطة عدد التيراجات الكل، ومبعد بسّط الكسر."
+              }
+            ]
+          }
+        ]
+      },
+      "solutionPhrases": {
+        "fr": [
+          "un demi",
+          "une chance sur deux",
+          "zéro virgule cinq"
+        ],
+        "ar": [
+          "نص",
+          "النص",
+          "واحد على زوز",
+          "زوز على أربعة"
+        ]
+      },
+      "link": {
+        "resultRef": "nA",
+        "text": {
+          "ar": [
+            {
+              "ar": "النتيجة اللي لقيناها: عدد التيراجات اللي فيهم كورة حمراء وحدة."
+            }
+          ]
+        }
+      },
+      "deepDiveId": "dd_fav_total"
+    },
+    {
+      "blockId": "qsc1-s9",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "exsc2-0.3.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "id": "s9",
+      "skills": [
+        "probability-by-counting"
+      ],
+      "kind": "text",
+      "text": {
+        "ar": [
+          {
+            "ar": "طريقة أخرى صحيحة: كان تعدّ بالترتيب، عدّ الملائمة والكل بالترتيب، والاحتمال ما يتبدّلش:"
+          }
+        ],
+        "math": "\\frac{3 \\times 4 \\times 6 \\times 5}{10 \\times 9 \\times 8} = \\frac{\\val{nAOrd}}{\\val{nOrd}} = \\val{pA}"
+      }
+    }
+  ],
+  "writeup": {
+    "elements": [
+      "count_total",
+      "count_favourable",
+      "equiprobable",
+      "conclusion"
+    ],
+    "modelFr": [
+      "On tire simultanément 3 boules parmi 10 : il y a C(10,3) = \\val{nTotal} tirages possibles, tous équiprobables.",
+      "A est réalisé lorsqu'on tire 1 boule rouge parmi 4 et 2 boules noires parmi 6 : C(4,1) × C(6,2) = \\val{c41} × \\val{c62} = \\val{nA} tirages.",
+      "Donc P(A) = \\val{nA}/\\val{nTotal} = \\val{pA} = 0,5.",
+      "Variante (tirages ordonnés) : 3 × 4 × 6 × 5 = \\val{nAOrd} tirages favorables sur 10 × 9 × 8 = \\val{nOrd}, et P(A) = \\val{pA}."
+    ]
+  },
+  "variants": [
+    {
+      "id": "sim-1-onered-1",
+      "blockId": "var-sim-1-onered-1",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "exsc2-0.3.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "simpler",
+      "forSteps": [
+        "1/s6"
+      ],
+      "representation": "EventPicker",
+      "intro": [],
+      "step": {
+        "blockId": "var-sim-1-onered-1-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "exsc2-0.3.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "id": "pick",
+        "skills": [
+          "multiplication-principle",
+          "event-as-set"
+        ],
+        "kind": "component",
+        "component": {
+          "component": "EventPicker",
+          "props": {
+            "event": {
+              "id": "value_eq",
+              "args": {
+                "valueFn": {
+                  "id": "count_value",
+                  "args": {
+                    "value": 1
+                  }
+                },
+                "value": 1
+              }
+            },
+            "reveal": "live",
+            "showFraction": false
+          }
+        },
+        "prompt": {
+          "ar": [
+            {
+              "ar": "مثال أصغر: ثلاثة حمر وزوز كحل، نجبدو زوز. اختار التيراجات الكل اللي فيهم حمراء وحدة بالضبط."
+            }
+          ]
+        },
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "تيراج فيه حمراء وحدة: الكورة الأخرى لازم تكون كحلة."
+              }
+            ]
+          }
+        ],
+        "diagnoses": [
+          {
+            "misconceptionId": "selects_complement",
+            "feedback": {
+              "ar": [
+                {
+                  "ar": "اخترت العكس: هاذوما التيراجات اللي ما فيهمش حمراء وحدة."
+                }
+              ]
+            }
+          },
+          {
+            "misconceptionId": "selects_all",
+            "feedback": {
+              "ar": [
+                {
+                  "ar": "اخترت الكل: موش كل تيراج فيه حمراء وحدة بالضبط."
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "experiment": {
+        "urn": [
+          {
+            "id": "r1",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "r2",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "r3",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "n1",
+            "value": 0,
+            "color": "black"
+          },
+          {
+            "id": "n2",
+            "value": 0,
+            "color": "black"
+          }
+        ],
+        "draw": "simultaneous",
+        "k": 2
+      },
+      "round": 1
+    },
+    {
+      "id": "sim-1-p-1",
+      "blockId": "var-sim-1-p-1",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "exsc2-0.3.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "simpler",
+      "forSteps": [
+        "1/s8"
+      ],
+      "representation": "OutcomeSpace",
+      "intro": [
+        {
+          "type": "component",
+          "blockId": "var-sim-1-p-1-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "exsc2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "OutcomeSpace",
+            "props": {
+              "colorBy": "event",
+              "event": {
+                "id": "value_eq",
+                "args": {
+                  "valueFn": {
+                    "id": "count_value",
+                    "args": {
+                      "value": 1
+                    }
+                  },
+                  "value": 1
+                }
+              }
+            }
+          }
+        }
+      ],
+      "step": {
+        "blockId": "var-sim-1-p-1-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "exsc2-0.3.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "id": "twin",
+        "skills": [
+          "probability-by-counting"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "مثال أصغر: زوز حمر وزوز كحل، نجبدو زوز مع بعض. قدّاش احتمال حمراء وحدة بالضبط؟"
+            }
+          ]
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "probability",
+            "args": {
+              "event": {
+                "id": "value_eq",
+                "args": {
+                  "valueFn": {
+                    "id": "count_value",
+                    "args": {
+                      "value": 1
+                    }
+                  },
+                  "value": 1
+                }
+              }
+            }
+          }
+        },
+        "keypad": "probability",
+        "procedures": [
+          {
+            "id": "balls_in_event",
+            "misconceptionId": "single_ball_probability",
+            "reviewed": false
+          },
+          {
+            "id": "with_replacement",
+            "misconceptionId": "draws_with_replacement",
+            "reviewed": false
+          }
+        ],
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "الفوق: الخانات الملوّنة. اللوطة: الخانات الكل. ومبعد بسّط."
+              }
+            ]
+          }
+        ]
+      },
+      "experiment": {
+        "urn": [
+          {
+            "id": "r1",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "r2",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "n1",
+            "value": 0,
+            "color": "black"
+          },
+          {
+            "id": "n2",
+            "value": 0,
+            "color": "black"
+          }
+        ],
+        "draw": "simultaneous",
+        "k": 2
+      },
+      "round": 1
+    },
+    {
+      "id": "tr-1-onered-5r5n",
+      "blockId": "var-tr-1-onered-5r5n",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "exsc2-0.3.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "transfer",
+      "forSteps": [
+        "1/s6"
+      ],
+      "representation": "Urn",
+      "intro": [
+        {
+          "type": "component",
+          "blockId": "var-tr-1-onered-5r5n-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "exsc2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "Urn",
+            "props": {}
+          }
+        }
+      ],
+      "step": {
+        "blockId": "var-tr-1-onered-5r5n-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "exsc2-0.3.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "id": "count",
+        "skills": [
+          "multiplication-principle"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "صندوق آخر: خمسة حمر وخمسة كحل، نجبدو زوز مع بعض. قدّاش من تيراج فيه حمراء وحدة بالضبط؟"
+            }
+          ]
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "count",
+            "args": {
+              "event": {
+                "id": "value_eq",
+                "args": {
+                  "valueFn": {
+                    "id": "count_value",
+                    "args": {
+                      "value": 1
+                    }
+                  },
+                  "value": 1
+                }
+              }
+            }
+          }
+        },
+        "keypad": "integer",
+        "wrongAnswers": [
+          {
+            "value": "10",
+            "misconceptionId": "adds_instead_of_multiplying"
+          }
+        ],
+        "procedures": [
+          {
+            "id": "balls_in_event",
+            "misconceptionId": "counts_only_reds",
+            "reviewed": false
+          },
+          {
+            "id": "ordered_draw",
+            "misconceptionId": "counts_ordered_draws",
+            "reviewed": false
+          },
+          {
+            "id": "all_outcomes",
+            "misconceptionId": "gives_total_as_favourable",
+            "reviewed": false
+          }
+        ],
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "نفس الطريقة: نختارو الحمراء، ومعاها نختارو الكحلة."
+              }
+            ]
+          }
+        ],
+        "solutionPhrases": {
+          "fr": [
+            "vingt-cinq",
+            "vingt cinq"
+          ],
+          "ar": [
+            "خمسة وعشرين",
+            "خمسة و عشرين"
+          ]
+        }
+      },
+      "experiment": {
+        "urn": [
+          {
+            "id": "r1",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "r2",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "r3",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "r4",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "r5",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "n1",
+            "value": 0,
+            "color": "black"
+          },
+          {
+            "id": "n2",
+            "value": 0,
+            "color": "black"
+          },
+          {
+            "id": "n3",
+            "value": 0,
+            "color": "black"
+          },
+          {
+            "id": "n4",
+            "value": 0,
+            "color": "black"
+          },
+          {
+            "id": "n5",
+            "value": 0,
+            "color": "black"
+          }
+        ],
+        "draw": "simultaneous",
+        "k": 2
+      }
+    },
+    {
+      "id": "tr-1-p-5r5n",
+      "blockId": "var-tr-1-p-5r5n",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "exsc2-0.3.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "transfer",
+      "forSteps": [
+        "1/s8"
+      ],
+      "representation": "text",
+      "intro": [],
+      "step": {
+        "blockId": "var-tr-1-p-5r5n-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "exsc2-0.3.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "id": "p",
+        "skills": [
+          "probability-by-counting"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "نفس الصندوق: خمسة حمر وخمسة كحل، نجبدو زوز مع بعض. قدّاش احتمال حمراء وحدة بالضبط؟"
+            }
+          ]
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "probability",
+            "args": {
+              "event": {
+                "id": "value_eq",
+                "args": {
+                  "valueFn": {
+                    "id": "count_value",
+                    "args": {
+                      "value": 1
+                    }
+                  },
+                  "value": 1
+                }
+              }
+            }
+          }
+        },
+        "keypad": "probability",
+        "procedures": [
+          {
+            "id": "balls_in_event",
+            "misconceptionId": "single_ball_probability",
+            "reviewed": false
+          },
+          {
+            "id": "with_replacement",
+            "misconceptionId": "draws_with_replacement",
+            "reviewed": false
+          }
+        ],
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "عدّ التيراجات الكل، ومبعد اللي فيهم حمراء وحدة بالضبط."
+              }
+            ]
+          }
+        ],
+        "solutionPhrases": {
+          "fr": [
+            "cinq neuvièmes",
+            "cinq sur neuf"
+          ],
+          "ar": [
+            "خمسة على تسعة"
+          ]
+        }
+      },
+      "experiment": {
+        "urn": [
+          {
+            "id": "r1",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "r2",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "r3",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "r4",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "r5",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "n1",
+            "value": 0,
+            "color": "black"
+          },
+          {
+            "id": "n2",
+            "value": 0,
+            "color": "black"
+          },
+          {
+            "id": "n3",
+            "value": 0,
+            "color": "black"
+          },
+          {
+            "id": "n4",
+            "value": 0,
+            "color": "black"
+          },
+          {
+            "id": "n5",
+            "value": 0,
+            "color": "black"
+          }
+        ],
+        "draw": "simultaneous",
+        "k": 2
+      }
+    },
+    {
+      "id": "alt-1-s6-choice",
+      "blockId": "var-alt-1-s6-choice",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "exsc2-0.3.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "alternative",
+      "forSteps": [
+        "1/s6"
+      ],
+      "representation": "ChoiceProduct",
+      "intro": [
+        {
+          "type": "tutor_text",
+          "blockId": "var-alt-1-s6-choice-i1",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "exsc2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "text": {
+            "ar": [
+              {
+                "ar": "نجرّبو بالصورة: صندوق فيه زوز حمر وأربعة كحل. التيراج فيه كورة حمراء وحدة وزوج كور كحل."
+              }
+            ]
+          }
+        },
+        {
+          "type": "component",
+          "blockId": "var-alt-1-s6-choice-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "exsc2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "ChoiceProduct",
+            "props": {
+              "stages": [
+                {
+                  "title": {
+                    "ar": [
+                      {
+                        "ar": "كورة حمراء"
+                      }
+                    ]
+                  },
+                  "balls": [
+                    {
+                      "id": "r1",
+                      "value": 1,
+                      "color": "red"
+                    },
+                    {
+                      "id": "r2",
+                      "value": 1,
+                      "color": "red"
+                    }
+                  ],
+                  "size": 1
+                },
+                {
+                  "title": {
+                    "ar": [
+                      {
+                        "ar": "زوج كور كحل"
+                      }
+                    ]
+                  },
+                  "balls": [
+                    {
+                      "id": "n1",
+                      "value": 0,
+                      "color": "black"
+                    },
+                    {
+                      "id": "n2",
+                      "value": 0,
+                      "color": "black"
+                    },
+                    {
+                      "id": "n3",
+                      "value": 0,
+                      "color": "black"
+                    },
+                    {
+                      "id": "n4",
+                      "value": 0,
+                      "color": "black"
+                    }
+                  ],
+                  "size": 2
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "step": {
+        "blockId": "var-alt-1-s6-choice-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "exsc2-0.3.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "id": "choice",
+        "skills": [
+          "choices-and-product",
+          "multiplication-principle"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "قدّاش من تيراج فيه كورة حمراء وحدة بالضبط؟"
+            }
+          ]
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "count",
+            "args": {
+              "event": {
+                "id": "value_eq",
+                "args": {
+                  "valueFn": {
+                    "id": "count_value",
+                    "args": {
+                      "value": 1
+                    }
+                  },
+                  "value": 1
+                }
+              }
+            }
+          }
+        },
+        "keypad": "integer",
+        "wrongAnswers": [
+          {
+            "value": "8",
+            "misconceptionId": "adds_instead_of_multiplying"
+          },
+          {
+            "value": "16",
+            "misconceptionId": "reads_choose_as_product"
+          }
+        ],
+        "procedures": [
+          {
+            "id": "balls_in_event",
+            "misconceptionId": "counts_only_reds",
+            "reviewed": false
+          },
+          {
+            "id": "all_outcomes",
+            "misconceptionId": "gives_total_as_favourable",
+            "reviewed": false
+          }
+        ],
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "اختار كورة حمراء، ومعاها زوج كحل: كل خيار من الحمر مع كل زوج."
+              }
+            ]
+          },
+          {
+            "ar": [
+              {
+                "ar": "«ومعاها» معناها نضربو: عدد الحمر في عدد الأزواج الكحل."
+              }
+            ]
+          }
+        ]
+      },
+      "experiment": {
+        "urn": [
+          {
+            "id": "r1",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "r2",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "n1",
+            "value": 0,
+            "color": "black"
+          },
+          {
+            "id": "n2",
+            "value": 0,
+            "color": "black"
+          },
+          {
+            "id": "n3",
+            "value": 0,
+            "color": "black"
+          },
+          {
+            "id": "n4",
+            "value": 0,
+            "color": "black"
+          }
+        ],
+        "draw": "simultaneous",
+        "k": 3
+      },
+      "addresses": [
+        "why"
+      ]
+    },
+    {
+      "id": "alt-1-s8-partwhole",
+      "blockId": "var-alt-1-s8-partwhole",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "exsc2-0.3.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "kind": "alternative",
+      "forSteps": [
+        "1/s8"
+      ],
+      "representation": "PartWholeBar",
+      "intro": [
+        {
+          "type": "tutor_text",
+          "blockId": "var-alt-1-s8-partwhole-i1",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "exsc2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "text": {
+            "ar": [
+              {
+                "ar": "الاحتمال جزء من الكلّ. كي نكتبو الكسر مقلوب، يطلع الجزء أكبر من الكلّ. شوف الشريط."
+              }
+            ]
+          }
+        },
+        {
+          "type": "component",
+          "blockId": "var-alt-1-s8-partwhole-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "exsc2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "PartWholeBar",
+            "props": {
+              "whole": "6",
+              "part": "12",
+              "mode": "feedback"
+            }
+          }
+        }
+      ],
+      "step": {
+        "blockId": "var-alt-1-s8-partwhole-s",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "exsc2-0.3.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "id": "partwhole",
+        "skills": [
+          "probability-by-counting",
+          "equiprobability"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "في نفس الصندوق الصغير نجبدو ثلاثة كور. قدّاش الاحتمال باش يكون فيهم كورة حمراء وحدة بالضبط؟"
+            }
+          ]
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "probability",
+            "args": {
+              "event": {
+                "id": "value_eq",
+                "args": {
+                  "valueFn": {
+                    "id": "count_value",
+                    "args": {
+                      "value": 1
+                    }
+                  },
+                  "value": 1
+                }
+              }
+            }
+          }
+        },
+        "keypad": "probability",
+        "procedures": [
+          {
+            "id": "total_over_favourable",
+            "misconceptionId": "probability_above_one",
+            "reviewed": false
+          },
+          {
+            "id": "balls_in_event",
+            "misconceptionId": "single_ball_probability",
+            "reviewed": false
+          }
+        ],
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "الاحتمال جزء من الكلّ: ما ينجّمش يفوّت الواحد."
+              }
+            ]
+          },
+          {
+            "ar": [
+              {
+                "ar": "الملائمة فوق، والكل لوطة."
+              }
+            ]
+          }
+        ]
+      },
+      "experiment": {
+        "urn": [
+          {
+            "id": "r1",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "r2",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "r3",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "n1",
+            "value": 0,
+            "color": "black"
+          },
+          {
+            "id": "n2",
+            "value": 0,
+            "color": "black"
+          },
+          {
+            "id": "n3",
+            "value": 0,
+            "color": "black"
+          },
+          {
+            "id": "n4",
+            "value": 0,
+            "color": "black"
+          }
+        ],
+        "draw": "simultaneous",
+        "k": 3
+      },
+      "addresses": [
+        "why"
+      ]
+    }
+  ],
+  "deepDives": [
+    {
+      "id": "dd_choose_bridge",
+      "blockId": "dd-cb",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "exsc2-0.3.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "addresses": [
+        "counting"
+      ],
+      "blocks": [
+        {
+          "type": "tutor_text",
+          "blockId": "dd-cb-1",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "exsc2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "text": {
+            "ar": [
+              {
+                "ar": "نفس الصندوق الصغير: ثلاثة حمر وأربعة كحل، ونختارو ثلاثة كور. علّم الكور المختارة وزيد كل طريقة تنجّم تختارها. وبعد بدّل وشوف الكور اللي تبقى في الصندوق."
+              }
+            ]
+          }
+        },
+        {
+          "type": "component",
+          "blockId": "dd-cb-c",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "exsc2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "SlotsPattern",
+            "props": {
+              "n": 7,
+              "k": 3,
+              "mode": "bridge",
+              "bridge": {
+                "balls": [
+                  {
+                    "id": "b1",
+                    "label": "R1"
+                  },
+                  {
+                    "id": "b2",
+                    "label": "R2"
+                  },
+                  {
+                    "id": "b3",
+                    "label": "R3"
+                  },
+                  {
+                    "id": "b4",
+                    "label": "N1"
+                  },
+                  {
+                    "id": "b5",
+                    "label": "N2"
+                  },
+                  {
+                    "id": "b6",
+                    "label": "N3"
+                  },
+                  {
+                    "id": "b7",
+                    "label": "N4"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dd_and_times",
+      "blockId": "dd-at",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "exsc2-0.3.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "addresses": [
+        "why"
+      ],
+      "experiment": {
+        "urn": [
+          {
+            "id": "r1",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "r2",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "r3",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "n1",
+            "value": 0,
+            "color": "black"
+          },
+          {
+            "id": "n2",
+            "value": 0,
+            "color": "black"
+          }
+        ],
+        "draw": "simultaneous",
+        "k": 2
+      },
+      "blocks": [
+        {
+          "type": "tutor_text",
+          "blockId": "dd-at-1",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "exsc2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "text": {
+            "ar": [
+              {
+                "ar": "صندوق صغير: ثلاثة حمر وزوز كحل، نجبدو زوز مع بعض. باش يكون فيه حمراء وحدة بالضبط: نختارو الحمراء، ومعاها نختارو الكحلة."
+              }
+            ]
+          }
+        },
+        {
+          "type": "component",
+          "blockId": "dd-at-os",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "exsc2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "OutcomeSpace",
+            "props": {
+              "colorBy": "event",
+              "event": {
+                "id": "value_eq",
+                "args": {
+                  "valueFn": {
+                    "id": "count_value",
+                    "args": {
+                      "value": 1
+                    }
+                  },
+                  "value": 1
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "math",
+          "blockId": "dd-at-2",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "exsc2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "latex": "C_{3}^{1} \\times C_{2}^{1}"
+        }
+      ],
+      "mini": {
+        "blockId": "dd-at-mini",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "exsc2-0.3.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "id": "mini",
+        "skills": [
+          "multiplication-principle"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "قدّاش من تيراج فيه حمراء وحدة بالضبط؟"
+            }
+          ]
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "count",
+            "args": {
+              "event": {
+                "id": "value_eq",
+                "args": {
+                  "valueFn": {
+                    "id": "count_value",
+                    "args": {
+                      "value": 1
+                    }
+                  },
+                  "value": 1
+                }
+              }
+            }
+          }
+        },
+        "keypad": "integer",
+        "wrongAnswers": [
+          {
+            "value": "5",
+            "misconceptionId": "adds_instead_of_multiplying"
+          }
+        ],
+        "procedures": [
+          {
+            "id": "balls_in_event",
+            "misconceptionId": "counts_only_reds",
+            "reviewed": false
+          },
+          {
+            "id": "all_outcomes",
+            "misconceptionId": "gives_total_as_favourable",
+            "reviewed": false
+          }
+        ],
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "كل حمراء تمشي مع كل كحلة: عدّ الخانات الملوّنة الفوق."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "dd_fav_total",
+      "blockId": "dd-ft",
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "exsc2-0.3.0",
+        "source": "authored",
+        "status": "ok"
+      },
+      "addresses": [
+        "counting"
+      ],
+      "experiment": {
+        "urn": [
+          {
+            "id": "r1",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "r2",
+            "value": 1,
+            "color": "red"
+          },
+          {
+            "id": "n1",
+            "value": 0,
+            "color": "black"
+          },
+          {
+            "id": "n2",
+            "value": 0,
+            "color": "black"
+          },
+          {
+            "id": "n3",
+            "value": 0,
+            "color": "black"
+          }
+        ],
+        "draw": "simultaneous",
+        "k": 2
+      },
+      "blocks": [
+        {
+          "type": "tutor_text",
+          "blockId": "dd-ft-1",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "exsc2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "text": {
+            "ar": [
+              {
+                "ar": "صندوق صغير: زوز حمر وثلاثة كحل، نجبدو زوز مع بعض. التيراجات الكل عندهم نفس الحظ."
+              }
+            ]
+          }
+        },
+        {
+          "type": "component",
+          "blockId": "dd-ft-os",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "exsc2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "spec": {
+            "component": "OutcomeSpace",
+            "props": {
+              "colorBy": "event",
+              "event": {
+                "id": "value_eq",
+                "args": {
+                  "valueFn": {
+                    "id": "count_value",
+                    "args": {
+                      "value": 1
+                    }
+                  },
+                  "value": 1
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "math",
+          "blockId": "dd-ft-2",
+          "trust": {
+            "reviewed": false,
+            "contentVersion": "exsc2-0.3.0",
+            "source": "authored",
+            "status": "ok"
+          },
+          "latex": "P = \\frac{\\text{tirages favorables}}{\\text{tirages possibles}}"
+        }
+      ],
+      "mini": {
+        "blockId": "dd-ft-mini",
+        "trust": {
+          "reviewed": false,
+          "contentVersion": "exsc2-0.3.0",
+          "source": "authored",
+          "status": "ok"
+        },
+        "id": "mini",
+        "skills": [
+          "probability-by-counting"
+        ],
+        "kind": "typed",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "قدّاش احتمال حمراء وحدة بالضبط؟"
+            }
+          ]
+        },
+        "answer": {
+          "type": "fraction",
+          "compute": {
+            "fn": "probability",
+            "args": {
+              "event": {
+                "id": "value_eq",
+                "args": {
+                  "valueFn": {
+                    "id": "count_value",
+                    "args": {
+                      "value": 1
+                    }
+                  },
+                  "value": 1
+                }
+              }
+            }
+          }
+        },
+        "keypad": "probability",
+        "wrongAnswers": [
+          {
+            "value": "4",
+            "misconceptionId": "count_given_as_probability"
+          }
+        ],
+        "procedures": [
+          {
+            "id": "balls_in_event",
+            "misconceptionId": "single_ball_probability",
+            "reviewed": false
+          }
+        ],
+        "hints": [
+          {
+            "ar": [
+              {
+                "ar": "الفوق: الخانات الملوّنة. اللوطة: الخانات الكل."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

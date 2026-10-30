@@ -1,0 +1,335 @@
+[
+  {
+    "id": "mut.drop_division",
+    "skillId": "ordering-vs-choosing",
+    "category": "math",
+    "description": "The ordered count was not divided by the orderings of one group.",
+    "signature": "10*9*8 for 120",
+    "repairComponent": "method:small_box",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "هذا السطر يعدّ التيراجات بالترتيب؟ شوف النص: الترتيب يهمّ ولا لا؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "هذا السطر يعدّ التيراجات اللي فيها الترتيب يهمّ: نفس الكور بترتيب آخر يتحسب تيراج آخر. شوف النص: الترتيب يهمّ هنا ولا لا؟"
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.divide_by_k_not_k_factorial",
+    "skillId": "ordering-vs-choosing",
+    "category": "math",
+    "description": "Divided by the number of balls drawn instead of the orderings of a group.",
+    "signature": "720/3 for 720/6",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "قسمت على عدد الكور؟ المجموعة الوحدة تتكتب بترتيبات برشا: شنوّة عددهم؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "هذا السطر يقسم على عدد الكور برك. المجموعة الوحدة تتكتب بترتيبات أكثر من هكا: شوف قدّاش."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    },
+    "repairComponent": "method:own_claim"
+  },
+  {
+    "id": "mut.one_factor_divided",
+    "skillId": "ordering-vs-choosing",
+    "category": "math",
+    "description": "Divided by only some of the orderings of a group.",
+    "signature": "720/2 for 720/6",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "قسمت على بعض ترتيبات المجموعة برك؟ المجموعة الوحدة تتكتب بكل ترتيباتها."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "هذا السطر يقسم على بعض ترتيبات المجموعة برك، موش كلهم."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    },
+    "repairComponent": "method:small_box"
+  },
+  {
+    "id": "mut.bracket_left_to_right",
+    "skillId": "combinations-count",
+    "category": "writing",
+    "description": "The divisor group was written without parentheses, so it is read left to right.",
+    "signature": "10*9*8/3*2*1",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "السطر هذا يتحسب من اليسار لليمين. القسمة تمسّ الرقم الأول برك؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "السطر هذا يقسم على الرقم الأول برك، وبعد يضرب في اللي بعدو. هذا اللي كتبتو؟"
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.ordered_instead_of_groups",
+    "skillId": "ordering-vs-choosing",
+    "category": "math",
+    "description": "An ordered count and a count of groups are mixed in one line.",
+    "signature": "4*6*5 for 4*15",
+    "repairComponent": "method:units",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "هذا السطر يخلط بين عدد بالترتيب وعدد بلا ترتيب؟ قارن بين الأرقام اللي كتبتهم."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "في السطر هذا فما رقم بالترتيب ورقم بلا ترتيب مع بعضهم. هل يعدّو نفس الحاجة؟"
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.add_instead_of_multiply",
+    "skillId": "multiplication-principle",
+    "category": "math",
+    "description": "Added the two numbers instead of combining every choice of the first with every choice of the second.",
+    "signature": "4+15 for 4*15",
+    "repairComponent": "method:combine_list",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "زدت الرقمين؟ كل خيار من الأول يتزوّج مع كل خيار من الثاني: كيفاش تعدّهم؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "السطر هذا يزيد الرقمين. الخيارات متاع الأول والثاني يتعملو مع بعضهم، موش واحد بعد واحد."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.swap_numerator_denominator",
+    "skillId": "probability-by-counting",
+    "category": "math",
+    "description": "The ratio was written upside down.",
+    "signature": "120/60 for 60/120",
+    "repairComponent": "method:above_one",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "الاحتمال يمكن يكون أكبر من الواحد؟ شوف الكسر اللي كتبتو."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "الكسر هذا مقلوب: الرقم اللي فوق هو الكل."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.over_generalised_order_rule",
+    "skillId": "ordering-vs-choosing",
+    "category": "math",
+    "description": "The order rule of several balls was carried to the choice of one ball.",
+    "signature": "1 for the choice of one red among four",
+    "repairComponent": "method:one_ball",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "اخترت كورة وحدة برك: فما ترتيب باش نحسبو هنا؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "قاعدة الترتيب تخدم كي نختارو برشا كور مع بعضهم. هنا اخترت كورة وحدة."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.missing_part",
+    "skillId": "multiplication-principle",
+    "category": "math",
+    "description": "A line counts only one of the choices the question asks for.",
+    "signature": "4 or 15 for 60",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "هذا العدد يغطي الخيارين الكل؟ شوف النص: شنوّة المطلوب بالضبط؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "هذا العدد يغطي خيار وحدة برك من الخيارات المطلوبة."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    },
+    "repairComponent": "method:combine_list"
+  },
+  {
+    "id": "mut.start_number_off",
+    "skillId": "combinations-count",
+    "category": "math",
+    "description": "The product starts at a number that is not the number of balls in the box.",
+    "signature": "11*10*9/(3*2*1)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "الرقم الأول في الجداء هو عدد الكور في الصندوق؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "الجداء يبدا من رقم موش هو عدد الكور في الصندوق."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.n_times_k",
+    "skillId": "combinations-count",
+    "category": "math",
+    "description": "Multiplied the number of balls by the number drawn.",
+    "signature": "10*3 for 120",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "ضربت عدد الكور في عدد الكور المجبودة؟ هذا يعدّ التيراجات الممكنة؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "السطر هذا يضرب عدد الكور في عدد الكور المجبودة. هذا ما يعدّش التيراجات."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    },
+    "repairComponent": "method:slots_bridge"
+  },
+  {
+    "id": "mut.unsimplified",
+    "skillId": "probability-by-counting",
+    "category": "writing",
+    "description": "The fraction was left with a common factor.",
+    "signature": "25/55 for 5/11",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "الكسر هذا يتبسّط؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "الكسر هذا فيه عامل مشترك بين فوق وتحت."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  }
+]

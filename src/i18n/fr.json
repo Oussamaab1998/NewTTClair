@@ -605,5 +605,169 @@
     "question": "Recommencer cet exercice ? Les marques de progression seront effacées.",
     "confirm": "Recommencer",
     "cancel": "Non"
+  },
+  "method": {
+    "credit": {
+      "title": "Bonne ligne.",
+      "counts": "Cette ligne compte :",
+      "unexplained": "Écris comment tu l'as trouvé, comme sur la copie.",
+      "unsimplified": "Regarde la fraction : y a-t-il un facteur commun en haut et en bas ?"
+    },
+    "node": {
+      "ord": "les tirages avec ordre",
+      "orderings": "le nombre d'ordres d'un même groupe",
+      "total": "tous les tirages",
+      "positions": "les places de la boule parmi les boules tirées",
+      "fav_red": "les façons de choisir les boules rouges",
+      "fav_black": "les façons de choisir les boules noires",
+      "fav": "les tirages demandés",
+      "result": "la probabilité"
+    },
+    "recap": {
+      "found": "Trouvé :",
+      "next": "Ensuite :",
+      "last": "Toutes les étapes sont faites."
+    },
+    "reason": {
+      "lead": "Pourquoi cet ordre ?",
+      "after": "vient après",
+      "and": "et",
+      "because": ", car elle utilise leurs résultats.",
+      "free": "Ces étapes ne dépendent pas l'une de l'autre."
+    },
+    "plan": {
+      "confirm": "Valider le plan",
+      "slot": "Étape {{n}}",
+      "pool": "Étapes",
+      "needs": "a besoin de",
+      "before": "avant."
+    },
+    "neutral": {
+      "unfinished": "Ajoute un signe égal et le résultat du calcul.",
+      "mismatch": "Les deux côtés ne sont pas égaux :",
+      "repeat": "Tu as déjà cette ligne.",
+      "other_step": "Cette ligne appartient à une autre étape du plan.",
+      "generic": "Cette ligne compte autre chose que ce que demande l'étape.",
+      "ambiguous": "Cette ligne compte autre chose que ce que demande l'étape.",
+      "not_order_word": "Ce mot ne dit pas si l'ordre compte.",
+      "checkLead": "Vérifie en multipliant :"
+    },
+    "readback": {
+      "ask": "Que veux-tu diviser ?",
+      "grouped": "diviser par tous les nombres ensemble",
+      "literal": "diviser par le premier nombre seulement, puis multiplier"
+    },
+    "line": {
+      "keys": "Touches de calcul",
+      "delete": "Effacer un caractère",
+      "clear": "Tout effacer",
+      "lines": "Lignes justes"
+    },
+    "strip": {
+      "now": "Maintenant",
+      "next": "Ensuite",
+      "why": "Pourquoi",
+      "open": "Ouvrir la carte de la question"
+    },
+    "sheet": {
+      "title": "Carte de la question",
+      "close": "Fermer",
+      "back": "Retour à la question",
+      "done": "faite",
+      "current": "tu es ici",
+      "upcoming": "à venir",
+      "whyLabel": "Pourquoi",
+      "nextLabel": "Ensuite",
+      "found": "Ce qu'on a trouvé",
+      "paper": "La feuille",
+      "roadmap": "Le chemin",
+      "rule": "La règle",
+      "condition": "Quand elle marche",
+      "did": "Ce que j'ai fait",
+      "exam": "Comment l'examen l'écrit",
+      "blank": "blanc"
+    },
+    "show": {
+      "ok": "J'ai lu"
+    },
+    "list": {
+      "add": "Ajouter ce groupe",
+      "done": "C'est tout",
+      "remove": "Retirer"
+    },
+    "listHelp": {
+      "1": "Il manque au moins un groupe.",
+      "2": "Il reste un groupe avec cette boule :",
+      "3": "Voici un groupe qui manque :"
+    },
+    "recipe": {
+      "slot": "Ligne {{n}}",
+      "pool": "Phrases",
+      "confirm": "Valider ma recette",
+      "mine": "Ma recette",
+      "clean": "La recette propre",
+      "steps": "Les étapes",
+      "checks": "À vérifier"
+    },
+    "similar": {
+      "done": "J'ai fini"
+    },
+    "review": {
+      "credit": "Cette ligne compte :",
+      "slip": "Cette ligne ressemble à :",
+      "slipUnknown": "autre chose",
+      "other": "Je ne sais pas ce que compte cette ligne."
+    },
+    "target": {
+      "lead": "L'énoncé donne :"
+    },
+    "claim": {
+      "predicted": "Ta règle prévoit :",
+      "actual": "On compte en réalité :",
+      "holds": "La règle tient ici.",
+      "fails": "La règle ne tient pas ici."
+    },
+    "mut": {
+      "drop_division": "des tirages avec ordre",
+      "divide_by_k_not_k_factorial": "une division par le nombre de boules tirées seulement",
+      "one_factor_divided": "une division par certains ordres seulement",
+      "bracket_left_to_right": "des parenthèses oubliées dans la division",
+      "ordered_instead_of_groups": "un nombre avec ordre à côté d'un nombre de groupes",
+      "add_instead_of_multiply": "une addition à la place d'un produit",
+      "swap_numerator_denominator": "une fraction à l'envers",
+      "over_generalised_order_rule": "la règle des ordres appliquée à un seul choix",
+      "unsimplified": "une fraction non simplifiée",
+      "missing_part": "un morceau du calcul qui manque",
+      "start_number_off": "un produit qui ne commence pas au bon nombre",
+      "n_times_k": "un produit à la place du nombre de groupes"
+    }
+  },
+  "ai": {
+    "dontKnow": "Je ne sais pas",
+    "placeholder": "Écris comme tu veux : en arabe ou en français",
+    "send": "Envoyer",
+    "continue": "Continuer",
+    "done": "J'ai fini",
+    "typing": "Le tuteur écrit",
+    "slow": "Je réfléchis un peu",
+    "retry": "Réessayer",
+    "back": "Retour",
+    "paper": "La copie",
+    "paperEmpty": "La copie se remplit avec tes lignes justes.",
+    "close": "Fermer",
+    "now": "Maintenant",
+    "next": "Ensuite",
+    "ended": "Question terminée. Bravo pour le travail.",
+    "aiMark": "Le tuteur est une IA ; les calculs sont vérifiés par le moteur.",
+    "error": {
+      "network": "Pas d'internet ou le service n'a pas répondu.",
+      "timeout": "La réponse a pris trop de temps.",
+      "capped": "Limite du jour atteinte. On continue demain.",
+      "disabled": "Le tuteur n'est pas disponible dans cette version.",
+      "other": "Un problème est survenu."
+    },
+    "question": "Question",
+    "nextQuestion": "Question suivante",
+    "backToList": "Retour aux exercices"
   }
 }

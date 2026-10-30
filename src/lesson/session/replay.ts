@@ -36,6 +36,18 @@ export function actionsFromEvents(events: readonly Event[]): LessonAction[] {
           });
           break;
         }
+        if (e.kind === 'method') {
+          // Method answers log their value as the action's own shape.
+          actions.push({
+            type: 'answer',
+            value: e.value as Extract<
+              LessonAction,
+              { type: 'answer' }
+            >['value'],
+            at,
+          });
+          break;
+        }
         actions.push({
           type: 'answer',
           value:
@@ -69,6 +81,29 @@ export function actionsFromEvents(events: readonly Event[]): LessonAction[] {
         ) {
           // B4: line 0 comes with the planner's decision; later lines are taps.
           actions.push({ type: 'walkthrough_next', at });
+        } else if (e.component === 'Method' && e.name === 'act') {
+          // A method act that was not graded (a repair stage, a line of a similar question): the same act again.
+          actions.push({
+            type: 'answer',
+            value: e.payload.value as Extract<
+              LessonAction,
+              { type: 'answer' }
+            >['value'],
+            at,
+          });
+        } else if (e.component === 'LineInput' && e.name === 'line_ungraded') {
+          // A method line that was shown a note but not graded: the same act again.
+          actions.push({
+            type: 'answer',
+            value: {
+              mline: String(e.payload.mline),
+              ...(e.payload.readback === 'grouped' ||
+              e.payload.readback === 'literal'
+                ? { readback: e.payload.readback }
+                : {}),
+            },
+            at,
+          });
         } else if (
           e.component === 'NumericKeypad' &&
           e.name === 'input_trace'

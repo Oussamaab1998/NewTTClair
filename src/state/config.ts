@@ -58,6 +58,20 @@ export const THRESHOLDS = {
   stepBackPerSkillPerSession: 1,
   /** Repeats and step-backs together, per question. */
   movesPerQuestion: 4,
+  // Method lesson (D38, untuned): acts are reducer actions, keypad keys are not.
+  /**
+   * A question with no mistake, by method block id (the opening card is 0
+   * acts): Q1 plan 1, read 1, total 1, favourable 3, the reason 1, result 1,
+   * recipe 1 = 9. Q2 8, Q3a 10, Q3b 8 (set when each is authored). A block
+   * not listed uses the default.
+   */
+  methodFastActs: { default: 8, m1: 9, m2: 8, m3a: 10, m3b: 8 } as Readonly<
+    Record<string, number>
+  >,
+  /** One repair path, the accepting tap included. */
+  methodRepairActs: 10,
+  /** Worst case per question; at the cap no repair opens and the rest is shown. */
+  methodActsPerQuestion: 30,
   /** Help chips: seconds without any action on the active card before they show. */
   helpChipsIdleMs: 20_000,
   /**

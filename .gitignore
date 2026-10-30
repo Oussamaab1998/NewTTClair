@@ -84,3 +84,6 @@ docs/screens/
 
 # AI tutor v2 evaluation outputs (raw model outputs, spend ledger): local only.
 tools/replay/out/
+
+# AI tutor harness outputs (transcripts, raw requests, spend ledger): local only.
+tools/tutor-harness/out/

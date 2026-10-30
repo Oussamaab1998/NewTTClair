@@ -102,7 +102,8 @@ function typeOf(
   return typeof s.type === 'string' ? s.type : 'unknown';
 }
 
-function propsOf(id: ComponentName): string {
+/** Compact TypeScript-like props type of a component, as the model reads it. */
+export function propsOf(id: ComponentName): string {
   const meta = REGISTRY[id];
   if (!meta) {
     throw new Error(`${id} not in registry`);

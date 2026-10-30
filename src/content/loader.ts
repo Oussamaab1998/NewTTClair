@@ -28,6 +28,17 @@ import {
   type EventSpec,
 } from '../engine/probability';
 import { parseLatexSubset } from '../lesson/math/latexSubset';
+import { expandMethodSteps } from '../method/expand';
+import { buildGraphFor, templateOf } from '../method/templates';
+import { mutationLibrary } from '../method/library';
+import { validateCards } from '../method/cards';
+import { ballsOf } from '../method/repair';
+import type { Graph } from '../method/graph';
+import {
+  mutationsFor,
+  type ExtraCandidate,
+  type MutationTable,
+} from '../method/mutations';
 import {
   ExerciseSchema,
   MisconceptionLibrarySchema,
@@ -50,7 +61,28 @@ export type ResolvedAnswer =
       procedures?: ResolvedProcedure[];
     }
   /** Line-by-line writing: the engine-checked spec the reducer checks lines with. */
-  | { kind: 'lines'; spec: LinesSpec };
+  | { kind: 'lines'; spec: LinesSpec }
+  /** Method lesson: the plan, the read tap and the recipe carry their data in the step. */
+  | { kind: 'method'; frame: 'plan' | 'read' | 'recipe' }
+  /** A lines frame, a pick or a similar question: the expected graph and the slips of the block. */
+  | {
+      kind: 'method';
+      frame: 'lines' | 'cards' | 'similar';
+      graph: Graph;
+      table: MutationTable;
+      /** Authored wrong answers and procedure values, matched by value after the mutations. */
+      extra: ExtraCandidate[];
+    }
+  /** A repair script: what each stage needs (a twin graph for a line, every group for a list). */
+  | { kind: 'method'; frame: 'repair'; stages: ResolvedStage[] };
+
+export interface ResolvedStage {
+  graph?: Graph;
+  table?: MutationTable;
+  /** A list stage: every group, as sorted ball ids, and the balls in order. */
+  groups?: string[][];
+  balls?: { id: string; label: string }[];
+}
 
 export interface ResolvedProcedure {
   id: ProcedureId;
@@ -58,10 +90,16 @@ export interface ResolvedProcedure {
   values: Fraction[];
 }
 
-export type AskedStep = Extract<Step, { kind: 'choice' | 'typed' | 'lines' }>;
+export type AskedStep = Extract<
+  Step,
+  { kind: 'choice' | 'typed' | 'lines' | 'mframe' }
+>;
 export type LinesStep = Extract<Step, { kind: 'lines' }>;
 const isAsked = (s: Step): s is AskedStep =>
-  s.kind === 'choice' || s.kind === 'typed' || s.kind === 'lines';
+  s.kind === 'choice' ||
+  s.kind === 'typed' ||
+  s.kind === 'lines' ||
+  s.kind === 'mframe';
 /** A component step whose registry kind is "task": it blocks the path like a question. */
 export type TaskStep = Extract<Step, { kind: 'component' }>;
 
@@ -292,13 +330,210 @@ export function linesSpecOf(step: LinesStep): LinesSpec {
   };
 }
 
+/** Cross-question inputs: the value of a node of an earlier method block (the student's sheet). */
+function resolveInputs(
+  ex: Exercise,
+  inputs: Record<string, { from: string; node: string }> | undefined,
+  ctx: CallContext,
+  errors: string[],
+  where: string,
+): Record<string, Fraction> {
+  const out: Record<string, Fraction> = {};
+  for (const [name, spec] of Object.entries(inputs ?? {})) {
+    const [partId, methodId] = spec.from.split('/');
+    const frame = ex.parts
+      .find(p => p.id === partId)
+      ?.groups.flatMap(g => g.steps)
+      .find(st => st.kind === 'mframe' && st.methodId === methodId && st.graph);
+    if (!frame || frame.kind !== 'mframe' || !frame.graph) {
+      errors.push(`${where}: input ${name}: no method block ${spec.from}`);
+      continue;
+    }
+    try {
+      const g = buildGraphFor(frame.graph, {
+        ...(urnOf(ctx) && { urn: urnOf(ctx)! }),
+        inputs: {},
+      });
+      const node = g.nodes.find(n => n.id === spec.node);
+      if (node) {
+        out[name] = node.value;
+      } else {
+        errors.push(
+          `${where}: input ${name}: ${spec.from} has no node ${spec.node}`,
+        );
+      }
+    } catch (e) {
+      errors.push(`${where}: input ${name}: ${(e as Error).message}`);
+    }
+  }
+  return out;
+}
+
+const urnOf = (ctx: CallContext) => {
+  const urn = ctx.experiment?.urn;
+  if (!urn) {
+    return undefined;
+  }
+  const reds = urn.filter(b => b.value === 1).length;
+  const blacks = urn.filter(b => b.value === 0).length;
+  return { reds, blacks, k: ctx.experiment!.k };
+};
+
+/** A method frame: the plan, the read tap and the recipe need nothing resolved; the others get their graph, their slips and their known wrong values. */
+function resolveMethodFrame(
+  step: Extract<Step, { kind: 'mframe' }>,
+  ctx: CallContext,
+  errors: string[],
+  where: string,
+  ex: Exercise,
+): ResolvedAnswer | null {
+  const f = step.frame;
+  if (f.type === 'plan' || f.type === 'read' || f.type === 'recipe') {
+    return { kind: 'method', frame: f.type };
+  }
+
+  const graphCtx = (
+    graph: { template: string },
+    inputs?: Record<string, { from: string; node: string }>,
+  ) => ({
+    ...(urnOf(ctx) && { urn: urnOf(ctx)! }),
+    inputs: resolveInputs(ex, inputs, ctx, errors, where),
+    ...(graph ? {} : {}),
+  });
+  if (f.type === 'repair') {
+    const stages: ResolvedStage[] = [];
+    for (const st of f.stages) {
+      if (st.type === 'line') {
+        try {
+          const graph = buildGraphFor(st.graph, graphCtx(st.graph));
+          stages.push({ graph, table: mutationsFor(graph) });
+        } catch (e) {
+          errors.push(`${where}: repair line: ${(e as Error).message}`);
+          stages.push({});
+        }
+      } else if (st.type === 'list') {
+        const balls = ballsOf(st.reds, st.blacks);
+        stages.push({
+          balls,
+          groups: groupsOf(
+            balls.map(b => b.id),
+            st.k,
+            st.contains,
+          ),
+        });
+      } else {
+        if (st.type === 'cards') {
+          let graph: Graph | undefined;
+          if (st.graph) {
+            try {
+              graph = buildGraphFor(st.graph, graphCtx(st.graph));
+            } catch (e) {
+              errors.push(
+                `${where}: repair cards graph: ${(e as Error).message}`,
+              );
+            }
+          }
+          for (const p of validateCards(
+            st.evaluator,
+            st.args,
+            st.cards,
+            graph,
+          )) {
+            errors.push(`${where}: repair cards: ${p}`);
+          }
+          stages.push(graph ? { graph } : {});
+        } else {
+          stages.push({});
+        }
+      }
+    }
+    return { kind: 'method', frame: 'repair', stages };
+  }
+  const own = f.type === 'similar' ? f.slot.graph : step.graph;
+  if (!own) {
+    errors.push(`${where}: a method frame needs a graph`);
+    return null;
+  }
+  let graph: Graph;
+  try {
+    graph = buildGraphFor(own, graphCtx(own, step.inputs));
+  } catch (e) {
+    errors.push(`${where}: graph: ${(e as Error).message}`);
+    return null;
+  }
+  const extra: ExtraCandidate[] = [];
+  if (f.type === 'lines') {
+    const call = templateOf(own.template)?.call?.(
+      f.key,
+      own.args,
+      graphCtx(own, step.inputs),
+    );
+    for (const row of f.procedures ?? []) {
+      if (!call) {
+        errors.push(
+          `${where}: the template has no engine call for the card ${f.key}`,
+        );
+        break;
+      }
+      const r = runProcedure(row.id, call, ctx);
+      if (!r.ok) {
+        errors.push(`${where}: procedure ${r.error}`);
+        continue;
+      }
+      for (const value of r.value) {
+        extra.push({ value, misconceptionId: row.misconceptionId });
+      }
+    }
+    for (const w of f.wrongAnswers ?? []) {
+      const v = parseNumeric(w.value);
+      if (v.ok && w.misconceptionId !== undefined) {
+        extra.push({ value: v.value, misconceptionId: w.misconceptionId });
+      }
+    }
+  }
+  if (f.type === 'cards') {
+    for (const p of validateCards(f.evaluator, f.args, f.cards, graph)) {
+      errors.push(`${where}: ${p}`);
+    }
+  }
+  return {
+    kind: 'method',
+    frame: f.type,
+    graph,
+    table: mutationsFor(graph),
+    extra,
+  };
+}
+
+/** Every group of k balls among `ids` (sorted ids), only those holding `contains` when given. */
+function groupsOf(ids: string[], k: number, contains?: string): string[][] {
+  const out: string[][] = [];
+  const walk = (start: number, acc: string[]) => {
+    if (acc.length === k) {
+      if (contains === undefined || acc.includes(contains)) {
+        out.push([...acc]);
+      }
+      return;
+    }
+    for (let i = start; i < ids.length; i++) {
+      walk(i + 1, [...acc, ids[i]!]);
+    }
+  };
+  walk(0, []);
+  return out;
+}
+
 function resolveAnswer(
   step: AskedStep,
   answer: AnswerSpec | undefined,
   ctx: CallContext,
   errors: string[],
   where: string,
+  exercise: Exercise,
 ): ResolvedAnswer | null {
+  if (step.kind === 'mframe') {
+    return resolveMethodFrame(step, ctx, errors, where, exercise);
+  }
   if (step.kind === 'lines' || answer === undefined) {
     return step.kind === 'lines' ? resolveLines(step, errors, where) : null;
   }
@@ -880,12 +1115,25 @@ export function loadExercise(
       ),
     };
   }
-  const first = ExerciseSchema.safeParse(rawExercise);
-  if (!first.success) {
+  const parsed = ExerciseSchema.safeParse(rawExercise);
+  if (!parsed.success) {
     return {
       ok: false,
-      errors: first.error.issues.map(i => `${i.path.join('.')}: ${i.message}`),
+      errors: parsed.error.issues.map(i => `${i.path.join('.')}: ${i.message}`),
     };
+  }
+  // A `method` block becomes ordinary steps (plan, read, lines frames) and
+  // brings the shared `mut.*` misconception library with it.
+  const expanded = expandMethodSteps(parsed.data);
+  if (expanded.errors.length > 0) {
+    return { ok: false, errors: expanded.errors };
+  }
+  const first = { data: expanded.exercise };
+  const usesMethod = expanded.exercise !== parsed.data;
+  if (usesMethod) {
+    const shared = MisconceptionLibrarySchema.parse(mutationLibrary());
+    const have = new Set(lib.data.map(m => m.id));
+    lib.data.push(...shared.filter(m => !have.has(m.id)));
   }
   const ctx: CallContext = first.data.experiment
     ? { experiment: first.data.experiment }
@@ -967,6 +1215,7 @@ export function loadExercise(
       stepCtx ?? ctx,
       errors,
       key,
+      exercise,
     );
     if (resolved) {
       answers.set(key, resolved);
@@ -976,6 +1225,19 @@ export function loadExercise(
         ? step.options
         : step.kind === 'lines'
         ? step.knownWrong
+        : step.kind === 'mframe'
+        ? step.frame.type === 'lines'
+          ? [
+              ...(step.frame.wrongAnswers ?? []),
+              ...(step.frame.procedures ?? []),
+            ]
+          : step.frame.type === 'cards'
+          ? step.frame.cards
+          : step.frame.type === 'repair'
+          ? step.frame.stages.flatMap(st =>
+              st.type === 'cards' ? st.cards : [],
+            )
+          : []
         : [...(step.wrongAnswers ?? []), ...(step.procedures ?? [])]),
     ]
       .map(o => o.misconceptionId)
@@ -1006,8 +1268,15 @@ export function loadExercise(
         `${key}: numeric check uses unknown value ${step.check.known}`,
       );
     }
-    if ((step.hints ?? []).length === 0) {
-      // Rule 6: the answer can only be revealed at the end of a ladder.
+    const ungraded =
+      step.kind === 'mframe' &&
+      (step.frame.type === 'similar' ||
+        step.frame.type === 'recipe' ||
+        // a script frame on the route (an after-answer picture) has nothing to hide
+        (step.frame.type === 'repair' && step.group !== undefined));
+    if (!ungraded && (step.hints ?? []).length === 0) {
+      // Rule 6: the answer can only be revealed at the end of a ladder (a similar
+      // question and the recipe are not graded: no help, no answer to hide).
       errors.push(`${key}: asked steps need at least one hint`);
     }
   }

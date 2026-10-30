@@ -39,12 +39,12 @@ export const EventSchema = z.discriminatedUnion('t', [
     t: z.literal('answer'),
     // 'task': the result of a task component (EventPicker, LawBuilder); value = its details.
     // 'lines': line-by-line writing; value = the line (wrong) or all lines (done).
-    kind: z.enum(['choice', 'typed', 'ordering', 'task', 'lines']),
+    kind: z.enum(['choice', 'typed', 'ordering', 'task', 'lines', 'method']),
     value: z.json(),
     correct: z.boolean(),
     misconceptionId: Id.optional(),
     /** Typed values (C3): an authored wrong answer, or the engine's wrong procedures. */
-    inferredBy: z.enum(['authored', 'procedure']).optional(),
+    inferredBy: z.enum(['authored', 'procedure', 'mutation']).optional(),
     /** Procedure matches' misconceptions, in table order (the first is misconceptionId). */
     candidates: z.array(Id).max(7).optional(),
     attempt,

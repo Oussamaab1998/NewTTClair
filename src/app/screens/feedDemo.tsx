@@ -28,6 +28,7 @@ const HANDLERS: FeedHandlers = {
   onSelect: noop,
   onSubmitTyped: noop,
   onSubmitLine: noop,
+  onSubmitMethod: noop,
   onLinesInput: noop,
   onNotSure: noop,
   onHint: noop,

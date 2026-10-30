@@ -364,6 +364,362 @@ const ComponentStep = z.strictObject({
   solutionPhrases: SolutionPhrasesSchema.optional(),
 });
 
+// ---------------------------------------------------------------------------
+// Method lesson (docs/METHOD_LESSON_PLAN.md, its addenda, METHOD_Q2_SPEC.md and
+// METHOD_Q3_SPEC.md). The author writes ONE `method` block per question; the
+// loader expands it into ordinary steps (`text` for the opening card, `mframe`
+// for the plan, the read tap, one lines frame per built plan card, the extra
+// card frames, the recipe and the similar questions), so the planner, hints,
+// outcome classes and caps work per frame. Repairs are variants of kind
+// `alternative` whose step is an `mframe` with a `repair` script.
+// Everything domain-specific (graph templates, mutations, card evaluators,
+// checks) lives in src/method, behind an id: the schema only holds the shape.
+
+/** What the strip and the frame header show. Never a value, never the how (loader scan). */
+export const MethodHeaderSchema = z.strictObject({
+  now: RichSchema,
+  why: RichSchema,
+  next: RichSchema,
+});
+export type MethodHeader = z.infer<typeof MethodHeaderSchema>;
+
+/** A plan-card key: the template says which keys exist (src/method/templates.ts). */
+export const PlanKeySchema = Id;
+export type PlanKey = string;
+
+/** The part of a plan card the plan frame needs. */
+export const PlanCardRefSchema = z.strictObject({
+  id: Id,
+  key: PlanKeySchema,
+  /** One or two words: used by the reason-for-order line, the recap and the strip. */
+  short: RichSchema,
+  /** The coarse step as the student sees it on the card. */
+  text: RichSchema,
+  header: MethodHeaderSchema,
+  /** Cards whose result this card uses. */
+  needs: z.array(Id).default([]),
+});
+export type PlanCardRef = z.infer<typeof PlanCardRefSchema>;
+
+/** An authored plan card: the ref plus what the lines frame of this card asks. */
+export const PlanCardSchema = PlanCardRefSchema.extend({
+  prompt: RichSchema,
+  hints: z.array(RichSchema).max(3),
+  deepDiveId: Id.optional(),
+  walkthrough: z
+    .strictObject({ lines: z.array(RichSchema).min(2).max(3) })
+    .optional(),
+  /** Known wrong procedures for this card's main node, matched by value after the mutations. */
+  procedures: z.array(ProcedureRowSchema).optional(),
+  wrongAnswers: z.array(WrongAnswerSchema).optional(),
+});
+export type PlanCard = z.infer<typeof PlanCardSchema>;
+
+const JsonRecord = z.record(z.string(), z.json());
+
+export const ReadTargetSchema = z.strictObject({
+  /** A word of the exercise statement (loader: it must occur). */
+  token: z.string().min(2),
+  /** Facts the tap establishes for the rest of the question (order, replacement, event...). */
+  effect: JsonRecord.default({}),
+});
+
+/** A graph template of src/method/templates.ts and its arguments. */
+export const MethodGraphSchema = z.strictObject({
+  template: Id,
+  args: JsonRecord.default({}),
+});
+export type MethodGraph = z.infer<typeof MethodGraphSchema>;
+
+/** One sentence card of a pick (combine reason, claim, recognise, formula). */
+export const CardOptionSchema = z.strictObject({
+  id: Id,
+  text: RichSchema,
+  truth: z.enum(['true', 'false']),
+  misconceptionId: Id.optional(),
+  /** Authored line shown when this card is the wrong pick. */
+  feedback: RichSchema.optional(),
+  /** What the evaluator tests (a prediction, a formula): src/method/cards.ts. */
+  claim: JsonRecord.optional(),
+});
+export type CardOption = z.infer<typeof CardOptionSchema>;
+
+/** A pick of one card, placed after a plan card's lines (or after the plan, the read tap, another pick). */
+export const CardsFrameSchema = z.strictObject({
+  id: Id,
+  /** A plan card id, `plan`, `read`, or the id of another pick. */
+  after: Id,
+  short: RichSchema,
+  header: MethodHeaderSchema,
+  prompt: RichSchema,
+  hints: z.array(RichSchema).max(3),
+  deepDiveId: Id.optional(),
+  /** What happens after the pick (src/method/cards.ts); default: right or wrong. */
+  evaluator: Id.default('pick'),
+  args: JsonRecord.default({}),
+  cards: z.array(CardOptionSchema).min(2).max(5),
+});
+export type CardsFrame = z.infer<typeof CardsFrameSchema>;
+
+/** The student's recipe: 3 to 5 sentence cards from a pool with distractors, beside the clean card. */
+export const RecipeSchema = z.strictObject({
+  short: RichSchema,
+  header: MethodHeaderSchema,
+  prompt: RichSchema,
+  hints: z.array(RichSchema).max(3),
+  pool: z
+    .array(
+      z.strictObject({
+        id: Id,
+        text: RichSchema,
+        kind: z.enum(['step', 'check', 'distractor']),
+      }),
+    )
+    .min(5)
+    .max(10),
+  clean: z.array(Id).min(3).max(5),
+});
+export type Recipe = z.infer<typeof RecipeSchema>;
+
+/** The method card of the question's TYPE, shown beside the student's recipe (addendum E, 24). */
+export const MethodCardSchema = z.strictObject({
+  type: RichSchema,
+  steps: z.array(RichSchema).min(3).max(5),
+  checks: z.array(RichSchema).min(1).max(4),
+});
+
+/** One of the two similar questions without help (addendum E, 25). */
+export const SimilarSlotSchema = z.strictObject({
+  id: Id,
+  kind: z.enum(['same_structure', 'twist']),
+  /** The statement, exam French; formulas as `math`. */
+  statement: RichSchema,
+  /** A template and its arguments (an urn of its own, a die...). */
+  graph: MethodGraphSchema,
+  /** Numbers that are on screen elsewhere and allowed on purpose (printed by the guard). */
+  allow: z.array(z.number()).default([]),
+});
+export type SimilarSlot = z.infer<typeof SimilarSlotSchema>;
+
+/** What he found: nodes whose credited lines make a finding, the reason of each, the rule WITH its condition. */
+export const FindingSchema = z.strictObject({
+  id: Id,
+  title: RichSchema,
+  nodes: z.array(Id).min(1),
+  reasons: z.record(Id, RichSchema).default({}),
+  /** Shown only once a card of `viaCard` was picked right (a claim he made), if given. */
+  viaCard: Id.optional(),
+  rule: z.strictObject({ text: RichSchema, condition: RichSchema }),
+  /** Show "what I did / how the exam writes it" after he computed the nodes himself. */
+  bridge: z.boolean().default(false),
+});
+export type Finding = z.infer<typeof FindingSchema>;
+
+/** The paper skeleton: exam French (LTR), blanks `{node}` filled from his accepted lines only. */
+export const SkeletonLineSchema = z.strictObject({
+  id: Id,
+  fr: z.string().min(1),
+});
+
+/** A value another question's graph gives (the student's sheet): `from` is `part/blockId`, e.g. `1/m1`. */
+export const MethodInputSchema = z.strictObject({
+  from: z.string().min(3),
+  node: Id,
+});
+
+const RoadmapEntrySchema = z.strictObject({
+  id: Id,
+  kind: z.enum(['plan', 'read', 'card', 'cards', 'recipe', 'paper']),
+  short: RichSchema,
+  header: MethodHeaderSchema,
+});
+export type RoadmapEntry = z.infer<typeof RoadmapEntrySchema>;
+
+/** One stage of a repair script (a repair is ONE detour of at most 10 acts). */
+export const RepairStageSchema = z.discriminatedUnion('type', [
+  /**
+   * Text and math the student reads and acknowledges with one tap. `worked`
+   * shows lines of a graph the engine builds (a worked example on another
+   * urn): each node as `form = value`, never typed by hand.
+   */
+  z.strictObject({
+    type: z.literal('show'),
+    text: RichSchema,
+    worked: z
+      .strictObject({ graph: MethodGraphSchema, nodes: z.array(Id).min(1) })
+      .optional(),
+  }),
+  /** He builds the list of groups himself with chips (duplicates merged, "something is missing" help). */
+  z.strictObject({
+    type: z.literal('list'),
+    prompt: RichSchema,
+    reds: z.number().int().min(0),
+    blacks: z.number().int().min(0),
+    k: z.number().int().min(1),
+    /** Only the groups that contain this ball (the habit "list by the first ball"). */
+    contains: z.string().optional(),
+  }),
+  /** A line on a twin graph: credited when it matches `node` (any accepted form). */
+  z.strictObject({
+    type: z.literal('line'),
+    prompt: RichSchema,
+    graph: MethodGraphSchema,
+    node: Id,
+  }),
+  z.strictObject({
+    type: z.literal('cards'),
+    prompt: RichSchema,
+    evaluator: Id.default('pick'),
+    args: JsonRecord.default({}),
+    /** The twin the evaluator computes on (a claim about counts); absent: none. */
+    graph: MethodGraphSchema.optional(),
+    cards: z.array(CardOptionSchema).min(2).max(5),
+  }),
+  /** A picture; the stage ends when its gate opens (`explored`). */
+  z.strictObject({
+    type: z.literal('component'),
+    component: ComponentSpecSchema,
+    prompt: RichSchema.optional(),
+  }),
+]);
+export type RepairStage = z.infer<typeof RepairStageSchema>;
+
+/**
+ * A script frame on the ROUTE (not a detour): an after-answer picture or a
+ * short walk placed after a plan card, a pick or the read tap. Same stages as
+ * a repair; no help ladder (nothing to hide), one act per stage.
+ */
+export const ExtraFrameSchema = z.strictObject({
+  id: Id,
+  /** A plan card id, `plan`, `read`, or the id of a pick or another extra. */
+  after: Id,
+  short: RichSchema,
+  header: MethodHeaderSchema,
+  prompt: RichSchema,
+  stages: z.array(RepairStageSchema).min(1).max(4),
+});
+export type ExtraFrame = z.infer<typeof ExtraFrameSchema>;
+
+export const MethodStepSchema = z.strictObject({
+  ...stepBase,
+  kind: z.literal('method'),
+  /** The route in 4 or 5 short lines and how help works; no math (loader scan). Not blocking. */
+  opening: z.strictObject({
+    route: z.array(RichSchema).min(4).max(5),
+    help: RichSchema,
+  }),
+  plan: z.strictObject({
+    short: RichSchema,
+    header: MethodHeaderSchema,
+    prompt: RichSchema,
+    hints: z.array(RichSchema).max(3),
+    cards: z.array(PlanCardSchema).min(3).max(5),
+  }),
+  read: z.strictObject({
+    short: RichSchema,
+    header: MethodHeaderSchema,
+    prompt: RichSchema,
+    hints: z.array(RichSchema).max(3),
+    targets: z.array(ReadTargetSchema).min(1),
+    notOrderWord: RichSchema,
+    /** The sentence to tap in, when it is the question's own wording and not the exercise statement (exam French). */
+    sentence: z.string().min(1).optional(),
+  }),
+  /** The last roadmap row: writing the answer on the real paper. */
+  paper: z.strictObject({ short: RichSchema, header: MethodHeaderSchema }),
+  graph: MethodGraphSchema,
+  /** Values from earlier questions (cross-question inputs), given to the template. */
+  inputs: z.record(Id, MethodInputSchema).optional(),
+  /** What the statement gives (« Montrer que P(A) = 1/2 »): the last check of the result. */
+  target: RichSchema.optional(),
+  /** Plan cards whose lines frame exists so far (absent: all). */
+  builtFrames: z.array(Id).optional(),
+  /** Picks placed after a card (the combine reason, a claim consolidation, formula cards). */
+  picks: z.array(CardsFrameSchema).default([]),
+  /** Script frames on the route (an after-answer picture, a short walk). */
+  extras: z.array(ExtraFrameSchema).default([]),
+  recipe: RecipeSchema.optional(),
+  methodCard: MethodCardSchema.optional(),
+  /** Two similar questions without help: same structure, then a twist. */
+  similar: z.array(SimilarSlotSchema).length(2).optional(),
+  findings: z.array(FindingSchema).default([]),
+  skeleton: z.array(SkeletonLineSchema).default([]),
+});
+export type MethodStep = z.infer<typeof MethodStepSchema>;
+
+const MethodFrameSchema = z.discriminatedUnion('type', [
+  z.strictObject({
+    type: z.literal('plan'),
+    cards: z.array(PlanCardRefSchema).min(3).max(5),
+  }),
+  z.strictObject({
+    type: z.literal('read'),
+    /** The statement's sentence with the word(s) to find: the tappable copy. */
+    sentence: z.string().min(1),
+    targets: z.array(ReadTargetSchema).min(1),
+    notOrderWord: RichSchema,
+  }),
+  z.strictObject({
+    type: z.literal('lines'),
+    cardId: Id,
+    key: PlanKeySchema,
+    procedures: z.array(ProcedureRowSchema).optional(),
+    wrongAnswers: z.array(WrongAnswerSchema).optional(),
+  }),
+  z.strictObject({
+    type: z.literal('cards'),
+    after: Id,
+    evaluator: Id,
+    args: JsonRecord,
+    cards: z.array(CardOptionSchema).min(2).max(5),
+  }),
+  z.strictObject({
+    type: z.literal('recipe'),
+    pool: RecipeSchema.shape.pool,
+    clean: z.array(Id),
+    methodCard: MethodCardSchema.optional(),
+  }),
+  /** A question without help: he writes lines, then the review credits them and labels the slips. */
+  z.strictObject({
+    type: z.literal('similar'),
+    slot: SimilarSlotSchema,
+  }),
+  z.strictObject({
+    type: z.literal('repair'),
+    stages: z.array(RepairStageSchema).min(1).max(6),
+  }),
+]);
+export type MethodFrame = z.infer<typeof MethodFrameSchema>;
+
+/** Internal (made by the loader, or authored as a repair step): a frame with its own hint ladder. */
+export const MethodFrameStepSchema = z.strictObject({
+  ...stepBase,
+  ...asked,
+  kind: z.literal('mframe'),
+  frame: MethodFrameSchema,
+  /** Absent on a repair step (a detour has no place on the route). */
+  header: MethodHeaderSchema.optional(),
+  short: RichSchema.optional(),
+  roadmap: z.array(RoadmapEntrySchema).min(4).optional(),
+  graph: MethodGraphSchema.optional(),
+  /** The block's id: frames of one method block share it. */
+  methodId: Id.optional(),
+  /** Cross-question inputs of the block's graph. */
+  inputs: z.record(Id, MethodInputSchema).optional(),
+  /** What the statement gives: the last check of the result. */
+  target: RichSchema.optional(),
+  /** On the plan frame only: what the sheet shows (findings, paper skeleton). */
+  sheet: z
+    .strictObject({
+      findings: z.array(FindingSchema),
+      skeleton: z.array(SkeletonLineSchema),
+    })
+    .optional(),
+  /** Which plan card (or `tail`) a frame belongs to: the student's order moves the groups. */
+  group: Id.optional(),
+});
+export type MethodFrameStep = z.infer<typeof MethodFrameStepSchema>;
+
 export const StepSchema = z
   .discriminatedUnion('kind', [
     z.strictObject({
@@ -381,6 +737,8 @@ export const StepSchema = z
     ChoiceStep,
     TypedStep,
     LinesStep,
+    MethodStepSchema,
+    MethodFrameStepSchema,
     z.strictObject({
       ...stepBase,
       ...asked,
@@ -568,7 +926,10 @@ export const MisconceptionSchema = z.strictObject({
   category: z.enum(['math', 'writing']).default('math'),
   description: z.string().min(1),
   signature: z.string().min(1),
-  repairComponent: ComponentNameSchema.optional(),
+  /** A picture component, or `method:<id>` for a repair that is a script of stages. */
+  repairComponent: z
+    .union([ComponentNameSchema, z.string().regex(/^method:[a-z0-9_]+$/)])
+    .optional(),
   /**
    * Shown once, on the first wrong answer of a step (product owner,
    * 2026-10-18): uses the student's value when possible, ends with an action.
@@ -612,8 +973,8 @@ export const VariantSchema = z
     kind: VariantKindSchema,
     /** Step keys ("1b/s8") this variant is for; empty for prerequisites. */
     forSteps: z.array(z.string().regex(/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/)),
-    /** Representation it uses: a component name, "text", "numeric_twin", "worked_example". */
-    representation: Id,
+    /** Representation it uses: a component name, "text", "numeric_twin", "worked_example", or `method:<id>` (a repair script of the method lesson). */
+    representation: z.union([Id, z.string().regex(/^method:[a-z0-9_]+$/)]),
     /** Which ask_clarify answers it addresses. */
     addresses: z.array(ClarifyChoiceSchema).optional(),
     /** Simpler twins: order in the mini-example loop (1 = first, each simpler). */
@@ -630,11 +991,22 @@ export const VariantSchema = z
     step: StepSchema,
   })
   .superRefine((v, ctx) => {
-    if (!['choice', 'typed', 'lines', 'component'].includes(v.step.kind)) {
+    if (
+      !['choice', 'typed', 'lines', 'component', 'mframe'].includes(v.step.kind)
+    ) {
       ctx.addIssue({
         code: 'custom',
         path: ['step'],
-        message: 'variant step must be asked (choice, typed, lines) or a task',
+        message:
+          'variant step must be asked (choice, typed, lines), a task or a repair script',
+      });
+    }
+    if (v.step.kind === 'mframe' && v.step.frame.type !== 'repair') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['step'],
+        message:
+          'a variant can only carry a repair script of the method lesson',
       });
     }
     if ((v.kind === 'prerequisite') !== (v.forSteps.length === 0)) {
@@ -778,6 +1150,15 @@ export const ExerciseSchema = z
         for (const s of g.steps) {
           blockIds.push(s.blockId);
           stepIds.push(`${q.id}/${s.id}`);
+          if (s.kind === 'method') {
+            // The frames a method block expands to (src/method/expand.ts) can be the
+            // target of a variant, even a frame not built yet.
+            stepIds.push(
+              `${q.id}/${s.id}.plan`,
+              `${q.id}/${s.id}.read`,
+              ...s.plan.cards.map(c => `${q.id}/${s.id}.${c.id}`),
+            );
+          }
           const dd = 'deepDiveId' in s ? s.deepDiveId : undefined;
           if (dd !== undefined && !deepDiveIds.has(dd)) {
             ctx.addIssue({

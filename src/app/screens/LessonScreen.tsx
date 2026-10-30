@@ -16,6 +16,7 @@ import {
   Share,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -30,6 +31,10 @@ import {
   type Opened,
 } from '../exercises';
 import { ExercisePicker } from './ExercisePicker';
+import { hasTutorNotes } from '../../ai/packs/notes';
+import type { MessagesTransport } from '../../ai/transport/messagesApi';
+import { TutorLessonScreen } from './tutor/TutorLessonScreen';
+import { aiPartDone } from './tutor/done';
 import { AskField } from '../../lesson/feed/AskField';
 import { LessonFeed, type FeedHandlers } from '../../lesson/feed/LessonFeed';
 import { HelpContext, HelpUiContext } from '../../lesson/feed/help';
@@ -60,6 +65,14 @@ import { appEventStore } from '../appEventStore';
 import { appDoneRecord } from '../appDoneRecord';
 import { doneParts, resetExercise } from '../../state/doneParts';
 import { PaperSheet, type PaperCloseVia } from '../../lesson/feed/PaperSheet';
+import {
+  MethodSheet,
+  type MethodSheetCloseVia,
+} from '../../lesson/feed/method/MethodSheet';
+import { NARROW_WIDTH, PadOpenContext } from '../../lesson/feed/method/padOpen';
+import { MethodStrip } from '../../lesson/feed/method/MethodStrip';
+import { roadmapFor } from '../../method/roadmap';
+import { sheetFor } from '../../method/sheetData';
 import { ExamPaperScreen } from './ExamPaperScreen';
 import { paperStyle } from '../paperStyle';
 import type { EventStore } from '../../telemetry/eventStore';
@@ -71,7 +84,7 @@ import type * as DevOnly from '../dev';
 import { deviceContext } from '../device';
 import type { AskMode } from '../../lesson/session/types';
 import { useLesson, type LessonLlm } from '../../lesson/useLesson';
-import { LLM_CONFIG } from '../../config/llm';
+import { LLM_CONFIG, localLlmConfig } from '../../config/llm';
 import { opensGate } from '../../components/registry';
 import type { JsonObject } from '../../components/contract';
 import type { TutorTurn } from '../../planner/llm/contextPack';
@@ -124,6 +137,13 @@ interface LessonScreenProps {
   doneRecord?: DoneRecord;
   /** Help under the active question: chips (default) or the «ما نعرفش» choice (tests; dev `-devHelpLayout`). */
   helpLayout?: 'chips' | 'choice';
+  /**
+   * The AI tutor leads the questions that have a tutor pack. Default: on when
+   * the build has an Anthropic key (it cannot run without one).
+   */
+  aiTutor?: boolean;
+  /** Tests of the AI route: a fake Messages API transport. */
+  aiTransport?: MessagesTransport;
 }
 
 /** The exercise picker, then a part played from JSON. */
@@ -143,6 +163,24 @@ export function LessonScreen({
     const entry = CATALOG.find(e => e.id === id)?.result;
     if (entry?.ok) {
       resetExercise(entry.loaded.exercise, { eventStore, doneRecord });
+    }
+    // `-devMarkDone exerciseId/questionId` (debug builds): mark it done once.
+    const mark = devOnly?.devMarkDoneAtLaunch();
+    const slash = mark?.lastIndexOf('/') ?? -1;
+    const marked =
+      mark && slash > 0
+        ? CATALOG.find(e => e.id === mark.slice(0, slash))?.result
+        : undefined;
+    if (mark && marked?.ok) {
+      doneRecord.note(
+        aiPartDone({
+          exerciseId: marked.loaded.exercise.id,
+          contentVersion: marked.loaded.exercise.contentVersion,
+          questionId: mark.slice(slash + 1),
+          answered: 1,
+          now: Date.now(),
+        }),
+      );
     }
     return null;
   });
@@ -176,6 +214,28 @@ export function LessonScreen({
         onPaper={setPaperFor}
         eventStore={eventStore}
         doneRecord={doneRecord}
+      />
+    );
+  }
+  // The AI tutor leads every question that has a tutor pack (owner,
+  // 2026-10-29: it replaces this lesson); `-devLesson old` keeps the old one.
+  const entry = CATALOG.find(e => e.id === opened.exerciseId);
+  const aiOn = props.aiTutor ?? localLlmConfig().anthropicApiKey.length > 0;
+  if (
+    aiOn &&
+    hasTutorNotes(opened.exerciseId, opened.partId) &&
+    entry?.raw !== undefined &&
+    devOnly?.devOldLessonAtLaunch() !== true
+  ) {
+    return (
+      <TutorLessonScreen
+        key={`${opened.exerciseId}/${opened.partId}`}
+        loaded={result.loaded}
+        raw={entry.raw}
+        questionId={opened.partId}
+        onBack={() => setOpened(null)}
+        onNext={partId => setOpened({ exerciseId: opened.exerciseId, partId })}
+        {...(props.aiTransport && { transport: props.aiTransport })}
       />
     );
   }
@@ -288,6 +348,35 @@ function Lesson({
       AccessibilityInfo.sendAccessibilityEvent(paperButton.current, 'focus');
     }
   };
+  // The route of a method question: strip under the progress bar, sheet on a tap.
+  // `-devDemo methodSheet` (debug builds): the route sheet open from the start (screenshots).
+  const [methodOpen, setMethodOpen] = useState(
+    devOnly?.devDemoAtLaunch() === 'methodSheet',
+  );
+  const [padOpen, setPadOpen] = useState(false);
+  const { width: windowWidth } = useWindowDimensions();
+  const roadmap = useMemo(
+    () => roadmapFor(content.question.groups, state),
+    [content.question.groups, state],
+  );
+  const sheetData = useMemo(
+    () =>
+      sheetFor(
+        loaded,
+        content.question.id,
+        content.question.groups,
+        state.method,
+      ),
+    [loaded, content.question.id, content.question.groups, state.method],
+  );
+  const openMethod = () => {
+    logUi('MethodSheet', 'opened', {});
+    setMethodOpen(true);
+  };
+  const closeMethod = (via: MethodSheetCloseVia) => {
+    logUi('MethodSheet', 'closed', { via });
+    setMethodOpen(false);
+  };
   /** The active card's key: its component state goes with an ask. */
   const activeCard = state.stack[state.stack.length - 1]?.cardKey;
   useEffect(() => onLog?.(log), [log, onLog]);
@@ -311,6 +400,7 @@ function Lesson({
         dispatch({ type: 'answer', value: { raw }, keys }),
       onSubmitLine: (line, keys) =>
         dispatch({ type: 'answer', value: { line }, keys }),
+      onSubmitMethod: value => dispatch({ type: 'answer', value }),
       onLinesInput: (stepId, name, payload) =>
         logUi('LinesEditor', name, payload, stepId),
       onNotSure: () => dispatch({ type: 'not_sure' }),
@@ -599,6 +689,8 @@ function Lesson({
         dispatch(
           a.type === 'notSure'
             ? { type: 'not_sure' }
+            : a.type === 'line'
+            ? { type: 'answer', value: { mline: a.raw } }
             : { type: 'answer', value: { raw: a.raw }, keys: [...a.raw] },
         );
       }
@@ -733,6 +825,8 @@ function Lesson({
 
   // `-devWidth 360` (debug builds): a narrow column for screenshots.
   const devWidth = devOnly?.devWidthAtLaunch() ?? null;
+  const stripCompact =
+    padOpen && Math.min(windowWidth, devWidth ?? windowWidth) <= NARROW_WIDTH;
   return (
     <KeyboardAvoidingView
       style={[
@@ -812,6 +906,13 @@ function Lesson({
         progress={mainProgress(content.question.groups, state)}
         label={t('lesson.progress')}
       />
+      {roadmap && (
+        <MethodStrip
+          roadmap={roadmap}
+          onOpen={openMethod}
+          compact={stripCompact}
+        />
+      )}
       {devTools && (
         <View style={styles.devRow}>
           <ExportQueue queue={queue} />
@@ -874,21 +975,23 @@ function Lesson({
       {devTools && <HelpUsageLine log={log} />}
       {devTools && <MovesLine log={log} />}
       {devTools && showEvents && <EventPanel log={log} />}
-      <HelpContext.Provider value={lesson.help}>
-        <HelpUiContext.Provider value={helpUi}>
-          <LessonFeed
-            items={state.items}
-            content={content}
-            handlers={handlers}
-            snapshots={snapshots}
-            onUserScroll={studentScrolled}
-            endCard={endCard}
-            paper={paperBackground}
-            devScrollToEnd={devOnly?.devScrollEndAtLaunch() ?? false}
-            devScrollBack={devOnly?.devScrollAtLaunch() ?? 0}
-          />
-        </HelpUiContext.Provider>
-      </HelpContext.Provider>
+      <PadOpenContext.Provider value={setPadOpen}>
+        <HelpContext.Provider value={lesson.help}>
+          <HelpUiContext.Provider value={helpUi}>
+            <LessonFeed
+              items={state.items}
+              content={content}
+              handlers={handlers}
+              snapshots={snapshots}
+              onUserScroll={studentScrolled}
+              endCard={endCard}
+              paper={paperBackground}
+              devScrollToEnd={devOnly?.devScrollEndAtLaunch() ?? false}
+              devScrollBack={devOnly?.devScrollAtLaunch() ?? 0}
+            />
+          </HelpUiContext.Provider>
+        </HelpContext.Provider>
+      </PadOpenContext.Provider>
       <AskField
         // Collapsed while a question card is on screen (DESIGN.md §3).
         foldFor={activeCard ?? null}
@@ -920,6 +1023,18 @@ function Lesson({
         onReport={handlers.onReport}
         onMenu={handlers.onBlockMenu}
       />
+      {roadmap && (
+        <MethodSheet
+          visible={methodOpen && sheet === null}
+          roadmap={roadmap}
+          {...(sheetData && {
+            found: sheetData.found,
+            skeleton: sheetData.skeleton,
+          })}
+          onClose={closeMethod}
+          paperStyle={paperBackground}
+        />
+      )}
       <PaperSheet
         visible={paper !== null}
         loaded={loaded}

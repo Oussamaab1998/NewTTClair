@@ -16,11 +16,13 @@
  *   -devUntil sum      with answerAll: stop when this main step's card is open
  *                      (screenshots of a card mid-part, e.g. 2.a's sum)
  *   -devThen type:720,notSure  once answerAll stopped at -devUntil: type this
- *                      value on the open card / open «ما نعرفش» (comma-separated)
+ *                      value on the open card / open «ما نعرفش» (comma-separated);
+ *                      `line:10*9*8=720` writes a line on a method frame
  *   -devDemo paperSheet  the opened lesson starts with «الورقة» open
  *   -devReset bac2022c-ex4  "start from scratch" for this exercise at launch
  *                      (the real reset: an exercise_reset event, its done
  *                      marks cleared; other exercises untouched)
+ *   -devDemo methodSheet  the opened method lesson starts with the route sheet open
  *   -devDemo resetDialog  the picker starts with exercise 4's reset dialog open
  *   -devPaperScreen bac2022c-ex4  the exam paper screen of this exercise
  *                      opens at launch (normal mode)
@@ -69,11 +71,17 @@ const stringArg = (name: string): string | null => {
   return typeof v === 'string' && v.length > 0 ? v : null;
 };
 export const devTabAtLaunch = () => stringArg('devTab');
+/** `-devLesson old`: the scripted lesson instead of the AI tutor (comparison, screenshots). */
+export const devOldLessonAtLaunch = () => String(arg('devLesson')) === 'old';
 export const devComponentAtLaunch = () => stringArg('devComponent');
 export const devPartAtLaunch = () => stringArg('devPart');
 export const devDemoAtLaunch = () => stringArg('devDemo');
 export const devUntilAtLaunch = () => stringArg('devUntil');
-export type DevThen = { type: 'type'; raw: string } | { type: 'notSure' };
+export type DevThen =
+  | { type: 'type'; raw: string }
+  /** A written line of a method frame (`line:10*9*8/(3*2*1)=120`). */
+  | { type: 'line'; raw: string }
+  | { type: 'notSure' };
 /** `-devThen type:720,notSure`: known forms only; anything else is ignored. */
 export const devThenAtLaunch = (): DevThen[] =>
   (stringArg('devThen') ?? '').split(',').flatMap((a): DevThen[] => {
@@ -83,6 +91,8 @@ export const devThenAtLaunch = (): DevThen[] =>
     }
     return t.startsWith('type:') && t.length > 5
       ? [{ type: 'type', raw: t.slice(5) }]
+      : t.startsWith('line:') && t.length > 5
+      ? [{ type: 'line', raw: t.slice(5) }]
       : [];
   });
 /** `-devScript real1b` (screenshots): the real 1.b session played live by the scripted student. */
@@ -126,6 +136,8 @@ export const devWidthAtLaunch = (): number | null => {
   return Number.isFinite(v) && v >= 280 && v <= 600 ? v : null;
 };
 export const devResetAtLaunch = () => stringArg('devReset');
+/** `-devMarkDone <exerciseId>/<questionId>`: mark a question done (testing the next one). */
+export const devMarkDoneAtLaunch = () => stringArg('devMarkDone');
 /** `-devPaper flat|grid|ruled`: known names only; anything else is ignored. */
 export const devPaperAtLaunch = (): 'flat' | 'grid' | 'ruled' | null => {
   const v = stringArg('devPaper');

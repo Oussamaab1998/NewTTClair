@@ -18,6 +18,8 @@ export interface CatalogEntry {
   /** From the raw JSON, so a card exists even when loading fails. */
   id: string;
   result: LoadResult;
+  /** The JSON as authored (the AI tutor's pack reads the method steps from it). */
+  raw?: unknown;
 }
 
 /** Loads, then checks what needs the lesson content (walk-throughs, B4): any error fails the load. */
@@ -33,6 +35,7 @@ function loadChecked(raw: unknown, misconceptions: unknown): LoadResult {
 const entry = (raw: { id: string }, misconceptions: unknown): CatalogEntry => ({
   id: raw.id,
   result: loadChecked(raw, misconceptions),
+  raw,
 });
 
 /** In exam order. */

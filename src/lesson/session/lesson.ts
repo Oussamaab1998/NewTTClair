@@ -20,6 +20,19 @@ import { add, equals } from '../../engine/rational';
 import { fractionToLatex, parseNumeric } from '../../engine/format';
 import { parseExpression, toLatex } from '../../engine/expression';
 import { checkLine } from '../lines/check';
+import { THRESHOLDS } from '../../state/config';
+import { evaluatorOf } from '../../method/cards';
+import { multiplyBackCheck } from '../../method/checks';
+import {
+  checkPlan,
+  checkRead,
+  evaluateLine,
+  reviewLine,
+} from '../../method/frame';
+import { evalChain } from '../../method/lineChain';
+import { checkList, listedByFirstBall } from '../../method/repair';
+import { reasonOrder, recap } from '../../method/narration';
+import type { MethodNote } from '../../method/note';
 import { componentKind, isGate } from '../../components/registry';
 import type { ComponentSpec, JsonObject } from '../../components/contract';
 import {
@@ -53,6 +66,7 @@ import {
 import type { Action, Decision } from '../../planner/schema';
 import { catalogFor, type Catalog } from '../../state/catalog';
 import type {
+  AnswerValue,
   AskRef,
   CardPurpose,
   EventDraft,
@@ -92,6 +106,10 @@ export interface LessonContent {
   catalog: Catalog;
 }
 
+/** Is this step key a method frame (plan, read or lines)? The AI planner is never asked about one. */
+export const isMethodStep = (content: LessonContent, key: string): boolean =>
+  content.steps.get(key)?.kind === 'mframe';
+
 export function buildContent(
   loaded: LoadedExercise,
   questionId: string,
@@ -108,6 +126,7 @@ export function buildContent(
         s.kind === 'choice' ||
         s.kind === 'typed' ||
         s.kind === 'lines' ||
+        s.kind === 'mframe' ||
         isTaskStep(s)
       ) {
         steps.set(stepKey.main(question.id, s.id), s as FrameStep);
@@ -247,7 +266,7 @@ function showCard(d: Draft, frame: Frame) {
     attempts: frame.attempts,
     ...(frame.notSures && { notSure: frame.notSures }),
     ...(frame.chipsHold !== undefined && { chipsHold: frame.chipsHold }),
-    ...(revealUnlocked(frame) && { revealUnlocked: true }),
+    ...((revealUnlocked(frame) || methodCapped(d)) && { revealUnlocked: true }),
     ...(frame.fresh && { freshExit: true }),
     hintLevel: frame.hintLevel,
     hintCount: step.hints?.length ?? 0,
@@ -548,7 +567,7 @@ function advance(d: Draft) {
       finish(d);
       return;
     }
-    const step: Step | undefined = group.steps[d.s.cursor.step];
+    const step: Step | undefined = walked(d, group.steps)[d.s.cursor.step];
     if (!step) {
       d.s.cursor = { group: d.s.cursor.group + 1, step: 0 };
       continue;
@@ -581,6 +600,7 @@ function advance(d: Draft) {
       case 'choice':
       case 'typed':
       case 'lines':
+      case 'mframe':
         pushFrame(
           d,
           { scope: 'main', questionId: d.c.question.id, stepId: step.id },
@@ -943,6 +963,9 @@ function correctAnswerRich(d: Draft, frame: Frame): Rich {
     return { math: fractionToLatex(answer.value) };
   }
   const step = stepOf(d, frame);
+  if (answer.kind === 'method' && step.kind === 'mframe') {
+    return methodRevealRich(step, answer);
+  }
   if (answer.kind === 'lines') {
     // The goal's written form (engine-checked by the loader).
     const goal =
@@ -1144,6 +1167,924 @@ function onLine(
 }
 
 // ---------------------------------------------------------------------------
+// Method lesson frames (docs/METHOD_LESSON_PLAN.md, addendum). The decisions are
+// pure functions of src/method; this part logs, shows and hands over to the planner.
+
+type MframeStep = Extract<FrameStep, { kind: 'mframe' }>;
+type MethodState = NonNullable<LessonState['method']>;
+
+/** Acts of one repair script at most (D38). */
+const REPAIR_ACTS = THRESHOLDS.methodRepairActs;
+
+/** The 30-act cap of a method question: at the cap no repair opens and every frame can be shown. */
+const methodCapped = (d: Draft): boolean => d.s.method?.capped === true;
+
+/**
+ * Counts a student act of a method question: an answer, a hint, a "not sure"
+ * or a reveal on a frame of the route or of a repair. The recipe and the
+ * similar questions are not part of the question's budget.
+ */
+function tickMethodActs(d: Draft, action: LessonAction) {
+  const acceptsRepair =
+    action.type === 'card_choice' &&
+    action.purpose === 'repair' &&
+    action.choice === 'yes';
+  if (
+    action.type !== 'answer' &&
+    action.type !== 'hint' &&
+    action.type !== 'not_sure' &&
+    action.type !== 'reveal' &&
+    !acceptsRepair
+  ) {
+    return;
+  }
+  const frame = top(d);
+  const step = frame && stepOf(d, frame);
+  if (
+    !frame ||
+    step?.kind !== 'mframe' ||
+    step.frame.type === 'recipe' ||
+    step.frame.type === 'similar'
+  ) {
+    return;
+  }
+  const m = methodOf(d);
+  const acts = m.acts + 1;
+  d.s.method = { ...m, acts };
+  if (acts >= THRESHOLDS.methodActsPerQuestion && !m.capped) {
+    d.s.method = { ...d.s.method, capped: true };
+    d.events.push({
+      ...eventBase(d, frame),
+      t: 'component_event',
+      component: 'Method',
+      name: 'capped',
+      payload: { acts },
+    });
+    updateCard(d, frame.cardKey, { revealUnlocked: true });
+  }
+}
+
+const methodOf = (d: Draft): MethodState => ({
+  credited: [],
+  lines: {},
+  picks: {},
+  acts: 0,
+  ...d.s.method,
+});
+
+const noteItem = (
+  d: Draft,
+  frame: Frame,
+  tone: 'success' | 'warning' | 'info',
+  note: MethodNote,
+) => append(d, { kind: 'feedback', depth: frame.depth, tone, note });
+
+const shortOf = (step: MframeStep, id: string): Rich | undefined =>
+  step.frame.type === 'plan'
+    ? step.frame.cards.find(c => c.id === id)?.short
+    : undefined;
+
+/** The plan card that comes after this one in HIS order, else the paper row. */
+function nextShort(d: Draft, step: MframeStep, cardId: string): Rich | null {
+  const roadmap = step.roadmap ?? [];
+  const prefix = step.id.slice(0, step.id.length - cardId.length - 1);
+  const order = methodOf(d).planOrder;
+  const roadmapShort = (id: string) => roadmap.find(r => r.id === id)?.short;
+  if (order) {
+    const at = order.indexOf(cardId);
+    const next = order[at + 1];
+    if (at >= 0 && next !== undefined) {
+      return roadmapShort(`${prefix}.${next}`) ?? null;
+    }
+    return (
+      roadmapShort(`${prefix}.recipe`) ??
+      roadmapShort(`${prefix}.paper`) ??
+      null
+    );
+  }
+  const i = roadmap.findIndex(r => r.id === step.id);
+  return roadmap[i + 1]?.short ?? null;
+}
+
+/** What "show me" gives at the end of a ladder: the plan's cards, the word, the expected line, the true card. */
+function methodRevealRich(step: MframeStep, answer: ResolvedAnswer): Rich {
+  const f = step.frame;
+  if (f.type === 'plan') {
+    const runs: NonNullable<Rich['ar']> = [];
+    f.cards.forEach((c, i) => {
+      if (i > 0) {
+        runs.push({ ar: ' ، ' });
+      }
+      runs.push(...(c.short.ar ?? []));
+    });
+    return { ar: runs };
+  }
+  if (f.type === 'read') {
+    return { fr: f.targets[0]?.token ?? '?' };
+  }
+  if (f.type === 'cards') {
+    return f.cards.find(c => c.truth === 'true')?.text ?? { math: '?' };
+  }
+  if (f.type === 'repair') {
+    const shown = f.stages.find(st => st.type === 'show');
+    return shown?.type === 'show' ? shown.text : { math: '?' };
+  }
+  if (
+    f.type === 'lines' &&
+    answer.kind === 'method' &&
+    answer.frame === 'lines'
+  ) {
+    const main = answer.graph.nodes.find(n => n.planCard === f.key && n.main);
+    const form = main?.forms[0];
+    if (main && form) {
+      const parsed = parseExpression(form, { variables: [] });
+      return {
+        math: `${parsed.ok ? toLatex(parsed.ast) : form} = ${fractionToLatex(
+          main.value,
+        )}`,
+      };
+    }
+  }
+  return { math: '?' };
+}
+
+/** The frames of a method group in the student's own order once his plan is accepted (D47). */
+function stepOrderFor(
+  steps: readonly Step[],
+  planOrder: readonly string[],
+): string[] {
+  const planAt = steps.findIndex(
+    s => s.kind === 'mframe' && s.frame.type === 'plan',
+  );
+  const rank = (s: Step, i: number): number => {
+    if (s.kind === 'mframe' && s.group !== undefined) {
+      if (s.group === 'head') {
+        return 1;
+      }
+      if (s.group === 'tail') {
+        return 100;
+      }
+      const at = planOrder.indexOf(s.group);
+      return at >= 0 ? 2 + at : 50;
+    }
+    return i < planAt ? 0 : 200;
+  };
+  return steps
+    .map((s, i) => ({ id: s.id, r: rank(s, i), i }))
+    .sort((x, y) => x.r - y.r || x.i - y.i)
+    .map(x => x.id);
+}
+
+/** The steps of a group as the student walks them: reordered after the plan. */
+const walked = (d: Draft, steps: readonly Step[]): readonly Step[] => {
+  const order = d.s.method?.stepOrder;
+  if (!order || order.length !== steps.length) {
+    return steps;
+  }
+  const byId = new Map(steps.map(s => [s.id, s]));
+  const out = order.map(id => byId.get(id));
+  return out.every((s): s is Step => s !== undefined) ? out : steps;
+};
+
+function onMethodFrame(
+  d: Draft,
+  frame: Frame,
+  step: MframeStep,
+  value: AnswerValue,
+) {
+  const f = step.frame;
+  closeOpenCards(d);
+  const base = eventBase(d, frame);
+  if (f.type === 'plan' && 'plan' in value) {
+    const order = value.plan.slice(0, 8);
+    const verdict = checkPlan(f.cards, order);
+    d.events.push({
+      ...base,
+      ...duration(d, frame),
+      t: 'answer',
+      kind: 'method',
+      value: { plan: order },
+      correct: verdict.ok,
+      attempt: frame.attempts + 1,
+    });
+    if (verdict.ok) {
+      const group = d.c.question.groups.find(g =>
+        g.steps.some(x => x.id === step.id),
+      );
+      d.s.method = {
+        ...methodOf(d),
+        planOrder: order,
+        ...(group && { stepOrder: stepOrderFor(group.steps, order) }),
+      };
+      updateCard(d, frame.cardKey, {
+        status: 'done',
+        result: { raw: order.join(','), correct: true },
+      });
+      noteItem(d, frame, 'info', reasonOrder(f.cards));
+      completeStep(d, frame, true);
+      return;
+    }
+    frame.attempts += 1;
+    d.s.compressed = false;
+    updateCard(d, frame.cardKey, { attempts: frame.attempts });
+    if (verdict.ok === false && verdict.reason === 'dependency') {
+      const card = f.cards.find(c => c.id === verdict.card);
+      noteItem(d, frame, 'warning', {
+        kind: 'plan_violation',
+        card: card?.short ?? { ar: [{ ar: '?' }] },
+        needs: verdict.needs
+          .map(id => shortOf(step, id))
+          .filter((r): r is Rich => r !== undefined),
+      });
+    } else {
+      append(d, {
+        kind: 'feedback',
+        depth: frame.depth,
+        tone: 'warning',
+        message: 'wrong',
+      });
+    }
+    setPending(d, 'wrong', frame.stepId);
+    return;
+  }
+  if (f.type === 'read' && 'token' in value) {
+    const token = value.token.slice(0, 40);
+    const verdict = checkRead(f.targets, token);
+    d.events.push({
+      ...base,
+      ...duration(d, frame),
+      t: 'answer',
+      kind: 'method',
+      value: { token },
+      correct: verdict.ok,
+      attempt: frame.attempts + 1,
+    });
+    append(d, {
+      kind: 'student',
+      depth: frame.depth,
+      content: { kind: 'typed', raw: token },
+    });
+    if (verdict.ok) {
+      d.s.method = {
+        ...methodOf(d),
+        facts: { ...(methodOf(d).facts ?? {}), ...verdict.effect },
+      };
+      updateCard(d, frame.cardKey, {
+        status: 'done',
+        result: { raw: token, correct: true },
+      });
+      append(d, {
+        kind: 'feedback',
+        depth: frame.depth,
+        tone: 'success',
+        message: 'correct',
+      });
+      completeStep(d, frame, true);
+      return;
+    }
+    frame.attempts += 1;
+    d.s.compressed = false;
+    updateCard(d, frame.cardKey, { attempts: frame.attempts });
+    append(d, {
+      kind: 'feedback',
+      depth: frame.depth,
+      tone: 'warning',
+      rich: f.notOrderWord,
+    });
+    setPending(d, 'wrong', frame.stepId);
+    return;
+  }
+  if (f.type === 'lines' && 'mline' in value) {
+    onMethodLine(d, frame, step, value.mline, value.readback);
+  } else if (f.type === 'cards' && 'card' in value) {
+    onCardsFrame(d, frame, step, value.card);
+  } else if (f.type === 'recipe' && 'recipe' in value) {
+    onRecipe(d, frame, step, value.recipe);
+  } else if (f.type === 'similar') {
+    onSimilar(d, frame, step, value);
+  } else if (f.type === 'repair') {
+    onRepair(d, frame, step, value);
+  }
+}
+
+/** An act that is shown a note but not graded: logged generically so a replay can do it again. */
+function ungradedAct(
+  d: Draft,
+  frame: Frame,
+  value: AnswerValue,
+  extra: Record<string, string> = {},
+) {
+  d.events.push({
+    ...eventBase(d, frame),
+    t: 'component_event',
+    component: 'Method',
+    name: 'act',
+    payload: { value: value as unknown as JsonObject, ...extra },
+  });
+}
+
+function onCardsFrame(
+  d: Draft,
+  frame: Frame,
+  step: MframeStep,
+  cardId: string,
+) {
+  const f = step.frame;
+  const answer = answerOf(d, frame);
+  if (
+    f.type !== 'cards' ||
+    answer.kind !== 'method' ||
+    answer.frame !== 'cards'
+  ) {
+    return;
+  }
+  const card = f.cards.find(c => c.id === cardId);
+  const evaluate = card ? evaluatorOf(f.evaluator) : undefined;
+  if (!card || !evaluate) {
+    return;
+  }
+  const m = methodOf(d);
+  const verdict = evaluate({
+    card,
+    cards: f.cards,
+    args: f.args,
+    graph: answer.graph,
+    lines: m.lines,
+  });
+  d.events.push({
+    ...eventBase(d, frame),
+    ...duration(d, frame),
+    t: 'answer',
+    kind: 'method',
+    value: { card: card.id },
+    correct: verdict.correct,
+    ...(!verdict.correct &&
+      card.misconceptionId !== undefined && {
+        misconceptionId: card.misconceptionId,
+      }),
+    attempt: frame.attempts + 1,
+  });
+  append(d, {
+    kind: 'student',
+    depth: frame.depth,
+    content: { kind: 'rich', rich: card.text },
+  });
+  for (const note of verdict.notes) {
+    noteItem(d, frame, 'info', note);
+  }
+  if (verdict.correct) {
+    d.s.method = { ...m, picks: { ...m.picks, [step.id]: card.id } };
+    updateCard(d, frame.cardKey, {
+      status: 'done',
+      result: { optionId: card.id, correct: true },
+    });
+    append(d, {
+      kind: 'feedback',
+      depth: frame.depth,
+      tone: 'success',
+      message: 'correct',
+    });
+    completeStep(d, frame, true);
+    return;
+  }
+  const lib = card.misconceptionId
+    ? d.c.loaded.misconceptions.get(card.misconceptionId)
+    : undefined;
+  const text =
+    card.feedback ??
+    misconceptionFeedback(d, frame, card.misconceptionId) ??
+    lib?.feedback;
+  append(
+    d,
+    text
+      ? { kind: 'feedback', depth: frame.depth, tone: 'warning', rich: text }
+      : {
+          kind: 'feedback',
+          depth: frame.depth,
+          tone: 'warning',
+          message: 'wrong',
+        },
+  );
+  frame.attempts += 1;
+  d.s.compressed = false;
+  updateCard(d, frame.cardKey, { attempts: frame.attempts });
+  setPending(d, 'wrong', frame.stepId);
+}
+
+function onRecipe(
+  d: Draft,
+  frame: Frame,
+  step: MframeStep,
+  ids: readonly string[],
+) {
+  const f = step.frame;
+  if (f.type !== 'recipe') {
+    return;
+  }
+  const byId = new Map(f.pool.map(c => [c.id, c]));
+  const picked = ids.slice(0, 5);
+  if (
+    picked.length < 3 ||
+    new Set(picked).size !== picked.length ||
+    !picked.every(id => byId.has(id))
+  ) {
+    return;
+  }
+  d.events.push({
+    ...eventBase(d, frame),
+    ...duration(d, frame),
+    t: 'answer',
+    kind: 'method',
+    value: { recipe: picked },
+    correct: true,
+    attempt: frame.attempts + 1,
+  });
+  noteItem(d, frame, 'info', {
+    kind: 'recipe',
+    mine: picked.map(id => byId.get(id)!.text),
+    clean: f.clean
+      .map(id => byId.get(id)?.text)
+      .filter((r): r is Rich => r !== undefined),
+    ...(f.methodCard && { card: f.methodCard }),
+  });
+  updateCard(d, frame.cardKey, {
+    status: 'done',
+    result: { raw: picked.join(','), correct: true },
+  });
+  completeStep(d, frame, true);
+}
+
+function onSimilar(
+  d: Draft,
+  frame: Frame,
+  step: MframeStep,
+  value: AnswerValue,
+) {
+  const answer = answerOf(d, frame);
+  if (answer.kind !== 'method' || answer.frame !== 'similar') {
+    return;
+  }
+  if ('sline' in value) {
+    const raw = value.sline.slice(0, LINE_MAX);
+    const lines = [...(frame.lines ?? []), raw];
+    frame.lines = lines;
+    updateCard(d, frame.cardKey, { lines });
+    append(d, {
+      kind: 'student',
+      depth: frame.depth,
+      content: { kind: 'typed', raw },
+    });
+    ungradedAct(d, frame, { sline: raw });
+    return;
+  }
+  if (!('submit' in value) || (frame.lines ?? []).length === 0) {
+    return;
+  }
+  // The review: every line credited or labelled, nothing said while he wrote.
+  const credited = new Set<string>();
+  for (const raw of frame.lines ?? []) {
+    const r = reviewLine(answer.graph, answer.table, raw, credited);
+    if (r.nodeId && r.outcome === 'credit') {
+      credited.add(r.nodeId);
+    }
+    d.events.push({
+      ...eventBase(d, frame),
+      t: 'component_event',
+      component: 'Review',
+      name: 'line',
+      payload: {
+        raw,
+        outcome: r.outcome,
+        ...(r.id && { id: r.id }),
+        ...(r.nodeId && { node: r.nodeId }),
+      },
+    });
+    noteItem(d, frame, r.outcome === 'credit' ? 'success' : 'info', {
+      kind: 'review',
+      raw,
+      ...r,
+    });
+  }
+  d.events.push({
+    ...eventBase(d, frame),
+    ...duration(d, frame),
+    t: 'answer',
+    kind: 'method',
+    value: { submit: true },
+    correct: true,
+    attempt: frame.attempts + 1,
+  });
+  updateCard(d, frame.cardKey, {
+    status: 'done',
+    result: { raw: String((frame.lines ?? []).length), correct: true },
+  });
+  completeStep(d, frame, true);
+}
+
+function onRepair(
+  d: Draft,
+  frame: Frame,
+  step: MframeStep,
+  value: AnswerValue,
+) {
+  const f = step.frame;
+  const res = answerOf(d, frame);
+  if (f.type !== 'repair' || res.kind !== 'method' || res.frame !== 'repair') {
+    return;
+  }
+  const si = frame.stage ?? 0;
+  const st = f.stages[si];
+  const rs = res.stages[si];
+  if (!st || !rs) {
+    return;
+  }
+  // The accepting tap is the first act of the repair (D38: at most 10, it included).
+  frame.acts = (frame.acts ?? 1) + 1;
+  ungradedAct(d, frame, value, { stage: String(si), type: st.type });
+  let done = false;
+  if (st.type === 'show' && 'ack' in value) {
+    done = true;
+  } else if (st.type === 'component' && 'explored' in value) {
+    done = true;
+  } else if (st.type === 'list' && 'list' in value) {
+    const v = checkList(rs, value.list, frame.listFails ?? 0);
+    if (v.complete) {
+      d.events.push({
+        ...eventBase(d, frame),
+        t: 'component_event',
+        component: 'ListBuilder',
+        name: 'complete',
+        payload: {
+          byFirstBall: listedByFirstBall(rs, value.list),
+          groups: v.merged.length,
+        },
+      });
+      done = true;
+    } else {
+      frame.listFails = (frame.listFails ?? 0) + 1;
+      const labelOf = (id: string) =>
+        rs.balls?.find(b => b.id === id)?.label ?? id;
+      noteItem(d, frame, 'info', {
+        kind: 'list_help',
+        level: v.level ?? 1,
+        ...(v.ball !== undefined && { ball: labelOf(v.ball) }),
+        ...(v.group && { group: v.group.map(labelOf) }),
+      });
+    }
+  } else if (st.type === 'line' && 'mline' in value && rs.graph && rs.table) {
+    const raw = value.mline.slice(0, LINE_MAX);
+    const node = rs.graph.nodes.find(n => n.id === st.node);
+    append(d, {
+      kind: 'student',
+      depth: frame.depth,
+      content: { kind: 'typed', raw },
+    });
+    const ev = evaluateLine({
+      raw,
+      graph: rs.graph,
+      table: rs.table,
+      card: node?.planCard ?? 'total',
+      credited: new Set(),
+    });
+    const o = ev.outcome;
+    if (
+      (o.kind === 'credit' || o.kind === 'support') &&
+      o.node.id === st.node
+    ) {
+      done = true;
+    } else if (o.kind === 'mutation') {
+      const lib = d.c.loaded.misconceptions.get(o.misconceptionId);
+      const text =
+        o.strength === 'confirmed'
+          ? lib?.feedbackConfirmed ?? lib?.feedback
+          : lib?.feedback;
+      append(
+        d,
+        text
+          ? {
+              kind: 'feedback',
+              depth: frame.depth,
+              tone: 'warning',
+              rich: text,
+            }
+          : {
+              kind: 'feedback',
+              depth: frame.depth,
+              tone: 'warning',
+              message: 'wrong',
+            },
+      );
+    } else if (o.kind === 'unreadable') {
+      append(d, {
+        kind: 'feedback',
+        depth: frame.depth,
+        tone: 'info',
+        message: 'invalidInput',
+      });
+    } else {
+      noteItem(d, frame, 'info', {
+        kind: 'neutral',
+        code:
+          o.kind === 'unfinished'
+            ? 'unfinished'
+            : o.kind === 'mismatch'
+            ? 'mismatch'
+            : 'generic',
+        ...(o.kind === 'mismatch' && { line: o.shown }),
+      });
+    }
+  } else if (st.type === 'cards' && 'card' in value) {
+    const card = st.cards.find(c => c.id === value.card);
+    const evaluate = evaluatorOf(st.evaluator);
+    if (card && evaluate) {
+      const verdict = evaluate({
+        card,
+        cards: st.cards,
+        args: st.args,
+        ...(rs.graph && { graph: rs.graph }),
+        lines: methodOf(d).lines,
+      });
+      append(d, {
+        kind: 'student',
+        depth: frame.depth,
+        content: { kind: 'rich', rich: card.text },
+      });
+      for (const note of verdict.notes) {
+        noteItem(d, frame, 'info', note);
+      }
+      if (verdict.correct) {
+        done = true;
+      } else if (card.feedback) {
+        append(d, {
+          kind: 'feedback',
+          depth: frame.depth,
+          tone: 'warning',
+          rich: card.feedback,
+        });
+      } else {
+        append(d, {
+          kind: 'feedback',
+          depth: frame.depth,
+          tone: 'warning',
+          message: 'wrong',
+        });
+      }
+    }
+  }
+  if (done) {
+    frame.stage = si + 1;
+    frame.listFails = 0;
+    updateCard(d, frame.cardKey, { stage: frame.stage });
+    if (frame.stage >= f.stages.length) {
+      updateCard(d, frame.cardKey, { status: 'done' });
+      completeStep(d, frame, true);
+    }
+    return;
+  }
+  if (frame.acts >= REPAIR_ACTS) {
+    // The cap: the repair closes and the student is back at his line, with the ladder.
+    d.events.push({
+      ...eventBase(d, frame),
+      t: 'component_event',
+      component: 'Repair',
+      name: 'capped',
+      payload: { stage: si },
+    });
+    completeStep(d, frame, false);
+  }
+}
+
+function onMethodLine(
+  d: Draft,
+  frame: Frame,
+  step: MframeStep,
+  rawLine: string,
+  readbackChoice: 'grouped' | 'literal' | undefined,
+) {
+  const f = step.frame;
+  const answer = answerOf(d, frame);
+  if (
+    f.type !== 'lines' ||
+    answer.kind !== 'method' ||
+    answer.frame !== 'lines'
+  ) {
+    return;
+  }
+  const base = eventBase(d, frame);
+  const raw = rawLine.slice(0, LINE_MAX);
+  const method = methodOf(d);
+  const ev = evaluateLine({
+    raw,
+    graph: answer.graph,
+    table: answer.table,
+    card: f.key,
+    credited: new Set(method.credited),
+    extra: answer.extra,
+  });
+  const o = ev.outcome;
+  if (readbackChoice) {
+    d.events.push({
+      ...base,
+      t: 'component_event',
+      component: 'LineInput',
+      name: 'readback',
+      payload: { choice: readbackChoice },
+    });
+  }
+  const ungraded = (outcome: string, extra: Record<string, string> = {}) =>
+    d.events.push({
+      ...base,
+      t: 'component_event',
+      component: 'LineInput',
+      name: 'line_ungraded',
+      payload: {
+        mline: raw,
+        outcome,
+        ...(readbackChoice && { readback: readbackChoice }),
+        ...extra,
+      },
+    });
+  if (o.kind === 'unreadable') {
+    ungraded('unreadable', { reason: o.reason });
+    append(d, {
+      kind: 'feedback',
+      depth: frame.depth,
+      tone: 'info',
+      message: 'invalidInput',
+    });
+    setPending(d, 'line_invalid', frame.stepId);
+    return;
+  }
+  append(d, {
+    kind: 'student',
+    depth: frame.depth,
+    content: { kind: 'typed', raw },
+  });
+  if (o.kind === 'unfinished') {
+    ungraded('unfinished');
+    noteItem(d, frame, 'info', { kind: 'neutral', code: 'unfinished' });
+    return;
+  }
+  if (o.kind === 'mismatch') {
+    ungraded('mismatch');
+    // A division that does not hold: the student checks it himself (multiply back), with his own numbers.
+    const chain = evalChain(raw);
+    const back = chain.kind === 'chain' ? multiplyBackCheck(chain) : null;
+    noteItem(d, frame, 'info', {
+      kind: 'neutral',
+      code: 'mismatch',
+      line: o.shown,
+      ...(back && { check: back.expr }),
+    });
+    return;
+  }
+  if (o.kind === 'support') {
+    ungraded('support', { node: o.node.id });
+    noteItem(d, frame, 'info', {
+      kind: 'credit',
+      nodeId: o.node.id,
+      support: true,
+      derivation: o.derivation,
+      unsimplified: false,
+    });
+    return;
+  }
+  if (o.kind === 'repeat' || o.kind === 'other_step') {
+    ungraded(o.kind, { node: o.node.id });
+    noteItem(d, frame, 'info', { kind: 'neutral', code: o.kind });
+    return;
+  }
+  const answerEvent = (
+    correct: boolean,
+    extra: Partial<
+      Pick<
+        Extract<EventDraft, { t: 'answer' }>,
+        'misconceptionId' | 'inferredBy'
+      >
+    > = {},
+  ) =>
+    d.events.push({
+      ...base,
+      ...duration(d, frame),
+      t: 'answer',
+      kind: 'method',
+      value: {
+        mline: raw,
+        ...(readbackChoice && { readback: readbackChoice }),
+      },
+      correct,
+      ...extra,
+      attempt: frame.attempts + 1,
+    });
+  if (o.kind === 'credit') {
+    answerEvent(true);
+    if (o.unsimplified) {
+      // Simplify until nothing is common: this line is not the result yet.
+      noteItem(d, frame, 'success', {
+        kind: 'credit',
+        nodeId: o.node.id,
+        support: false,
+        derivation: o.derivation,
+        unsimplified: true,
+      });
+      return;
+    }
+    d.s.method = {
+      ...method,
+      credited: [...new Set([...method.credited, o.node.id])],
+      lines: { ...method.lines, [o.node.id]: raw },
+    };
+    const lines = [...(frame.lines ?? []), raw];
+    frame.lines = lines;
+    updateCard(d, frame.cardKey, { lines });
+    noteItem(d, frame, 'success', {
+      kind: 'credit',
+      nodeId: o.node.id,
+      support: false,
+      derivation: o.derivation,
+      unsimplified: false,
+    });
+    if (o.completes) {
+      updateCard(d, frame.cardKey, {
+        status: 'done',
+        result: { raw, correct: true },
+      });
+      noteItem(
+        d,
+        frame,
+        'info',
+        recap(
+          step.short ?? { ar: [{ ar: '?' }] },
+          nextShort(d, step, f.cardId),
+          raw,
+        ),
+      );
+      completeStep(d, frame, true);
+    }
+    return;
+  }
+  // A wrong line: a known slip, a known wrong value, or a value nobody expects.
+  let misconceptionId: string | undefined;
+  let strength: 'confirmed' | 'asked' = 'asked';
+  let inferredBy: 'mutation' | 'procedure' | undefined;
+  if (o.kind === 'mutation') {
+    misconceptionId = o.misconceptionId;
+    strength = o.strength;
+    inferredBy = 'mutation';
+  } else if (o.kind === 'value_only') {
+    misconceptionId = o.misconceptionId;
+    inferredBy = 'procedure';
+  }
+  answerEvent(false, {
+    ...(misconceptionId !== undefined && { misconceptionId }),
+    ...(inferredBy && { inferredBy }),
+  });
+  const lib = misconceptionId
+    ? d.c.loaded.misconceptions.get(misconceptionId)
+    : undefined;
+  const text =
+    strength === 'confirmed'
+      ? lib?.feedbackConfirmed ?? lib?.feedback
+      : lib?.feedback;
+  const fresh =
+    misconceptionId !== undefined &&
+    !frame.misconceptionsShown?.includes(misconceptionId);
+  if (fresh && text) {
+    frame.misconceptionsShown = [
+      ...(frame.misconceptionsShown ?? []),
+      misconceptionId!,
+    ];
+    append(d, {
+      kind: 'feedback',
+      depth: frame.depth,
+      tone: 'warning',
+      rich: text,
+    });
+  } else if (misconceptionId === undefined) {
+    noteItem(d, frame, 'warning', {
+      kind: 'neutral',
+      code: o.kind === 'ambiguous' ? 'ambiguous' : 'generic',
+    });
+  }
+  // The statement gives the target: his result and the target, side by side (the target is in the statement).
+  if (
+    step.target &&
+    answer.graph.nodes.some(n => n.planCard === f.key && n.role === 'result')
+  ) {
+    noteItem(d, frame, 'info', {
+      kind: 'target',
+      line: raw,
+      target: step.target,
+    });
+  }
+  frame.attempts += 1;
+  delete frame.lastRaw;
+  d.s.compressed = false;
+  updateCard(d, frame.cardKey, { attempts: frame.attempts });
+  setPending(d, 'wrong', frame.stepId);
+}
+
+// ---------------------------------------------------------------------------
 // Student actions.
 
 function onAnswer(d: Draft, action: Extract<LessonAction, { type: 'answer' }>) {
@@ -1159,6 +2100,10 @@ function onAnswer(d: Draft, action: Extract<LessonAction, { type: 'answer' }>) {
     if ('line' in action.value) {
       onLine(d, frame, step, action.value.line, action.keys);
     }
+    return;
+  }
+  if (step.kind === 'mframe') {
+    onMethodFrame(d, frame, step, action.value);
     return;
   }
   const answer = answerOf(d, frame);
@@ -1366,7 +2311,11 @@ function onReveal(d: Draft) {
     return;
   }
   const hints = stepOf(d, frame).hints ?? [];
-  if (frame.hintLevel < hints.length && !revealUnlocked(frame)) {
+  if (
+    frame.hintLevel < hints.length &&
+    !revealUnlocked(frame) &&
+    !methodCapped(d)
+  ) {
     return; // Rule 6: never before the end of the ladder (variant exception above).
   }
   closeOpenCards(d);
@@ -1931,13 +2880,18 @@ function stateRejects(d: Draft, a: Action): string | null {
         ? null
         : 'no hint left';
     case 'deep_dive':
-      return frame && frame.depth < MAX_DEPTH && d.c.deepDives.has(a.deepDiveId)
+      return frame &&
+        frame.depth < MAX_DEPTH &&
+        d.c.deepDives.has(a.deepDiveId) &&
+        !methodCapped(d)
         ? null
         : 'deep dive not possible here';
     case 'variant':
     case 'quiz':
     case 'revisit_prerequisite':
-      return (frame?.depth ?? -1) < MAX_DEPTH ? null : 'depth cap';
+      return (frame?.depth ?? -1) < MAX_DEPTH && !methodCapped(d)
+        ? null
+        : 'depth cap';
     case 'walkthrough':
       return frame && walkthroughOf(d, frame) ? null : 'no walk-through here';
     case 'numeric_check':
@@ -2334,6 +3288,7 @@ export function reduce(
   if (state.pending && action.type !== 'apply_plan') {
     return { state, events: [] };
   }
+  tickMethodActs(d, action);
   if (ACTING.has(action.type) && top(d)?.ref.scope !== 'main') {
     const frame = editTop(d);
     if (frame && !frame.acted) {

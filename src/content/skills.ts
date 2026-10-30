@@ -19,6 +19,14 @@ export const SkillMapSchema = z
         /** `writing`: an exam-paper habit, tracked apart from math gaps. */
         kind: z.enum(['math', 'writing']),
         requires: z.array(Id),
+        /**
+         * School year where the skill is taught (Tunisian system: 7b..9b
+         * collège "année de base", 1s..4s lycée, 4s = bac). Draft values,
+         * reviewed: false; used by the AI tutor to name old-year gaps.
+         */
+        year: z
+          .enum(['7b', '8b', '9b', '1s', '2s', '3s', '4s'])
+          .optional(),
       }),
     ),
   })

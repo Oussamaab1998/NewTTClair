@@ -1,0 +1,222 @@
+[
+  {
+    "id": "mut.colour_swapped",
+    "skillId": "event-as-set",
+    "category": "math",
+    "description": "The draws are counted from the other colour.",
+    "signature": "4*3*2/(3*2*1) for 'no red'",
+    "repairComponent": "method:small_box",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "هذا السطر يعدّ تيراجات من لون آخر؟ شوف الحدث: شنوّة لون الكور اللي نحتاجوها؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "هذا السطر يعدّ تيراجات من الكور الحمر. شوف الحدث: شنوّة لون الكور اللي نحتاجوها؟"
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.2.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.a_count_for_b",
+    "skillId": "event-as-set",
+    "category": "math",
+    "description": "The count of the earlier event is used for this event.",
+    "signature": "60 for 'no red'",
+    "repairComponent": "method:claim_test",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "العدد هذا هو عدد تيراجات حدث آخر؟ شوف الحدث اللي يطلبوه."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "العدد هذا هو عدد تيراجات حدث آخر، موش الحدث اللي يطلبوه."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.2.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.complement_of_A",
+    "skillId": "probability-by-counting",
+    "category": "math",
+    "description": "The opposite of the earlier event is taken for this event.",
+    "signature": "1 - P(A) for P(B)",
+    "repairComponent": "method:claim_test",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "حسابك يفترض إنّ الحدث هذا هو عكس الحدث اللي قبل؟ نختبرو الفكرة هاذي."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "حسابك يفترض إنّ الحدث هذا هو عكس الحدث اللي قبل. نختبرو الفكرة هاذي."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.2.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.complement_of_wrong_event",
+    "skillId": "event-as-set",
+    "category": "math",
+    "description": "The opposite of 'exactly one' is taken for 'at least one'.",
+    "signature": "1 - P(A) for 'at least one'",
+    "repairComponent": "method:claim_test",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "الحدث اللي قبل هو عكس الحدث هذا؟ شوف شنوّة معناه كل واحد."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "الحدث اللي قبل موش عكس الحدث هذا. شوف شنوّة معناه كل واحد."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.2.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.adds_wrong_cases",
+    "skillId": "probability-by-counting",
+    "category": "math",
+    "description": "Two probabilities are added that do not cover all the cases.",
+    "signature": "P(A) + P(B) for 'at least one'",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "جمعت احتمالين؟ هل يغطيوا الحالات الكل اللي يطلبوها؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "جمعت احتمالين ما يغطيوش الحالات الكل اللي يطلبوها."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.2.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.forgot_one_minus",
+    "skillId": "probability-by-counting",
+    "category": "math",
+    "description": "The probability of the opposite event is given.",
+    "signature": "1/6 for 'at least one'",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "الرقم هذا هو احتمال حدث آخر؟ شوف الحدث اللي يطلبوه."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "الرقم هذا هو احتمال «ما فيهاش حمراء». السؤال على الحدث الآخر."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.2.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.exactly_instead_of_at_least",
+    "skillId": "event-as-set",
+    "category": "math",
+    "description": "The count of 'exactly one' is given for 'at least one'.",
+    "signature": "60 for 'at least one'",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "العدد هذا يعدّ التيراجات اللي فيها حمراء وحدة بالضبط؟ السؤال أوسع."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "العدد هذا يعدّ التيراجات اللي فيها حمراء وحدة بالضبط. السؤال أوسع."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.2.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.forgot_to_subtract",
+    "skillId": "probability-by-counting",
+    "category": "math",
+    "description": "The count of the opposite event is given as the wanted count.",
+    "signature": "20 for 'at least one'",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "العدد هذا يعدّ التيراجات اللي ما فيهاش حمراء؟ شوف شنوّة المطلوب."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "العدد هذا يعدّ التيراجات اللي ما فيهاش حمراء. المطلوب هو الباقي."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.2.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  }
+]

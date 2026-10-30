@@ -21,7 +21,7 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.3.0",
+      "contentVersion": "exsc2-0.4.0",
       "source": "authored",
       "status": "ok"
     }
@@ -48,7 +48,7 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.3.0",
+      "contentVersion": "exsc2-0.4.0",
       "source": "authored",
       "status": "ok"
     }
@@ -75,7 +75,7 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.3.0",
+      "contentVersion": "exsc2-0.4.0",
       "source": "authored",
       "status": "ok"
     }
@@ -102,7 +102,7 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.3.0",
+      "contentVersion": "exsc2-0.4.0",
       "source": "authored",
       "status": "ok"
     }
@@ -129,7 +129,7 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.3.0",
+      "contentVersion": "exsc2-0.4.0",
       "source": "authored",
       "status": "ok"
     }
@@ -156,7 +156,7 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.3.0",
+      "contentVersion": "exsc2-0.4.0",
       "source": "authored",
       "status": "ok"
     }
@@ -183,7 +183,7 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.3.0",
+      "contentVersion": "exsc2-0.4.0",
       "source": "authored",
       "status": "ok"
     }
@@ -210,7 +210,7 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.3.0",
+      "contentVersion": "exsc2-0.4.0",
       "source": "authored",
       "status": "ok"
     }
@@ -237,7 +237,7 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.3.0",
+      "contentVersion": "exsc2-0.4.0",
       "source": "authored",
       "status": "ok"
     }
@@ -264,7 +264,7 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.3.0",
+      "contentVersion": "exsc2-0.4.0",
       "source": "authored",
       "status": "ok"
     }
@@ -291,7 +291,7 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.3.0",
+      "contentVersion": "exsc2-0.4.0",
       "source": "authored",
       "status": "ok"
     }
@@ -317,7 +317,7 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.3.0",
+      "contentVersion": "exsc2-0.4.0",
       "source": "authored",
       "status": "ok"
     }
@@ -344,7 +344,7 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.3.0",
+      "contentVersion": "exsc2-0.4.0",
       "source": "authored",
       "status": "ok"
     }
@@ -371,7 +371,7 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.3.0",
+      "contentVersion": "exsc2-0.4.0",
       "source": "authored",
       "status": "ok"
     }
@@ -398,7 +398,7 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.3.0",
+      "contentVersion": "exsc2-0.4.0",
       "source": "authored",
       "status": "ok"
     }
@@ -425,7 +425,7 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.3.0",
+      "contentVersion": "exsc2-0.4.0",
       "source": "authored",
       "status": "ok"
     }
@@ -452,7 +452,27 @@
     },
     "trust": {
       "reviewed": false,
-      "contentVersion": "exsc2-0.3.0",
+      "contentVersion": "exsc2-0.4.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "reason_by_size",
+    "skillId": "multiplication-principle",
+    "category": "math",
+    "description": "Gives the number of balls of one colour as the reason to multiply.",
+    "signature": "multiplies because there are more black balls",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "عدد الكور موش هو السبب. السبب في كيفاش الاختيارين يتركّبو مع بعضهم في نفس التيراج."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "exsc2-0.4.0",
       "source": "authored",
       "status": "ok"
     }

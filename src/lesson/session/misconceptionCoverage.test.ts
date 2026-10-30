@@ -7,10 +7,11 @@
  * hint, an offer or other card, a detour, a check, an explanation). Probe
  * cards are resolved both ways (the misconception confirmed, «موش توّا»).
  */
+// Frozen copy of question 1 as it was in exsc2-0.3.0 (before the method-lesson slice, docs/METHOD_LESSON_PROGRESS.md). Its assertions are unchanged; the live content has its own tests (scEx2.method.test.ts).
 import ex2 from '../../content/exercises/bac2022c-ex2.json';
 import ex2Misconceptions from '../../content/exercises/bac2022c-ex2.misconceptions.json';
-import exSc2 from '../../content/exercises/bac2022c-sc-ex2.json';
-import exSc2Misconceptions from '../../content/exercises/bac2022c-sc-ex2.misconceptions.json';
+import exSc2 from '../../content/fixtures/scEx2.v030.json';
+import exSc2Misconceptions from '../../content/fixtures/scEx2Misconceptions.v030.json';
 import ex4 from '../../content/exercises/bac2022c-ex4.json';
 import ex4Misconceptions from '../../content/exercises/bac2022c-ex4.misconceptions.json';
 import { nextRightAction } from '../../app/dev/answerAll';

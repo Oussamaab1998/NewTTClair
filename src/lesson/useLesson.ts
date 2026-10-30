@@ -26,6 +26,7 @@ import {
 import type { JsonObject } from '../components/contract';
 import {
   buildContent,
+  isMethodStep,
   reduce,
   startLesson,
   type LessonContent,
@@ -378,7 +379,10 @@ export function useLesson(
       ruleId: rulesDecision.ruleId,
     };
     let reason: ConsultReason | null = null;
-    if (llm && situation) {
+    // Method steps never ask the AI (D40: no model call anywhere in v1).
+    const methodStep =
+      !!situation && isMethodStep(content, situation.step.key);
+    if (llm && situation && !methodStep) {
       reason = llm.consultAll
         ? 'forced'
         : consultReason(situation, rulesDecision, {

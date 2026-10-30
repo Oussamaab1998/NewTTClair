@@ -48,10 +48,22 @@ function session() {
   const act = (a: ActionInput): Event[] => {
     t += 20000;
     const before = log.all().length;
-    state = stepSync(content, state, { ...a, at: t } as LessonAction, log, planner);
+    state = stepSync(
+      content,
+      state,
+      { ...a, at: t } as LessonAction,
+      log,
+      planner,
+    );
     return log.all().slice(before);
   };
-  return { act, log, get state() { return state; } };
+  return {
+    act,
+    log,
+    get state() {
+      return state;
+    },
+  };
 }
 
 /** Domain choice, then the gate at s4. */
@@ -71,7 +83,9 @@ describe('a gate left with how: skipped', () => {
     atGate(s);
     s.act({ type: 'gate_passed', stepId: 's4', how: 'skipped' });
     expect(s.state.gate).toBeUndefined();
-    const card = s.state.items.find(i => i.kind === 'question' && i.status === 'active');
+    const card = s.state.items.find(
+      i => i.kind === 'question' && i.status === 'active',
+    );
     expect(card).toBeDefined();
   });
 
@@ -99,7 +113,10 @@ describe('a gate left with how: skipped', () => {
     const t = session();
     atGate(t);
     t.act({ type: 'gate_passed', stepId: 's4', how: 'done' });
-    expect(finish(t).find(e => e.t === 'part_done')).toMatchObject({ answered: 4, revealed: 0 });
+    expect(finish(t).find(e => e.t === 'part_done')).toMatchObject({
+      answered: 4,
+      revealed: 0,
+    });
   });
 
   it('a second tap, or a tap for another step, does not change what was recorded', () => {
@@ -108,12 +125,19 @@ describe('a gate left with how: skipped', () => {
     s.act({ type: 'gate_passed', stepId: 's4', how: 'skipped' });
     s.act({ type: 'gate_passed', stepId: 's4' });
     s.act({ type: 'gate_passed', stepId: 's9', how: 'skipped' });
-    expect(finish(s).find(e => e.t === 'part_done')).toMatchObject({ answered: 3, revealed: 1 });
+    expect(finish(s).find(e => e.t === 'part_done')).toMatchObject({
+      answered: 3,
+      revealed: 1,
+    });
   });
 });
 
 describe('replay maps the logged escape back', () => {
-  const log = (name: string, payload: Record<string, unknown>, component = 'GroupBoxes') =>
+  const log = (
+    name: string,
+    payload: Record<string, unknown>,
+    component = 'GroupBoxes',
+  ) =>
     ({
       t: 'component_event',
       id: 'e1',
@@ -132,15 +156,28 @@ describe('replay maps the logged escape back', () => {
   it('an explored event with how: skipped becomes a skipped gate tap', () => {
     expect(
       actionsFromEvents([log('explored', { why: 'reveal', how: 'skipped' })]),
-    ).toEqual([expect.objectContaining({ type: 'gate_passed', stepId: 'boxes', how: 'skipped' })]);
+    ).toEqual([
+      expect.objectContaining({
+        type: 'gate_passed',
+        stepId: 'boxes',
+        how: 'skipped',
+      }),
+    ]);
   });
   it('an explored event with how: done is a plain gate tap (no how)', () => {
-    const [a] = actionsFromEvents([log('explored', { why: 'box_expanded', how: 'done' })]);
+    const [a] = actionsFromEvents([
+      log('explored', { why: 'box_expanded', how: 'done' }),
+    ]);
     expect(a).toMatchObject({ type: 'gate_passed', stepId: 'boxes' });
     expect(a).not.toHaveProperty('how');
   });
   it('the other events of the component are not gate taps', () => {
-    expect(actionsFromEvents([log('box_expanded', { key: 'r1' }), log('finding', {})])).toEqual([]);
+    expect(
+      actionsFromEvents([
+        log('box_expanded', { key: 'r1' }),
+        log('finding', {}),
+      ]),
+    ).toEqual([]);
   });
   it('a session with a skipped gate replays to the same feed', () => {
     const s = session();
@@ -161,6 +198,9 @@ describe('replay maps the logged escape back', () => {
       replay.act(a);
     }
     expect(replay.state.items).toEqual(s.state.items);
-    expect(finish(replay).find(e => e.t === 'part_done')).toMatchObject({ answered: 3, revealed: 1 });
+    expect(finish(replay).find(e => e.t === 'part_done')).toMatchObject({
+      answered: 3,
+      revealed: 1,
+    });
   });
 });

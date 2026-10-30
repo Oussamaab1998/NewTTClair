@@ -7,6 +7,7 @@ import type { ComponentSpec, JsonObject } from '../../components/contract';
 import type { Asks, Rich, VariantKind } from '../../content/schema';
 import type { Experiment } from '../../engine/calls';
 import type { Decision, Trigger } from '../../planner/schema';
+import type { MethodNote } from '../../method/note';
 import type { EventDraft } from '../../telemetry/events';
 
 export type { EventDraft };
@@ -126,6 +127,8 @@ export type FeedItem = ItemBase &
         tone: 'success' | 'warning' | 'danger' | 'info';
         message?: UiMessage;
         rich?: Rich;
+        /** Method lesson: a generated line as data; the view composes it with i18n and the cards' own words. */
+        note?: MethodNote;
       }
     | { kind: 'hint'; level: number; total: number; rich: Rich }
     | { kind: 'answer'; rich: Rich }
@@ -157,6 +160,8 @@ export type FeedItem = ItemBase &
         optional?: boolean;
         /** Lines steps: accepted lines (the card's notebook, readonly and replay). */
         lines?: string[];
+        /** A repair script: the stage he is at. */
+        stage?: number;
       }
     | {
         /** A visual component (tasks are question cards). */
@@ -232,6 +237,10 @@ export interface Frame {
   lastRaw?: string;
   /** Lines steps: the lines accepted so far. */
   lines?: string[];
+  /** A repair script: the stage he is at, the acts used (cap), the "that is all" taps on an incomplete list. */
+  stage?: number;
+  acts?: number;
+  listFails?: number;
   /** Misconceptions whose message this card already showed (each once). */
   misconceptionsShown?: string[];
   /** "Not sure" taps on this step (kept when the card is shown again). */
@@ -272,13 +281,64 @@ export interface LessonState {
    * step the student did (part_done counts them as revealed).
    */
   skippedGates?: string[];
+  /** Method lesson: what the student has established so far. */
+  method?: {
+    /** From the read tap: the facts for the rest of the question. */
+    facts?: Record<string, unknown>;
+    /** Graph nodes credited so far (by id). */
+    credited: string[];
+    /** The plan he ordered (card ids): the recap and the strip follow HIS order. */
+    planOrder?: string[];
+    /** The steps of the method group in the order he walks them (his plan order, D47). */
+    stepOrder?: string[];
+    /** His credited line by node id (a formula card is tested on his own numbers). */
+    lines: Record<string, string>;
+    /** The card he picked, by pick-frame step id. */
+    picks: Record<string, string>;
+    /** Student acts of the question so far, hints and repairs included, recipe excluded (the 30-act cap). */
+    acts: number;
+    /** The cap was reached: no repair opens, every frame can be shown. */
+    capped?: boolean;
+  };
 }
 
 export type AnswerValue =
   | { optionId: string }
   | { raw: string }
   /** One typed line of a lines step (safe-parser syntax). */
-  | { line: string };
+  | { line: string }
+  /** The plan frame: the card ids in the order he put them. */
+  | { plan: string[] }
+  /** The read frame: the word he tapped. */
+  | { token: string }
+  /** A lines frame: one written line; `readback` says which reading he chose when the line was ambiguous. */
+  | { mline: string; readback?: 'grouped' | 'literal' }
+  /** A sentence card of a pick frame (or of a repair's cards stage). */
+  | { card: string }
+  /** The recipe: 3 to 5 sentence cards, in his order. */
+  | { recipe: string[] }
+  /** A similar question: one line written (nothing is said), then the submit. */
+  | { sline: string }
+  | { submit: true }
+  /** A repair script: the shown example was read, the picture was explored, a list was built. */
+  | { ack: true }
+  | { explored: true }
+  | { list: string[][] };
+
+/** What a method frame sends (the answer values of the method frames). */
+export type MethodValue = Extract<
+  AnswerValue,
+  | { plan: string[] }
+  | { token: string }
+  | { mline: string }
+  | { card: string }
+  | { recipe: string[] }
+  | { sline: string }
+  | { submit: true }
+  | { ack: true }
+  | { explored: true }
+  | { list: string[][] }
+>;
 
 export type LessonAction =
   | { type: 'answer'; value: AnswerValue; keys?: string[]; at: number }
@@ -307,7 +367,12 @@ export type LessonAction =
     }
   | { type: 'skip'; reason: SkipReason; at: number }
   /** The gating component of this step got its tap (ungraded). */
-  | { type: 'gate_passed'; stepId: string; at: number; how?: 'done' | 'skipped' }
+  | {
+      type: 'gate_passed';
+      stepId: string;
+      at: number;
+      how?: 'done' | 'skipped';
+    }
   /** A tap inside a detour's component (logged as a UI event; marks the detour as acted in). */
   | { type: 'detour_acted'; at: number }
   /** B4: «التالي» on the open walk-through. */

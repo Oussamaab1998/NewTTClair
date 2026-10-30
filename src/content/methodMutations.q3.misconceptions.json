@@ -1,0 +1,502 @@
+[
+  {
+    "id": "mut.p_single_trial",
+    "skillId": "binomial-law",
+    "category": "math",
+    "description": "Question 3 slip p_single_trial.",
+    "signature": "p_single_trial",
+    "repairComponent": "method:independence",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "الرقم هذا هو احتمال مرّة وحدة؟ السؤال على تسلسل كامل من عدّة مرّات."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "الرقم هذا هو احتمال مرّة وحدة. السؤال على تسلسل كامل من عدّة مرّات."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.forgets_failures",
+    "skillId": "binomial-law",
+    "category": "math",
+    "description": "Question 3 slip forgets_failures.",
+    "signature": "forgets_failures",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "نسيت المرّات اللي ما نجحتش في التسلسل؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "نسيت المرّات اللي ما نجحتش في التسلسل: كل مرة تدخل في احتمال التسلسل."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.forgets_successes",
+    "skillId": "binomial-law",
+    "category": "math",
+    "description": "Question 3 slip forgets_successes.",
+    "signature": "forgets_successes",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "نسيت المرّات اللي نجحت في التسلسل؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "نسيت المرّات اللي نجحت في التسلسل: كل مرة تدخل في احتمال التسلسل."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.adds_instead_of_multiplies",
+    "skillId": "multiplication-principle",
+    "category": "math",
+    "description": "Question 3 slip adds_instead_of_multiplies.",
+    "signature": "adds_instead_of_multiplies",
+    "repairComponent": "method:independence",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "زدت الاحتمالات؟ المرّات مستقلة: كل مرة نبداو من الصفر، كيفاش تتركّب الاحتمالات؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "زدت الاحتمالات. المرّات مستقلة: كل مرة نبداو من الصفر، فالاحتمالات تتركّب بطريقة أخرى."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.reads_choose_as_fraction",
+    "skillId": "combinations-count",
+    "category": "math",
+    "description": "Question 3 slip reads_choose_as_fraction.",
+    "signature": "reads_choose_as_fraction",
+    "repairComponent": "method:small_box",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "هذا الكسر هو عدد التسلسلات؟ شنوّة اللي نعدّوه بالضبط؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "هذا الكسر موش عدد التسلسلات. شنوّة اللي نعدّوه بالضبط؟"
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.n_for_count",
+    "skillId": "combinations-count",
+    "category": "math",
+    "description": "Question 3 slip n_for_count.",
+    "signature": "n_for_count",
+    "repairComponent": "method:slots_bridge",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "هذا العدد يعدّ التسلسلات؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "هذا العدد يعدّ المرّات، موش التسلسلات."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.k_for_count",
+    "skillId": "combinations-count",
+    "category": "math",
+    "description": "Question 3 slip k_for_count.",
+    "signature": "k_for_count",
+    "repairComponent": "method:slots_bridge",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "هذا العدد يعدّ التسلسلات؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "هذا العدد يعدّ النجاحات، موش التسلسلات."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.one_sequence_as_P_X_k",
+    "skillId": "binomial-law",
+    "category": "math",
+    "description": "Question 3 slip one_sequence_as_P_X_k.",
+    "signature": "one_sequence_as_P_X_k",
+    "repairComponent": "method:law_table",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "الرقم هذا هو احتمال القانون؟ شوف شنوّة يعدّ."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "الرقم هذا هو احتمال تسلسل وحد. السؤال على كل التسلسلات اللي فيها نفس عدد النجاحات."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.count_given_as_probability",
+    "skillId": "binomial-law",
+    "category": "math",
+    "description": "Question 3 slip count_given_as_probability.",
+    "signature": "count_given_as_probability",
+    "repairComponent": "method:law_table",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "العدد هذا هو احتمال؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "العدد هذا هو عدد تسلسلات، موش احتمال."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.x_given_as_probability",
+    "skillId": "binomial-law",
+    "category": "math",
+    "description": "Question 3 slip x_given_as_probability.",
+    "signature": "x_given_as_probability",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "القيمة هذي هي احتمال؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "القيمة هذي هي قيمة عدد النجاحات، موش احتمالها."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.law_forgets_failures",
+    "skillId": "binomial-law",
+    "category": "math",
+    "description": "Question 3 slip law_forgets_failures.",
+    "signature": "law_forgets_failures",
+    "repairComponent": "method:law_table",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "نسيت المرّات اللي ما نجحتش في احتمال التسلسل؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "نسيت المرّات اللي ما نجحتش: كل مرة تدخل في احتمال التسلسل."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.law_n_for_count",
+    "skillId": "binomial-law",
+    "category": "math",
+    "description": "Question 3 slip law_n_for_count.",
+    "signature": "law_n_for_count",
+    "repairComponent": "method:law_table",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "استعملت عدد المرّات بلاصة عدد التسلسلات؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "عدد المرّات موش هو عدد التسلسلات."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.mean_of_one_trial_for_n",
+    "skillId": "expectation",
+    "category": "math",
+    "description": "Question 3 slip mean_of_one_trial_for_n.",
+    "signature": "mean_of_one_trial_for_n",
+    "repairComponent": "method:mean_runs",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "هذا هو المتوسّط في مرّة وحدة؟ السؤال على عدّة مرّات."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "هذا هو المتوسّط في مرّة وحدة. السؤال على عدّة مرّات."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.n_instead_of_np",
+    "skillId": "expectation",
+    "category": "math",
+    "description": "Question 3 slip n_instead_of_np.",
+    "signature": "n_instead_of_np",
+    "repairComponent": "method:mean_runs",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "هذا هو عدد المرّات؟ شنوّة المتوسّط؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "هذا هو عدد المرّات، موش المتوسّط."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.variance_as_mean",
+    "skillId": "variance",
+    "category": "math",
+    "description": "Question 3 slip variance_as_mean.",
+    "signature": "variance_as_mean",
+    "repairComponent": "method:spread",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "هذا هو المتوسّط؟ السؤال على التبعثر."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "هذا هو المتوسّط، موش التبعثر."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.variance_forgets_n",
+    "skillId": "variance",
+    "category": "math",
+    "description": "Question 3 slip variance_forgets_n.",
+    "signature": "variance_forgets_n",
+    "repairComponent": "method:independence",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "هذا هو تبعثر مرّة وحدة؟ السؤال على عدّة مرّات."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "هذا هو تبعثر مرّة وحدة. السؤال على عدّة مرّات."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.variance_p_squared",
+    "skillId": "variance",
+    "category": "math",
+    "description": "Question 3 slip variance_p_squared.",
+    "signature": "variance_p_squared",
+    "repairComponent": "method:spread",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "ربّعت الاحتمال بلاصة ما تحسب التبعثر؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "ربّعت الاحتمال: التبعثر يتحسب من بعد القيم عن المتوسّط."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.binomial_for_dependent",
+    "skillId": "binomial-law",
+    "category": "math",
+    "description": "Question 3 slip binomial_for_dependent.",
+    "signature": "binomial_for_dependent",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "الكور ما رجعوش: واش كل مرة نبداو من نفس الحالة؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "الكور ما رجعوش، فكل مرة ما نبداوش من نفس الحالة: المرّات موش مستقلة."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  }
+]

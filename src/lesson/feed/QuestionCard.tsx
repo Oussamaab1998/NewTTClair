@@ -19,6 +19,7 @@ import {
   ComponentHost,
   type ComponentErrorReason,
 } from '../../components/ComponentHost';
+import { opensGate } from '../../components/registry';
 import type {
   ComponentEvent,
   ComponentHandle,
@@ -32,12 +33,18 @@ import { helpChipsState } from './helpChips';
 import { THRESHOLDS } from '../../state/config';
 import type { Experiment } from '../../engine/calls';
 import type { FrameStep } from '../session/lesson';
-import type { FeedItemOf, RequestKind, SkipReason } from '../session/types';
+import type {
+  FeedItemOf,
+  MethodValue,
+  RequestKind,
+  SkipReason,
+} from '../session/types';
 import { CardMemoryContext } from './cardMemory';
 import { SnapshotContext } from './snapshots';
 import { LevelLabel } from './Bubbles';
 import { NumericKeypad } from './NumericKeypad';
 import { OptionsQuestion } from './OptionsQuestion';
+import { FrameHeader, MethodFrameCard } from './method/MethodFrameCard';
 import { RichView } from './RichView';
 import type { CardMenu } from './ReportSheet';
 import type { ReportTarget } from './reportTarget';
@@ -51,6 +58,8 @@ export interface QuestionHandlers {
   onSubmitTyped: (raw: string, keys: string[]) => void;
   /** Lines steps: one checked line (the reducer re-checks and logs it). */
   onSubmitLine: (line: string, keys: string[]) => void;
+  /** Method frames: the plan, the tapped word or a written line. */
+  onSubmitMethod: (value: MethodValue) => void;
   /** Lines steps: an editor input logged on its own (a copied line). */
   onLinesInput: (stepId: string, name: string, payload: JsonObject) => void;
   onNotSure: () => void;
@@ -273,6 +282,7 @@ export const QuestionCard = memo(function QuestionCardImpl({
         </Text>
       )}
       {!active && menu}
+      {step.kind === 'mframe' && <FrameHeader step={step} />}
       {step.prompt && (
         <RichView rich={step.prompt} fontFamily={theme.font.family.ui.bold} />
       )}
@@ -298,6 +308,35 @@ export const QuestionCard = memo(function QuestionCardImpl({
           readonly={!active}
           {...(item.result && { result: item.result })}
           onSelect={h.onSelect}
+        />
+      ) : step.kind === 'mframe' ? (
+        <MethodFrameCard
+          step={step}
+          active={active}
+          lines={item.lines}
+          result={item.result}
+          restored={restored}
+          stage={item.stage}
+          onSubmit={h.onSubmitMethod}
+          renderComponent={spec => (
+            <ComponentHost
+              spec={spec}
+              defaultInstanceId={`${step.id}.view`}
+              mode={active ? 'interactive' : 'readonly'}
+              {...(experiment && { experiment })}
+              onEvent={e => {
+                onEvent(e);
+                if (active && opensGate(e.component, e.name)) {
+                  h.onSubmitMethod({ explored: true });
+                }
+              }}
+              onResult={h.onComponentResult}
+              onError={onError}
+              showSolution={false}
+              handleRef={handle}
+            />
+          )}
+          handle={handle}
         />
       ) : step.kind === 'lines' ? (
         <LinesCard

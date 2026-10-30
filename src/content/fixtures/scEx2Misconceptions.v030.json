@@ -1,0 +1,460 @@
+[
+  {
+    "id": "counts_ordered_draws",
+    "skillId": "simultaneous-draw",
+    "description": "Counts ordered draws in a simultaneous draw (each group counted once per order).",
+    "signature": "720 for C(10,3); 360 for the draws of A",
+    "repairComponent": "GroupBoxes",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "عدّيت بالترتيب؟ في التيراج مع بعض، كل مجموعة تتعدّ مرّة وحدة: عاود عدّ بلا ترتيب."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "عدّيت بالترتيب، وكل مجموعة تتعدّ برشا مرّات. هنا الكور يخرجو مع بعض: عدّ كل مجموعة مرّة وحدة."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "exsc2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "counts_balls_not_draws",
+    "skillId": "combinations-count",
+    "description": "Counts balls instead of draws.",
+    "signature": "10 for the number of draws",
+    "repairComponent": "OutcomeSpace",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "هذا عدد الكور. نعدّو التيراجات، يعني المجموعات متاع الكور: شوف المثال الصغير."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "عدّيت الكور، والسؤال على التيراجات: كل تيراج مجموعة كاملة من الكور."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "exsc2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "multiplies_balls_by_k",
+    "skillId": "combinations-count",
+    "description": "Multiplies the number of balls by the number drawn.",
+    "signature": "30 = 10 × 3",
+    "repairComponent": "OutcomeSpace",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "ضربت عدد الكور في عدد الكور اللي نجبدوهم؟ هذا ما يعدّش المجموعات: جرّب على صندوق صغير."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "الضرب هذا ما يعطيش عدد المجموعات. عدّ المجموعات على المثال الصغير، ومبعد ارجع."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "exsc2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "draws_with_replacement",
+    "skillId": "simultaneous-draw",
+    "description": "Counts as if each ball were put back before the next one.",
+    "signature": "1000 draws; P(A) = 54/125; P(B) = 27/125",
+    "repairComponent": "OutcomeSpace",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "حسبت كأنّك ترجّع الكورة قبل ما تجبد اللي بعدها؟ هنا الثلاثة يخرجو مع بعض، وما ترجع حتى كورة."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "حسبت مع الرجوع، أما في التمرين ما نرجّعو حتى كورة: الثلاثة يخرجو مع بعض."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "exsc2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "adds_instead_of_multiplying",
+    "skillId": "multiplication-principle",
+    "description": "Adds the choices of reds and blacks instead of multiplying them.",
+    "signature": "19 = 4 + 15; 19/120",
+    "repairComponent": "ChoiceProduct",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "جمعت؟ كل اختيار للحمراء يمشي مع كل اختيار للكحل: هذا ضرب، موش جمع."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "جمعت الاختيارات. كي نختارو الحمراء ومعاها الكحل، نضربو: عاود بالضرب."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "exsc2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "counts_only_reds",
+    "skillId": "multiplication-principle",
+    "description": "Counts only the choice of the red ball, forgetting the black balls.",
+    "signature": "4 for the draws of A",
+    "repairComponent": "OutcomeSpace",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "عدّيت كان الكورة الحمراء. التيراج فيه ثلاثة كور: الزوز الأخرين كحل، وعندهم زادة اختيارات."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "نسيت الكور الكحل. عدّ الطرق باش تختار الكحل زادة، ومبعد اضرب."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "exsc2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "wrong_group_size",
+    "skillId": "multiplication-principle",
+    "description": "Chooses the wrong number of balls of one colour.",
+    "signature": "24 = 4 × 6 (one black); 15 = C(6,2) for no red",
+    "repairComponent": "ChoiceProduct",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "ثبّت قدّاش من كورة من كل لون: التيراج فيه ثلاثة كور في الكل."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "عدد الكور من كل لون موش صحيح: الحمر والكحل لازم يعملو ثلاثة."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "exsc2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "gives_total_as_favourable",
+    "skillId": "event-as-set",
+    "description": "Gives the number of all draws for the draws of an event.",
+    "signature": "120 for the draws of A",
+    "repairComponent": "EventPicker",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "هذا عدد التيراجات الكل. أحنا نحبّو كان اللي فيهم كورة حمراء وحدة بالضبط."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "عدّيت التيراجات الكل. خوذ كان اللي فيهم حمراء وحدة بالضبط."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "exsc2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "single_ball_probability",
+    "skillId": "probability-by-counting",
+    "description": "Computes the probability on one ball instead of the draw of three.",
+    "signature": "P(A) = 4/10 = 2/5; P(B) = 6/10 = 3/5",
+    "repairComponent": "OutcomeSpace",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "حسبت على كورة وحدة؟ التيراج فيه ثلاثة كور: الاحتمال على التيراجات، موش على الكور."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "حسبت على كورة وحدة. احسب على التيراجات: الملائمة على الكل."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "exsc2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "at_least_one_instead_of_exactly",
+    "skillId": "event-as-set",
+    "description": "Reads «une seule» as «au moins une».",
+    "signature": "P(A) = 5/6 (at least one red)",
+    "repairComponent": "EventPicker",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "حسبت «على الأقل وحدة»؟ الحدث يقول وحدة برك، بالضبط."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "خلطت بين «وحدة بالضبط» و«على الأقل وحدة». هنا وحدة بالضبط."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "exsc2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mixed_order_count",
+    "skillId": "probability-by-counting",
+    "description": "Counts the favourable draws without order but all draws with order.",
+    "signature": "P(A) = 60/720 = 1/12",
+    "repairComponent": "OutcomeSpace",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "الفوق واللوطة موش محسوبين بنفس الطريقة: الزوز بلا ترتيب، ولا الزوز بالترتيب."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "خلطت: الفوق بلا ترتيب واللوطة بالترتيب. احسب الزوز بنفس الطريقة."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "exsc2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "count_given_as_probability",
+    "skillId": "probability-by-counting",
+    "description": "Gives a count where a probability is asked.",
+    "signature": "60 or 120 for P(A); 4 for a probability on the twin",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "هذا عدد، موش احتمال: الاحتمال كسر بين صفر وواحد."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "كتبت عدد. الاحتمال كسر: الملائمة على الكل."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "exsc2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "selects_complement",
+    "skillId": "event-as-set",
+    "description": "Selects exactly the draws outside the event.",
+    "signature": "EventPicker: the complement selected",
+    "repairComponent": "EventPicker",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "اخترت العكس متاع الحدث: ثبّت في الشرط مرّة أخرى."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "اخترت التيراجات اللي ما يحقّقوش الحدث. اختار اللي يحقّقوه."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "exsc2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "selects_all",
+    "skillId": "event-as-set",
+    "description": "Selects every draw.",
+    "signature": "EventPicker: all draws selected",
+    "repairComponent": "EventPicker",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "اخترت التيراجات الكل: موش الكل فيهم حمراء وحدة بالضبط."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "اخترت الكل. خوذ كان اللي يحقّقو الشرط."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "exsc2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "divides_by_balls_not_orderings",
+    "skillId": "ordering-vs-choosing",
+    "description": "Divides the ordered count by the number of balls in a box instead of the number of orderings of a box.",
+    "signature": "240 = 720 / 3 for C(10,3); 8 = 24 / 3 for 4 balls, 3 drawn",
+    "repairComponent": "GroupBoxes",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "قسمت على عدد الكور في العلبة؟ في العلبة ثلاثة كور، أما الترتيبات متاعها أكثر: حلّ علبة وعدّهم."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "قسمت على ثلاثة، وهذا عدد الكور في العلبة. اللازم تقسم على عدد الترتيبات اللي في العلبة."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "exsc2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "reads_choose_as_product",
+    "skillId": "choices-and-product",
+    "description": "Reads the number of ways to choose k of n as n times k (6 x 2 = 12; 4 x 12 = 48).",
+    "signature": "48 = 4 x 12 for the draws with one red; 12 for the pairs of 6 blacks",
+    "repairComponent": "ChoiceProduct",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "عدد الأزواج الكحل موش ستّة في زوز. عدّ الأزواج في الصورة."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "قرات عدد الأزواج كأنو ستّة في زوز. الأزواج الممكنة أقلّ من هذا: عدّهم واحد واحد في الصورة."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "exsc2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "probability_above_one",
+    "skillId": "probability-by-counting",
+    "description": "Writes the probability upside down (total over favourable): a value above 1.",
+    "signature": "120/60 = 2 for P(A); 35/18 on the small box",
+    "repairComponent": "PartWholeBar",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "الاحتمال ما ينجّمش يفوّت الكلّ، والقيمة اللي كتبتها تفوّتو. شوف الشريط، وبعد اكتب الكسر من جديد: الملائمة فوق والكل لوطة."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "قلبت الكسر: كتبت الكل فوق والملائمة لوطة. الملائمة هي اللي تمشي فوق."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "exsc2-0.3.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  }
+]

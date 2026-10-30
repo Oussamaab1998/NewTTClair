@@ -44,6 +44,7 @@ import {
   Writeup,
 } from './Bubbles';
 import { ChoiceCard } from './ChoiceCard';
+import { MethodNoteView, noteSpoken } from './method/MethodNoteView';
 import { FooterRevealContext } from './help';
 import { footerScrollY, isAway } from './jump';
 import { CardMemory, CardMemoryContext } from './cardMemory';
@@ -93,7 +94,9 @@ function blockLabel(item: FeedItem, t: TFunction): string {
     case 'math':
       return spokenMath(item.latex);
     case 'feedback':
-      return item.rich
+      return item.note
+        ? noteSpoken(t, item.note)
+        : item.rich
         ? richToSpoken(item.rich)
         : item.message
         ? t(`lesson.${item.message}`)
@@ -182,7 +185,9 @@ const FeedItemView = memo(function FeedItemViewImpl({
           tone={item.tone}
           {...(item.message && { message: item.message })}
           {...(item.rich && { rich: item.rich })}
-        />
+        >
+          {item.note && <MethodNoteView note={item.note} />}
+        </ToneBlock>
       );
       break;
     case 'hint':

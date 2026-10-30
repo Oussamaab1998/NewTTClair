@@ -8,8 +8,9 @@ const { freshCandidateOk, proposeUrnVariants } = require('../src/engine/urnVaria
 const { frac } = require('../src/engine/rational');
 const { loadExercise } = require('../src/content/loader');
 const { parseNumeric } = require('../src/engine/format');
-const exSc2 = require('../src/content/exercises/bac2022c-sc-ex2.json');
-const misconceptions = require('../src/content/exercises/bac2022c-sc-ex2.misconceptions.json');
+// Frozen exsc2-0.3.0 copy (the twins are checked against the s8 parent that is parked for now).
+const exSc2 = require('../src/content/fixtures/scEx2.v030.json');
+const misconceptions = require('../src/content/fixtures/scEx2Misconceptions.v030.json');
 
 const md = fs.readFileSync(path.resolve(__dirname, '..', 'docs/exercises/EX_URN_RN.md'), 'utf8');
 

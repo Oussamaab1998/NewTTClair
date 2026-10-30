@@ -9,8 +9,9 @@
  * on array order in bac2022c-sc-ex2; dd_choose_bridge is first on purpose;
  * pinned by tests".
  */
-import exSc2 from '../../content/exercises/bac2022c-sc-ex2.json';
-import exSc2Misconceptions from '../../content/exercises/bac2022c-sc-ex2.misconceptions.json';
+// Frozen copy of question 1 as it was in exsc2-0.3.0 (before the method-lesson slice, docs/METHOD_LESSON_PROGRESS.md). Its assertions are unchanged; the live content has its own tests (scEx2.method.test.ts).
+import exSc2 from '../../content/fixtures/scEx2.v030.json';
+import exSc2Misconceptions from '../../content/fixtures/scEx2Misconceptions.v030.json';
 import { isGate, resolveSpec } from '../../components/registry';
 import { partWholeModel } from '../../components/probability2/partWhole';
 import {
@@ -186,14 +187,19 @@ describe('the main path is exactly what 4a left (Phase 4b adds nothing to it)', 
   });
 
   it('the student still acts on the same four questions and two gates: no interaction was added', () => {
-    expect(steps.filter(s => s.kind === 'choice' || s.kind === 'typed').map(s => s.id)).toEqual([
-      's3',
-      's4',
-      's6',
-      's8',
-    ]);
     expect(
-      steps.filter(s => s.kind === 'component' && isGate(s.component.component, s.component.props)).map(s => s.id),
+      steps
+        .filter(s => s.kind === 'choice' || s.kind === 'typed')
+        .map(s => s.id),
+    ).toEqual(['s3', 's4', 's6', 's8']);
+    expect(
+      steps
+        .filter(
+          s =>
+            s.kind === 'component' &&
+            isGate(s.component.component, s.component.props),
+        )
+        .map(s => s.id),
     ).toEqual(['boxes', 'choice']);
   });
 
@@ -209,8 +215,15 @@ describe('the main path is exactly what 4a left (Phase 4b adds nothing to it)', 
       'total_over_favourable',
     ]);
     expect(s8.hints).toHaveLength(3);
-    expect(s8.answer).toMatchObject({ type: 'fraction', compute: { fn: 'probability' } });
-    expect((s8.wrongAnswers ?? []).map(w => w.value)).toEqual(['5/6', '1/12', '19/120']);
+    expect(s8.answer).toMatchObject({
+      type: 'fraction',
+      compute: { fn: 'probability' },
+    });
+    expect((s8.wrongAnswers ?? []).map(w => w.value)).toEqual([
+      '5/6',
+      '1/12',
+      '19/120',
+    ]);
   });
 
   it('the version is 0.3.0 in the exercise and in every block it carries (Exercise 2 and 4 keep theirs, D23)', () => {
@@ -219,13 +232,18 @@ describe('the main path is exactly what 4a left (Phase 4b adds nothing to it)', 
     expect(JSON.stringify(exSc2Misconceptions)).not.toContain('exsc2-0.2.0');
     const ex2 = require('../../content/exercises/bac2022c-ex2.json');
     const ex4 = require('../../content/exercises/bac2022c-ex4.json');
-    expect([ex2.contentVersion, ex4.contentVersion]).toEqual(['ex2-0.5.0', 'ex4-0.1.0']);
+    expect([ex2.contentVersion, ex4.contentVersion]).toEqual([
+      'ex2-0.5.0',
+      'ex4-0.1.0',
+    ]);
   });
 
   it('everything new is unreviewed', () => {
     const trusts = JSON.stringify(exSc2).match(/"reviewed":(true|false)/g)!;
     expect(new Set(trusts)).toEqual(new Set(['"reviewed":false']));
-    const mine = JSON.stringify(exSc2Misconceptions).match(/"reviewed":(true|false)/g) ?? [];
+    const mine =
+      JSON.stringify(exSc2Misconceptions).match(/"reviewed":(true|false)/g) ??
+      [];
     expect(mine.every(m => m === '"reviewed":false')).toBe(true);
   });
 });
@@ -250,7 +268,10 @@ describe('dd_choose_bridge: the SlotsPattern bridge deep dive (priority pinned b
   it('clarify "counting": at s6 the bridge, at s4 the boxes alternative (its own), at s8 its own deep dive', () => {
     const d6 = planner.decideSync(sit('1/s6'));
     expect(d6.ruleId).toBe(RULES.clarifyCounting);
-    expect(d6.next).toEqual({ kind: 'deep_dive', deepDiveId: 'dd_choose_bridge' });
+    expect(d6.next).toEqual({
+      kind: 'deep_dive',
+      deepDiveId: 'dd_choose_bridge',
+    });
     const d4 = planner.decideSync(sit('1/s4'));
     expect(d4.next).toEqual({ kind: 'variant', variantId: 'alt-1-s4-boxes' });
     const d8 = planner.decideSync(sit('1/s8'));
@@ -280,9 +301,15 @@ describe('dd_choose_bridge: the SlotsPattern bridge deep dive (priority pinned b
     if (text?.type !== 'tutor_text') {
       throw new Error('first block is text');
     }
-    const chars = (text.text.ar ?? []).reduce((n, r) => n + ('ar' in r ? r.ar.length : 0), 0);
+    const chars = (text.text.ar ?? []).reduce(
+      (n, r) => n + ('ar' in r ? r.ar.length : 0),
+      0,
+    );
     expect(chars).toBeLessThanOrEqual(240);
-    expect(d.trust).toMatchObject({ reviewed: false, contentVersion: 'exsc2-0.3.0' });
+    expect(d.trust).toMatchObject({
+      reviewed: false,
+      contentVersion: 'exsc2-0.3.0',
+    });
   });
 
   it('its picture is valid: a bridge over the n balls of the small box, k >= 3, the coincidence guard on', () => {
@@ -348,7 +375,15 @@ describe('twin numbers: nothing on screen is an answer or a known wrong value of
     expect(p.n - p.k).toBe(4);
     // and the shown numbers are the A1 box's own: 7 balls, 3 red + 4 black, 35 boxes
     expect(choose(p.n, p.k)).toBe(35);
-    expect(p.bridge?.balls.map(b => b.label)).toEqual(['R1', 'R2', 'R3', 'N1', 'N2', 'N3', 'N4']);
+    expect(p.bridge?.balls.map(b => b.label)).toEqual([
+      'R1',
+      'R2',
+      'R3',
+      'N1',
+      'N2',
+      'N3',
+      'N4',
+    ]);
   });
 
   it('the bar of the s8 repair: 6 and 12 are clean; the ratio 2 is exactly the engine value of the slip it answers', () => {
@@ -363,7 +398,10 @@ describe('twin numbers: nothing on screen is an answer or a known wrong value of
     expect(isForbidden(m.part!)).toBe(false);
     const ratio = div(m.part!, m.whole);
     const a = loaded.answers.get('1/s8');
-    const slip = a?.kind === 'number' ? (a.procedures ?? []).find(x => x.id === 'total_over_favourable') : undefined;
+    const slip =
+      a?.kind === 'number'
+        ? (a.procedures ?? []).find(x => x.id === 'total_over_favourable')
+        : undefined;
     expect(slip?.values).toHaveLength(1);
     expect(equals(ratio, slip!.values[0]!)).toBe(true);
     expect(frac(ratio)).toBe('2/1');
@@ -372,8 +410,13 @@ describe('twin numbers: nothing on screen is an answer or a known wrong value of
   it('the repair step is on the small box of the two pictures: 18 / 35, its slip 35 / 18, and none of it is a forbidden value', () => {
     const a = loaded.answers.get('var:alt-1-s8-partwhole');
     expect(a).toMatchObject({ kind: 'number', value: [18, 35] });
-    const slips = (a?.kind === 'number' ? a.procedures ?? [] : []).map(p => [p.id, frac(p.values[0]!)]);
-    expect(slips).toEqual(expect.arrayContaining([['total_over_favourable', '35/18']]));
+    const slips = (a?.kind === 'number' ? a.procedures ?? [] : []).map(p => [
+      p.id,
+      frac(p.values[0]!),
+    ]);
+    expect(slips).toEqual(
+      expect.arrayContaining([['total_over_favourable', '35/18']]),
+    );
     expect(isForbidden([18, 35])).toBe(false);
     expect(isForbidden([35, 18])).toBe(false);
   });
@@ -384,7 +427,9 @@ describe('twin numbers: nothing on screen is an answer or a known wrong value of
       throw new Error('picture');
     }
     expect(revealsAnswer(content, '1/s6', comp.spec)).toBeNull();
-    const bar = variant('alt-1-s8-partwhole').intro.find(b => b.type === 'component');
+    const bar = variant('alt-1-s8-partwhole').intro.find(
+      b => b.type === 'component',
+    );
     if (bar?.type !== 'component') {
       throw new Error('picture');
     }
@@ -402,17 +447,27 @@ describe('twin numbers: nothing on screen is an answer or a known wrong value of
 describe('probability_above_one: a probability written upside down is named, and repaired with the bar', () => {
   it('the misconception points at PartWholeBar, with its two lines and no digit in an Arabic run', () => {
     const m = loaded.misconceptions.get('probability_above_one');
-    expect(m).toMatchObject({ skillId: 'probability-by-counting', repairComponent: 'PartWholeBar' });
+    expect(m).toMatchObject({
+      skillId: 'probability-by-counting',
+      repairComponent: 'PartWholeBar',
+    });
     expect(m?.feedback).toBeDefined();
     expect(m?.feedbackConfirmed).toBeDefined();
-    expect(JSON.stringify([m?.feedback, m?.feedbackConfirmed])).not.toMatch(/[0-9]/);
+    expect(JSON.stringify([m?.feedback, m?.feedbackConfirmed])).not.toMatch(
+      /[0-9]/,
+    );
   });
 
   it('s8 names the slip: 120 / 60 = 2 comes from the engine as total_over_favourable', () => {
     const a = loaded.answers.get('1/s8');
     expect(a).toMatchObject({ kind: 'number', value: [1, 2] });
-    const slips = (a?.kind === 'number' ? a.procedures ?? [] : []).map(p => [p.id, frac(p.values[0]!)]);
-    expect(slips).toEqual(expect.arrayContaining([['total_over_favourable', '2/1']]));
+    const slips = (a?.kind === 'number' ? a.procedures ?? [] : []).map(p => [
+      p.id,
+      frac(p.values[0]!),
+    ]);
+    expect(slips).toEqual(
+      expect.arrayContaining([['total_over_favourable', '2/1']]),
+    );
   });
 
   it('typing 2 on s8 is diagnosed by the procedure, shows the line, and opens the bar repair (not the main path)', () => {
@@ -439,7 +494,10 @@ describe('probability_above_one: a probability written upside down is named, and
       .all()
       .filter(e => e.t === 'answer')
       .at(-1);
-    expect(answer).toMatchObject({ correct: false, misconceptionId: 'probability_above_one' });
+    expect(answer).toMatchObject({
+      correct: false,
+      misconceptionId: 'probability_above_one',
+    });
   });
 
   it('the no-mistake path never meets it: the right answers finish the question at once', () => {
@@ -462,7 +520,9 @@ describe('probability_above_one: a probability written upside down is named, and
     if (comp?.type !== 'component') {
       throw new Error('picture');
     }
-    expect(resolveSpec(comp.spec, v.experiment ?? ex.experiment)).toMatchObject({ ok: true });
+    expect(resolveSpec(comp.spec, v.experiment ?? ex.experiment)).toMatchObject(
+      { ok: true },
+    );
     expect(isGate('PartWholeBar', comp.spec.props)).toBe(false);
     expect(v.step.kind).toBe('typed');
     expect(v.step.kind === 'typed' ? v.step.hints : []).toHaveLength(2);
