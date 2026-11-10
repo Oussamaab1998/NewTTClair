@@ -131,7 +131,7 @@ const issuesOf = (e: { issues: { path: PropertyKey[]; message: string }[] }) =>
  * "{\"kind\": ...}"). A top-level field that parses as a JSON object or
  * array is used as that value; anything else is left for zod to judge.
  */
-function unstringify(input: unknown): unknown {
+export function unstringify(input: unknown): unknown {
   if (input === null || typeof input !== 'object' || Array.isArray(input)) {
     return input;
   }
@@ -299,8 +299,9 @@ export class TutorSession {
         JSON.stringify(body).length,
         maxTokens,
       );
-      if (!this.o.budget.canSpend(worst)) {
-        return { kind: 'error', error: 'capped', retryable: false };
+      const cap = this.o.budget.capHit(worst);
+      if (cap) {
+        return { kind: 'error', error: `capped_${cap}`, retryable: false };
       }
       const r = await this.o.transport.send(body, {
         timeoutMs: c.requestTimeoutMs,

@@ -34,6 +34,9 @@ import { ExercisePicker } from './ExercisePicker';
 import { hasTutorNotes } from '../../ai/packs/notes';
 import type { MessagesTransport } from '../../ai/transport/messagesApi';
 import { TutorLessonScreen } from './tutor/TutorLessonScreen';
+import { LiveHybridLessonScreen } from './hybrid/LiveHybridLessonScreen';
+import { hasConductorFrames } from './hybrid/useHybridSession';
+import { tutorMode, type TutorMode } from '../../config/tutorMode';
 import { aiPartDone } from './tutor/done';
 import { AskField } from '../../lesson/feed/AskField';
 import { LessonFeed, type FeedHandlers } from '../../lesson/feed/LessonFeed';
@@ -144,6 +147,12 @@ interface LessonScreenProps {
   aiTutor?: boolean;
   /** Tests of the AI route: a fake Messages API transport. */
   aiTransport?: MessagesTransport;
+  /**
+   * Which lesson a tutored question gets (src/config/tutorMode.ts): the
+   * lesson board, the AI-led chat, or the old lesson. Default: the launch
+   * choice in debug builds, else 'hybrid'.
+   */
+  tutorMode?: TutorMode;
 }
 
 /** The exercise picker, then a part played from JSON. */
@@ -217,15 +226,44 @@ export function LessonScreen({
       />
     );
   }
-  // The AI tutor leads every question that has a tutor pack (owner,
-  // 2026-10-29: it replaces this lesson); `-devLesson old` keeps the old one.
+  // A tutor leads every question it can (owner, 2026-10-29: it replaces
+  // this lesson): the lesson board when the question has conductor frames
+  // (plan v2, the default), the AI-led chat under 'ai'; 'old' (or
+  // `-devLesson old`) keeps the old lesson.
   const entry = CATALOG.find(e => e.id === opened.exerciseId);
   const aiOn = props.aiTutor ?? localLlmConfig().anthropicApiKey.length > 0;
+  const mode =
+    props.tutorMode ??
+    tutorMode(
+      devOnly
+        ? {
+            mode: devOnly.devTutorModeAtLaunch(),
+            oldLesson: devOnly.devOldLessonAtLaunch(),
+          }
+        : null,
+    );
   if (
     aiOn &&
-    hasTutorNotes(opened.exerciseId, opened.partId) &&
+    mode === 'hybrid' &&
     entry?.raw !== undefined &&
-    devOnly?.devOldLessonAtLaunch() !== true
+    hasConductorFrames(result.loaded, entry.raw, opened.partId)
+  ) {
+    return (
+      <LiveHybridLessonScreen
+        key={`${opened.exerciseId}/${opened.partId}`}
+        loaded={result.loaded}
+        raw={entry.raw}
+        questionId={opened.partId}
+        onBack={() => setOpened(null)}
+        onNext={partId => setOpened({ exerciseId: opened.exerciseId, partId })}
+      />
+    );
+  }
+  if (
+    aiOn &&
+    mode === 'ai' &&
+    hasTutorNotes(opened.exerciseId, opened.partId) &&
+    entry?.raw !== undefined
   ) {
     return (
       <TutorLessonScreen

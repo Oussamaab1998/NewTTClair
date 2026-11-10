@@ -11,7 +11,9 @@
  * 4. Leak: a value of the question's graph he has not earned yet is refused,
  *    unless he already tried that node 3 times.
  * 5. Notation: C(n,k) only after he computed the gating node himself.
- * 6. One question per message.
+ * 6. One question per message; no line id (L1) and no non-Tunisian word
+ *    (src/ai/prompt/lexicon.ts) in what he reads; at most one run of ball
+ *    labels or letter groups in an Arabic sentence (more are scrambled).
  * 7. Inputs: a component resolves in the registry and reveals no unearned
  *    value; a list case exists and is small; choice options pass 3 and 4.
  */
@@ -28,6 +30,7 @@ import { isolateLlmRuns, type ArRuns } from '../../lesson/rich/runs';
 import { numbersIn } from '../../planner/llm/numbers';
 import { latexToPlain } from '../../tutor/verify';
 import { plain, readLine } from '../checks/lines';
+import { bannedIn } from '../prompt/lexicon';
 import type { QuestionPack } from '../packs/build';
 import type { SessionRuntime } from '../session/state';
 import { boxValues, caseExperiment } from '../session/state';
@@ -63,21 +66,59 @@ const QUESTION = /[?؟]/g;
 const NOTATION_LATEX =
   /\\binom|C_\s*\{|C_\s*\d|C\^|\\mathrm\{C\}|\bC\s*\(|A_\s*\{/;
 const NOTATION_TEXT = /\bC\s*\(\s*\d/;
-/** A calculation (number, operator, number) written inside Arabic text. */
 /** A calculation (numbers joined by operators or "=") inside a sentence. */
 const CALC_SPAN = /\(?\d[\d.,]*\)?(?:\s*[=×÷+*/−-]\s*\(?\s*\d[\d.,]*\s*\)?)+/g;
+const OPERATOR = /[×÷+*/−-]/g;
+/** Next to a Latin stretch («B(n ; 1/2)», «P(A) = 4*15/120»): left whole for the runs. */
+const LATIN_BEFORE = /[A-Za-z][()\s;,=]*$/;
+const LATIN_AFTER = /^[()\s;,=]*[A-Za-z]/;
+/**
+ * A run of ball labels or letter groups (ab, R1, a b c d): one in a sentence
+ * reads fine; two or more next to «و» and brackets are scrambled by the
+ * phone's right-to-left layout (owner's screenshot, 2026-10-30).
+ */
+const LABEL_RUN = /^(?=.{2})[A-Za-z]{1,3}\d{0,2}( [A-Za-z]{1,3}\d{0,2})*$/;
+/** A line id of the session (L1, L12): his lines are shown with student_line blocks. */
+const LINE_ID = /\bL\d+\b/;
 
 type TextPart =
   | { kind: 'text'; text: string }
   | { kind: 'math'; plain: string; latex: string };
 
-/** Arabic text with its calculations cut out as math (empty text parts dropped). */
+const depth = (s: string): number =>
+  (s.match(/\(/g) ?? []).length - (s.match(/\)/g) ?? []).length;
+
+/**
+ * Arabic text with its calculations cut out as math (empty text parts
+ * dropped). Only a real calculation is cut: an "=" or two operators, balanced
+ * brackets, not inside a Latin stretch. Anything else stays in the sentence.
+ */
 export function splitCalculations(text: string): TextPart[] {
   const out: TextPart[] = [];
   let at = 0;
   for (const m of text.matchAll(CALC_SPAN)) {
-    const span = m[0].trim();
-    const before = text.slice(at, m.index);
+    let start = m.index;
+    let end = m.index + m[0].length;
+    // A bracket the calculation does not close (or open) stays in the sentence.
+    while (text[start] === '(' && depth(text.slice(start, end)) > 0) {
+      start++;
+    }
+    while (
+      /[\s)]/.test(text[end - 1] ?? '') &&
+      depth(text.slice(start, end)) < 0
+    ) {
+      end--;
+    }
+    const span = text.slice(start, end).trim();
+    if (
+      depth(span) !== 0 ||
+      (!span.includes('=') && (span.match(OPERATOR) ?? []).length < 2) ||
+      LATIN_BEFORE.test(text.slice(0, start)) ||
+      LATIN_AFTER.test(text.slice(end))
+    ) {
+      continue;
+    }
+    const before = text.slice(at, start);
     if (before.trim() !== '') {
       out.push({ kind: 'text', text: before.trim() });
     }
@@ -87,7 +128,7 @@ export function splitCalculations(text: string): TextPart[] {
       plain: calc,
       latex: lineLatex(calc.replace(/,/g, '.')),
     });
-    at = m.index + m[0].length;
+    at = end;
   }
   const rest = text.slice(at);
   if (rest.trim() !== '' && /[^\s.،,:؟?!]/.test(rest)) {
@@ -101,6 +142,19 @@ export function splitCalculations(text: string): TextPart[] {
   }
   return out.length > 0 ? out : [{ kind: 'text', text }];
 }
+
+/** Words the student must not read: line ids and non-Tunisian forms. */
+function checkWords(where: string, text: string, reasons: string[]): void {
+  if (LINE_ID.test(text)) {
+    reasons.push(
+      `${where}: a line id (L1, L2...) is for you, not for him. Show his line with a student_line block, or say "your line".`,
+    );
+  }
+  for (const b of bannedIn(text)) {
+    reasons.push(`${where}: «${b.phrase}» is not Tunisian; say «${b.use}»`);
+  }
+}
+
 /** Reveal is allowed after this many engine-checked attempts on a node. */
 export const REVEAL_AFTER = 3;
 
@@ -228,6 +282,7 @@ export function verifyAsk(ask: AskStudent, c: Context): VerifyResult {
     switch (b.type) {
       case 'ar': {
         arChars += b.text.length;
+        let labelRuns = 0;
         if (REPEAT.test(b.text)) {
           reasons.push(`${where}: a character repeated many times`);
           break;
@@ -238,6 +293,7 @@ export function verifyAsk(ask: AskStudent, c: Context): VerifyResult {
           );
         }
         questions += (b.text.match(QUESTION) ?? []).length;
+        checkWords(where, b.text, reasons);
         checkNumbers(where, numbersIn(b.text), allowed, forbidden, reasons);
         // A calculation written inside the sentence ("20+36+4 = 60") becomes
         // its own left-to-right math block; the Arabic around it stays.
@@ -259,12 +315,21 @@ export function verifyAsk(ask: AskStudent, c: Context): VerifyResult {
             );
             break;
           }
+          labelRuns += runs.filter(
+            r => 'fr' in r && LABEL_RUN.test(r.fr),
+          ).length;
           blocks.push({ type: 'ar', runs });
+        }
+        if (labelRuns >= 2) {
+          reasons.push(
+            `${where}: ball labels or letter examples (ab, ba, R1 N2) inside an Arabic sentence come out scrambled on the phone. Put them in their own math block (e.g. ab = ba), not between Arabic words.`,
+          );
         }
         break;
       }
       case 'fr': {
         questions += (b.text.match(QUESTION) ?? []).length;
+        checkWords(where, b.text, reasons);
         checkNumbers(where, numbersIn(b.text), allowed, forbidden, reasons);
         blocks.push({ type: 'fr', text: b.text });
         break;
@@ -335,15 +400,16 @@ export function verifyAsk(ask: AskStudent, c: Context): VerifyResult {
 
   const input = ask.input;
   if (input.kind === 'choice') {
-    input.options.forEach((o, i) =>
+    input.options.forEach((o, i) => {
+      checkWords(`option ${i + 1}`, o.text, reasons);
       checkNumbers(
         `option ${i + 1}`,
         numbersIn(o.text),
         allowed,
         forbidden,
         reasons,
-      ),
-    );
+      );
+    });
   }
   if (input.kind === 'line' && input.expect?.kind === 'node') {
     const g = input.expect.graph;

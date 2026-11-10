@@ -4,8 +4,9 @@
  * a simulated student, and writes a readable transcript for the owner.
  *
  *   npm run tutor -- pack [exercise]                 print the prompt sizes and the exercise pack
+ *   npm run tutor -- conduct --script owner-q1       hybrid conductor dry run, no AI (conduct.ts)
  *   npm run tutor -- run --question 1 --persona owner [--exercise bac2022c-sc-ex2]
- *                        [--effort low|medium] [--turns 30] [--cap 2]
+ *                        [--model sonnet|haiku] [--effort low|medium] [--turns 30] [--cap 2]
  *   npm run tutor -- run --questions 1,2,3a,3b --persona owner [--turns 30] [--cap 8]
  *
  * Several questions run like a student doing the exercise: one simulated
@@ -17,8 +18,10 @@
  * Key: CLAUDE_API_KEY from the shell, else .env.llm.local; never printed.
  * Outputs (gitignored) in tools/tutor-harness/out/: <run>.md (transcript, a
  * section per question), <run>.json (raw messages), summary.csv (old
- * columns) and summary.v2.csv (with component and formula counts), one row
- * per question.
+ * columns), summary.v2.csv (with component and formula counts) and
+ * summary.model.csv (the same with the tutor model), one row per question.
+ * --model picks the tutor's model; the simulated student stays on Sonnet so
+ * runs on both models meet the same student.
  */
 import {
   appendFileSync,
@@ -29,7 +32,7 @@ import {
 } from 'node:fs';
 import path from 'node:path';
 
-import { AI_TUTOR } from '../../src/ai/config';
+import { AI_MODELS, AI_TUTOR, hasServerFallback } from '../../src/ai/config';
 import { profileDigest } from '../../src/ai/profile/digest';
 import {
   applySession,
@@ -64,6 +67,7 @@ import {
   renderForStudent,
   SimStudent,
 } from './simStudent';
+import { conductCommand } from './conduct';
 
 const root = path.resolve(__dirname, '..', '..');
 const outDir = path.join(__dirname, 'out');
@@ -168,6 +172,7 @@ async function runQuestion(o: {
   student: SimStudent;
   transport: MessagesTransport;
   budget: Budget;
+  model: string;
   effort: Effort;
   maxTurns: number;
   profile: string | null;
@@ -183,7 +188,12 @@ async function runQuestion(o: {
     questionId: o.questionId,
     transport: o.transport,
     budget: o.budget,
-    config: { ...DEFAULT_TUTOR_CONFIG, effort: o.effort },
+    config: {
+      ...DEFAULT_TUTOR_CONFIG,
+      model: o.model,
+      effort: o.effort,
+      fallbacks: DEFAULT_TUTOR_CONFIG.fallbacks && hasServerFallback(o.model),
+    },
     profile: o.profile,
     carried: o.carried,
     onCall: c => calls.push(c),
@@ -209,13 +219,13 @@ async function runQuestion(o: {
           outcome.detail ? ` (${outcome.detail})` : ''
         }`,
       );
-      capped = outcome.error === 'capped';
+      capped = outcome.error.startsWith('capped');
       if (outcome.retryable && !capped) {
         md.push('> retrying once');
         outcome = await t.session.retry();
         if (outcome.kind === 'error') {
           md.push(`> **error again** ${outcome.error}`);
-          capped = outcome.error === 'capped';
+          capped = outcome.error.startsWith('capped');
           break;
         }
         continue;
@@ -255,7 +265,17 @@ async function runQuestion(o: {
         : []),
       '',
     );
-    const { act, costUsd } = await o.student.answer(outcome.blocks, input, ctx);
+    let answered: Awaited<ReturnType<SimStudent['answer']>>;
+    try {
+      answered = await o.student.answer(outcome.blocks, input, ctx);
+    } catch (e) {
+      // The simulated student failed, not the tutor: keep the transcript so far.
+      md.push(
+        `> **student failed** ${e instanceof Error ? e.message : 'unknown'}`,
+      );
+      break;
+    }
+    const { act, costUsd } = answered;
     studentUsd += costUsd;
     if (act.kind === 'component') {
       counts.studentComponentActs += 1;
@@ -386,6 +406,10 @@ async function runCommand(a: Record<string, string>): Promise<void> {
     throw new Error(`unknown persona; use ${Object.keys(PERSONAS).join(', ')}`);
   }
   const effort = (a.effort ?? AI_TUTOR.effort) as Effort;
+  const model = AI_MODELS[(a.model ?? 'sonnet') as keyof typeof AI_MODELS];
+  if (!model) {
+    throw new Error(`unknown model; use ${Object.keys(AI_MODELS).join(', ')}`);
+  }
   const maxTurns = Number(a.turns ?? 30);
   const capUsd = Number(a.cap ?? 2 * questions.length);
   const key = apiKey();
@@ -413,14 +437,14 @@ async function runCommand(a: Record<string, string>): Promise<void> {
     .toISOString()
     .replace(/[:.]/g, '-')}-${exerciseId}-q${questions.join('-')}-${
     persona.id
-  }-${effort}`;
+  }-${a.model ?? 'sonnet'}-${effort}`;
   const md: string[] = [
     `# Tutor run ${runId}`,
     `Exercise ${exerciseId}, questions ${questions.join(
       ', ',
-    )}; student persona: ${persona.id}; tutor: ${
+    )}; student persona: ${persona.id} (on ${
       AI_TUTOR.model
-    }, effort ${effort}; cap $${capUsd} for the run; ${maxTurns} turns per question.`,
+    }); tutor: ${model}, effort ${effort}; cap $${capUsd} for the run; ${maxTurns} turns per question.`,
     '',
   ];
   const results: QuestionResult[] = [];
@@ -434,6 +458,7 @@ async function runCommand(a: Record<string, string>): Promise<void> {
       student,
       transport,
       budget,
+      model,
       effort,
       maxTurns,
       profile: profile ? profileDigest(profile, notes) : null,
@@ -482,6 +507,13 @@ async function runCommand(a: Record<string, string>): Promise<void> {
         r.counts.formulas
       },${r.counts.componentRejections}`,
     );
+    appendCsv(
+      'summary.model.csv',
+      `${CSV_HEAD},model,components,formulas,component_rejections`,
+      `${lead},${cells},${model},${componentsCell(r.counts.components)},${
+        r.counts.formulas
+      },${r.counts.componentRejections}`,
+    );
   }
   const total = results.reduce(
     (s, r) => s + metricsOf(r).tutorUsd + r.studentUsd,
@@ -507,9 +539,11 @@ async function main(): Promise<void> {
     );
   } else if (cmd === 'run') {
     await runCommand(a);
+  } else if (cmd === 'conduct') {
+    conductCommand(a, load, root, outDir);
   } else {
     console.log(
-      'usage: npm run tutor -- pack [exercise] | run --question 1 | --questions 1,2,3a,3b --persona owner [--effort medium] [--turns 30] [--cap 2 per question]',
+      'usage: npm run tutor -- pack [exercise] | conduct --script owner-q1 (free dry run) | run --question 1 | --questions 1,2,3a,3b --persona owner [--model sonnet|haiku] [--effort medium] [--turns 30] [--cap 2 per question]',
     );
   }
 }

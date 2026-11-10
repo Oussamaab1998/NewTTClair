@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -30,8 +30,10 @@ const sizeAt = (depth: number) =>
 const SHOW: Partial<Record<string, string>> = { '*': '×', '-': '−' };
 /** Letters are italic, as in the rendered formulas (x is never read as ×). */
 const LETTER = /^[a-z]$/;
-/** Binary signs get space around them (× never touches x). */
-const OPERATOR = /^[-+*]$/;
+/** Binary signs and "=" get space around them (× never touches x). */
+const OPERATOR = /^[-+*=]$/;
+/** C(n, r) is drawn as the letter C with r above and n below (C_n^r). */
+const CHOOSE = 'C';
 
 /** A spot to mark: a whole slot, or one node of it. */
 export type Mark = Pick<LineIssue, 'path' | 'index'>;
@@ -60,11 +62,14 @@ function Slot({
   path,
   depth,
   ctx,
+  boxed = false,
 }: {
   nodes: readonly Node[];
   path: PathStep[];
   depth: number;
   ctx: ViewCtx;
+  /** The owner draws the box (a scaffold's blank): no dashed box of its own. */
+  boxed?: boolean;
 }) {
   const size = sizeAt(depth);
   const { cursor, mark, flash, onTap } = ctx;
@@ -139,7 +144,7 @@ function Slot({
           minWidth: size * E.slotRatio,
           minHeight: size * E.slotRatio,
         },
-        empty && styles.empty,
+        empty && !boxed && styles.empty,
         active && path.length > 0 && styles.activeSlot,
         empty && active && styles.activeEmpty,
         faulty && styles.faulty,
@@ -175,6 +180,7 @@ function NodeView({
             styles.sym,
             LETTER.test(node.v) && styles.letter,
             OPERATOR.test(node.v) && styles.operator,
+            node.lock && styles.locked,
             { fontSize: size },
           ]}
         >
@@ -212,9 +218,47 @@ function NodeView({
     case 'group':
       return (
         <View style={styles.group}>
-          <Text style={[styles.sym, { fontSize: size }]}>{PAREN.open}</Text>
+          <Text
+            style={[styles.sym, node.lock && styles.locked, { fontSize: size }]}
+          >
+            {PAREN.open}
+          </Text>
           <Slot nodes={node.body} path={at('body')} depth={depth} ctx={ctx} />
-          <Text style={[styles.sym, { fontSize: size }]}>{PAREN.close}</Text>
+          <Text
+            style={[styles.sym, node.lock && styles.locked, { fontSize: size }]}
+          >
+            {PAREN.close}
+          </Text>
+        </View>
+      );
+    case 'choose':
+      return (
+        <View style={styles.group}>
+          <Text
+            style={[styles.sym, node.lock && styles.locked, { fontSize: size }]}
+          >
+            {CHOOSE}
+          </Text>
+          <View style={styles.chooseArgs}>
+            <Slot nodes={node.r} path={at('r')} depth={depth + 1} ctx={ctx} />
+            <Slot nodes={node.n} path={at('n')} depth={depth + 1} ctx={ctx} />
+          </View>
+        </View>
+      );
+    case 'hole':
+      // A blank of a scaffold: always boxed (dashed), filled or not.
+      return (
+        <View
+          style={[styles.hole, { minWidth: size * E.slotRatio }]}
+          testID="editor-hole"
+        >
+          <Slot
+            nodes={node.fill}
+            path={at('fill')}
+            depth={depth}
+            ctx={ctx}
+            boxed
+          />
         </View>
       );
   }
@@ -304,6 +348,35 @@ export function EditorLine({
 /** onScroll of a long line at most this often (only the cursor follow uses it). */
 const LINE_SCROLL_THROTTLE_MS = 50;
 
+/** No slot is ever active: a line drawn without a caret. */
+const NO_CURSOR: Cursor = { path: [{ i: -1, slot: 'body' }], at: -1 };
+
+/**
+ * A finished line, drawn as written (stacked fractions, blanks) without a
+ * caret or taps; a wide line scrolls sideways. Memoized: a page of earlier
+ * lines does not redraw while he types the next one.
+ */
+export const MathLine = memo(function MathLineImpl({
+  nodes,
+  testID,
+}: {
+  nodes: readonly Node[];
+  testID?: string;
+}) {
+  return (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.lineContent}
+      testID={testID}
+    >
+      <View style={styles.lineRow}>
+        <Slot nodes={nodes} path={[]} depth={0} ctx={{ cursor: NO_CURSOR }} />
+      </View>
+    </ScrollView>
+  );
+});
+
 /** Key labels (structure keys drawn as their shape, not as "^(" text). */
 const LABEL: Record<string, string> = {
   frac: '▭⁄▭',
@@ -320,9 +393,11 @@ const LABEL: Record<string, string> = {
   clear: 'C',
   '*': '×',
   '-': '−',
+  div: '÷',
+  choose: CHOOSE,
 };
 
-export type KeyId = Sym | 'frac' | 'pow' | 'group' | 'close';
+export type KeyId = Sym | 'frac' | 'div' | 'pow' | 'group' | 'choose' | 'close';
 
 /** Default keys for A1-A3 lines; content can narrow them (contextual keys). */
 export const DEFAULT_KEYS: readonly KeyId[] = [
@@ -562,6 +637,20 @@ const styles = StyleSheet.create({
     backgroundColor: theme.color.textPrimary,
   },
   group: { flexDirection: 'row', alignItems: 'center' },
+  // A scaffold's given parts: muted ink (its blanks are boxed, not colour alone).
+  locked: { color: theme.color.inkMuted },
+  hole: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    borderWidth: theme.border.thin,
+    borderStyle: 'dashed',
+    borderColor: theme.color.pen,
+    borderRadius: theme.radius.xs,
+    paddingHorizontal: theme.space.xxxs,
+    marginHorizontal: theme.space.xxxs,
+  },
+  chooseArgs: { alignItems: 'flex-start', gap: theme.space.xxxs },
   keys: { gap: E.keyGap, direction: 'ltr' },
   row: { flexDirection: 'row', gap: E.keyGap },
   // Cahier keys: card fill, 1.5 border, radius 12.

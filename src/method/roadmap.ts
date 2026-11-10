@@ -1,6 +1,7 @@
 /**
  * The route of a method question, for the strip and the sheet: the roadmap
- * rows that every method frame carries, with where the student is. Pure.
+ * rows that every method frame carries, with where the student is, in his
+ * own order once he ordered the plan (state.method.stepOrder). Pure.
  */
 import type { MethodFrameStep, RoadmapEntry, Step } from '../content/schema';
 import type { LessonState } from '../lesson/session/types';
@@ -15,13 +16,33 @@ export interface Roadmap {
   current: RoadmapRow;
 }
 
+/** The items whose id is in `order` take that order among their own slots; the others stay. */
+function inOrder<T extends { id: string }>(
+  items: readonly T[],
+  order: readonly string[] | undefined,
+): T[] {
+  if (!order) {
+    return [...items];
+  }
+  const at = new Map(order.map((id, i) => [id, i]));
+  const moving = items
+    .filter(x => at.has(x.id))
+    .sort((a, b) => at.get(a.id)! - at.get(b.id)!);
+  let k = 0;
+  return items.map(x => (at.has(x.id) ? moving[k++]! : x));
+}
+
 export function roadmapFor(
   groups: readonly { steps: readonly Step[] }[],
-  state: Pick<LessonState, 'stack' | 'finished'>,
+  state: Pick<LessonState, 'stack' | 'finished' | 'method'>,
 ): Roadmap | null {
-  const frames = groups
-    .flatMap(g => g.steps)
-    .filter((s): s is MethodFrameStep => s.kind === 'mframe');
+  const order = state.method?.stepOrder;
+  const frames = inOrder(
+    groups
+      .flatMap(g => g.steps)
+      .filter((s): s is MethodFrameStep => s.kind === 'mframe'),
+    order,
+  );
   const first = frames.find(f => f.roadmap !== undefined);
   if (!first?.roadmap) {
     return null;
@@ -32,7 +53,7 @@ export function roadmapFor(
   const doneIds = new Set(
     state.finished ? builtIds : openAt >= 0 ? builtIds.slice(0, openAt) : [],
   );
-  const entries: RoadmapRow[] = first.roadmap.map(e => ({
+  const entries: RoadmapRow[] = inOrder(first.roadmap, order).map(e => ({
     ...e,
     status:
       e.id === openId && openAt >= 0

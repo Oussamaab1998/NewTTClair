@@ -83,6 +83,9 @@ describe('TutorLessonScreen', () => {
     await flush();
     expect(await screen.findByText(/مرحبا، نبداو\./)).toBeTruthy();
     expect(screen.getByTestId('ai-dont-know')).toBeTruthy();
+    // The map strip comes from the engine: first step now, no step named yet.
+    expect(screen.getByTestId('ai-map-c_total-now')).toBeTruthy();
+    expect(screen.queryByText(/نعدّو كل التيراجات/)).toBeNull();
     await fireEvent.press(screen.getByTestId('ai-continue'));
     expect(await screen.findByText(/قدّاش من تيراج ممكن؟/)).toBeTruthy();
     // The reply went back as the tool result of the first ask_student.
@@ -222,5 +225,28 @@ describe('TutorLessonScreen', () => {
     expect(onBack).toHaveBeenCalled();
     // No input after the end.
     expect(screen.queryByTestId('ai-dock')).toBeNull();
+  });
+
+  it('names the cap that stopped the tutor, with no retry', async () => {
+    const { transport } = fake([[ask('مرحبا.', { kind: 'free' })]]);
+    const store = memoryStore();
+    store.set(
+      'ai.spend.v1',
+      JSON.stringify({ day: new Date().toISOString().slice(0, 10), usd: 99 }),
+    );
+    await render(
+      <TutorLessonScreen
+        loaded={loaded!}
+        raw={entry.raw}
+        questionId="1"
+        onBack={() => {}}
+        transport={transport}
+        store={store}
+      />,
+    );
+    await flush();
+    expect(await screen.findByText(/متاع اليوم/)).toBeTruthy();
+    expect(screen.queryByTestId('ai-retry')).toBeNull();
+    expect(transport.send).not.toHaveBeenCalled();
   });
 });

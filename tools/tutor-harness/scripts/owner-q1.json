@@ -1,0 +1,97 @@
+{
+  "exercise": "bac2022c-sc-ex2",
+  "question": "1",
+  "about": "Shaped on the owner's Question 1 session (2026-10-29), now opening with the trip (the map, then «نبداو»), then: first counts 10*3, writes his reasoning in Arabizi, asks for help once, finds the ordered count, divides, slips on the favourable count, picks a wrong reason first, then finishes, the recipe and the two similar questions.",
+  "acts": [
+    {
+      "kind": "continue"
+    },
+    {
+      "kind": "line",
+      "raw": "10*3=30"
+    },
+    {
+      "kind": "free",
+      "text": "ya3ni 10 kor w njbdo 3, donc 10*3 = 30"
+    },
+    {
+      "kind": "dont_know"
+    },
+    {
+      "kind": "line",
+      "raw": "10*9*8=720"
+    },
+    {
+      "kind": "line",
+      "raw": "720/3*2*1=120"
+    },
+    {
+      "kind": "line",
+      "raw": "720/3*2*1=120",
+      "readback": "grouped"
+    },
+    {
+      "kind": "line",
+      "raw": "4*6=24"
+    },
+    {
+      "kind": "line",
+      "raw": "4*6*5=120"
+    },
+    {
+      "kind": "dont_know"
+    },
+    {
+      "kind": "line",
+      "raw": "4*15=60"
+    },
+    {
+      "kind": "choice",
+      "optionId": "r_add"
+    },
+    {
+      "kind": "choice",
+      "optionId": "r_true"
+    },
+    {
+      "kind": "line",
+      "raw": "60/120=1/2"
+    },
+    {
+      "kind": "order",
+      "ids": [
+        "rc_read",
+        "rc_total",
+        "rc_fav",
+        "rc_divide",
+        "rc_check"
+      ]
+    },
+    {
+      "kind": "line",
+      "raw": "14*13*12/(3*2*1)=364"
+    },
+    {
+      "kind": "line",
+      "raw": "5*36=180"
+    },
+    {
+      "kind": "line",
+      "raw": "180/364=45/91"
+    },
+    {
+      "kind": "continue"
+    },
+    {
+      "kind": "line",
+      "raw": "12*11*10/(3*2*1)=220"
+    },
+    {
+      "kind": "line",
+      "raw": "7*5=35"
+    },
+    {
+      "kind": "continue"
+    }
+  ]
+}

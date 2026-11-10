@@ -18,7 +18,8 @@ import {
 import { createBudget } from '../../../ai/session/budget';
 import { carriedSummary } from '../../../ai/session/carry';
 import type { TurnOutcome } from '../../../ai/session/loop';
-import type { Roadmap, SessionState } from '../../../ai/session/state';
+import type { SessionState } from '../../../ai/session/state';
+import { stepMap, type StepMap } from '../../../ai/session/stepMap';
 import type { AskInput } from '../../../ai/tools/schemas';
 import {
   createMessagesTransport,
@@ -66,7 +67,8 @@ export interface TutorView {
   /** Waiting longer than SLOW_MS. */
   slow: boolean;
   error: { kind: string; retryable: boolean } | null;
-  roadmap: Roadmap | null;
+  /** The map strip, from the engine's credits (not from the tutor's words). */
+  map: StepMap | null;
   paper: SessionState['paper'];
   /** Balls of a case the student lists (ListBuilder). */
   caseBalls: (caseId: string) => { id: string; label: string }[];
@@ -305,13 +307,14 @@ export function useTutorSession(o: {
   }, [run, waiting]);
 
   const state = setup.current?.rt.state;
+  const question = setup.current?.pack.questions.get(o.questionId);
   return {
     items,
     input,
     waiting,
     slow,
     error,
-    roadmap: state?.roadmap ?? null,
+    map: state && question ? stepMap(question, state) : null,
     paper: state?.paper ?? [],
     caseBalls: (caseId: string) => {
       const spec = state?.cases[caseId];

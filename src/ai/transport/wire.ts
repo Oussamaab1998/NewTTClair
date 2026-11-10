@@ -62,8 +62,14 @@ export interface MessagesRequest {
   system: SystemBlock[];
   messages: ApiMessage[];
   tools: ToolDefinition[];
-  thinking: { type: 'adaptive' };
+  /**
+   * Adaptive on every tutor call; 'disabled' only with a forced tool on Haiku
+   * 5.5 (Sonnet 5.5 refuses both a forced tool and disabled thinking).
+   */
+  thinking: { type: 'adaptive' } | { type: 'disabled' };
   output_config: { effort: Effort };
+  /** Omitted means auto. */
+  tool_choice?: { type: 'auto' } | { type: 'tool'; name: string };
   /** Top-level automatic caching of the last cacheable block (the history tail). */
   cache_control?: CacheControl;
   /** Server-side refusal fallback (beta header server-side-fallback-2026-07-01). */

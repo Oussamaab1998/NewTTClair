@@ -83,6 +83,8 @@ export interface SessionState {
   /** Numbers already shown or computed by the engine this session ("p/q"). */
   known: string[];
   roadmap: Roadmap | null;
+  /** His plan, once he put the plan cards in a valid order (card ids). */
+  planOrder: string[] | null;
   paper: PaperLine[];
   observations: Observation[];
   componentRequests: ComponentRequest[];
@@ -118,6 +120,7 @@ export function newSession(
       given: [...new Set(statementNumbers)],
       known: [...new Set(statementNumbers)],
       roadmap: null,
+      planOrder: null,
       paper: [],
       observations: [],
       componentRequests: [],

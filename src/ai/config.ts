@@ -26,11 +26,13 @@ export const AI_TUTOR = {
 } as const;
 
 /**
- * List prices, USD per million tokens. Source: the Claude API reference for
- * Sonnet 5.5 (cache reads 0.20, 1-hour writes 4). src/planner/llm/models.ts
+ * List prices, USD per million tokens. Source: the Claude API reference.
+ * Sonnet 5.5: cache reads 0.20, 1-hour writes 4 (src/planner/llm/models.ts
  * lists cache reads at 0.10 with a pricing-page note of 0.05x; until the
  * owner re-checks the pricing page, the tutor uses the higher figure so caps
- * err on the safe side.
+ * err on the safe side). Haiku 5.5 (plan v2, the light tier): two rate
+ * cards by prompt length, x5 above 100K prompt tokens; cache reads 0.1x the
+ * input rate, 5-minute writes 1.25x, 1-hour writes 2x.
  */
 export const AI_PRICES: Record<
   string,
@@ -40,6 +42,8 @@ export const AI_PRICES: Record<
     cacheWrite1h: number;
     cacheRead: number;
     output: number;
+    /** Every rate times `factor` when the prompt is over `tokens`. */
+    long?: { tokens: number; factor: number };
   }
 > = {
   'claude-sonnet-5-5': {
@@ -49,7 +53,25 @@ export const AI_PRICES: Record<
     cacheRead: 0.2,
     output: 10,
   },
+  'claude-haiku-5-5': {
+    input: 0.1,
+    cacheWrite5m: 0.125,
+    cacheWrite1h: 0.2,
+    cacheRead: 0.01,
+    output: 0.5,
+    long: { tokens: 100_000, factor: 5 },
+  },
 };
+
+/** The models the tutor can run on (harness --model). */
+export const AI_MODELS = {
+  sonnet: 'claude-sonnet-5-5',
+  haiku: 'claude-haiku-5-5',
+} as const;
+
+/** Server-side refusal fallback exists for Sonnet 5.5, not for Haiku 5.5. */
+export const hasServerFallback = (model: string): boolean =>
+  model !== AI_MODELS.haiku;
 
 /** Cost of one response; unknown models cost NaN (callers treat it as over the cap). */
 export function aiCostUsd(model: string, u: AiUsage): number {
@@ -57,14 +79,34 @@ export function aiCostUsd(model: string, u: AiUsage): number {
   if (!p) {
     return Number.NaN;
   }
+  const prompt = u.input + u.cacheRead + u.cacheWrite5m + u.cacheWrite1h;
+  const factor = p.long && prompt > p.long.tokens ? p.long.factor : 1;
   return (
-    (u.input * p.input +
-      u.cacheRead * p.cacheRead +
-      u.cacheWrite5m * p.cacheWrite5m +
-      u.cacheWrite1h * p.cacheWrite1h +
-      u.output * p.output) /
+    (factor *
+      (u.input * p.input +
+        u.cacheRead * p.cacheRead +
+        u.cacheWrite5m * p.cacheWrite5m +
+        u.cacheWrite1h * p.cacheWrite1h +
+        u.output * p.output)) /
     1_000_000
   );
+}
+
+/**
+ * What a call is charged to a student's allowance: its cost with the cache
+ * writes priced as cache reads. Writing the core prompt and the question's
+ * pack to the cache is paid once and then shared by every student and
+ * question that reuses it (owner's screenshot, 2026-10-30: one cold Sonnet
+ * call cost $0.04, the whole per-question limit); the real cost is still
+ * what the dev overlay shows.
+ */
+export function aiChargeUsd(model: string, u: AiUsage): number {
+  return aiCostUsd(model, {
+    ...u,
+    cacheRead: u.cacheRead + u.cacheWrite5m + u.cacheWrite1h,
+    cacheWrite5m: 0,
+    cacheWrite1h: 0,
+  });
 }
 
 /**
@@ -82,7 +124,7 @@ export function aiWorstCaseUsd(
     return Number.NaN;
   }
   const inRate = Math.max(p.input, p.cacheWrite1h);
-  return (
-    (Math.ceil(promptChars / 2.5) * inRate + maxTokens * p.output) / 1_000_000
-  );
+  const tokens = Math.ceil(promptChars / 2.5);
+  const factor = p.long && tokens > p.long.tokens ? p.long.factor : 1;
+  return (factor * (tokens * inRate + maxTokens * p.output)) / 1_000_000;
 }

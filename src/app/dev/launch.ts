@@ -41,9 +41,13 @@
  *   -devStopAt walkthrough|walkthroughDone|fresh  where -devScript pauses
  *   -devLlm off        no AI client at all: rules only, never a model call
  *                      (screenshots of rules-only rounds)
+ *   -devTutorMode hybrid|ai|old  which lesson leads a tutored question: the
+ *                      lesson board (default), the AI-led chat, or the old
+ *                      lesson (src/config/tutorMode.ts)
  */
 import { Settings } from 'react-native';
 
+import { isTutorMode, type TutorMode } from '../../config/tutorMode';
 import { appStore } from '../../storage/appStore';
 import { createKvEventStore } from '../../telemetry/eventStore';
 import type { Event } from '../../telemetry/events';
@@ -73,6 +77,11 @@ const stringArg = (name: string): string | null => {
 export const devTabAtLaunch = () => stringArg('devTab');
 /** `-devLesson old`: the scripted lesson instead of the AI tutor (comparison, screenshots). */
 export const devOldLessonAtLaunch = () => String(arg('devLesson')) === 'old';
+/** `-devTutorMode hybrid|ai|old`: known names only; anything else is ignored. */
+export const devTutorModeAtLaunch = (): TutorMode | null => {
+  const v = stringArg('devTutorMode');
+  return isTutorMode(v) ? v : null;
+};
 export const devComponentAtLaunch = () => stringArg('devComponent');
 export const devPartAtLaunch = () => stringArg('devPart');
 export const devDemoAtLaunch = () => stringArg('devDemo');

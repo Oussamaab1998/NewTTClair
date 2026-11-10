@@ -590,6 +590,57 @@
     "copyPrevious": "⧉ Copier la ligne précédente",
     "unchanged": "C'est la même ligne : change quelque chose."
   },
+  "worksheet": {
+    "tab": "Feuille",
+    "page": "Ta feuille",
+    "line": "La ligne que tu écris",
+    "fixHint": "Touche-la pour la corriger",
+    "fixing": "Tu corriges la ligne marquée. Quand c'est fini, valide.",
+    "cancelFix": "La laisser comme elle est",
+    "fixed": "Corrigée",
+    "submit": "Valider",
+    "mark": {
+      "pending": "Ligne en attente",
+      "right": "Ligne juste",
+      "wrong": "Ligne avec une erreur",
+      "neutral": "Ligne lue"
+    },
+    "scaffold": {
+      "same": "La même forme qu'une ligne que tu as écrite : remplis les cases.",
+      "yours": "Ta ligne d'avant :",
+      "chip": "Tu as déjà écrit une ligne comme ça",
+      "drop": "J'écris à ma façon"
+    },
+    "tiles": "Tes nombres",
+    "tile": "Ajouter ce nombre à la ligne",
+    "key": {
+      "plus": "+",
+      "minus": "−",
+      "times": "×",
+      "div": "division",
+      "equals": "égal",
+      "comma": "virgule",
+      "open": "parenthèses",
+      "close": "Fermer la parenthèse",
+      "back": "effacer",
+      "left": "gauche",
+      "right": "droite",
+      "n": "n",
+      "k": "k",
+      "factorial": "factorielle",
+      "choose": "combinaison"
+    },
+    "issue": {
+      "empty_slot": "Une case est vide (marquée) : remplis-la ou efface-la.",
+      "double_operator": "Deux signes se suivent (marqués) : efface-en un, ou mets le second entre parenthèses.",
+      "operator_at_start": "Cette case commence par un signe (marqué) : écris quelque chose avant ou efface-le.",
+      "operator_at_end": "Un signe termine la ligne sans rien après (marqué) : complète ou efface-le.",
+      "power_without_base": "Cet exposant (marqué) n'est posé sur rien : écris la base avant.",
+      "factorial_without_base": "Ce signe (marqué) a besoin d'un nombre ou d'une parenthèse juste avant.",
+      "misplaced_comma": "Cette virgule (marquée) doit être entre deux chiffres d'un même nombre.",
+      "misplaced_equals": "Le signe égal (marqué) se met dans la ligne, pas dans une fraction ou des parenthèses."
+    }
+  },
   "paper": {
     "title": "La feuille",
     "here": "Vous êtes ici",
@@ -762,12 +813,129 @@
     "error": {
       "network": "Pas d'internet ou le service n'a pas répondu.",
       "timeout": "La réponse a pris trop de temps.",
-      "capped": "Limite du jour atteinte. On continue demain.",
+      "capped_question": "Limite de cette question atteinte. Reviens à la liste et reprends-la plus tard.",
+      "capped_day": "Limite du jour atteinte. On continue demain.",
       "disabled": "Le tuteur n'est pas disponible dans cette version.",
       "other": "Un problème est survenu."
     },
     "question": "Question",
     "nextQuestion": "Question suivante",
     "backToList": "Retour aux exercices"
+  },
+  "hybrid": {
+    "back": "Retour",
+    "question": "Question",
+    "strip": {
+      "now": "Maintenant",
+      "open": "Ouvrir le chemin",
+      "similar": "Questions semblables"
+    },
+    "tabs": {
+      "label": "Les feuilles de la question",
+      "exercise": "L'exercice",
+      "road": "Le chemin",
+      "found": "Ce qu'on a trouvé"
+    },
+    "kind": {
+      "plan": "Le plan",
+      "read": "La lecture",
+      "card": "Une étape",
+      "recipe": "La recette",
+      "similar": "Questions semblables"
+    },
+    "step": {
+      "now": "Maintenant",
+      "why": "Pourquoi",
+      "next": "Ensuite",
+      "similar": "Question semblable : seul, sans aide.",
+      "dontKnow": "Je ne sais pas",
+      "waiting": "Le prof écrit",
+      "aiMark": "Ce texte est écrit par l'IA ; les calculs sont vérifiés par le moteur.",
+      "finished": "J'ai fini"
+    },
+    "collapsed": {
+      "open": "Étape finie : ouvrir le chemin"
+    },
+    "chat": {
+      "open": "Écrire au prof",
+      "empty": "Écris ici une question ou une idée. L'étape reste à sa place.",
+      "placeholder": "Écris comme tu veux : en arabe ou en français",
+      "send": "Envoyer"
+    },
+    "sheet": {
+      "close": "Fermer",
+      "back": "Retour à la question"
+    },
+    "exercise": {
+      "data": "Donnée",
+      "tapped": "Le mot que tu as trouvé",
+      "given": "Donné par l'énoncé",
+      "proven": "Trouvé"
+    },
+    "road": {
+      "done": "Fait",
+      "now": "Tu es ici",
+      "upcoming": "À venir",
+      "hidden": "Étape pas encore ordonnée",
+      "what": "Quoi",
+      "why": "Pourquoi",
+      "reopen": "Rouvrir",
+      "hide": "Masquer",
+      "checks": "Ce qu'on vérifie toujours",
+      "target": "L'énoncé dit",
+      "from": "Trouvé à la question",
+      "others": "Autres outils utilisés",
+      "saved": "Ton chemin est ici"
+    },
+    "trip": {
+      "title": "La carte de la question",
+      "intro": "Voici la carte de la question : d'où on part et où on arrive. Lis-la tranquillement, puis touche « On commence ». Tu la retrouves toujours dans « Le chemin ».",
+      "overview": "L'exercice vu d'en haut",
+      "current": "On est ici",
+      "of": "sur",
+      "more": "Voir tout l'exercice",
+      "less": "Réduire",
+      "changed": "Qu'est-ce qui change ?",
+      "have": "On a",
+      "found": "Trouvé",
+      "goal": "On cherche",
+      "steps": "Les étapes",
+      "startHere": "On commence ici",
+      "here": "Tu es ici",
+      "foundIn": "Trouvé à la question",
+      "finish": "À la fin",
+      "start": "On commence"
+    },
+    "case": {
+      "title": "La petite boîte",
+      "intro": "On essaie sur une petite boîte, puis on revient à la question.",
+      "contents": "Ce qu'elle contient",
+      "drawn": "Combien on en tire ensemble",
+      "list": "Écris tous les groupes qui peuvent sortir",
+      "lines": "Les calculs que tu écris maintenant vont sur la feuille, sous la petite boîte.",
+      "back": "Retour à la question"
+    },
+    "found": {
+      "question": "Question",
+      "here": "Tu es ici",
+      "writeup": "La rédaction sur la copie",
+      "how": "Comment on y est arrivé",
+      "empty": "Rien encore. Chaque ligne juste s'ajoute ici.",
+      "fixed": "Erreur corrigée",
+      "before": "Avant",
+      "after": "Après",
+      "yourRule": "La règle avec tes mots",
+      "card": "Fiche méthode",
+      "cardSteps": "Les étapes",
+      "cardChecks": "On vérifie"
+    },
+    "ended": {
+      "title": "Question terminée. Bravo pour le travail.",
+      "next": "Question suivante",
+      "list": "Retour aux exercices"
+    },
+    "dev": {
+      "toggle": "Dev"
+    }
   }
 }

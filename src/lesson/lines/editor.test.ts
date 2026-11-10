@@ -2,13 +2,24 @@ import {
   apply,
   deserialize,
   diagnose,
+  diagnoseLine,
   emptyEditor,
   fromExpression,
+  holesEmpty,
+  scaffoldEditor,
   serialize,
+  toLine,
   type EditorState,
   type Key,
+  type Node,
 } from './editor';
-import { checkEquivalence, parseExpression } from '../../engine/expression';
+import {
+  checkEquivalence,
+  evaluateExact,
+  parseExpression,
+} from '../../engine/expression';
+import { normalizeCounting } from '../../engine/expression/counting';
+import { readback } from '../../method/factorForm';
 
 const run = (keys: Key[], s: EditorState = emptyEditor()) =>
   keys.reduce(apply, s);
@@ -645,5 +656,295 @@ describe('editor: the fraction key in a denominator keeps wrapping (nested fract
     const s = run(['1', '+', 'x', 'widen', 'widen', 'frac', '1', 'frac']);
     expect(serialize(s.root)).toBe('((1+x)/(((1)/())))');
     expect(s.change).toBe('fraction');
+  });
+});
+
+/** The written line read the way the engine reads it (counting notation first). */
+const valueOf = (line: string) => {
+  const n = normalizeCounting(line);
+  const p = parseExpression(n.ok ? n.text : line, {
+    variables: [],
+    constants: [],
+  });
+  if (!p.ok) {
+    throw new Error(`${line} must parse`);
+  }
+  return evaluateExact(p.ast);
+};
+const sides = (line: string) => line.split('=').map(valueOf);
+
+describe('editor: written lines (worksheet keys)', () => {
+  it('10×9×8 = 720: "=" splits the line, the engine reads it', () => {
+    const s = run(['1', '0', '*', '9', '*', '8', '=', '7', '2', '0']);
+    expect(toLine(s.root)).toBe('10*9*8=720');
+    expect(serialize(s.root)).toBe('10*9*8=720');
+    expect(diagnoseLine(s.root)).toBeNull();
+  });
+  it('÷ wraps the product on its left, the divisor is one denominator: no 990/3*2*1 reading', () => {
+    const keys: Key[] = [
+      ...(['1', '0', '*', '9', '*', '8'] as Key[]),
+      'div',
+      ...(['3', '*', '2', '*', '1'] as Key[]),
+      '=',
+      ...(['1', '2', '0'] as Key[]),
+    ];
+    const s = run(keys);
+    expect(s.root[0]?.k).toBe('frac');
+    expect(toLine(s.root)).toBe('10*9*8/(3*2*1)=120');
+    expect(sides(toLine(s.root))).toEqual([
+      [120, 1],
+      [120, 1],
+    ]);
+  });
+  it('720 ÷ (3×2×1) = 120: "=" typed in the denominator leaves it', () => {
+    const s = run([
+      ...(['7', '2', '0', 'div', '3', '*', '2', '*', '1', '='] as Key[]),
+      ...(['1', '2', '0'] as Key[]),
+    ]);
+    expect(s.cursor).toEqual({ path: [], at: 5 });
+    expect(toLine(s.root)).toBe('720/(3*2*1)=120');
+  });
+  it('the fraction key never takes the other side of an "="', () => {
+    const s = run(['5', '=', '1', '0', 'div', '2']);
+    expect(toLine(s.root)).toBe('5=10/2');
+  });
+  it('widen stops at the side: the whole side, never the "="', () => {
+    let s = run(['2', '+', '3', '=', '5', '+', '0']);
+    s = apply(apply(s, 'widen'), 'widen'); // 5+0 (the side after "=")
+    expect(s.sel).toEqual({ path: [], from: 4, to: 7 });
+    expect(apply(s, 'widen').sel).toEqual(s.sel);
+  });
+  it('the decimal comma: 0,5 × 120 = 60', () => {
+    const s = run(['0', ',', '5', '*', '1', '2', '0', '=', '6', '0']);
+    expect(toLine(s.root)).toBe('0,5*120=60');
+    expect(sides(toLine(s.root))).toEqual([
+      [60, 1],
+      [60, 1],
+    ]);
+  });
+  it('n, k, ! and C(n, r): C(10,3) = 10!/(3!×7!)', () => {
+    const s = run([
+      'choose',
+      '1',
+      '0',
+      'right',
+      '3',
+      'right',
+      '=',
+      ...(['1', '0', '!', 'div', '3', '!', '*', '7', '!'] as Key[]),
+    ]);
+    expect(serialize(s.root)).toBe('C((10),(3))=((10!)/(3!*7!))');
+    expect(toLine(s.root)).toBe('C(10,3)=10!/(3!*7!)');
+    expect(sides(toLine(s.root))).toEqual([
+      [120, 1],
+      [120, 1],
+    ]);
+    expect(sides(serialize(s.root))).toEqual([
+      [120, 1],
+      [120, 1],
+    ]);
+    const formula = run(['choose', 'n', 'up', 'k']);
+    expect(serialize(formula.root)).toBe('C((n),(k))');
+  });
+  it('↑ ↓ in C(n, r): r is drawn above, n below', () => {
+    let s = run(['choose', '5']);
+    expect(s.cursor.path).toEqual([{ i: 0, slot: 'n' }]);
+    s = apply(s, 'up');
+    expect(s.cursor).toEqual({ path: [{ i: 0, slot: 'r' }], at: 0 });
+    s = apply(apply(s, '2'), 'down');
+    expect(s.cursor).toEqual({ path: [{ i: 0, slot: 'n' }], at: 1 });
+    // ← from the start of r goes to the end of n; ⌫ in an empty n keeps r.
+    expect(apply(run(['choose', 'right']), 'left').cursor.path).toEqual([
+      { i: 0, slot: 'n' },
+    ]);
+    const kept = apply(run(['choose', 'right', '2', 'left', 'left']), 'back');
+    expect(serialize(kept.root)).toBe('2');
+  });
+  it('round trip of the new symbols and C(n, r)', () => {
+    const lines: Key[][] = [
+      ['1', '0', '*', '9', 'div', '2', '=', '4', '5'],
+      ['choose', 'n', 'right', 'k', 'right', '*', '0', ',', '5'],
+      ['group', 'n', '-', 'k', 'close', '!'],
+    ];
+    for (const keys of lines) {
+      const { root } = run(keys);
+      expect(deserialize(serialize(root))).toEqual(root);
+    }
+  });
+  it('toLine has the value of serialize, with fewer parentheses', () => {
+    const lines: Key[][] = [
+      ['2', '*', 'div', '1', 'right', '4'],
+      ['2', '*', '1', 'div', '4'],
+      ['1', 'div', '2', 'right', '+', '3'],
+      ['1', 'div', '2', 'right', 'group', '3', 'close'],
+      ['1', 'div', '1', 'div', '2'],
+      ['1', '+', '2', 'widen', 'widen', 'div', '3'],
+      ['6', 'div', '-', '3'],
+      ['9', '-', '6', 'div', '3', '*', '2'],
+      ['choose', '5', 'right', '2', 'right', 'div', '2', '!'],
+      ['1', 'div', '2', 'right', 'div', '4'],
+    ];
+    for (const keys of lines) {
+      const { root } = run(keys);
+      expect(diagnoseLine(root)).toBeNull();
+      expect(valueOf(toLine(root))).toEqual(valueOf(serialize(root)));
+    }
+    // ÷ takes the whole product on its left; a fraction after × stays whole.
+    expect(toLine(run(['2', '*', '1', 'div', '4']).root)).toBe('2*1/4');
+    expect(toLine(run(['2', '*', 'div', '1', 'right', '4']).root)).toBe(
+      '2*(1/4)',
+    );
+    expect(toLine(run(['6', 'div', '-', '3']).root)).toBe('6/(-3)');
+  });
+  it('a fraction followed by × is grouped: the engine never has to ask how a ÷ was meant', () => {
+    const literal = toLine(
+      run(['9', '9', '0', 'div', '3', 'right', '*', '2', '*', '1']).root,
+    );
+    expect(literal).toBe('(990/3)*2*1');
+    expect(readback(literal)).toBeNull();
+    const grouped = toLine(
+      run(['9', '9', '0', 'div', '3', '*', '2', '*', '1']).root,
+    );
+    expect(grouped).toBe('990/(3*2*1)');
+    expect(readback(grouped)).toBeNull();
+  });
+  it('written-line issues: misplaced comma, factorial on nothing, signs around "="', () => {
+    const at = (keys: Key[]) => diagnoseLine(run(keys).root)?.kind;
+    expect(at([',', '5'])).toBe('misplaced_comma');
+    expect(at(['1', ',', '5', ',', '2'])).toBe('misplaced_comma');
+    expect(at(['5', ','])).toBe('misplaced_comma');
+    expect(at(['!'])).toBe('factorial_without_base');
+    expect(at(['5', '+', '!'])).toBe('factorial_without_base');
+    expect(at(['=', '5'])).toBe('operator_at_start');
+    expect(at(['5', '='])).toBe('operator_at_end');
+    expect(at(['5', '+', '=', '5'])).toBe('operator_at_end');
+    expect(at(['5', '=', '=', '5'])).toBe('double_operator');
+    expect(at(['5', '=', '*', '5'])).toBe('operator_at_start');
+    expect(at(['5', '=', '-', '5'])).toBeUndefined();
+    // "=" inside a structure cannot be typed; a read line can still hold one.
+    expect(
+      diagnoseLine([{ k: 'group', body: [{ k: 'sym', v: '=' }] }])?.kind,
+    ).toBe('misplaced_equals');
+  });
+  it('diagnose (analysis lines) keeps its own kinds', () => {
+    expect(diagnose(run(['5', ',']).root)).toBeNull();
+    expect(diagnose(run(['x', '+']).root)?.kind).toBe('operator_at_end');
+  });
+});
+
+describe('editor: written lines read back (fromExpression, line mode)', () => {
+  const read = (src: string, vars: string[] = []) =>
+    fromExpression(src, vars, { line: true });
+  it('sides, ÷ and × signs, the divisor stays one denominator', () => {
+    expect(serialize(read('10×9×8÷(3×2×1)=120')!)).toBe(
+      '((10*9*8)/(3*2*1))=120',
+    );
+    expect(toLine(read('10*9*8/(3*2*1)=120')!)).toBe('10*9*8/(3*2*1)=120');
+  });
+  it('counting notation and factorials become C(n, r) and "!"', () => {
+    expect(serialize(read('C(10,3)=120')!)).toBe('C((10),(3))=120');
+    expect(serialize(read('C(10;3)')!)).toBe('C((10),(3))');
+    expect(serialize(read('2C(5,2)')!)).toBe('2C((5),(2))');
+    expect(serialize(read('10!/(3!*7!)')!)).toBe('((10!)/(3!*7!))');
+    expect(serialize(read('(n-k)!', ['n', 'k'])!)).toBe('(n-k)!');
+    expect(serialize(read('C(n,k)', ['n', 'k'])!)).toBe('C((n),(k))');
+  });
+  it('the decimal comma only in line mode (the analysis lines are unchanged)', () => {
+    expect(serialize(read('0,5*4=2')!)).toBe('0,5*4=2');
+    expect(fromExpression('0.5x', ['x'])).toBeNull();
+  });
+  it('what cannot be written gives null', () => {
+    expect(read('C(10)')).toBeNull();
+    expect(read('!5')).toBeNull();
+    expect(read('A(10,3)')).toBeNull();
+    expect(read('10*')).toBeNull();
+  });
+});
+
+describe('editor: scaffolds (holes and locks)', () => {
+  const lock = (v: string): Node => ({ k: 'sym', v, lock: true });
+  const hole = (): Node => ({ k: 'hole', fill: [] });
+  // [ ] × [ ] over ([ ]) = [ ]: a locked fraction with blanks.
+  const TEMPLATE: Node[] = [
+    {
+      k: 'frac',
+      num: [hole(), lock('*'), hole()],
+      den: [hole()],
+      lock: true,
+    },
+    lock('='),
+    hole(),
+  ];
+  const start = () => scaffoldEditor(TEMPLATE);
+  it('starts in the first blank', () => {
+    expect(start().cursor).toEqual({
+      path: [
+        { i: 0, slot: 'num' },
+        { i: 0, slot: 'fill' },
+      ],
+      at: 0,
+    });
+  });
+  it('typed over: signs and ÷ the scaffold has are stepped over', () => {
+    const s = run(['1', '0', '*', '9', 'div', '2', '=', '4', '5'], start());
+    expect(toLine(s.root)).toBe('10*9/2=45');
+    expect(diagnoseLine(s.root)).toBeNull();
+    expect(holesEmpty(s.root)).toBe(false);
+  });
+  it('a key outside a blank writes in the next blank; the locked parts never change', () => {
+    let s = apply(start(), { focus: [], at: 1 }); // after the fraction, before "="
+    s = run(['7'], s);
+    expect(toLine(s.root).endsWith('=7')).toBe(true);
+    s = run(['back', 'back', 'back'], s);
+    expect(holesEmpty(s.root)).toBe(true);
+    expect(s.root[1]).toEqual(lock('='));
+    expect(s.root[0]?.k).toBe('frac');
+  });
+  it('⌫ never deletes a locked piece: it goes back to the previous blank', () => {
+    let s = run(['1', '0', '*', '9'], start());
+    s = apply(s, { focus: [{ i: 0, slot: 'num' }], at: 2 }); // after the locked ×
+    s = apply(s, 'back');
+    expect(s.cursor).toEqual({
+      path: [
+        { i: 0, slot: 'num' },
+        { i: 0, slot: 'fill' },
+      ],
+      at: 2,
+    });
+    expect(toLine(s.root)).toContain('10*9');
+  });
+  it('a sign inside a blank stays there (10 − 3 in one blank)', () => {
+    const s = run(['1', '0', '-', '3'], start());
+    expect(toLine(s.root).startsWith('(10-3)*')).toBe(true);
+  });
+  it('wrapping or deleting a locked part with a selection does nothing', () => {
+    const s = { ...start(), sel: { path: [], from: 0, to: 2 } };
+    expect(apply(s, 'back').root).toBe(TEMPLATE);
+    expect(apply(s, 'group').root).toBe(TEMPLATE);
+  });
+  it('"clear" empties the blanks and keeps the scaffold', () => {
+    const s = apply(run(['1', '0', '*', '9'], start()), 'clear');
+    expect(s.root).toEqual(TEMPLATE);
+    expect(s.cursor).toEqual(start().cursor);
+  });
+  it('a number tile goes in at the cursor (in the next blank from a locked spot)', () => {
+    const tile: Key = {
+      insert: [
+        { k: 'sym', v: '7' },
+        { k: 'sym', v: '2' },
+      ],
+    };
+    expect(serialize(apply(run(['1', '+']), tile).root)).toBe('1+72');
+    const s = apply(apply(start(), { focus: [], at: 2 }), tile);
+    expect(toLine(s.root).endsWith('=72')).toBe(true);
+  });
+  it('an empty blank is named and located', () => {
+    expect(diagnoseLine(start().root)).toEqual({
+      kind: 'empty_slot',
+      path: [
+        { i: 0, slot: 'num' },
+        { i: 0, slot: 'fill' },
+      ],
+    });
   });
 });

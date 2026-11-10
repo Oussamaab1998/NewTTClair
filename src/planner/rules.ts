@@ -14,6 +14,7 @@ import { THRESHOLDS, type Thresholds } from '../state/config';
 import { continueDecision, type Planner, type PlannerMenu } from './planner';
 import type { Action, Decision } from './schema';
 import type { Situation } from './situation';
+import { repairVariantFor } from '../method/repairRoute';
 
 export const MAX_DEPTH = 3;
 
@@ -778,16 +779,14 @@ class Rules {
     s: Situation,
     misconceptionId: string | undefined,
   ): Pick | null {
-    if (misconceptionId === undefined || !this.canNest(s)) {
+    if (!this.canNest(s)) {
       return null;
     }
-    const component =
-      this.menu.loaded.misconceptions.get(misconceptionId)?.repairComponent;
-    if (component === undefined) {
-      return null;
-    }
-    const v = this.unshown(this.variantsFor(s, 'alternative'), s).find(
-      x => x.representation === component,
+    const v = repairVariantFor(
+      misconceptionId,
+      this.menu.loaded.misconceptions,
+      this.variantsFor(s, 'alternative'),
+      { shown: s.question.variantsShown, declined: s.declinedOffers },
     );
     return v ? this.variantPick(v, true) : null;
   }

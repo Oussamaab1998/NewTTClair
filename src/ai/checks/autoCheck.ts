@@ -44,7 +44,7 @@ export interface Checked {
   text: string;
 }
 
-function recordLine(
+export function recordLine(
   rt: SessionRuntime,
   raw: string,
   expect: Expect | null,
@@ -201,7 +201,11 @@ export function autoCheck(
         act.ids.every(id => planIds.includes(id));
       let engine: Record<string, unknown> = {};
       if (isPlan) {
-        engine = { plan: checkPlan(pack.plan, act.ids) };
+        const plan = checkPlan(pack.plan, act.ids);
+        if (plan.ok) {
+          rt.state.planOrder = [...act.ids];
+        }
+        engine = { plan };
       } else if (pack.recipe) {
         const r = pack.recipe;
         engine = {

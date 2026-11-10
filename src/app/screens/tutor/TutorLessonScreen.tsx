@@ -1,7 +1,8 @@
 /**
  * The AI-led lesson (owner, 2026-10-29): a chat thread where the tutor leads
  * one question, one message and one action at a time. Header (back, title,
- * «الورقة»), the roadmap strip (now / next), the thread, and the input dock.
+ * «الورقة»), the map strip (his plan steps from the engine's credits, now /
+ * next), the thread, and the input dock.
  * Internet only: a failed call shows a retry.
  */
 import React, { useEffect, useRef, useState } from 'react';
@@ -33,10 +34,13 @@ const BACK_MARK = '\u2192';
 const ERROR_KEYS = {
   network: 'ai.error.network',
   timeout: 'ai.error.timeout',
-  capped: 'ai.error.capped',
+  capped_question: 'ai.error.capped_question',
+  capped_day: 'ai.error.capped_day',
   disabled: 'ai.error.disabled',
 } as const;
 const PAPER_MARK = '\u25a4';
+/** Step marks: shape, not only colour (done, now, later). */
+const STEP_MARK = { done: '\u2713', now: '\u25cf', later: '\u25cb' } as const;
 
 export interface TutorLessonScreenProps {
   loaded: LoadedExercise;
@@ -166,8 +170,8 @@ export function TutorLessonScreen(p: TutorLessonScreenProps) {
   const errorKey = s.error
     ? ERROR_KEYS[s.error.kind as keyof typeof ERROR_KEYS] ?? 'ai.error.other'
     : null;
-  const nowLine = s.roadmap ? `${t('ai.now')}: ${s.roadmap.now}` : '';
-  const nextLine = s.roadmap ? `${t('ai.next')}: ${s.roadmap.next}` : '';
+  const nowLine = s.map?.now ? `${t('ai.now')}: ${s.map.now}` : null;
+  const nextLine = s.map?.next ? `${t('ai.next')}: ${s.map.next}` : null;
 
   return (
     <KeyboardAvoidingView
@@ -206,14 +210,38 @@ export function TutorLessonScreen(p: TutorLessonScreenProps) {
           <Text style={styles.headerMark}>{PAPER_MARK}</Text>
         </Pressable>
       </View>
-      {s.roadmap && (
-        <View style={styles.strip} testID="ai-roadmap">
-          <Text style={styles.stripNow} numberOfLines={1}>
-            {nowLine}
-          </Text>
-          <Text style={styles.stripNext} numberOfLines={1}>
-            {nextLine}
-          </Text>
+      {s.map && (
+        <View
+          style={styles.strip}
+          testID="ai-map"
+          accessible
+          accessibilityLabel={nowLine ?? undefined}
+        >
+          <View style={styles.stripSteps}>
+            {s.map.steps.map(step => (
+              <Text
+                key={step.cardId}
+                style={[
+                  styles.stripMark,
+                  step.state === 'done' && styles.stripDone,
+                  step.state === 'now' && styles.stripCurrent,
+                ]}
+                testID={`ai-map-${step.cardId}-${step.state}`}
+              >
+                {STEP_MARK[step.state]}
+              </Text>
+            ))}
+          </View>
+          {nowLine && (
+            <Text style={styles.stripNow} numberOfLines={1}>
+              {nowLine}
+            </Text>
+          )}
+          {nextLine && (
+            <Text style={styles.stripNext} numberOfLines={1}>
+              {nextLine}
+            </Text>
+          )}
         </View>
       )}
       <FlatList
@@ -334,6 +362,13 @@ const styles = StyleSheet.create({
     paddingVertical: theme.space.xs,
     backgroundColor: theme.color.surfaceMuted,
   },
+  stripSteps: {
+    flexDirection: theme.reading.row,
+    gap: theme.space.sm,
+  },
+  stripMark: { ...theme.font.small, color: theme.color.inkMuted },
+  stripDone: { color: theme.color.correct.ink },
+  stripCurrent: { color: theme.color.textPrimary },
   stripNow: {
     ...theme.font.small,
     color: theme.color.textPrimary,

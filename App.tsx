@@ -17,12 +17,23 @@ import {
   PROBABILITY_DEMO_COMPONENTS,
   ProbabilityDemoScreen,
 } from './src/app/screens/ProbabilityDemoScreen';
+import { WorksheetDemoScreen } from './src/app/screens/WorksheetDemoScreen';
 import { setDevTools, useDevTools } from './src/app/devFlags';
 import type * as DevOnly from './src/app/dev';
 import { theme } from './src/theme';
 
-type Tab = 'lesson' | 'demo' | 'proba' | 'analyse' | 'bidi';
-const TABS: readonly Tab[] = ['lesson', 'demo', 'proba', 'analyse', 'bidi'];
+type Tab = 'lesson' | 'demo' | 'proba' | 'analyse' | 'sheet' | 'bidi';
+const TABS: readonly Tab[] = [
+  'lesson',
+  'demo',
+  'proba',
+  'analyse',
+  'sheet',
+  'bidi',
+];
+/** The worksheet tab's label lives in its own namespace (plan v2, track C). */
+const tabLabel = (name: Tab) =>
+  name === 'sheet' ? ('worksheet.tab' as const) : (`app.tab.${name}` as const);
 
 /** Debug builds only; `__DEV__` is false in release, so Metro drops the require. */
 const devOnly: typeof DevOnly | null = __DEV__
@@ -66,6 +77,7 @@ function Root() {
         {shown === 'demo' && <LessonUiDemoScreen />}
         {shown === 'proba' && <ProbabilityDemoScreen />}
         {shown === 'analyse' && <AnalysisDemoScreen />}
+        {shown === 'sheet' && <WorksheetDemoScreen />}
         {shown === 'bidi' && <BidiTestScreen />}
       </View>
       {devTools && (
@@ -79,7 +91,7 @@ function Root() {
               accessibilityState={{ selected: tab === name }}
               testID={`tab-${name}`}
             >
-              <Text style={styles.tabText}>{t(`app.tab.${name}`)}</Text>
+              <Text style={styles.tabText}>{t(tabLabel(name))}</Text>
             </Pressable>
           ))}
         </View>

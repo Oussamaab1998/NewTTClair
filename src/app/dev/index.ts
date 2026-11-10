@@ -25,6 +25,7 @@ export {
   devScrollAtLaunch,
   devTabAtLaunch,
   devOldLessonAtLaunch,
+  devTutorModeAtLaunch,
   devUntilAtLaunch,
   devThenAtLaunch,
   devScriptAtLaunch,

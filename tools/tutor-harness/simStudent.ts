@@ -157,7 +157,11 @@ export class SimStudent {
       { timeoutMs: 90_000 },
     );
     if (!r.ok) {
-      throw new Error(`student model: ${r.error}`);
+      throw new Error(
+        `student model: ${r.error}${r.status ? ` (HTTP ${r.status})` : ''}${
+          r.provider ? ` ${JSON.stringify(r.provider)}` : ''
+        }`,
+      );
     }
     const costUsd = aiCostUsd(this.o.model, r.response.usage);
     this.o.budget.add(costUsd);

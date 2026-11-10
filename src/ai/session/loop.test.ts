@@ -264,7 +264,7 @@ describe('TutorSession turn protocol', () => {
     const { s, transport } = session([{ content: [ask()] }], 0);
     expect(await s.start('go')).toEqual({
       kind: 'error',
-      error: 'capped',
+      error: 'capped_question',
       retryable: false,
     });
     expect(transport.send).not.toHaveBeenCalled();

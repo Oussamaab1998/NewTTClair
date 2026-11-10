@@ -7,6 +7,7 @@
  */
 import { DARIJA_LEXICON } from '../../planner/llm/prompts';
 import { aiCatalogText } from './catalogAi';
+import { bannedSentence } from './lexicon';
 import { principlesText } from './principles';
 import { WORKED_EXAMPLE } from './workedExample';
 
@@ -41,7 +42,7 @@ Reading the engine's verdict on his line
 - checks.unreduced_written: same value, a common factor remains: ask him to simplify.`;
 
 const SCREEN = `What the student sees (message blocks)
-- "ar": short Tunisian darija sentences. French maths words (simultanément, tirage, probabilité, urne) may sit inside: the app isolates them left to right. NO formulas and NO LaTeX in "ar" text; prefer to put numbers in math blocks too.
+- "ar": short Tunisian darija sentences. French maths words (simultanément, tirage, probabilité, urne) may sit inside: the app isolates them left to right. NO formulas and NO LaTeX in "ar" text; prefer to put numbers in math blocks too. At most ONE group of ball labels or letters (a b c d, R1 N2) per "ar" sentence: examples like ab = ba go in their own math block, never between Arabic words.
 - "math": one formula per block, LaTeX, shown left to right on its own line (e.g. "10 \\times 9 \\times 8 = 720", "\\dfrac{60}{120}").
 - "student_line": his own line exactly as he wrote it. "compare": two of his lines one under the other. Use them instead of retyping his numbers.
 - "fr": French text (exam wording, paper lines).
@@ -107,7 +108,9 @@ export function buildCorePrompt(): string {
     SCREEN,
     INPUTS,
     METHOD,
-    `Tunisian words\n${DARIJA_LEXICON.text} Also: «توّا» now, «موش» not, «برك» only, «مع بعض» together, «بالترتيب» in order, «نثبّتو» we check, «سؤال وحيد» one question. Never these non-Tunisian words: «لماذا» (say «علاش»), «اثنين» (say «زوز»), «شحال» (say «قدّاش»), «ماشي» (say «موش»), «سحبة» (say «تيراج»), «كيف» for how (say «كيفاش»), «نسحب» (say «نجبدو»).`,
+    `Tunisian words\n${
+      DARIJA_LEXICON.text
+    } Also: «توّا» now, «موش» not, «برك» only, «مع بعض» together, «بالترتيب» in order, «نثبّتو» we check, «سؤال وحيد» one question. ${bannedSentence()} For "how" say «كيفاش», not «كيف» alone.`,
     `Worked example (another urn; the style to follow, not numbers to reuse)\n${WORKED_EXAMPLE}`,
     `Components you may show (input kind "component"; props_json must match)\n${aiCatalogText()}`,
   ].join('\n\n');

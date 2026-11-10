@@ -1,7 +1,9 @@
+import { CATALOG } from '../app/exercises';
 import { loadExercise } from '../content/loader';
 import { buildContent, startLesson } from '../lesson/session/lesson';
 import { methodExercise } from './fixtures/methodExercise';
 import { roadmapFor } from './roadmap';
+import { stepOrderFor } from './route';
 
 const trust = {
   reviewed: false,
@@ -85,6 +87,42 @@ describe('the roadmap behind the strip and the sheet', () => {
       'upcoming',
     ]);
     expect(rm.current.id).toBe('m1.c_fav'); // the next thing on the route
+  });
+
+  it('follows his order once he ordered the plan (sc-ex2 Q1, every card built)', () => {
+    const entry = CATALOG.find(e => e.id === 'bac2022c-sc-ex2')!;
+    const q1 = buildContent(
+      entry.result.ok ? entry.result.loaded : (null as never),
+      '1',
+    );
+    const start = startLesson(q1).state;
+    const group = q1.question.groups.find(g =>
+      g.steps.some(x => x.id === 'm1.c_total'),
+    )!;
+    const planOrder = ['c_fav', 'c_total', 'c_ratio'];
+    const state = {
+      ...start,
+      method: {
+        credited: [],
+        lines: {},
+        picks: {},
+        acts: 0,
+        planOrder,
+        stepOrder: stepOrderFor(group.steps, planOrder),
+      },
+      // He finished the favourable draws and is now on the total.
+      stack: [
+        { ...start.stack[0]!, stepId: 'm1.c_total', stepKey: '1/m1.c_total' },
+      ],
+    };
+    const rows = roadmapFor(q1.question.groups, state)!.entries.filter(e =>
+      e.id.startsWith('m1.c_'),
+    );
+    expect(rows.map(e => `${e.id}:${e.status}`)).toEqual([
+      'm1.c_fav:done',
+      'm1.c_total:current',
+      'm1.c_ratio:upcoming',
+    ]);
   });
 
   it('a part without a method block has no roadmap', () => {

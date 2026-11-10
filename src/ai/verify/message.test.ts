@@ -5,7 +5,7 @@ import type { QuestionPack } from '../packs/build';
 import { newSession } from '../session/state';
 import { COMPUTE } from '../tools/compute';
 import type { AskStudent } from '../tools/schemas';
-import { verifyAsk } from './message';
+import { splitCalculations, verifyAsk } from './message';
 
 const graph = buildGraphFor(
   { template: 'urn_exactly_j', args: { j: 1 } },
@@ -205,5 +205,82 @@ describe('verifyAsk', () => {
         c,
       ),
     ).toMatchObject({ ok: false });
+  });
+
+  it('refuses two letter groups in one Arabic sentence, allows one', () => {
+    expect(
+      verifyAsk(
+        say({ type: 'ar', text: 'اكتب المجموعات (مثلا ab و ba هي نفسها).' }),
+        ctx(),
+      ),
+    ).toMatchObject({ ok: false });
+    expect(
+      verifyAsk(
+        say({ type: 'ar', text: 'صندوق فيه a b c d، نجبدو زوز.' }),
+        ctx(),
+      ).ok,
+    ).toBe(true);
+    expect(
+      verifyAsk(say({ type: 'ar', text: 'الحدث A والحدث B.' }), ctx()).ok,
+    ).toBe(true);
+  });
+
+  it('refuses a line id and a non-Tunisian word in what he reads', () => {
+    expect(
+      verifyAsk(say({ type: 'ar', text: 'شوف السطر L2 متاعك.' }), ctx()),
+    ).toMatchObject({ ok: false });
+    const r = verifyAsk(say({ type: 'ar', text: 'نختارو اثنين كور.' }), ctx());
+    expect(JSON.stringify(r)).toContain('«زوز»');
+    expect(
+      verifyAsk(
+        {
+          message: [{ type: 'ar', text: 'شنوّة تختار؟' }],
+          input: {
+            kind: 'choice',
+            options: [
+              { id: 'a', text: 'ماشي مشكل' },
+              { id: 'b', text: 'موش مشكل' },
+            ],
+          },
+          intent: 'other',
+        } as AskStudent,
+        ctx(),
+      ),
+    ).toMatchObject({ ok: false });
+  });
+});
+
+describe('splitCalculations', () => {
+  const kinds = (text: string) =>
+    splitCalculations(text).map(p =>
+      p.kind === 'math' ? `[${p.plain}]` : p.text,
+    );
+
+  it('cuts a calculation with "=" or two operators out of the sentence', () => {
+    expect(kinds('لقيت 10×9×8 = 720 تيراج')).toEqual([
+      'لقيت',
+      '[10*9*8 = 720]',
+      'تيراج',
+    ]);
+    expect(kinds('نقسمو (10*9*8)/6 برك.')).toEqual([
+      'نقسمو',
+      '[(10*9*8)/6]',
+      'برك.',
+    ]);
+  });
+
+  it('leaves a single fraction, a Latin stretch and unbalanced brackets in the sentence', () => {
+    expect(kinds('X suit la loi binomiale B(n ; 1/2)')).toEqual([
+      'X suit la loi binomiale B(n ; 1/2)',
+    ]);
+    expect(kinds('الاحتمال 1/2 برك')).toEqual(['الاحتمال 1/2 برك']);
+    expect(kinds('نكتبو P(A) = 4*15/120 في الورقة')).toEqual([
+      'نكتبو P(A) = 4*15/120 في الورقة',
+    ]);
+    expect(kinds('(يعني 720/6 = 120)')).toEqual([
+      '(يعني',
+      '[720/6 = 120]',
+      ')',
+    ]);
   });
 });

@@ -7,6 +7,9 @@ import { PaperBackground } from '../../lesson/paper/PaperBackground';
 import { MathBlock } from '../../lesson/math/MathBlock';
 import { doneParts, partKey, type DoneRecord } from '../../state/doneParts';
 import type { EventStore } from '../../telemetry/eventStore';
+import { clearExerciseProgress } from '../../hybrid/records';
+import type { KeyValueStore } from '../../storage/kv';
+import { appStore } from '../../storage/appStore';
 import { theme } from '../../theme';
 import {
   DEV_REVEAL_MS,
@@ -46,6 +49,8 @@ interface ExercisePickerProps {
    */
   eventStore?: Pick<EventStore, 'load' | 'append'>;
   doneRecord?: Pick<DoneRecord, 'all' | 'clearExercise'>;
+  /** Where the hybrid lesson keeps its question records (cleared on reset). */
+  progressStore?: KeyValueStore;
 }
 
 /**
@@ -61,6 +66,7 @@ export function ExercisePicker({
   catalog = CATALOG,
   eventStore,
   doneRecord,
+  progressStore,
 }: ExercisePickerProps) {
   const { t } = useTranslation();
   const readDone = () => doneParts(eventStore?.load() ?? [], doneRecord);
@@ -113,6 +119,13 @@ export function ExercisePicker({
           doneRecord={doneRecord}
           onClose={reset => {
             setResetFor(null);
+            if (reset && resetFor?.result.ok) {
+              clearExerciseProgress(
+                progressStore ?? appStore(),
+                resetFor.id,
+                resetFor.result.loaded.exercise.parts.map(q => q.id),
+              );
+            }
             if (reset) {
               setDone(readDone());
             }

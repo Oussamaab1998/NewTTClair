@@ -1,0 +1,177 @@
+{
+  "exerciseId": "bac2022c-sc-ex2",
+  "contentVersion": "replies-sc2-0.1.0",
+  "reviewed": false,
+  "templates": [
+    {
+      "id": "drop_division_total",
+      "about": "Q1/Q2 total card: he wrote the ordered count (10*9*8=720). The engine names it as the support node ord, so mut.drop_division never fires at the total; this is that moment. His line, why it counts too much, one question toward the orderings.",
+      "when": {
+        "card": "total",
+        "reasons": ["line_note"],
+        "line": "support",
+        "node": "ord"
+      },
+      "say": [
+        { "line": "act" },
+        {
+          "ar": "سطرك صحيح، أما يعدّ التيراجات بالترتيب: المجموعة الوحدة من ثلاثة كور تتعدّ فيه برشا مرّات."
+        },
+        {
+          "ar": "في التيراج مع بعض، المجموعة تتعدّ مرّة وحدة. قدّاش من ترتيب عندها المجموعة الوحدة؟"
+        }
+      ]
+    },
+    {
+      "id": "drop_division_black",
+      "about": "Q1 favourable card: mut.drop_division on fav_black (6*5=30). His total line and this line side by side: the total was counted without order, the two black balls are drawn together too.",
+      "when": {
+        "frame": "m1.c_fav",
+        "reasons": ["slip_first", "slip_again", "slip_third"],
+        "misconception": "mut.drop_division",
+        "node": "fav_black"
+      },
+      "say": [
+        { "compare": ["node:total", "act"] },
+        {
+          "ar": "قارن السطرين: التيراجات الكل عدّيتهم بلا ترتيب، خاطر الكور يخرجو مع بعض."
+        },
+        {
+          "ar": "الزوز كور الكحل زادة يخرجو مع بعض: الترتيب بيناتهم يهمّ ولا لا؟"
+        }
+      ]
+    },
+    {
+      "id": "swapped_ratio",
+      "about": "Q1/Q2 ratio card: mut.swap_numerator_denominator (120/60=2). His line, the value it gives, and: can a probability be above one?",
+      "when": {
+        "card": "ratio",
+        "reasons": ["slip_first", "slip_again", "slip_third"],
+        "misconception": "mut.swap_numerator_denominator"
+      },
+      "say": [
+        { "line": "act" },
+        { "ar": "سطرك يعطي:" },
+        { "value": "act" },
+        { "ar": "احتمال ينجّم يكون أكبر من واحد؟" }
+      ]
+    },
+    {
+      "id": "unsimplified",
+      "about": "Q1/Q2 ratio card: a right ratio whose last fraction still simplifies (60/120=30/60). The conductor answers line_note; the engine verdict is credit with unsimplified.",
+      "when": {
+        "card": "ratio",
+        "reasons": ["line_note"],
+        "line": "unsimplified"
+      },
+      "say": [
+        { "line": "act" },
+        { "ar": "الحساب صحيح، أما الكسر اللي في الآخر مازال يتبسّط." },
+        { "ar": "فما عدد يقسم اللي فوق واللي لوطة مع بعضهم؟" }
+      ]
+    },
+    {
+      "id": "result_vs_target",
+      "about": "Q1 ratio card (the only frame with a target): a wrong result the prepared reply does not explain (undiagnosed, a slip with no text, a repeated slip). His value next to the result the exam gives. Used only when no hint is pending.",
+      "when": {
+        "frame": "m1.c_ratio",
+        "reasons": ["undiagnosed", "slip_no_reply", "slip_again", "slip_third"]
+      },
+      "say": [
+        { "line": "act" },
+        { "ar": "سطرك يعطي:" },
+        { "value": "act" },
+        { "ar": "والسؤال يعطيك:" },
+        { "target": true },
+        {
+          "ar": "النتيجتين موش كيف كيف. ارجع للعددين اللي قسمتهم: شكون فيهم ما يعدّش اللي لازم؟"
+        }
+      ]
+    },
+    {
+      "id": "a_count_for_b",
+      "about": "Q2 favourable card: mut.a_count_for_b (he reuses the count of A, 60). His line, the count of A from question 1 (a number of the Q2 statement), the wording of B. His Q1 line itself lives in the Q1 session and is not reachable here.",
+      "when": {
+        "frame": "m2.c_fav",
+        "reasons": ["slip_first", "slip_again", "slip_third"],
+        "misconception": "mut.a_count_for_b"
+      },
+      "say": [
+        { "line": "act" },
+        {
+          "ar": "العدد هذا هو عدد التيراجات متاع الحدث A في السؤال الأول:"
+        },
+        { "given": "nA" },
+        { "ar": "أما الحدث B يقول:" },
+        { "fr": "Obtenir aucune boule rouge" },
+        { "ar": "التيراجات متاع A فيهم كورة حمراء؟" }
+      ]
+    },
+    {
+      "id": "divide_by_k_small_case",
+      "about": "Q1/Q2 total card: mut.divide_by_k_not_k_factorial (720/3=240), next to his right line on a small box case (groups). Only an AI move makes a small case today, and the conductor does not record his lines on it, so this never fills in a conductor-only lesson.",
+      "when": {
+        "card": "total",
+        "reasons": ["slip_first", "slip_again", "slip_third"],
+        "misconception": "mut.divide_by_k_not_k_factorial"
+      },
+      "say": [
+        { "compare": ["case:groups", "act"] },
+        { "ar": "في الصندوق الصغير لقيت عدد المجموعات الصحيح." },
+        {
+          "ar": "هنا قسمت على عدد الكور المجبودة. المجموعة الوحدة من ثلاثة كور، قدّاش من ترتيب عندها؟"
+        }
+      ]
+    },
+    {
+      "id": "stage_recap_total",
+      "about": "Q1/Q2 total card credited with a line that shows how (not a bare value: then the credit note asks him to write how). His line, its value, what it is for.",
+      "when": {
+        "card": "total",
+        "reasons": ["credit"],
+        "line": "credit"
+      },
+      "say": [
+        { "line": "act" },
+        { "ar": "هذا عدد التيراجات الكل:" },
+        { "value": "act" },
+        {
+          "ar": "خلّيه في بالك: في الآخر نقسمو عليه. توّا الخطوة الجاية في الخطة متاعك."
+        }
+      ]
+    },
+    {
+      "id": "scaffold_fav_intro",
+      "about": "Q1 favourable card, first «ma na3rafch» (the first hint was just given): the first hint's question with his own total line as the model. No total line yet (he planned fav first): not filled.",
+      "when": {
+        "frame": "m1.c_fav",
+        "reasons": ["hint"],
+        "hints": 1
+      },
+      "say": [
+        { "ar": "بالسطر هذا عدّيت التيراجات الكل:" },
+        { "line": "node:total" },
+        {
+          "ar": "توّا نعدّو كان التيراجات اللي يحبّها السؤال، وسطرك هذا ينجّم يعاونك."
+        },
+        {
+          "ar": "اقرا المطلوب من جديد: شنوّة الكور اللي لازم يكونو في التيراج؟"
+        }
+      ]
+    },
+    {
+      "id": "mismatch_multiply_back",
+      "about": "Any lines card: a division whose = does not hold (720/6=125). His line and the product to compute from his own numbers (125*6). Not filled when his line is not a division.",
+      "when": {
+        "reasons": ["line_note"],
+        "line": "mismatch"
+      },
+      "say": [
+        { "line": "act" },
+        { "ar": "الطرفين ما يتساوواش. ثبّت القسمة متاعك بالضرب، احسب:" },
+        { "check": "act" },
+        { "ar": "يرجعلك العدد اللي قسمتو؟" }
+      ]
+    }
+  ]
+}

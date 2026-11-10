@@ -21,18 +21,24 @@ import { fractionToLatex, parseNumeric } from '../../engine/format';
 import { parseExpression, toLatex } from '../../engine/expression';
 import { checkLine } from '../lines/check';
 import { THRESHOLDS } from '../../state/config';
-import { evaluatorOf } from '../../method/cards';
-import { multiplyBackCheck } from '../../method/checks';
-import {
-  checkPlan,
-  checkRead,
-  evaluateLine,
-  reviewLine,
-} from '../../method/frame';
-import { evalChain } from '../../method/lineChain';
-import { checkList, listedByFirstBall } from '../../method/repair';
-import { reasonOrder, recap } from '../../method/narration';
+import { evaluateLine } from '../../method/frame';
+import { recap } from '../../method/narration';
 import type { MethodNote } from '../../method/note';
+import {
+  replyForCards,
+  replyForLine,
+  replyForPlan,
+  replyForRead,
+  replyForRecipe,
+  replyForRepairStage,
+  reviewSimilar,
+  type ReplyPart,
+} from '../../method/replies';
+import {
+  methodRevealRich,
+  nextShortFor,
+  stepOrderFor,
+} from '../../method/route';
 import { componentKind, isGate } from '../../components/registry';
 import type { ComponentSpec, JsonObject } from '../../components/contract';
 import {
@@ -1239,100 +1245,29 @@ const noteItem = (
   note: MethodNote,
 ) => append(d, { kind: 'feedback', depth: frame.depth, tone, note });
 
-const shortOf = (step: MframeStep, id: string): Rich | undefined =>
-  step.frame.type === 'plan'
-    ? step.frame.cards.find(c => c.id === id)?.short
-    : undefined;
-
-/** The plan card that comes after this one in HIS order, else the paper row. */
-function nextShort(d: Draft, step: MframeStep, cardId: string): Rich | null {
-  const roadmap = step.roadmap ?? [];
-  const prefix = step.id.slice(0, step.id.length - cardId.length - 1);
-  const order = methodOf(d).planOrder;
-  const roadmapShort = (id: string) => roadmap.find(r => r.id === id)?.short;
-  if (order) {
-    const at = order.indexOf(cardId);
-    const next = order[at + 1];
-    if (at >= 0 && next !== undefined) {
-      return roadmapShort(`${prefix}.${next}`) ?? null;
-    }
-    return (
-      roadmapShort(`${prefix}.recipe`) ??
-      roadmapShort(`${prefix}.paper`) ??
-      null
-    );
-  }
-  const i = roadmap.findIndex(r => r.id === step.id);
-  return roadmap[i + 1]?.short ?? null;
-}
-
-/** What "show me" gives at the end of a ladder: the plan's cards, the word, the expected line, the true card. */
-function methodRevealRich(step: MframeStep, answer: ResolvedAnswer): Rich {
-  const f = step.frame;
-  if (f.type === 'plan') {
-    const runs: NonNullable<Rich['ar']> = [];
-    f.cards.forEach((c, i) => {
-      if (i > 0) {
-        runs.push({ ar: ' ، ' });
-      }
-      runs.push(...(c.short.ar ?? []));
-    });
-    return { ar: runs };
-  }
-  if (f.type === 'read') {
-    return { fr: f.targets[0]?.token ?? '?' };
-  }
-  if (f.type === 'cards') {
-    return f.cards.find(c => c.truth === 'true')?.text ?? { math: '?' };
-  }
-  if (f.type === 'repair') {
-    const shown = f.stages.find(st => st.type === 'show');
-    return shown?.type === 'show' ? shown.text : { math: '?' };
-  }
-  if (
-    f.type === 'lines' &&
-    answer.kind === 'method' &&
-    answer.frame === 'lines'
-  ) {
-    const main = answer.graph.nodes.find(n => n.planCard === f.key && n.main);
-    const form = main?.forms[0];
-    if (main && form) {
-      const parsed = parseExpression(form, { variables: [] });
-      return {
-        math: `${parsed.ok ? toLatex(parsed.ast) : form} = ${fractionToLatex(
-          main.value,
-        )}`,
-      };
+/** The items of a pure reply (src/method/replies.ts), in order. */
+function appendParts(d: Draft, frame: Frame, parts: readonly ReplyPart[]) {
+  for (const p of parts) {
+    if (p.kind === 'student') {
+      append(d, { kind: 'student', depth: frame.depth, content: p.content });
+    } else if (p.kind === 'note') {
+      noteItem(d, frame, p.tone, p.note);
+    } else if (p.kind === 'feedback') {
+      append(d, {
+        kind: 'feedback',
+        depth: frame.depth,
+        tone: p.tone,
+        rich: p.rich,
+      });
+    } else {
+      append(d, {
+        kind: 'feedback',
+        depth: frame.depth,
+        tone: p.tone,
+        message: p.message,
+      });
     }
   }
-  return { math: '?' };
-}
-
-/** The frames of a method group in the student's own order once his plan is accepted (D47). */
-function stepOrderFor(
-  steps: readonly Step[],
-  planOrder: readonly string[],
-): string[] {
-  const planAt = steps.findIndex(
-    s => s.kind === 'mframe' && s.frame.type === 'plan',
-  );
-  const rank = (s: Step, i: number): number => {
-    if (s.kind === 'mframe' && s.group !== undefined) {
-      if (s.group === 'head') {
-        return 1;
-      }
-      if (s.group === 'tail') {
-        return 100;
-      }
-      const at = planOrder.indexOf(s.group);
-      return at >= 0 ? 2 + at : 50;
-    }
-    return i < planAt ? 0 : 200;
-  };
-  return steps
-    .map((s, i) => ({ id: s.id, r: rank(s, i), i }))
-    .sort((x, y) => x.r - y.r || x.i - y.i)
-    .map(x => x.id);
 }
 
 /** The steps of a group as the student walks them: reordered after the plan. */
@@ -1357,7 +1292,7 @@ function onMethodFrame(
   const base = eventBase(d, frame);
   if (f.type === 'plan' && 'plan' in value) {
     const order = value.plan.slice(0, 8);
-    const verdict = checkPlan(f.cards, order);
+    const { verdict, parts } = replyForPlan(f.cards, order);
     d.events.push({
       ...base,
       ...duration(d, frame),
@@ -1380,36 +1315,20 @@ function onMethodFrame(
         status: 'done',
         result: { raw: order.join(','), correct: true },
       });
-      noteItem(d, frame, 'info', reasonOrder(f.cards));
+      appendParts(d, frame, parts);
       completeStep(d, frame, true);
       return;
     }
     frame.attempts += 1;
     d.s.compressed = false;
     updateCard(d, frame.cardKey, { attempts: frame.attempts });
-    if (verdict.ok === false && verdict.reason === 'dependency') {
-      const card = f.cards.find(c => c.id === verdict.card);
-      noteItem(d, frame, 'warning', {
-        kind: 'plan_violation',
-        card: card?.short ?? { ar: [{ ar: '?' }] },
-        needs: verdict.needs
-          .map(id => shortOf(step, id))
-          .filter((r): r is Rich => r !== undefined),
-      });
-    } else {
-      append(d, {
-        kind: 'feedback',
-        depth: frame.depth,
-        tone: 'warning',
-        message: 'wrong',
-      });
-    }
+    appendParts(d, frame, parts);
     setPending(d, 'wrong', frame.stepId);
     return;
   }
   if (f.type === 'read' && 'token' in value) {
     const token = value.token.slice(0, 40);
-    const verdict = checkRead(f.targets, token);
+    const { verdict, parts } = replyForRead(f, token);
     d.events.push({
       ...base,
       ...duration(d, frame),
@@ -1418,11 +1337,6 @@ function onMethodFrame(
       value: { token },
       correct: verdict.ok,
       attempt: frame.attempts + 1,
-    });
-    append(d, {
-      kind: 'student',
-      depth: frame.depth,
-      content: { kind: 'typed', raw: token },
     });
     if (verdict.ok) {
       d.s.method = {
@@ -1433,24 +1347,14 @@ function onMethodFrame(
         status: 'done',
         result: { raw: token, correct: true },
       });
-      append(d, {
-        kind: 'feedback',
-        depth: frame.depth,
-        tone: 'success',
-        message: 'correct',
-      });
+      appendParts(d, frame, parts);
       completeStep(d, frame, true);
       return;
     }
     frame.attempts += 1;
     d.s.compressed = false;
     updateCard(d, frame.cardKey, { attempts: frame.attempts });
-    append(d, {
-      kind: 'feedback',
-      depth: frame.depth,
-      tone: 'warning',
-      rich: f.notOrderWord,
-    });
+    appendParts(d, frame, parts);
     setPending(d, 'wrong', frame.stepId);
     return;
   }
@@ -1498,73 +1402,46 @@ function onCardsFrame(
   ) {
     return;
   }
-  const card = f.cards.find(c => c.id === cardId);
-  const evaluate = card ? evaluatorOf(f.evaluator) : undefined;
-  if (!card || !evaluate) {
-    return;
-  }
   const m = methodOf(d);
-  const verdict = evaluate({
-    card,
-    cards: f.cards,
-    args: f.args,
+  const reply = replyForCards(f, cardId, {
     graph: answer.graph,
     lines: m.lines,
+    misconceptions: d.c.loaded.misconceptions,
+    shown: frame.misconceptionsShown ?? [],
   });
+  if (!reply) {
+    return;
+  }
+  const v = reply.verdict;
   d.events.push({
     ...eventBase(d, frame),
     ...duration(d, frame),
     t: 'answer',
     kind: 'method',
-    value: { card: card.id },
-    correct: verdict.correct,
-    ...(!verdict.correct &&
-      card.misconceptionId !== undefined && {
-        misconceptionId: card.misconceptionId,
-      }),
+    value: { card: cardId },
+    correct: v.correct,
+    ...(v.misconceptionId !== undefined && {
+      misconceptionId: v.misconceptionId,
+    }),
     attempt: frame.attempts + 1,
   });
-  append(d, {
-    kind: 'student',
-    depth: frame.depth,
-    content: { kind: 'rich', rich: card.text },
-  });
-  for (const note of verdict.notes) {
-    noteItem(d, frame, 'info', note);
-  }
-  if (verdict.correct) {
-    d.s.method = { ...m, picks: { ...m.picks, [step.id]: card.id } };
+  if (v.correct) {
+    d.s.method = { ...m, picks: { ...m.picks, [step.id]: cardId } };
     updateCard(d, frame.cardKey, {
       status: 'done',
-      result: { optionId: card.id, correct: true },
+      result: { optionId: cardId, correct: true },
     });
-    append(d, {
-      kind: 'feedback',
-      depth: frame.depth,
-      tone: 'success',
-      message: 'correct',
-    });
+    appendParts(d, frame, reply.parts);
     completeStep(d, frame, true);
     return;
   }
-  const lib = card.misconceptionId
-    ? d.c.loaded.misconceptions.get(card.misconceptionId)
-    : undefined;
-  const text =
-    card.feedback ??
-    misconceptionFeedback(d, frame, card.misconceptionId) ??
-    lib?.feedback;
-  append(
-    d,
-    text
-      ? { kind: 'feedback', depth: frame.depth, tone: 'warning', rich: text }
-      : {
-          kind: 'feedback',
-          depth: frame.depth,
-          tone: 'warning',
-          message: 'wrong',
-        },
-  );
+  if (v.explained !== undefined) {
+    frame.misconceptionsShown = [
+      ...(frame.misconceptionsShown ?? []),
+      v.explained,
+    ];
+  }
+  appendParts(d, frame, reply.parts);
   frame.attempts += 1;
   d.s.compressed = false;
   updateCard(d, frame.cardKey, { attempts: frame.attempts });
@@ -1578,16 +1455,8 @@ function onRecipe(
   ids: readonly string[],
 ) {
   const f = step.frame;
-  if (f.type !== 'recipe') {
-    return;
-  }
-  const byId = new Map(f.pool.map(c => [c.id, c]));
-  const picked = ids.slice(0, 5);
-  if (
-    picked.length < 3 ||
-    new Set(picked).size !== picked.length ||
-    !picked.every(id => byId.has(id))
-  ) {
+  const reply = f.type === 'recipe' ? replyForRecipe(f, ids) : null;
+  if (!reply) {
     return;
   }
   d.events.push({
@@ -1595,21 +1464,14 @@ function onRecipe(
     ...duration(d, frame),
     t: 'answer',
     kind: 'method',
-    value: { recipe: picked },
+    value: { recipe: reply.picked },
     correct: true,
     attempt: frame.attempts + 1,
   });
-  noteItem(d, frame, 'info', {
-    kind: 'recipe',
-    mine: picked.map(id => byId.get(id)!.text),
-    clean: f.clean
-      .map(id => byId.get(id)?.text)
-      .filter((r): r is Rich => r !== undefined),
-    ...(f.methodCard && { card: f.methodCard }),
-  });
+  appendParts(d, frame, reply.parts);
   updateCard(d, frame.cardKey, {
     status: 'done',
-    result: { raw: picked.join(','), correct: true },
+    result: { raw: reply.picked.join(','), correct: true },
   });
   completeStep(d, frame, true);
 }
@@ -1641,30 +1503,22 @@ function onSimilar(
     return;
   }
   // The review: every line credited or labelled, nothing said while he wrote.
-  const credited = new Set<string>();
-  for (const raw of frame.lines ?? []) {
-    const r = reviewLine(answer.graph, answer.table, raw, credited);
-    if (r.nodeId && r.outcome === 'credit') {
-      credited.add(r.nodeId);
-    }
+  const review = reviewSimilar(answer.graph, answer.table, frame.lines ?? []);
+  for (const r of review.reviews) {
     d.events.push({
       ...eventBase(d, frame),
       t: 'component_event',
       component: 'Review',
       name: 'line',
       payload: {
-        raw,
+        raw: r.raw,
         outcome: r.outcome,
         ...(r.id && { id: r.id }),
         ...(r.nodeId && { node: r.nodeId }),
       },
     });
-    noteItem(d, frame, r.outcome === 'credit' ? 'success' : 'info', {
-      kind: 'review',
-      raw,
-      ...r,
-    });
   }
+  appendParts(d, frame, review.parts);
   d.events.push({
     ...eventBase(d, frame),
     ...duration(d, frame),
@@ -1701,136 +1555,26 @@ function onRepair(
   // The accepting tap is the first act of the repair (D38: at most 10, it included).
   frame.acts = (frame.acts ?? 1) + 1;
   ungradedAct(d, frame, value, { stage: String(si), type: st.type });
-  let done = false;
-  if (st.type === 'show' && 'ack' in value) {
-    done = true;
-  } else if (st.type === 'component' && 'explored' in value) {
-    done = true;
-  } else if (st.type === 'list' && 'list' in value) {
-    const v = checkList(rs, value.list, frame.listFails ?? 0);
-    if (v.complete) {
-      d.events.push({
-        ...eventBase(d, frame),
-        t: 'component_event',
-        component: 'ListBuilder',
-        name: 'complete',
-        payload: {
-          byFirstBall: listedByFirstBall(rs, value.list),
-          groups: v.merged.length,
-        },
-      });
-      done = true;
-    } else {
-      frame.listFails = (frame.listFails ?? 0) + 1;
-      const labelOf = (id: string) =>
-        rs.balls?.find(b => b.id === id)?.label ?? id;
-      noteItem(d, frame, 'info', {
-        kind: 'list_help',
-        level: v.level ?? 1,
-        ...(v.ball !== undefined && { ball: labelOf(v.ball) }),
-        ...(v.group && { group: v.group.map(labelOf) }),
-      });
-    }
-  } else if (st.type === 'line' && 'mline' in value && rs.graph && rs.table) {
-    const raw = value.mline.slice(0, LINE_MAX);
-    const node = rs.graph.nodes.find(n => n.id === st.node);
-    append(d, {
-      kind: 'student',
-      depth: frame.depth,
-      content: { kind: 'typed', raw },
+  const reply = replyForRepairStage(st, rs, value, {
+    listFails: frame.listFails ?? 0,
+    misconceptions: d.c.loaded.misconceptions,
+    lines: methodOf(d).lines,
+    lineMax: LINE_MAX,
+  });
+  if (reply.listComplete) {
+    d.events.push({
+      ...eventBase(d, frame),
+      t: 'component_event',
+      component: 'ListBuilder',
+      name: 'complete',
+      payload: reply.listComplete,
     });
-    const ev = evaluateLine({
-      raw,
-      graph: rs.graph,
-      table: rs.table,
-      card: node?.planCard ?? 'total',
-      credited: new Set(),
-    });
-    const o = ev.outcome;
-    if (
-      (o.kind === 'credit' || o.kind === 'support') &&
-      o.node.id === st.node
-    ) {
-      done = true;
-    } else if (o.kind === 'mutation') {
-      const lib = d.c.loaded.misconceptions.get(o.misconceptionId);
-      const text =
-        o.strength === 'confirmed'
-          ? lib?.feedbackConfirmed ?? lib?.feedback
-          : lib?.feedback;
-      append(
-        d,
-        text
-          ? {
-              kind: 'feedback',
-              depth: frame.depth,
-              tone: 'warning',
-              rich: text,
-            }
-          : {
-              kind: 'feedback',
-              depth: frame.depth,
-              tone: 'warning',
-              message: 'wrong',
-            },
-      );
-    } else if (o.kind === 'unreadable') {
-      append(d, {
-        kind: 'feedback',
-        depth: frame.depth,
-        tone: 'info',
-        message: 'invalidInput',
-      });
-    } else {
-      noteItem(d, frame, 'info', {
-        kind: 'neutral',
-        code:
-          o.kind === 'unfinished'
-            ? 'unfinished'
-            : o.kind === 'mismatch'
-            ? 'mismatch'
-            : 'generic',
-        ...(o.kind === 'mismatch' && { line: o.shown }),
-      });
-    }
-  } else if (st.type === 'cards' && 'card' in value) {
-    const card = st.cards.find(c => c.id === value.card);
-    const evaluate = evaluatorOf(st.evaluator);
-    if (card && evaluate) {
-      const verdict = evaluate({
-        card,
-        cards: st.cards,
-        args: st.args,
-        ...(rs.graph && { graph: rs.graph }),
-        lines: methodOf(d).lines,
-      });
-      append(d, {
-        kind: 'student',
-        depth: frame.depth,
-        content: { kind: 'rich', rich: card.text },
-      });
-      for (const note of verdict.notes) {
-        noteItem(d, frame, 'info', note);
-      }
-      if (verdict.correct) {
-        done = true;
-      } else if (card.feedback) {
-        append(d, {
-          kind: 'feedback',
-          depth: frame.depth,
-          tone: 'warning',
-          rich: card.feedback,
-        });
-      } else {
-        append(d, {
-          kind: 'feedback',
-          depth: frame.depth,
-          tone: 'warning',
-          message: 'wrong',
-        });
-      }
-    }
   }
+  if (reply.listFailed) {
+    frame.listFails = (frame.listFails ?? 0) + 1;
+  }
+  appendParts(d, frame, reply.parts);
+  const done = reply.done;
   if (done) {
     frame.stage = si + 1;
     frame.listFails = 0;
@@ -1904,54 +1648,33 @@ function onMethodLine(
         ...extra,
       },
     });
-  if (o.kind === 'unreadable') {
-    ungraded('unreadable', { reason: o.reason });
-    append(d, {
-      kind: 'feedback',
-      depth: frame.depth,
-      tone: 'info',
-      message: 'invalidInput',
-    });
+  const reply = replyForLine(o, {
+    raw,
+    misconceptions: d.c.loaded.misconceptions,
+    shown: frame.misconceptionsShown ?? [],
+    // The statement gives the target when this card's line is the question's result.
+    target:
+      step.target &&
+      answer.graph.nodes.some(n => n.planCard === f.key && n.role === 'result')
+        ? step.target
+        : null,
+    recap: () =>
+      recap(
+        step.short ?? { ar: [{ ar: '?' }] },
+        nextShortFor(step, f.cardId, methodOf(d).planOrder),
+        raw,
+      ),
+  });
+  const v = reply.verdict;
+  if (v.kind === 'unreadable') {
+    ungraded('unreadable', { reason: v.reason });
+    appendParts(d, frame, reply.parts);
     setPending(d, 'line_invalid', frame.stepId);
     return;
   }
-  append(d, {
-    kind: 'student',
-    depth: frame.depth,
-    content: { kind: 'typed', raw },
-  });
-  if (o.kind === 'unfinished') {
-    ungraded('unfinished');
-    noteItem(d, frame, 'info', { kind: 'neutral', code: 'unfinished' });
-    return;
-  }
-  if (o.kind === 'mismatch') {
-    ungraded('mismatch');
-    // A division that does not hold: the student checks it himself (multiply back), with his own numbers.
-    const chain = evalChain(raw);
-    const back = chain.kind === 'chain' ? multiplyBackCheck(chain) : null;
-    noteItem(d, frame, 'info', {
-      kind: 'neutral',
-      code: 'mismatch',
-      line: o.shown,
-      ...(back && { check: back.expr }),
-    });
-    return;
-  }
-  if (o.kind === 'support') {
-    ungraded('support', { node: o.node.id });
-    noteItem(d, frame, 'info', {
-      kind: 'credit',
-      nodeId: o.node.id,
-      support: true,
-      derivation: o.derivation,
-      unsimplified: false,
-    });
-    return;
-  }
-  if (o.kind === 'repeat' || o.kind === 'other_step') {
-    ungraded(o.kind, { node: o.node.id });
-    noteItem(d, frame, 'info', { kind: 'neutral', code: o.kind });
+  if (v.kind === 'ungraded') {
+    ungraded(v.outcome, v.node !== undefined ? { node: v.node } : {});
+    appendParts(d, frame, reply.parts);
     return;
   }
   const answerEvent = (
@@ -1976,107 +1699,41 @@ function onMethodLine(
       ...extra,
       attempt: frame.attempts + 1,
     });
-  if (o.kind === 'credit') {
+  if (v.kind === 'credit') {
     answerEvent(true);
-    if (o.unsimplified) {
-      // Simplify until nothing is common: this line is not the result yet.
-      noteItem(d, frame, 'success', {
-        kind: 'credit',
-        nodeId: o.node.id,
-        support: false,
-        derivation: o.derivation,
-        unsimplified: true,
-      });
-      return;
+    if (!v.unsimplified) {
+      d.s.method = {
+        ...method,
+        credited: [...new Set([...method.credited, v.node])],
+        lines: { ...method.lines, [v.node]: raw },
+      };
+      const lines = [...(frame.lines ?? []), raw];
+      frame.lines = lines;
+      updateCard(d, frame.cardKey, { lines });
     }
-    d.s.method = {
-      ...method,
-      credited: [...new Set([...method.credited, o.node.id])],
-      lines: { ...method.lines, [o.node.id]: raw },
-    };
-    const lines = [...(frame.lines ?? []), raw];
-    frame.lines = lines;
-    updateCard(d, frame.cardKey, { lines });
-    noteItem(d, frame, 'success', {
-      kind: 'credit',
-      nodeId: o.node.id,
-      support: false,
-      derivation: o.derivation,
-      unsimplified: false,
-    });
-    if (o.completes) {
+    appendParts(d, frame, reply.parts);
+    if (v.completes) {
       updateCard(d, frame.cardKey, {
         status: 'done',
         result: { raw, correct: true },
       });
-      noteItem(
-        d,
-        frame,
-        'info',
-        recap(
-          step.short ?? { ar: [{ ar: '?' }] },
-          nextShort(d, step, f.cardId),
-          raw,
-        ),
-      );
       completeStep(d, frame, true);
     }
     return;
   }
-  // A wrong line: a known slip, a known wrong value, or a value nobody expects.
-  let misconceptionId: string | undefined;
-  let strength: 'confirmed' | 'asked' = 'asked';
-  let inferredBy: 'mutation' | 'procedure' | undefined;
-  if (o.kind === 'mutation') {
-    misconceptionId = o.misconceptionId;
-    strength = o.strength;
-    inferredBy = 'mutation';
-  } else if (o.kind === 'value_only') {
-    misconceptionId = o.misconceptionId;
-    inferredBy = 'procedure';
-  }
   answerEvent(false, {
-    ...(misconceptionId !== undefined && { misconceptionId }),
-    ...(inferredBy && { inferredBy }),
+    ...(v.misconceptionId !== undefined && {
+      misconceptionId: v.misconceptionId,
+    }),
+    ...(v.inferredBy && { inferredBy: v.inferredBy }),
   });
-  const lib = misconceptionId
-    ? d.c.loaded.misconceptions.get(misconceptionId)
-    : undefined;
-  const text =
-    strength === 'confirmed'
-      ? lib?.feedbackConfirmed ?? lib?.feedback
-      : lib?.feedback;
-  const fresh =
-    misconceptionId !== undefined &&
-    !frame.misconceptionsShown?.includes(misconceptionId);
-  if (fresh && text) {
+  if (v.explained !== undefined) {
     frame.misconceptionsShown = [
       ...(frame.misconceptionsShown ?? []),
-      misconceptionId!,
+      v.explained,
     ];
-    append(d, {
-      kind: 'feedback',
-      depth: frame.depth,
-      tone: 'warning',
-      rich: text,
-    });
-  } else if (misconceptionId === undefined) {
-    noteItem(d, frame, 'warning', {
-      kind: 'neutral',
-      code: o.kind === 'ambiguous' ? 'ambiguous' : 'generic',
-    });
   }
-  // The statement gives the target: his result and the target, side by side (the target is in the statement).
-  if (
-    step.target &&
-    answer.graph.nodes.some(n => n.planCard === f.key && n.role === 'result')
-  ) {
-    noteItem(d, frame, 'info', {
-      kind: 'target',
-      line: raw,
-      target: step.target,
-    });
-  }
+  appendParts(d, frame, reply.parts);
   frame.attempts += 1;
   delete frame.lastRaw;
   d.s.compressed = false;

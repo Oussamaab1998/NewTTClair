@@ -13,20 +13,18 @@ import { useTranslation } from 'react-i18next';
 
 import type { LoadedExercise } from '../../content/loader';
 import { appPaperParts, appPaperQuestions } from '../../content/paper';
-import type { PaperQuestion, Rich } from '../../content/schema';
+import type { PaperQuestion } from '../../content/schema';
 import { partKey } from '../../state/doneParts';
 import { PaperBackground } from '../paper/PaperBackground';
 import { theme, type PaperStyle } from '../../theme';
+import { QuestionRow, ResultTag, type RowState } from './paperParts';
 import { RichView } from './RichView';
 
 const CLOSE_MARK = '×';
-const DONE_MARK = '✓';
-const doneTag = (label: string) => `${DONE_MARK} ${label}`;
 /** Swallows taps inside the sheet (they never reach the scrim). */
 const swallow = () => undefined;
 
 export type PaperCloseVia = 'close' | 'scrim' | 'back_gesture' | 'return';
-type RowState = 'done' | 'current' | 'available' | 'soon';
 
 interface PaperSheetProps {
   visible: boolean;
@@ -182,67 +180,6 @@ export function PaperSheet({
   );
 }
 
-function QuestionRow({
-  q,
-  state,
-  onLayout,
-}: {
-  q: PaperQuestion;
-  state: RowState;
-  onLayout: ((e: LayoutChangeEvent) => void) | undefined;
-}) {
-  const { t } = useTranslation();
-  return (
-    <View
-      style={[
-        styles.row,
-        state === 'current' && styles.rowCurrent,
-        state === 'soon' && styles.rowSoon,
-      ]}
-      {...(onLayout && { onLayout })}
-      accessible
-      accessibilityState={{ disabled: state === 'soon' }}
-      testID={`paper-q-${q.id}-${state}`}
-    >
-      <View style={[styles.num, state === 'current' && styles.numCurrent]}>
-        <Text style={styles.numText}>{q.label}</Text>
-      </View>
-      <View style={styles.wording}>
-        {(q.wording ?? []).map((w, i) => (
-          <RichView
-            key={i}
-            rich={w}
-            variant="paper"
-            {...(state === 'soon' && { color: theme.color.inkDisabled })}
-          />
-        ))}
-      </View>
-      {state === 'done' && (
-        <Text style={styles.doneTag}>{doneTag(q.label)}</Text>
-      )}
-      {state === 'current' && (
-        <Text style={styles.hereTag}>{t('paper.here')}</Text>
-      )}
-      {state === 'soon' && (
-        <Text style={styles.soonTag}>{t('picker.soon')}</Text>
-      )}
-    </View>
-  );
-}
-
-function ResultTag({ id, statement }: { id: string; statement: Rich }) {
-  return (
-    <View style={styles.resultTag} testID={`paper-result-${id}`}>
-      <Text style={styles.resultMark}>{DONE_MARK}</Text>
-      <RichView
-        rich={statement}
-        variant="paper"
-        color={theme.color.correct.text}
-      />
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   scrim: {
     flex: 1,
@@ -305,70 +242,6 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.card,
     padding: theme.space.lg,
   },
-  // The exam's own (French, LTR) order: number, wording, then the state tag.
-  row: {
-    flexDirection: theme.mathSide.row,
-    alignItems: 'center',
-    gap: theme.space.md,
-    backgroundColor: theme.color.card,
-    borderWidth: theme.border.line,
-    borderColor: theme.color.border,
-    borderRadius: theme.radius.card,
-    padding: theme.space.lg,
-  },
-  rowCurrent: {
-    backgroundColor: theme.color.highlighterSoft,
-    borderWidth: theme.border.active,
-    borderColor: theme.color.ink,
-  },
-  // Clearly unavailable: dashed, muted, never pressable.
-  rowSoon: {
-    backgroundColor: theme.color.paper,
-    borderStyle: 'dashed',
-  },
-  num: {
-    width: theme.size.paperNumber,
-    height: theme.size.paperNumber,
-    borderRadius: theme.size.paperNumber / 2,
-    backgroundColor: theme.color.surfaceMuted,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  numCurrent: { backgroundColor: theme.color.highlighter },
-  numText: {
-    ...theme.font.small,
-    fontFamily: theme.font.family.ui.bold,
-    color: theme.color.ink,
-    writingDirection: 'ltr',
-  },
-  wording: { flex: 1, gap: theme.space.xxs },
-  doneTag: {
-    ...theme.font.small,
-    fontFamily: theme.font.family.ui.bold,
-    color: theme.color.correct.text,
-    backgroundColor: theme.color.correct.bg,
-    borderColor: theme.color.correct.ink,
-    borderWidth: theme.border.line,
-    borderRadius: theme.radius.tag,
-    overflow: 'hidden',
-    paddingHorizontal: theme.space.sm,
-    writingDirection: 'ltr',
-  },
-  hereTag: {
-    ...theme.font.small,
-    fontFamily: theme.font.family.ui.bold,
-    color: theme.color.textOnAccent,
-    backgroundColor: theme.color.ink,
-    borderRadius: theme.radius.tag,
-    overflow: 'hidden',
-    paddingHorizontal: theme.space.md,
-    writingDirection: 'rtl',
-  },
-  soonTag: {
-    ...theme.font.small,
-    color: theme.color.inkDisabled,
-    writingDirection: 'rtl',
-  },
   proven: { gap: theme.space.sm, alignItems: theme.reading.startAlign },
   provenTitle: {
     ...theme.font.body,
@@ -380,23 +253,6 @@ const styles = StyleSheet.create({
     flexDirection: theme.reading.row,
     flexWrap: 'wrap',
     gap: theme.space.sm,
-  },
-  // A proven result (French, LTR): ✓ then the statement.
-  resultTag: {
-    flexDirection: theme.mathSide.row,
-    alignItems: 'center',
-    gap: theme.space.xs,
-    backgroundColor: theme.color.correct.bg,
-    borderColor: theme.color.correct.ink,
-    borderWidth: theme.border.line,
-    borderRadius: theme.radius.chip,
-    paddingHorizontal: theme.space.md,
-    direction: 'ltr',
-  },
-  resultMark: {
-    ...theme.font.body,
-    fontFamily: theme.font.family.ui.bold,
-    color: theme.color.correct.ink,
   },
   primary: {
     minHeight: theme.size.touch,
