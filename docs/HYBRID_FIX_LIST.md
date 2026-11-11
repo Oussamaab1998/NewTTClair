@@ -1,6 +1,14 @@
 # Hybrid lesson: fix list
 
-Written for: the product owner and the next coding session. Source: review of four Q1 screenshots of `bac2022c-sc-ex2` (2026-11-02, the student wrote `10` for "all draws", then tapped «ما نعرفش» twice; badge `deep:stuck_again $0.0409`), plus items the owner added the same day (B9, B10, B11). Nothing here is fixed yet. Causes marked "confirmed" were checked in the code; "to confirm" needs the simulator.
+Written for: the product owner and the next coding session. Source: review of four Q1 screenshots of `bac2022c-sc-ex2` (2026-11-02, the student wrote `10` for "all draws", then tapped «ما نعرفش» twice; badge `deep:stuck_again $0.0409`), plus items the owner added the same day (B9, B10, B11). Causes marked "confirmed" were checked in the code; "to confirm" needs the simulator.
+
+**Status 2026-11-10 (not committed; `npm run check` green, 236 suites):**
+- **Fixed:** B1, B2, B3, B4, B6, B7, B8, B9, B10, B11, U1, U2, U4.
+- **B10:** the owner still could not scroll on the device, so all three sheets (board, «الورقة», method «الطريق») now have the scrim as a sibling behind the sheet instead of a pressable parent, and an explicit `flexShrink: 1` on the body.
+- **Not yet swipe-tested on a device.**
+- **Free way to see the waiting state:** the new `-devMover slow` launch argument.
+- **Still open:** B5, U3, U5–U9, S1–S9.
+- **2026-11-11, owner:** the progress strip over the card was removed; «الطريق» has the map, and its segment flashes at «نبداو». This cuts the header height (part of U6). «افتحها من جديد» was removed from «الطريق», so components are not reopened there for now; `board.ts` still computes them.
 
 Each item: what the student sees, the cause, the fix direction. UX items that change a screen get a mockup approved by the owner before they are built.
 

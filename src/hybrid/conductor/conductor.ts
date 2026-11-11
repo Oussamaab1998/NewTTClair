@@ -69,6 +69,7 @@ import {
   type FrameView,
   type Reason,
 } from './types';
+import { caseBridge } from './bridge';
 
 /** The longest line kept (as in the lesson). */
 const LINE_MAX = 200;
@@ -336,6 +337,11 @@ export function act(
       const complete =
         (r.result.engine as { complete?: boolean } | undefined)?.complete ===
         true;
+      // A box listed whole: the case closes, the bridge leads to the question.
+      if (complete && spec.kind === 'box') {
+        s.onCase = null;
+        return { state: s, out: out('case_done', caseBridge(ctx, rt, spec)) };
+      }
       return {
         state: s,
         out: out('case_line', [
@@ -346,11 +352,17 @@ export function act(
       };
     }
   }
-  // He used a component an AI move showed: worth a remark; the route stays.
+  // He used a component an AI move showed («كمّلت»): worth a remark; the
+  // route stays. The tap carries no answer, so it never spends or shows a
+  // hint: the prepared reply only sends him back to his step.
   if (a.kind === 'component' && f.type !== 'repair') {
+    const prompt = view(ctx, s)?.prompt;
     return {
       state: s,
-      out: withHint(out('component_result', []), nextHint(step, p)),
+      out: out(
+        'component_result',
+        prompt ? [{ kind: 'feedback', tone: 'info', rich: prompt }] : [],
+      ),
     };
   }
   switch (f.type) {
@@ -579,14 +591,12 @@ function onLine(
       extra: answer.extra,
     });
   }
-  // On a small case an AI move proposed: a line the question credits brings
-  // him back; a line the case reads (right or a slip) is about the case (its
-  // right lines often look like slips on the exam's urn); anything else is
-  // judged on the question.
-  const credits = ev.outcome.kind === 'credit' || ev.outcome.kind === 'support';
-  if (s.onCase && credits) {
-    s.onCase = null;
-  }
+  // On a small case an AI move proposed, the case judges first: a line it
+  // reads (right or a slip) is about the case (its right lines often look
+  // like steps of the exam's urn: 6 on a box of four is also 3!). A box's
+  // groups found close the case with the bridge to the question. Anything
+  // else is judged on the question, and a line the question credits brings
+  // him back.
   const spec = s.onCase ? s.session.cases[s.onCase] : undefined;
   if (s.onCase && spec) {
     const expect = {
@@ -598,13 +608,28 @@ function onLine(
     const peek = judgeLine(rt, raw, expect).match?.verdict;
     if (peek && peek !== 'no_match') {
       const { line } = recordLine(rt, raw, expect);
+      const right = line.match?.verdict === 'credit';
+      const typed: ReplyPart = {
+        kind: 'student',
+        content: { kind: 'typed', raw },
+      };
+      if (right && spec.kind === 'box') {
+        s.onCase = null;
+        return out('case_done', [typed, ...caseBridge(ctx, rt, spec)]);
+      }
       return out('case_line', [
-        { kind: 'student', content: { kind: 'typed', raw } },
-        line.match?.verdict === 'credit'
+        typed,
+        right
           ? { kind: 'message', tone: 'success', message: 'correct' }
           : { kind: 'message', tone: 'info', message: 'wrong' },
       ]);
     }
+  }
+  if (
+    s.onCase &&
+    (ev.outcome.kind === 'credit' || ev.outcome.kind === 'support')
+  ) {
+    s.onCase = null;
   }
   const main = answer.graph.nodes.find(n => n.planCard === f.key && n.main);
   // The line goes into the shared session (his L1.., the values he wrote),

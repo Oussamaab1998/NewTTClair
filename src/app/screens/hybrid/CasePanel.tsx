@@ -5,10 +5,17 @@
  * ids the engine's check uses: urn balls r1..rN, n1..nM; box letters a, b,
  * c…), a note that the lines he writes now go under the case on his page,
  * and «نرجعو للسؤال». Each label is on its own line, the numbers and ball
- * names on their own left-to-right line.
+ * names on their own left-to-right line. While an answer is on its way,
+ * every control is off and dimmed; the one he pressed shows a spinner.
  */
 import React, { memo, useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import type { StudentAct } from '../../../ai/checks/autoCheck';
@@ -29,18 +36,24 @@ export function caseBalls(spec: CaseSpec): { id: string; label: string }[] {
     : ballsOf(spec.reds, spec.blacks);
 }
 
+/** The panel's control whose act is being answered. */
+export type CaseBusy = 'list' | 'back' | null;
+
 export const CasePanel = memo(function CasePanelImpl({
   caseId,
   spec,
   lines,
   disabled,
+  busy,
   onAct,
 }: {
   caseId: string;
   spec: CaseSpec;
   /** The step takes lines: they go under the case on his page. */
   lines: boolean;
+  /** An answer is on its way. */
   disabled: boolean;
+  busy: CaseBusy;
   onAct: (a: StudentAct) => void;
 }) {
   const { t } = useTranslation();
@@ -58,25 +71,35 @@ export const CasePanel = memo(function CasePanelImpl({
         {String(spec.k)}
       </Text>
       <Text style={styles.label}>{t('hybrid.case.list')}</Text>
-      <View pointerEvents={disabled ? 'none' : 'auto'}>
-        <ListBuilder
-          key={caseId}
-          balls={balls}
-          size={spec.k}
-          readonly={false}
-          onSubmit={groups => onAct({ kind: 'list', groups })}
-          testID="case-list"
-        />
-      </View>
+      <ListBuilder
+        key={caseId}
+        balls={balls}
+        size={spec.k}
+        readonly={false}
+        disabled={disabled}
+        busy={disabled && busy === 'list'}
+        onSubmit={groups => onAct({ kind: 'list', groups })}
+        testID="case-list"
+      />
       {lines && <Text style={styles.text}>{t('hybrid.case.lines')}</Text>}
       <Pressable
-        style={styles.back}
+        style={[styles.back, disabled && busy !== 'back' && styles.off]}
         accessibilityRole="button"
+        accessibilityState={{ disabled, busy: disabled && busy === 'back' }}
         disabled={disabled}
         testID="case-back"
         onPress={() => onAct({ kind: 'continue' })}
       >
-        <Text style={styles.backText}>{t('hybrid.case.back')}</Text>
+        <View style={styles.backRow}>
+          {disabled && busy === 'back' && (
+            <ActivityIndicator
+              size="small"
+              color={theme.color.ink}
+              testID="case-back-busy"
+            />
+          )}
+          <Text style={styles.backText}>{t('hybrid.case.back')}</Text>
+        </View>
       </Pressable>
     </View>
   );
@@ -126,6 +149,12 @@ const styles = StyleSheet.create({
     backgroundColor: theme.color.card,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  off: { opacity: theme.opacity.disabled },
+  backRow: {
+    flexDirection: theme.reading.row,
+    alignItems: 'center',
+    gap: theme.space.sm,
   },
   backText: {
     ...theme.font.body,

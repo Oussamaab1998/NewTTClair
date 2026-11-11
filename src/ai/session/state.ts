@@ -10,6 +10,7 @@ import type { Experiment } from '../../engine/calls';
 import { choose, frac, type Fraction } from '../../engine/rational';
 import { arrangements, factorial } from '../../engine/combinatorics';
 import { mutationsFor } from '../../method/mutations';
+import { ballsOf } from '../../method/repair';
 import { buildGraphFor } from '../../method/templates';
 import type { GraphRuntime, GraphVerdict, LineVerdict } from '../checks/lines';
 import { plain } from '../checks/lines';
@@ -160,29 +161,33 @@ export function boxValues(n: number, k: number): Record<string, Fraction> {
 }
 
 /**
+ * A case's balls: the ids its lists are checked on and the names he reads
+ * (a box: letters a, b...; an urn: r1.. as R1.., n1.. as N1..), the same in
+ * the urn picture, the case card and the tools' results.
+ */
+export function caseBallNames(spec: CaseSpec): { id: string; label: string }[] {
+  return spec.kind === 'box'
+    ? 'abcdefgh'
+        .slice(0, spec.n)
+        .split('')
+        .map(id => ({ id, label: id }))
+    : ballsOf(spec.reds, spec.blacks);
+}
+
+/**
  * A case as the random experiment components draw (Urn, OutcomeSpace...):
  * red balls r1.. (value 1) and black n1.. (value 0); a box's letters a, b...
- * get distinct values so none is marked as a duplicate.
+ * get distinct values so none is marked as a duplicate. Each ball carries
+ * its name (caseBallNames), so the picture shows a b c d, not the values.
  */
 export function caseExperiment(spec: CaseSpec): Experiment {
-  const urn =
+  const urn = caseBallNames(spec).map(({ id, label }, i) =>
     spec.kind === 'box'
-      ? 'abcdefgh'
-          .slice(0, spec.n)
-          .split('')
-          .map((id, i) => ({ id, value: i + 1 }))
-      : [
-          ...Array.from({ length: spec.reds }, (_, i) => ({
-            id: `r${i + 1}`,
-            value: 1,
-            color: 'red' as const,
-          })),
-          ...Array.from({ length: spec.blacks }, (_, i) => ({
-            id: `n${i + 1}`,
-            value: 0,
-            color: 'black' as const,
-          })),
-        ];
+      ? { id, value: i + 1, label }
+      : id.startsWith('r')
+      ? { id, value: 1, color: 'red' as const, label }
+      : { id, value: 0, color: 'black' as const, label },
+  );
   return { urn, draw: 'simultaneous', k: spec.k };
 }
 

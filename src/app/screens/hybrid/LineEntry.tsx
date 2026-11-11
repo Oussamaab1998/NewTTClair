@@ -40,6 +40,10 @@ export interface LineEntryProps {
   state: ConductorState;
   /** His level on the node's skill (scaffold fading). */
   level: SkillLevel;
+  /** An answer is on its way: the keys, tiles and «نثبّت» are off and dimmed. */
+  disabled?: boolean;
+  /** His line is the act being answered: «نثبّت» shows a spinner. */
+  busy?: boolean;
   testID?: string;
 }
 
@@ -96,6 +100,8 @@ export function LineEntry(p: LineEntryProps) {
       scaffold={scaffold}
       counting={p.step.key !== null && COUNTING_KEYS.has(p.step.key)}
       readonly={!p.active}
+      disabled={p.disabled ?? false}
+      busy={p.busy ?? false}
       onSubmit={(raw, info) => {
         const next = info.fixes
           ? fixLine(page, info.fixes, info.nodes)

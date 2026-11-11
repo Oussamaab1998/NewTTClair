@@ -11,8 +11,9 @@
  *   (Sonnet 5.5 refuses a forced tool); `fallbacks: 'default'`.
  * A refused move gets ONE retry with the reasons (an is_error tool_result)
  * when the call budget allows; then the mover returns null and the screen
- * shows the conductor's prepared reply. The allowance is asked first and
- * told the real cost after. It never throws: any failure is null.
+ * shows the conductor's prepared reply. The allowance is asked first (a
+ * hand-over from light to deep by its own permit) and told the charge
+ * after. It never throws: any failure is null.
  * The mover keeps its own memory per question (the exchanges it saw); the
  * conductor state stays the only source of truth for where he is.
  */
@@ -358,7 +359,11 @@ export function createMover(o: MoverOptions): Mover {
       caseLabel: null,
       costUsd: 0,
     };
-    if (!o.allowance.permits(tier, reason)) {
+    // A hand-over has its own permit (a light reason is never sent deep).
+    const permitted = escalated
+      ? o.allowance.permitsHandover(reason)
+      : o.allowance.permits(tier, reason);
+    if (!permitted) {
       return none;
     }
     const cfg = config[tier];
@@ -571,7 +576,7 @@ export function createMover(o: MoverOptions): Mover {
       let tier: AiTier = out.tier;
       let r = await attempt(tier, ctx, req, memory, false, signal);
       let spent = r.costUsd;
-      // The light tier hands the moment over: one deep move, if allowed.
+      // The light tier hands the moment over: one deep move, if permitted.
       if (r.kind === 'escalate' && tier === 'light') {
         tier = 'deep';
         r = await attempt(tier, ctx, req, memory, true, signal);

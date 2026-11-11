@@ -51,6 +51,12 @@ export interface Allowance {
   mode(): AllowanceMode;
   /** May this call be made now (mode, the per-question limits)? */
   permits(tier: AiTier, reason: Reason): boolean;
+  /**
+   * May the light tier hand this moment over to one deep call (its move was
+   * escalate)? The deep limits and the day's mode; a light reason reaches
+   * the deep tier only this way.
+   */
+  permitsHandover(reason: Reason): boolean;
   /** The real cost of a call that was made. */
   add(tier: AiTier, usd: number): void;
 }

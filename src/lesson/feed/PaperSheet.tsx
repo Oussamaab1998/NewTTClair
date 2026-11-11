@@ -21,8 +21,6 @@ import { QuestionRow, ResultTag, type RowState } from './paperParts';
 import { RichView } from './RichView';
 
 const CLOSE_MARK = '×';
-/** Swallows taps inside the sheet (they never reach the scrim). */
-const swallow = () => undefined;
 
 export type PaperCloseVia = 'close' | 'scrim' | 'back_gesture' | 'return';
 
@@ -42,7 +40,9 @@ interface PaperSheetProps {
  * «الورقة» (DESIGN.md §4.3): the exam paper over the dimmed lesson. The
  * statement in the exam's wording, the question list (done ✓, the current one
  * «انت هنا», available, not built yet «قريبا»), and the results proven so far.
- * Rows are not tappable. Opens scrolled to the current question.
+ * Rows are not tappable. Opens scrolled to the current question. The scrim
+ * is a sibling behind the sheet, never its parent: a pressable around the
+ * sheet took the touch and its body did not scroll (owner, 2026-11-10).
  */
 export function PaperSheet({
   visible,
@@ -103,17 +103,14 @@ export function PaperSheet({
       onRequestClose={() => onClose('back_gesture')}
       testID="paper-modal"
     >
-      <Pressable
-        style={styles.scrim}
-        onPress={() => onClose('scrim')}
-        testID="paper-scrim"
-      >
+      <View style={styles.root}>
         <Pressable
-          style={styles.sheet}
-          onPress={swallow}
+          style={StyleSheet.absoluteFill}
+          onPress={() => onClose('scrim')}
           accessible={false}
-          testID="paper-sheet"
-        >
+          testID="paper-scrim"
+        />
+        <View style={styles.sheet} testID="paper-sheet">
           <PaperBackground style={paperStyle} />
           <View style={styles.handle} />
           <View style={styles.head}>
@@ -174,14 +171,14 @@ export function PaperSheet({
           >
             <Text style={styles.primaryText}>{t('lesson.back')}</Text>
           </Pressable>
-        </Pressable>
-      </Pressable>
+        </View>
+      </View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  scrim: {
+  root: {
     flex: 1,
     backgroundColor: theme.color.scrim,
     justifyContent: 'flex-end',
@@ -233,7 +230,8 @@ const styles = StyleSheet.create({
     color: theme.color.inkMuted,
     writingDirection: 'ltr',
   },
-  body: { flexGrow: 0 },
+  /** Grows with its content, shrinks to the sheet's height and scrolls. */
+  body: { flexGrow: 0, flexShrink: 1 },
   bodyContent: { gap: theme.space.md, paddingBottom: theme.space.lg },
   statement: {
     backgroundColor: theme.color.card,

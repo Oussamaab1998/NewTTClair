@@ -214,9 +214,40 @@ describe('verifyAsk', () => {
         ctx(),
       ),
     ).toMatchObject({ ok: false });
+    // Brackets stuck to a group do not hide it («(ab» and «ba)»).
+    expect(
+      verifyAsk(
+        say({
+          type: 'ar',
+          text: 'اكتب بيدك كل التيراجات الممكنة (ab هو نفسه ba).',
+        }),
+        ctx(),
+      ),
+    ).toMatchObject({
+      ok: false,
+      reasons: [expect.stringContaining('scrambled')],
+    });
+    expect(
+      verifyAsk(
+        say({
+          type: 'ar',
+          text: 'فيه الكور a b c d، ونجبدو زوز مع بعض (مثلا ab).',
+        }),
+        ctx(),
+      ),
+    ).toMatchObject({
+      ok: false,
+      reasons: [expect.stringContaining('scrambled')],
+    });
     expect(
       verifyAsk(
         say({ type: 'ar', text: 'صندوق فيه a b c d، نجبدو زوز.' }),
+        ctx(),
+      ).ok,
+    ).toBe(true);
+    expect(
+      verifyAsk(
+        say({ type: 'ar', text: 'صندوق فيه (a b c d)، نجبدو زوز.' }),
         ctx(),
       ).ok,
     ).toBe(true);

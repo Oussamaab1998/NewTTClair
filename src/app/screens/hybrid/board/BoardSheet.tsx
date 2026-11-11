@@ -2,6 +2,10 @@
  * The board's sheet over the dimmed lesson: the three segments at the top
  * (switch without closing), the sheet shown, and «نرجعو للسؤال». Only the
  * shown sheet is built (its data is computed when it opens).
+ *
+ * The scrim is a sibling behind the sheet, never its parent: a pressable
+ * around the sheet took the touch and its body did not scroll (owner,
+ * 2026-11-10).
  */
 import React from 'react';
 import {
@@ -19,8 +23,6 @@ import { theme } from '../../../../theme';
 import { TabBar, type BoardTab } from './TabBar';
 
 const CLOSE_MARK = '×';
-/** Swallows taps inside the sheet (they never reach the scrim). */
-const swallow = () => undefined;
 
 export function BoardSheet({
   tab,
@@ -43,13 +45,14 @@ export function BoardSheet({
       onRequestClose={onClose}
       testID="board-modal"
     >
-      <Pressable style={styles.scrim} onPress={onClose} testID="board-scrim">
+      <View style={styles.root}>
         <Pressable
-          style={styles.sheet}
-          onPress={swallow}
+          style={StyleSheet.absoluteFill}
+          onPress={onClose}
           accessible={false}
-          testID="board-sheet"
-        >
+          testID="board-scrim"
+        />
+        <View style={styles.sheet} testID="board-sheet">
           <PaperBackground style={theme.layout.paperStyle} />
           <View style={styles.handle} />
           <View style={styles.head}>
@@ -81,14 +84,14 @@ export function BoardSheet({
           >
             <Text style={styles.primaryText}>{t('hybrid.sheet.back')}</Text>
           </Pressable>
-        </Pressable>
-      </Pressable>
+        </View>
+      </View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  scrim: {
+  root: {
     flex: 1,
     backgroundColor: theme.color.scrim,
     justifyContent: 'flex-end',
@@ -128,7 +131,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   closeMark: { ...theme.font.header, color: theme.color.ink },
-  body: { flexGrow: 0 },
+  /** Grows with its content, shrinks to the sheet's height and scrolls. */
+  body: { flexGrow: 0, flexShrink: 1 },
   bodyContent: { gap: theme.space.md, paddingBottom: theme.space.lg },
   primary: {
     minHeight: theme.size.touch,

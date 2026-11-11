@@ -128,3 +128,37 @@ export function aiWorstCaseUsd(
   const factor = p.long && tokens > p.long.tokens ? p.long.factor : 1;
   return (factor * (tokens * inRate + maxTokens * p.output)) / 1_000_000;
 }
+
+/**
+ * A typical move call of the hybrid lesson, in tokens (src/ai/move/mover.ts).
+ * First guesses, to be measured in A6. The cached prefix is the tools, the
+ * core prompt and the question pack (about 22,000 characters; the cold deep
+ * call of 2026-11-02 wrote about 9,000 tokens); the situation is not cached;
+ * at effort low the thinking and the tutor_move call stay far under maxTokens
+ * (2,000 light, 6,000 deep).
+ */
+export const TYPICAL_MOVE_CALL: AiUsage = {
+  input: 1_500,
+  cacheRead: 9_000,
+  cacheWrite5m: 0,
+  cacheWrite1h: 0,
+  output: 1_000,
+};
+
+/**
+ * What one move is expected to be charged to the allowance, in aiChargeUsd
+ * units (the prefix priced as cache reads), so that a call that would pass
+ * the per-question limit is not made (src/hybrid/allowance.ts). First guesses,
+ * to be measured in A6. An estimate, not the worst case: Sonnet's worst case
+ * (2 calls x 6,000 output tokens) is over $0.12 and would leave no deep call.
+ * - light, about $0.0015: Haiku 5.5, both its calls (a refused move's retry);
+ * - deep, about $0.0148: Sonnet 5.5, one call (a compute hop adds a second
+ *   call that mostly re-reads the cached prefix); two of them fit the
+ *   question's $0.04 with room for light calls.
+ */
+export const MOVE_EXPECTED_CHARGE_USD: Readonly<
+  Record<'light' | 'deep', number>
+> = {
+  light: 2 * aiChargeUsd(AI_MODELS.haiku, TYPICAL_MOVE_CALL),
+  deep: aiChargeUsd(AI_MODELS.sonnet, TYPICAL_MOVE_CALL),
+};

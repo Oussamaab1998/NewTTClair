@@ -44,10 +44,14 @@
  *   -devTutorMode hybrid|ai|old  which lesson leads a tutored question: the
  *                      lesson board (default), the AI-led chat, or the old
  *                      lesson (src/config/tutorMode.ts)
+ *   -devMover slow     the lesson board's AI side waits about 5 s, then gives
+ *                      no move: the waiting state, then the prepared reply
+ *                      (no model call, nothing spent; src/hybrid/live.ts)
  */
 import { Settings } from 'react-native';
 
 import { isTutorMode, type TutorMode } from '../../config/tutorMode';
+import type { Mover } from '../../hybrid/mover';
 import { appStore } from '../../storage/appStore';
 import { createKvEventStore } from '../../telemetry/eventStore';
 import type { Event } from '../../telemetry/events';
@@ -177,6 +181,34 @@ export const devScrollAtLaunch = (): number => {
   const v = Number(arg('devScroll'));
   return Number.isFinite(v) && v > 0 ? v : 0;
 };
+
+/** How long the `-devMover slow` stand-in waits. */
+export const SLOW_MOVER_MS = 5_000;
+
+/**
+ * A free stand-in for the lesson board's AI side: waits `ms` (or until the
+ * screen aborts), then gives no move, so the prepared reply is shown.
+ */
+export function slowMover(ms = SLOW_MOVER_MS): Mover {
+  return (_ctx, _req, signal) =>
+    new Promise(resolve => {
+      if (signal?.aborted) {
+        resolve(null);
+        return;
+      }
+      const done = () => {
+        clearTimeout(timer);
+        signal?.removeEventListener('abort', done);
+        resolve(null);
+      };
+      const timer = setTimeout(done, ms);
+      signal?.addEventListener('abort', done);
+    });
+}
+
+/** `-devMover slow`: the slow stand-in (src/hybrid/live.ts); anything else is ignored. */
+export const devMoverAtLaunch = (): Mover | null =>
+  stringArg('devMover') === 'slow' ? slowMover() : null;
 
 export function runDevBench() {
   if (arg('devBench') !== 'events') {

@@ -6,8 +6,10 @@ import {
   questionCtx,
   startQuestion,
 } from '../../hybrid/conductor/conductor';
+import { createAllowance } from '../../hybrid/allowance';
 import type { Allowance, MoveRequest } from '../../hybrid/mover';
 import { passTour } from '../../hybrid/tour/passTour';
+import { memoryLedger } from '../../planner/llm/costCap';
 import { aiCostUsd } from '../config';
 import { bannedSentence } from '../prompt/lexicon';
 import type { MessagesTransport, SendResult } from '../transport/messagesApi';
@@ -123,6 +125,7 @@ function allowance(permit = true) {
   return {
     mode: () => 'full' as const,
     permits: jest.fn((_t: unknown, _r: unknown) => permit),
+    permitsHandover: jest.fn((_r: unknown) => permit),
     add: jest.fn(),
   } satisfies Allowance;
 }
@@ -480,10 +483,72 @@ describe('move mode: the mover', () => {
       'claude-haiku-5-5',
       'claude-sonnet-5-5',
     ]);
-    expect(al.permits).toHaveBeenCalledWith('deep', 'slip_again');
+    // The hand-over has its own permit; a light reason is never asked deep.
+    expect(al.permitsHandover).toHaveBeenCalledWith('slip_again');
+    expect(al.permits).not.toHaveBeenCalledWith('deep', 'slip_again');
     expect(situationOf(bodies[1])).toContain(
       'The light tutor handed this moment to you',
     );
+  });
+
+  it('hands an escalated moment over under the real allowance', async () => {
+    const { transport, bodies } = fake([
+      { content: [move({ move: 'escalate', message: [] })] },
+      { content: [GOOD] },
+    ]);
+    const ledger = memoryLedger();
+    const al = createAllowance({ ledger });
+    expect(al.permits('deep', 'slip_again')).toBe(false);
+    const m = await createMover({ transport, allowance: al })(ctx, lightReq());
+    expect(m).toMatchObject({ tier: 'deep' });
+    expect(bodies.map(b => b.model)).toEqual([
+      'claude-haiku-5-5',
+      'claude-sonnet-5-5',
+    ]);
+    // Both calls charged; the hand-over used one of the question's deep calls.
+    expect(ledger.get()).toBeCloseTo(
+      aiCostUsd('claude-haiku-5-5', USAGE) +
+        aiCostUsd('claude-sonnet-5-5', USAGE),
+      12,
+    );
+    al.add('deep', 0.001);
+    expect(al.permitsHandover('slip_again')).toBe(false);
+  });
+
+  it('in essential mode, hands over a moment the student needs answered', async () => {
+    const free: StudentAct = {
+      kind: 'free',
+      text: 'ma fhemtech chnowa na3mel',
+    };
+    const req = request(free);
+    expect(req.out).toMatchObject({ tier: 'light', reason: 'free_text' });
+    const { transport, bodies } = fake([
+      { content: [move({ move: 'escalate', message: [] })] },
+      { content: [GOOD] },
+    ]);
+    const ledger = memoryLedger();
+    ledger.add(0.07);
+    const al = createAllowance({ ledger });
+    expect(al.mode()).toBe('essential');
+    await createMover({ transport, allowance: al })(ctx, req);
+    expect(bodies[0]?.model).toBe('claude-haiku-5-5');
+    expect(bodies[1]?.model).toBe('claude-sonnet-5-5');
+    expect(situationOf(bodies[1])).toContain(
+      'The light tutor handed this moment to you',
+    );
+  });
+
+  it('pays Haiku and shows the prepared reply when the deep calls are used up', async () => {
+    const { transport, bodies } = fake([
+      { content: [move({ move: 'escalate', message: [] })] },
+      { content: [GOOD] },
+    ]);
+    const al = createAllowance({ ledger: memoryLedger() });
+    al.add('deep', 0.001);
+    al.add('deep', 0.001);
+    const m = await createMover({ transport, allowance: al })(ctx, lightReq());
+    expect(m).toBeNull();
+    expect(bodies.map(b => b.model)).toEqual(['claude-haiku-5-5']);
   });
 
   it('never throws and remembers what he was shown', async () => {

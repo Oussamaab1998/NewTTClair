@@ -1,6 +1,13 @@
+import { MOVE_EXPECTED_CHARGE_USD } from '../ai/config';
 import { memoryLedger, storeLedger } from '../planner/llm/costCap';
 import { memoryStore } from '../storage/kv';
-import { createAllowance, modeFor, routeCall } from './allowance';
+import {
+  createAllowance,
+  modeFor,
+  PER_QUESTION,
+  routeCall,
+  storeQuestionLedger,
+} from './allowance';
 import {
   DEEP_REASONS,
   LIGHT_REASONS,
@@ -139,6 +146,170 @@ describe('allowance: one question', () => {
     expect(allowance.permits('deep', 'claim')).toBe(false);
     allowance.add('light', 0);
     expect(allowance.permits('light', 'free_text')).toBe(false);
+  });
+});
+
+describe('allowance: the expected charge of the next move', () => {
+  it("refuses a call that would pass the question's $0.04, not only one made after it", () => {
+    const { allowance } = withDay(0);
+    allowance.add('deep', 0.03);
+    // 0.03 + 0.0148 > 0.04: the deep move would pass; a light one still fits.
+    expect(allowance.permits('deep', 'stuck_again')).toBe(false);
+    expect(allowance.permits('light', 'free_text')).toBe(true);
+    allowance.add('light', 0.0088);
+    // 0.0388 + 0.0015 > 0.04.
+    expect(allowance.permits('light', 'free_text')).toBe(false);
+  });
+
+  it('still leaves the question its 2 deep moves, with light calls around them', () => {
+    const { allowance } = withDay(0);
+    for (let i = 0; i < 6; i++) {
+      expect(allowance.permits('light', 'free_text')).toBe(true);
+      allowance.add('light', MOVE_EXPECTED_CHARGE_USD.light);
+    }
+    for (let i = 0; i < PER_QUESTION.deep; i++) {
+      expect(allowance.permits('deep', 'stuck_again')).toBe(true);
+      allowance.add('deep', MOVE_EXPECTED_CHARGE_USD.deep);
+    }
+    expect(allowance.permits('deep', 'stuck_again')).toBe(false);
+  });
+
+  it('takes its own estimates; one that is not a number refuses the call', () => {
+    const allowance = createAllowance({
+      ledger: memoryLedger(),
+      expectedUsd: { light: 0.05, deep: Number.NaN },
+    });
+    expect(allowance.permits('light', 'free_text')).toBe(false);
+    expect(allowance.permits('deep', 'stuck_again')).toBe(false);
+  });
+});
+
+describe('allowance: the hand-over from light to deep', () => {
+  it('full: every light reason may be handed over, while never sent deep directly', () => {
+    const { allowance } = withDay(0);
+    for (const r of LIGHT_REASONS) {
+      expect(allowance.permitsHandover(r)).toBe(true);
+      expect(allowance.permits('deep', r)).toBe(false);
+    }
+    expect(allowance.permitsHandover('credit')).toBe(false);
+  });
+
+  it('essential: only for a reason the student needs answered', () => {
+    const { allowance } = withDay(0.07);
+    expect(LIGHT_REASONS.filter(r => allowance.permitsHandover(r))).toEqual([
+      'free_text',
+      'slip_no_reply',
+      'pick_again',
+      'similar_other',
+    ]);
+    expect(DEEP_REASONS.filter(r => allowance.permitsHandover(r))).toEqual([
+      'stuck_again',
+      'slip_third',
+    ]);
+  });
+
+  it('prepared only: never', () => {
+    const { allowance } = withDay(0.095);
+    expect(LIGHT_REASONS.some(r => allowance.permitsHandover(r))).toBe(false);
+  });
+
+  it("uses up the deep calls and the question's dollars like a deep call", () => {
+    const { allowance } = withDay(0);
+    allowance.add('deep', 0.001);
+    expect(allowance.permitsHandover('free_text')).toBe(true);
+    allowance.add('deep', 0.001);
+    expect(allowance.permitsHandover('free_text')).toBe(false);
+    const other = withDay(0).allowance;
+    other.add('light', 0.03);
+    expect(other.permitsHandover('free_text')).toBe(false);
+    expect(other.permits('light', 'free_text')).toBe(true);
+  });
+});
+
+describe("allowance: the question's counts in the store", () => {
+  const KEY = 'hybrid.questions.v1';
+  let day = '2026-11-10';
+  const today = () => day;
+  const open = (store: ReturnType<typeof memoryStore>, question = 'ex/1') =>
+    createAllowance({
+      ledger: storeLedger(store, 'ai.spend', today),
+      question: storeQuestionLedger(store, KEY, question, today),
+    });
+  beforeEach(() => {
+    day = '2026-11-10';
+  });
+
+  it('keeps the limits when he leaves the question and opens it again', () => {
+    const store = memoryStore();
+    const first = open(store);
+    first.add('deep', 0.001);
+    first.add('deep', 0.001);
+    for (let i = 0; i < 10; i++) {
+      first.add('light', 0.0001);
+    }
+    const again = open(store);
+    expect(again.permits('deep', 'stuck_again')).toBe(false);
+    expect(again.permitsHandover('free_text')).toBe(false);
+    expect(again.permits('light', 'free_text')).toBe(false);
+  });
+
+  it("keeps the question's dollars too", () => {
+    const store = memoryStore();
+    open(store).add('deep', 0.03);
+    expect(open(store).permits('deep', 'stuck_again')).toBe(false);
+    expect(open(store).permits('light', 'free_text')).toBe(true);
+  });
+
+  it('counts each question apart, under one key', () => {
+    const store = memoryStore();
+    const q1 = open(store, 'ex/1');
+    q1.add('deep', 0.001);
+    q1.add('deep', 0.001);
+    open(store, 'ex/2').add('light', 0.0005);
+    expect(open(store, 'ex/1').permits('deep', 'stuck_again')).toBe(false);
+    expect(open(store, 'ex/2').permits('deep', 'stuck_again')).toBe(true);
+    expect(JSON.parse(store.getString(KEY)!)).toEqual({
+      day: '2026-11-10',
+      questions: {
+        'ex/1': { light: 0, deep: 2, usd: 0.002 },
+        'ex/2': { light: 1, deep: 0, usd: 0.0005 },
+      },
+    });
+  });
+
+  it('starts a new day with fresh limits and drops the old day', () => {
+    const store = memoryStore();
+    const q = open(store);
+    q.add('deep', 0.001);
+    q.add('deep', 0.001);
+    day = '2026-11-11';
+    const next = open(store);
+    expect(next.permits('deep', 'stuck_again')).toBe(true);
+    open(store, 'ex/2').add('light', 0.0005);
+    expect(Object.keys(JSON.parse(store.getString(KEY)!).questions)).toEqual([
+      'ex/2',
+    ]);
+  });
+
+  it('reads a record it cannot read as nothing', () => {
+    const store = memoryStore();
+    store.set(KEY, '{not json');
+    expect(open(store).permits('deep', 'stuck_again')).toBe(true);
+    store.set(
+      KEY,
+      JSON.stringify({
+        day: '2026-11-10',
+        questions: { 'ex/1': { light: 'x', deep: -3, usd: null } },
+      }),
+    );
+    const a = open(store);
+    expect(a.permits('deep', 'stuck_again')).toBe(true);
+    a.add('light', 0.001);
+    expect(JSON.parse(store.getString(KEY)!).questions['ex/1']).toEqual({
+      light: 1,
+      deep: 0,
+      usd: 0.001,
+    });
   });
 });
 

@@ -34,6 +34,14 @@ export const BallSchema = z.strictObject({
    * the urn check makes each colour carry one value.
    */
   color: BallColorSchema.optional(),
+  /**
+   * The name the student reads (a small case's box a b c d, its R1 N1):
+   * shown instead of the value or the colour letter; events still read `value`.
+   */
+  label: z
+    .string()
+    .regex(/^[A-Za-z]{1,2}\d{0,2}$/)
+    .optional(),
 });
 export type Ball = z.infer<typeof BallSchema>;
 

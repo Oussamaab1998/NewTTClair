@@ -3,7 +3,9 @@
  * 21): every step with what it does, why, and what comes next. Rows are not
  * tappable. Done steps carry a check, the current one is a highlighter row
  * with an ink border: no other status, never a mistake. Findings and the
- * paper skeleton come later; this is the roadmap.
+ * paper skeleton come later; this is the roadmap. The scrim is a sibling
+ * behind the sheet, never its parent: a pressable around the sheet took the
+ * touch and its body did not scroll (owner, 2026-11-10).
  */
 import React from 'react';
 import {
@@ -23,7 +25,6 @@ import { PaperBackground } from '../../paper/PaperBackground';
 import { Finding, RouteRow, SkeletonLine } from './sheetParts';
 
 const CLOSE_MARK = '×';
-const swallow = () => undefined;
 
 export type MethodSheetCloseVia = 'close' | 'scrim' | 'back_gesture' | 'return';
 
@@ -55,17 +56,14 @@ export function MethodSheet({
       onRequestClose={() => onClose('back_gesture')}
       testID="method-modal"
     >
-      <Pressable
-        style={styles.scrim}
-        onPress={() => onClose('scrim')}
-        testID="method-sheet-scrim"
-      >
+      <View style={styles.root}>
         <Pressable
-          style={styles.sheet}
-          onPress={swallow}
+          style={StyleSheet.absoluteFill}
+          onPress={() => onClose('scrim')}
           accessible={false}
-          testID="method-sheet"
-        >
+          testID="method-sheet-scrim"
+        />
+        <View style={styles.sheet} testID="method-sheet">
           <PaperBackground style={paperStyle} />
           <View style={styles.handle} />
           <View style={styles.head}>
@@ -114,14 +112,14 @@ export function MethodSheet({
           >
             <Text style={styles.primaryText}>{t('method.sheet.back')}</Text>
           </Pressable>
-        </Pressable>
-      </Pressable>
+        </View>
+      </View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  scrim: {
+  root: {
     flex: 1,
     backgroundColor: theme.color.scrim,
     justifyContent: 'flex-end',
@@ -166,7 +164,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   closeMark: { ...theme.font.header, color: theme.color.ink },
-  body: { flexGrow: 0 },
+  /** Grows with its content, shrinks to the sheet's height and scrolls. */
+  body: { flexGrow: 0, flexShrink: 1 },
   bodyContent: { gap: theme.space.sm, paddingBottom: theme.space.lg },
   section: {
     color: theme.color.textSecondary,

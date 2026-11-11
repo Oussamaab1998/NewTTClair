@@ -826,8 +826,6 @@
     "back": "Retour",
     "question": "Question",
     "strip": {
-      "now": "Maintenant",
-      "open": "Ouvrir le chemin",
       "similar": "Questions semblables"
     },
     "tabs": {
@@ -851,7 +849,14 @@
       "dontKnow": "Je ne sais pas",
       "waiting": "Le prof écrit",
       "aiMark": "Ce texte est écrit par l'IA ; les calculs sont vérifiés par le moteur.",
-      "finished": "J'ai fini"
+      "finished": "J'ai fini",
+      "paperFolded": "La feuille : on y revient après la petite boîte",
+      "reply": "Réponse du prof",
+      "openReply": "Ouvrir la réponse",
+      "foldReply": "Replier la réponse"
+    },
+    "wait": {
+      "long": "Encore un peu"
     },
     "collapsed": {
       "open": "Étape finie : ouvrir le chemin"
@@ -879,12 +884,9 @@
       "hidden": "Étape pas encore ordonnée",
       "what": "Quoi",
       "why": "Pourquoi",
-      "reopen": "Rouvrir",
-      "hide": "Masquer",
       "checks": "Ce qu'on vérifie toujours",
       "target": "L'énoncé dit",
       "from": "Trouvé à la question",
-      "others": "Autres outils utilisés",
       "saved": "Ton chemin est ici"
     },
     "trip": {
@@ -914,6 +916,13 @@
       "list": "Écris tous les groupes qui peuvent sortir",
       "lines": "Les calculs que tu écris maintenant vont sur la feuille, sous la petite boîte.",
       "back": "Retour à la question"
+    },
+    "bridge": {
+      "done": "Juste : tu as trouvé tous les groupes de la petite boîte.",
+      "ordered": "Si on compte avec l'ordre, on trouve :",
+      "perGroup": "Mais chaque groupe est alors compté plusieurs fois : une fois par ordre de ses boules. On divise par le nombre d'ordres :",
+      "question": "Maintenant la question : même idée.",
+      "write": "Écris ta ligne sur la feuille."
     },
     "found": {
       "question": "Question",

@@ -34,6 +34,8 @@ export {
   devModeAtLaunch,
   aiEveryMistakeAtLaunch,
   devLlmAtLaunch,
+  devMoverAtLaunch,
+  slowMover,
   runDevBench,
 } from './launch';
 export { realSessionPlayer } from '../../lesson/session/fixtures/realSession1b';

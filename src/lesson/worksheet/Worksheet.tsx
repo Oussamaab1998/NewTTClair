@@ -9,10 +9,18 @@
  *
  * The caller keeps the page (model.ts) and judges each line with the engine:
  * this component only edits and sends lines. Typing redraws the line being
- * written, not the page (memoized lines, keys and tiles).
+ * written, not the page (memoized lines, keys and tiles). While the caller
+ * waits for an answer, every control is off and dimmed (`disabled`), and
+ * «نثبّت» shows a spinner when his line is the act being answered (`busy`).
  */
 import React, { memo, useCallback, useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import type { Rich } from '../../content/schema';
@@ -70,6 +78,13 @@ export interface WorksheetProps {
   counting?: boolean;
   /** Replay or a finished question: the page only. */
   readonly?: boolean;
+  /**
+   * An answer is on its way: the keys, tiles and «نثبّت» are off and dimmed
+   * (the page and the line being written stay as they are).
+   */
+  disabled?: boolean;
+  /** His line is the act being answered: «نثبّت» shows a spinner. */
+  busy?: boolean;
   testID?: string;
 }
 
@@ -130,6 +145,8 @@ export function Worksheet({
   onSubmit,
   counting = false,
   readonly = false,
+  disabled = false,
+  busy = false,
   testID = 'worksheet',
 }: WorksheetProps) {
   const { t } = useTranslation();
@@ -161,6 +178,7 @@ export function Worksheet({
   const numberOf = new Map(lines.map((l, i) => [l.id, i + 1]));
   const lastStep = runs[runs.length - 1]?.step.id;
   const empty = isEmpty(draft.editor);
+  const canSubmit = !empty && !disabled;
   const issue =
     draft.issue &&
     `${theme.feedback.warning.icon} ${t(
@@ -186,7 +204,7 @@ export function Worksheet({
                 line={line}
                 n={numberOf.get(line.id) ?? 0}
                 fixing={draft.fixing === line.id}
-                onOpen={readonly ? null : onOpen}
+                onOpen={readonly || disabled ? null : onOpen}
                 testID={testID}
               />
             ))}
@@ -203,8 +221,10 @@ export function Worksheet({
               <Text style={styles.arabic}>{t('worksheet.fixing')}</Text>
               <Pressable
                 onPress={() => setDraft(fresh())}
-                style={styles.textButton}
+                disabled={disabled}
+                style={[styles.textButton, disabled && styles.off]}
                 accessibilityRole="button"
+                accessibilityState={{ disabled }}
                 testID={`${testID}-fix-cancel`}
               >
                 <Text style={styles.textButtonLabel}>
@@ -217,6 +237,7 @@ export function Worksheet({
             <ScaffoldView
               scaffold={scaffold}
               shown={ownShown}
+              disabled={disabled}
               onToggle={() => setOwnShown(s => !s)}
               onDrop={() => {
                 setDropped(true);
@@ -241,17 +262,36 @@ export function Worksheet({
               {issue}
             </Text>
           )}
-          <Tiles tiles={tiles} onKey={onKey} testID={testID} />
-          <Pad counting={counting} onKey={onKey} testID={testID} />
+          <Tiles
+            tiles={tiles}
+            onKey={onKey}
+            disabled={disabled}
+            testID={testID}
+          />
+          <Pad
+            counting={counting}
+            onKey={onKey}
+            disabled={disabled}
+            testID={testID}
+          />
           <Pressable
             onPress={submit}
-            disabled={empty}
-            style={[styles.submit, empty && styles.submitDisabled]}
+            disabled={!canSubmit}
+            style={[styles.submit, !canSubmit && styles.submitDisabled]}
             accessibilityRole="button"
-            accessibilityState={{ disabled: empty }}
+            accessibilityState={{ disabled: !canSubmit, busy }}
             testID={`${testID}-submit`}
           >
-            <Text style={styles.submitLabel}>{submitLabel}</Text>
+            <View style={styles.submitRow}>
+              {busy && (
+                <ActivityIndicator
+                  size="small"
+                  color={theme.color.textOnAccent}
+                  testID={`${testID}-submit-busy`}
+                />
+              )}
+              <Text style={styles.submitLabel}>{submitLabel}</Text>
+            </View>
           </Pressable>
         </View>
       )}
@@ -329,12 +369,14 @@ const PageLine = memo(function PageLineImpl({
 function ScaffoldView({
   scaffold,
   shown,
+  disabled,
   onToggle,
   onDrop,
   testID,
 }: {
   scaffold: Scaffold;
   shown: boolean;
+  disabled: boolean;
   onToggle: () => void;
   onDrop: () => void;
   testID: string;
@@ -345,9 +387,10 @@ function ScaffoldView({
       <View style={styles.scaffold}>
         <Pressable
           onPress={onToggle}
-          style={styles.chip}
+          disabled={disabled}
+          style={[styles.chip, disabled && styles.off]}
           accessibilityRole="button"
-          accessibilityState={{ expanded: shown }}
+          accessibilityState={{ expanded: shown, disabled }}
           testID={`${testID}-scaffold-chip`}
         >
           <Text style={styles.chipLabel}>{t('worksheet.scaffold.chip')}</Text>
@@ -379,8 +422,10 @@ function ScaffoldView({
       </Text>
       <Pressable
         onPress={onDrop}
-        style={styles.textButton}
+        disabled={disabled}
+        style={[styles.textButton, disabled && styles.off]}
         accessibilityRole="button"
+        accessibilityState={{ disabled }}
         testID={`${testID}-scaffold-drop`}
       >
         <Text style={styles.textButtonLabel}>
@@ -394,10 +439,12 @@ function ScaffoldView({
 const Tiles = memo(function TilesImpl({
   tiles,
   onKey,
+  disabled,
   testID,
 }: {
   tiles: readonly Tile[];
   onKey: (k: Key) => void;
+  disabled: boolean;
   testID: string;
 }) {
   const { t } = useTranslation();
@@ -410,10 +457,16 @@ const Tiles = memo(function TilesImpl({
         <Pressable
           key={tile.text}
           onPress={() => onKey({ insert: tile.nodes })}
-          style={({ pressed }) => [styles.tile, pressed && styles.pressed]}
+          disabled={disabled}
+          style={({ pressed }) => [
+            styles.tile,
+            pressed && styles.pressed,
+            disabled && styles.off,
+          ]}
           accessibilityRole="button"
           accessibilityLabel={tile.text}
           accessibilityHint={t('worksheet.tile')}
+          accessibilityState={{ disabled }}
           testID={`${testID}-tile-${i}`}
         >
           <Text style={styles.tileText}>{tile.text}</Text>
@@ -426,10 +479,12 @@ const Tiles = memo(function TilesImpl({
 const Pad = memo(function PadImpl({
   counting,
   onKey,
+  disabled,
   testID,
 }: {
   counting: boolean;
   onKey: (k: Key) => void;
+  disabled: boolean;
   testID: string;
 }) {
   const { t } = useTranslation();
@@ -449,6 +504,7 @@ const Pad = memo(function PadImpl({
                 a11y={name ? t(`worksheet.key.${name}`) : k}
                 tool={TOOLS.includes(k)}
                 emphasis={k === 'div' || k === 'choose'}
+                disabled={disabled}
                 testID={`${testID}-key-${k}`}
               />
             );
@@ -591,6 +647,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   submitDisabled: { backgroundColor: theme.color.inkDisabled },
+  submitRow: {
+    flexDirection: theme.reading.row,
+    alignItems: 'center',
+    gap: theme.space.sm,
+  },
+  // Off while an answer is on its way: dimmed, and announced as disabled.
+  off: { opacity: theme.opacity.disabled },
   submitLabel: {
     color: theme.color.textOnAccent,
     fontSize: theme.font.size.body,

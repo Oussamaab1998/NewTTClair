@@ -8,10 +8,32 @@
  * while help exists for the step. On a small case an AI move put him on,
  * the «الصندوق الصغير» panel: list its groups, write its lines (they go
  * under the case on his page), or come back to the question.
+ *
+ * One place to act at a time: on a small box the case card is the only
+ * input (the paper folds to one line, «ما نعرفش» hides, the AI's component
+ * is a picture); on any case the component has no «كمّلت». Older answers
+ * fold to their first line (his own acts stay as chips); the newest stays
+ * open. While an answer is on its way, a typing bubble stands where it will
+ * land and every action is off and dimmed; the one he pressed spins.
  */
-import React, { memo, useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  type LayoutChangeEvent,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 
 import type { StudentAct } from '../../../ai/checks/autoCheck';
 import { ComponentHost } from '../../../components/ComponentHost';
@@ -26,11 +48,16 @@ import type { FrameView } from '../../../hybrid/conductor/types';
 import { StudentBubble, ToneBlock } from '../../../lesson/feed/Bubbles';
 import { CardsPick } from '../../../lesson/feed/method/CardsPick';
 import { ListBuilder } from '../../../lesson/feed/method/ListBuilder';
-import { MethodNoteView } from '../../../lesson/feed/method/MethodNoteView';
+import {
+  MethodNoteView,
+  noteSpoken,
+} from '../../../lesson/feed/method/MethodNoteView';
 import { PlanCards } from '../../../lesson/feed/method/PlanCards';
 import { StatementTap } from '../../../lesson/feed/method/StatementTap';
 import { RichView } from '../../../lesson/feed/RichView';
 import { MathBlock } from '../../../lesson/math/MathBlock';
+import { isolateInline } from '../../../lesson/rich/runs';
+import type { StudentContent } from '../../../lesson/session/types';
 import type { Experiment } from '../../../engine/calls';
 import { checkPlan } from '../../../method/frame';
 import { lineLatex } from '../../../method/lineChain';
@@ -39,14 +66,27 @@ import { ballsOf } from '../../../method/repair';
 import { seededOrder } from '../../../method/shuffle';
 import { theme } from '../../../theme';
 import { TutorMessage } from '../tutor/TutorMessage';
-import { CasePanel } from './CasePanel';
+import { CasePanel, type CaseBusy } from './CasePanel';
 import { LineEntry } from './LineEntry';
-import type { Exchange, LiveComponent } from './useHybridSession';
+import { TypingBubble } from './TypingBubble';
+import type { Exchange, LiveComponent, Said } from './useHybridSession';
 import type { SkillLevel } from '../../../ai/profile/profile';
 import type { ConductorState } from '../../../hybrid/conductor/types';
 
 /** Frames where «ما نعرفش» gives a hint (similar questions are without help). */
 const HELPED = new Set<FrameView['type']>(['plan', 'read', 'lines', 'cards']);
+/** A folded answer (pointing toward the reading direction), and an open one. */
+const FOLDED_MARK = '◂';
+const OPEN_MARK = '▾';
+
+/** The control whose act is being answered (it spins while he waits). */
+type Pressed =
+  | 'dont_know'
+  | 'finish'
+  | 'line'
+  | 'case_list'
+  | 'case_back'
+  | 'other';
 
 function PartView({ part }: { part: ReplyPart }) {
   switch (part.kind) {
@@ -65,36 +105,154 @@ function PartView({ part }: { part: ReplyPart }) {
   }
 }
 
+/** His act: a tap («ما نعرفش») as a small chip, his words and lines as a bubble. */
+function HisAct({ content }: { content: StudentContent }) {
+  const { t } = useTranslation();
+  if (content.kind === 'message') {
+    return (
+      <View style={styles.hisChip} testID="his-chip">
+        <Text style={styles.hisChipText}>{t(`lesson.${content.message}`)}</Text>
+      </View>
+    );
+  }
+  return (
+    <View style={styles.his}>
+      <StudentBubble content={content} />
+    </View>
+  );
+}
+
+type Tone = 'success' | 'warning' | 'info';
+type Preview =
+  | { kind: 'rich'; rich: Rich; tone: Tone | null }
+  | { kind: 'text'; text: string; tone: Tone | null }
+  | { kind: 'reply' };
+
+/** The first line of an answer: its Arabic words (or its French line), never a formula alone. */
+function previewOf(said: Said, t: TFunction): Preview {
+  const lead = (rich: Rich, tone: Tone | null): Preview =>
+    rich.ar
+      ? { kind: 'rich', rich: { ar: rich.ar }, tone }
+      : rich.fr !== undefined
+      ? { kind: 'rich', rich: { fr: rich.fr }, tone }
+      : { kind: 'reply' };
+  if (said.kind === 'parts') {
+    const part = said.parts.find(x => x.kind !== 'student');
+    switch (part?.kind) {
+      case 'feedback':
+        return lead(part.rich, part.tone);
+      case 'message':
+        return {
+          kind: 'text',
+          text: t(`lesson.${part.message}`),
+          tone: part.tone,
+        };
+      case 'note':
+        return {
+          kind: 'text',
+          text: isolateInline(noteSpoken(t, part.note)),
+          tone: part.tone,
+        };
+      default:
+        return { kind: 'reply' };
+    }
+  }
+  const block = said.blocks[0];
+  return block?.type === 'ar'
+    ? { kind: 'rich', rich: { ar: block.runs }, tone: null }
+    : block?.type === 'fr'
+    ? { kind: 'rich', rich: { fr: block.text }, tone: null }
+    : { kind: 'reply' };
+}
+
+/** A folded answer on one line: its tone's mark (not colour alone) and its first words. */
+function ReplyPreview({ said }: { said: Said }) {
+  const { t } = useTranslation();
+  const v = previewOf(said, t);
+  const tone = v.kind === 'reply' ? null : v.tone;
+  return (
+    <View style={styles.preview}>
+      {tone && (
+        <Text style={styles.previewMark}>{theme.feedback[tone].icon}</Text>
+      )}
+      <View style={styles.previewText}>
+        {v.kind === 'rich' ? (
+          <RichView
+            rich={v.rich}
+            fontSize={theme.font.size.small}
+            color={theme.color.textSecondary}
+            numberOfLines={1}
+            mathScroll={false}
+          />
+        ) : (
+          <Text style={styles.previewPlain} numberOfLines={1}>
+            {v.kind === 'text' ? v.text : t('hybrid.step.reply')}
+          </Text>
+        )}
+      </View>
+    </View>
+  );
+}
+
 /** One act of his and the answer: his act at the reading end, the tutor's words, a pinned component. */
 export const ExchangeView = memo(function ExchangeViewImpl({
   x,
   live,
   onFinish,
+  waiting = false,
+  finishing = false,
+  folded,
+  onToggle,
+  onLayout,
 }: {
   x: Exchange;
-  /** The callbacks of its component while it is the live one. */
+  /** The callbacks of its component while it is the live one (null: a picture). */
   live: LiveComponent | null;
   onFinish?: (exchangeId: string) => void;
+  /** An answer is on its way: «كمّلت» is off. */
+  waiting?: boolean;
+  /** «كمّلت» is the act being answered: it spins. */
+  finishing?: boolean;
+  /** An older exchange on the card: folded to one line (true) or opened (false). */
+  folded?: boolean;
+  onToggle?: (exchangeId: string) => void;
+  onLayout?: (e: LayoutChangeEvent) => void;
 }) {
   const { t } = useTranslation();
   const said = x.said;
   const component = said?.kind === 'blocks' ? said.component : null;
   const isLive = live !== null && component !== null && !component.done;
+  const foldable = folded !== undefined && said !== null && !!onToggle;
+  const shut = foldable && folded === true;
   return (
-    <View style={styles.exchange} testID={`exchange-${x.reason}`}>
+    <View
+      style={styles.exchange}
+      testID={`exchange-${x.reason}`}
+      {...(onLayout && { onLayout })}
+    >
       {x.his.map((c, i) => (
-        <View key={i} style={styles.his}>
-          <StudentBubble content={c} />
-        </View>
+        <HisAct key={i} content={c} />
       ))}
-      {x.pending && (
-        <Text style={styles.waiting} testID="hybrid-waiting">
-          {t('hybrid.step.waiting')}
-        </Text>
+      {x.pending && <TypingBubble />}
+      {foldable && onToggle && said && (
+        <Pressable
+          style={styles.fold}
+          accessibilityRole="button"
+          accessibilityLabel={t(
+            shut ? 'hybrid.step.openReply' : 'hybrid.step.foldReply',
+          )}
+          accessibilityState={{ expanded: !shut }}
+          testID="reply-fold"
+          onPress={() => onToggle(x.id)}
+        >
+          <Text style={styles.foldMark}>{shut ? FOLDED_MARK : OPEN_MARK}</Text>
+          {shut && <ReplyPreview said={said} />}
+        </Pressable>
       )}
-      {said?.kind === 'parts' &&
+      {!shut &&
+        said?.kind === 'parts' &&
         said.parts.map((p, i) => <PartView key={i} part={p} />)}
-      {said?.kind === 'blocks' && (
+      {!shut && said?.kind === 'blocks' && (
         <>
           <TutorMessage
             id={x.id}
@@ -111,12 +269,23 @@ export const ExchangeView = memo(function ExchangeViewImpl({
       )}
       {isLive && onFinish && (
         <Pressable
-          style={styles.primary}
+          style={[styles.primary, waiting && !finishing && styles.primaryOff]}
           accessibilityRole="button"
+          accessibilityState={{ disabled: waiting, busy: finishing }}
+          disabled={waiting}
           testID="hybrid-component-done"
           onPress={() => onFinish(x.id)}
         >
-          <Text style={styles.primaryText}>{t('hybrid.step.finished')}</Text>
+          <View style={styles.busyRow}>
+            {finishing && (
+              <ActivityIndicator
+                size="small"
+                color={theme.color.textOnAccent}
+                testID="hybrid-component-done-busy"
+              />
+            )}
+            <Text style={styles.primaryText}>{t('hybrid.step.finished')}</Text>
+          </View>
         </Pressable>
       )}
     </View>
@@ -158,19 +327,144 @@ export interface StepCardProps {
   state: ConductorState;
   /** His level on a node's skill (the worksheet's scaffold fading). */
   levelOf: (node: string | null) => SkillLevel;
+  /**
+   * Bring something that just appeared into view: `at` gives its top,
+   * relative to the card, once it is laid out (undefined: not measured).
+   */
+  onReveal?: (at: () => number | undefined) => void;
+  /** The card's own place (the screen adds it to `onReveal`'s tops). */
+  onLayout?: (e: LayoutChangeEvent) => void;
 }
+
+/** What the input inside the card needs besides the card's props. */
+type InputProps = StepCardProps & {
+  /** His line is the act being answered: «نثبّت» spins. */
+  lineBusy: boolean;
+};
+
+const NO_IDS: ReadonlySet<string> = new Set();
 
 export function StepCard(p: StepCardProps) {
   const { t } = useTranslation();
-  const { frame } = p;
+  const { frame, onAct, onFinishMove, onReveal } = p;
   const similar = frame.type === 'similar';
   const caseId = p.state.onCase;
   const caseSpec = caseId ? p.state.session.cases[caseId] : undefined;
+  const onCase = caseId !== null && caseSpec !== undefined;
+  // A small box: its card is the only place to act.
+  const box = caseSpec?.kind === 'box';
   const nextLabel = p.next?.kind === 'similar' ? null : p.next?.short ?? null;
   // The newest exchange's component is live while it is not finished.
   const lastId = p.exchanges[p.exchanges.length - 1]?.id;
+
+  // The control he pressed: read while the answer is on its way, forgotten
+  // once nothing waits (an instant answer, or the end of the wait).
+  const pressed = useRef<Pressed | null>(null);
+  useEffect(() => {
+    if (!p.waiting) {
+      pressed.current = null;
+    }
+  });
+  const busy = (k: Pressed) => p.waiting && pressed.current === k;
+  const act = useCallback(
+    (k: Pressed, a: StudentAct) => {
+      pressed.current = k;
+      onAct(a);
+    },
+    [onAct],
+  );
+  const finish = useCallback(
+    (id: string) => {
+      pressed.current = 'finish';
+      onFinishMove(id);
+    },
+    [onFinishMove],
+  );
+  const caseAct = useCallback(
+    (a: StudentAct) => act(a.kind === 'list' ? 'case_list' : 'case_back', a),
+    [act],
+  );
+  const inputAct = useCallback(
+    (a: StudentAct) => act(a.kind === 'line' ? 'line' : 'other', a),
+    [act],
+  );
+  const caseBusy: CaseBusy = busy('case_list')
+    ? 'list'
+    : busy('case_back')
+    ? 'back'
+    : null;
+
+  // Older answers fold when a new one arrives; he can open one again.
+  const [opened, setOpened] = useState<{
+    last: string | undefined;
+    ids: ReadonlySet<string>;
+  }>({ last: undefined, ids: NO_IDS });
+  const openIds = opened.last === lastId ? opened.ids : NO_IDS;
+  const toggle = useCallback(
+    (id: string) =>
+      setOpened(o => {
+        const ids = new Set(o.last === lastId ? o.ids : NO_IDS);
+        if (!ids.delete(id)) {
+          ids.add(id);
+        }
+        return { last: lastId, ids };
+      }),
+    [lastId],
+  );
+
+  // Where the screen goes (B11): the top of a new exchange (the typing
+  // bubble's too), else the case card when it opens, else the paper when
+  // it is the input again; a new step shows its card. Tops are measured
+  // here, relative to the card.
+  const tops = useRef(new Map<string, number>());
+  const layouts = useRef(new Map<string, (e: LayoutChangeEvent) => void>());
+  const layoutOf = (key: string) => {
+    let f = layouts.current.get(key);
+    if (!f) {
+      f = e => {
+        tops.current.set(key, e.nativeEvent.layout.y);
+      };
+      layouts.current.set(key, f);
+    }
+    return f;
+  };
+  const seen = useRef<{
+    frameId: string | null;
+    ids: Set<string>;
+    caseId: string | null;
+  }>({ frameId: null, ids: new Set(), caseId: null });
+  useEffect(() => {
+    const s = seen.current;
+    const newStep = s.frameId !== frame.frameId;
+    if (newStep) {
+      s.frameId = frame.frameId;
+      s.ids = new Set();
+    }
+    const fresh = p.exchanges.find(x => !s.ids.has(x.id));
+    p.exchanges.forEach(x => s.ids.add(x.id));
+    const opens = caseId !== null && caseId !== s.caseId;
+    const closes = caseId === null && s.caseId !== null;
+    s.caseId = caseId;
+    const key = fresh
+      ? `x:${fresh.id}`
+      : opens
+      ? 'case'
+      : closes
+      ? 'paper'
+      : newStep
+      ? 'card'
+      : null;
+    if (key && onReveal) {
+      onReveal(() => (key === 'card' ? 0 : tops.current.get(key)));
+    }
+  }, [p.exchanges, caseId, frame.frameId, onReveal]);
+
   return (
-    <View style={styles.card} testID="step-card">
+    <View
+      style={styles.card}
+      testID="step-card"
+      {...(p.onLayout && { onLayout: p.onLayout })}
+    >
       <View style={styles.header} testID="step-header">
         {similar ? (
           <Text style={styles.similar}>{t('hybrid.step.similar')}</Text>
@@ -202,24 +496,40 @@ export function StepCard(p: StepCardProps) {
           {...(frame.prompt.ar === undefined && { variant: 'paper' as const })}
         />
       )}
-      {p.exchanges.map(x => (
-        <ExchangeView
-          key={x.id}
-          x={x}
-          live={x.id === lastId ? p.live : null}
-          onFinish={p.onFinishMove}
-        />
-      ))}
+      {p.exchanges.map(x => {
+        const last = x.id === lastId;
+        const c = x.said?.kind === 'blocks' ? x.said.component : null;
+        // On a case its card is where he acts: the component is a picture,
+        // and a case's component stays one once he left the case.
+        const live = last && !onCase && (c === null || c.view.caseId === null);
+        return (
+          <ExchangeView
+            key={x.id}
+            x={x}
+            live={live ? p.live : null}
+            onFinish={finish}
+            waiting={p.waiting}
+            finishing={last && busy('finish')}
+            {...(!last && { folded: !openIds.has(x.id), onToggle: toggle })}
+            onLayout={layoutOf(`x:${x.id}`)}
+          />
+        );
+      })}
       {p.readback && (
         <View style={styles.readback} testID="hybrid-readback">
           <Text style={styles.readbackAsk}>{t('method.readback.ask')}</Text>
           {(['grouped', 'literal'] as const).map(c => (
             <Pressable
               key={c}
-              style={styles.choice}
+              style={[styles.choice, p.waiting && styles.off]}
               accessibilityRole="button"
+              accessibilityState={{ disabled: p.waiting }}
+              disabled={p.waiting}
               testID={`hybrid-readback-${c}`}
-              onPress={() => p.onReadback(c)}
+              onPress={() => {
+                pressed.current = 'other';
+                p.onReadback(c);
+              }}
             >
               <Text style={styles.choiceLabel}>
                 {t(`method.readback.${c}`)}
@@ -235,30 +545,60 @@ export function StepCard(p: StepCardProps) {
         </View>
       )}
       {caseId && caseSpec && (
-        <CasePanel
-          caseId={caseId}
-          spec={caseSpec}
-          lines={frame.type === 'lines'}
-          disabled={p.waiting}
-          onAct={p.onAct}
-        />
+        <View onLayout={layoutOf('case')}>
+          <CasePanel
+            caseId={caseId}
+            spec={caseSpec}
+            lines={frame.type === 'lines' && !box}
+            disabled={p.waiting}
+            busy={caseBusy}
+            onAct={caseAct}
+          />
+        </View>
       )}
+      {box && (
+        <View style={styles.paperFolded} testID="paper-folded">
+          <Text style={styles.paperFoldedText} numberOfLines={1}>
+            {t('hybrid.step.paperFolded')}
+          </Text>
+        </View>
+      )}
+      {/* Folded, the paper stays mounted (his page and his draft are kept). */}
       <View
-        style={styles.input}
-        pointerEvents={p.waiting ? 'none' : 'auto'}
+        style={[styles.input, box && styles.hidden]}
+        pointerEvents={p.waiting || box ? 'none' : 'auto'}
+        onLayout={layoutOf('paper')}
         testID="step-input"
       >
-        <FrameInput key={`${frame.frameId}.${p.stage}`} {...p} />
+        <FrameInput
+          key={`${frame.frameId}.${p.stage}`}
+          {...p}
+          onAct={inputAct}
+          lineBusy={busy('line')}
+        />
       </View>
-      {HELPED.has(frame.type) && (
+      {HELPED.has(frame.type) && !box && (
         <Pressable
-          style={styles.chip}
+          style={[styles.chip, p.waiting && !busy('dont_know') && styles.off]}
           accessibilityRole="button"
+          accessibilityState={{
+            disabled: p.waiting,
+            busy: busy('dont_know'),
+          }}
           testID="hybrid-dont-know"
           disabled={p.waiting}
-          onPress={() => p.onAct({ kind: 'dont_know' })}
+          onPress={() => act('dont_know', { kind: 'dont_know' })}
         >
-          <Text style={styles.chipText}>{t('hybrid.step.dontKnow')}</Text>
+          <View style={styles.busyRow}>
+            {busy('dont_know') && (
+              <ActivityIndicator
+                size="small"
+                color={theme.color.ink}
+                testID="hybrid-dont-know-busy"
+              />
+            )}
+            <Text style={styles.chipText}>{t('hybrid.step.dontKnow')}</Text>
+          </View>
         </Pressable>
       )}
     </View>
@@ -266,7 +606,7 @@ export function StepCard(p: StepCardProps) {
 }
 
 /** What the frame asks him to do. */
-function FrameInput(p: StepCardProps) {
+function FrameInput(p: InputProps) {
   const { t } = useTranslation();
   const { step } = p;
   const f = step.frame;
@@ -301,75 +641,91 @@ function FrameInput(p: StepCardProps) {
     step: { id: onCase ? `${step.id}#case` : step.id, label, node, key },
     state: p.state,
     level: p.levelOf(node),
+    disabled: p.waiting,
+    busy: p.lineBusy,
   });
+  // The inputs that are not the worksheet are dimmed as one (the worksheet dims its own controls).
+  const dim = p.waiting && styles.off;
 
   switch (f.type) {
     case 'plan':
       return (
-        <PlanCards
-          pool={pool}
-          readonly={false}
-          onSubmit={ids => p.onAct({ kind: 'order', ids })}
-        />
+        <View style={dim}>
+          <PlanCards
+            pool={pool}
+            readonly={false}
+            onSubmit={ids => p.onAct({ kind: 'order', ids })}
+          />
+        </View>
       );
     case 'recipe':
       return (
-        <PlanCards
-          pool={pool}
-          readonly={false}
-          min={3}
-          max={5}
-          labels={{
-            slot: 'method.recipe.slot',
-            pool: 'method.recipe.pool',
-            confirm: 'method.recipe.confirm',
-          }}
-          onSubmit={ids => p.onAct({ kind: 'order', ids })}
-          testID="recipe-cards"
-        />
+        <View style={dim}>
+          <PlanCards
+            pool={pool}
+            readonly={false}
+            min={3}
+            max={5}
+            labels={{
+              slot: 'method.recipe.slot',
+              pool: 'method.recipe.pool',
+              confirm: 'method.recipe.confirm',
+            }}
+            onSubmit={ids => p.onAct({ kind: 'order', ids })}
+            testID="recipe-cards"
+          />
+        </View>
       );
     case 'read':
       return (
-        <StatementTap
-          sentence={f.sentence}
-          readonly={false}
-          onTap={token => p.onAct({ kind: 'tap_word', token })}
-        />
+        <View style={dim}>
+          <StatementTap
+            sentence={f.sentence}
+            readonly={false}
+            onTap={token => p.onAct({ kind: 'tap_word', token })}
+          />
+        </View>
       );
     case 'cards':
       return (
-        <CardsPick
-          cards={f.cards}
-          seed={step.id}
-          readonly={false}
-          onPick={optionId => p.onAct({ kind: 'choice', optionId })}
-        />
+        <View style={dim}>
+          <CardsPick
+            cards={f.cards}
+            seed={step.id}
+            readonly={false}
+            onPick={optionId => p.onAct({ kind: 'choice', optionId })}
+          />
+        </View>
       );
     case 'lines':
       return <LineEntry active onLine={line} {...sheet(f.key, f.key)} />;
-    case 'similar':
+    case 'similar': {
+      const off = p.similarLines.length === 0 || p.waiting;
       return (
         <View style={styles.input}>
           <LineEntry active onLine={line} {...sheet(null, null)} />
           <Pressable
             onPress={() => p.onAct({ kind: 'continue' })}
-            disabled={p.similarLines.length === 0}
-            style={[
-              styles.primary,
-              p.similarLines.length === 0 && styles.primaryOff,
-            ]}
+            disabled={off}
+            style={[styles.primary, off && styles.primaryOff]}
             accessibilityRole="button"
-            accessibilityState={{ disabled: p.similarLines.length === 0 }}
+            accessibilityState={{ disabled: off }}
             testID="similar-done"
           >
             <Text style={styles.primaryText}>{t('method.similar.done')}</Text>
           </Pressable>
         </View>
       );
+    }
     case 'repair': {
       const st = f.stages[p.stage];
       return st ? (
-        <RepairInput st={st} seed={`${step.id}.${p.stage}`} {...p} />
+        // The worksheet and the list dim their own controls.
+        <View
+          style={st.type === 'line' || st.type === 'list' ? undefined : dim}
+        >
+          <RepairInput st={st} seed={`${step.id}.${p.stage}`} {...p} />
+        </View>
       ) : null;
     }
   }
@@ -380,13 +736,15 @@ function RepairInput({
   st,
   seed,
   ...p
-}: StepCardProps & { st: RepairStage; seed: string }) {
+}: InputProps & { st: RepairStage; seed: string }) {
   const { t } = useTranslation();
   const ok = (onPress: () => void, testID: string) => (
     <Pressable
       onPress={onPress}
+      disabled={p.waiting}
       style={styles.primary}
       accessibilityRole="button"
+      accessibilityState={{ disabled: p.waiting }}
       testID={testID}
     >
       <Text style={styles.primaryText}>{t('method.show.ok')}</Text>
@@ -408,6 +766,7 @@ function RepairInput({
             balls={ballsOf(st.reds, st.blacks)}
             size={st.k}
             readonly={false}
+            disabled={p.waiting}
             onSubmit={groups => p.onAct({ kind: 'list', groups })}
           />
         </View>
@@ -427,6 +786,8 @@ function RepairInput({
             }}
             state={p.state}
             level={p.levelOf(st.node)}
+            disabled={p.waiting}
+            busy={p.lineBusy}
           />
         </View>
       );
@@ -505,7 +866,45 @@ const styles = StyleSheet.create({
   },
   exchange: { gap: theme.space.sm },
   his: { alignItems: theme.reading.endAlign },
-  waiting: {
+  hisChip: {
+    alignSelf: theme.reading.endAlign,
+    paddingHorizontal: theme.space.lg,
+    paddingVertical: theme.space.xxs,
+    borderRadius: theme.radius.pill,
+    borderWidth: theme.border.line,
+    borderColor: theme.color.pen,
+    backgroundColor: theme.color.card,
+  },
+  hisChipText: {
+    ...theme.font.small,
+    color: theme.color.pen,
+    writingDirection: 'rtl',
+  },
+  fold: {
+    flexDirection: theme.reading.row,
+    alignItems: 'center',
+    gap: theme.space.xs,
+    minHeight: theme.size.touch,
+    paddingHorizontal: theme.space.sm,
+    borderRadius: theme.radius.button,
+    borderWidth: theme.border.thin,
+    borderColor: theme.color.border,
+    backgroundColor: theme.color.surfaceCard,
+  },
+  foldMark: { ...theme.font.small, color: theme.color.textSecondary },
+  preview: {
+    flex: 1,
+    flexDirection: theme.reading.row,
+    alignItems: 'center',
+    gap: theme.space.xs,
+  },
+  previewMark: {
+    ...theme.font.small,
+    fontFamily: theme.font.family.ui.bold,
+    color: theme.color.textSecondary,
+  },
+  previewText: { flex: 1 },
+  previewPlain: {
     ...theme.font.small,
     color: theme.color.textSecondary,
     textAlign: 'right',
@@ -548,6 +947,24 @@ const styles = StyleSheet.create({
     writingDirection: 'rtl',
   },
   input: { gap: theme.space.sm },
+  // The paper while a small box is open: kept, not shown (the bar says where it went).
+  hidden: { display: 'none' },
+  paperFolded: {
+    minHeight: theme.size.touch,
+    justifyContent: 'center',
+    paddingHorizontal: theme.space.md,
+    borderRadius: theme.radius.button,
+    borderWidth: theme.border.line,
+    borderStyle: 'dashed',
+    borderColor: theme.color.borderControl,
+    backgroundColor: theme.color.surfaceMuted,
+  },
+  paperFoldedText: {
+    ...theme.font.small,
+    color: theme.color.textSecondary,
+    textAlign: 'right',
+    writingDirection: 'rtl',
+  },
   chip: {
     alignSelf: theme.reading.startAlign,
     minHeight: theme.size.touch,
@@ -562,6 +979,14 @@ const styles = StyleSheet.create({
     ...theme.font.body,
     color: theme.color.textPrimary,
     writingDirection: 'rtl',
+  },
+  // Off while an answer is on its way: dimmed, and announced as disabled.
+  off: { opacity: theme.opacity.disabled },
+  busyRow: {
+    flexDirection: theme.reading.row,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: theme.space.sm,
   },
   primary: {
     minHeight: theme.size.touch,

@@ -218,10 +218,16 @@ export const hasConductorFrames = (
 let seq = 0;
 const nextId = () => `h${++seq}`;
 
-/** His act as he sees it again: his own words, else what the prepared reply quotes. */
+/**
+ * His act as he sees it again: his own words, a «ما نعرفش» chip, else what
+ * the prepared reply quotes.
+ */
 function hisOf(a: StudentAct, out: ActOut): StudentContent[] {
   if (a.kind === 'free') {
     return [{ kind: 'text', text: a.text }];
+  }
+  if (a.kind === 'dont_know') {
+    return [{ kind: 'message', message: 'notSure' }];
   }
   return out.reply.flatMap(p => (p.kind === 'student' ? [p.content] : []));
 }

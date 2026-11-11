@@ -36,6 +36,8 @@ export const INSTANT_REASONS = [
   'tour_done',
   // Back from a small case to the question.
   'case_back',
+  // A small box finished: the case closes, the prepared bridge to the question (bridge.ts).
+  'case_done',
 ] as const;
 export const LIGHT_REASONS = [
   'free_text',
@@ -102,7 +104,11 @@ export interface ConductorState {
   session: SessionState;
   turn: number;
   done: boolean;
-  /** The small case an AI move put him on: a line the main graph does not read is judged there. */
+  /**
+   * The small case an AI move put him on: his lines are judged there first,
+   * and on the question when the case does not read them. Closed by
+   * «نرجعو للسؤال», a line the question credits, or a finished box.
+   */
   onCase: string | null;
   /** The question trip (null: none authored); its map is his road. */
   tour: TourProgress | null;

@@ -320,3 +320,149 @@ describe('conductor: picks, similar questions and the end', () => {
     );
   });
 });
+
+describe('conductor: a small box and the bridge back to the question', () => {
+  const onBox = (n: number, k: number, from = atTotal()) =>
+    applyMove(from, {
+      blocks: [],
+      component: null,
+      tier: 'light',
+      costUsd: 0,
+      case: { id: 'C1', spec: { kind: 'box', n, k } },
+    });
+  const pairs = [
+    ['a', 'b'],
+    ['a', 'c'],
+    ['a', 'd'],
+    ['b', 'c'],
+    ['b', 'd'],
+    ['c', 'd'],
+  ];
+  /** The math and the French of the reply's feedback parts, in order. */
+  const shown = (reply: ReturnType<typeof play>['out']['reply']) =>
+    reply.flatMap(x =>
+      x.kind === 'feedback' ? [x.rich.math ?? x.rich.fr ?? null] : [],
+    );
+
+  it.each(['6', '4*3/2=6', '12/2=6'])(
+    'judges «%s» on the box first (not as the orderings of the question) and bridges back',
+    raw => {
+      // Without the box, the question reads it (as its orderings).
+      expect(play([line(raw)], atTotal()).out.reason).toBe('line_note');
+      const r = play([line(raw)], onBox(4, 2));
+      expect(r.out).toMatchObject({
+        tier: 'instant',
+        reason: 'case_done',
+        advanced: false,
+      });
+      expect(r.state.onCase).toBeNull();
+      expect(r.out.reply[0]).toMatchObject({
+        kind: 'student',
+        content: { raw },
+      });
+      // Nothing about the question's orderings: the box credited it.
+      expect(r.out.reply.some(x => x.kind === 'note')).toBe(false);
+      expect(r.state.session.lines.at(-1)).toMatchObject({ graph: 'C1' });
+      expect(r.state.session.credited.C1).toEqual(['groups']);
+      expect(r.state.session.credited.main ?? []).toEqual([]);
+      expect(view(ctx, r.state)?.frameId).toBe('m1.c_total');
+    },
+  );
+
+  it('closes the box when he lists all its groups: success, the box numbers, the question, his paper', () => {
+    const r = play([{ kind: 'list', groups: pairs }], onBox(4, 2));
+    expect(r.out).toMatchObject({ tier: 'instant', reason: 'case_done' });
+    expect(r.state.onCase).toBeNull();
+    expect(r.out.reply.map(x => x.kind === 'feedback' && x.tone)).toEqual([
+      'success',
+      'info',
+      'info',
+      'info',
+      'info',
+    ]);
+    expect(shown(r.out.reply)).toEqual([
+      null,
+      '4 \\times 3 = 12',
+      '\\dfrac{4 \\times 3}{2 \\times 1} = 6',
+      '4 rouges + 6 noires = 10 boules ; 3 boules, simultanément',
+      null,
+    ]);
+    // Neither the question's count nor its hint ladder (CLAUDE.md rule 6).
+    const all = JSON.stringify(r.out.reply);
+    expect(all).not.toContain('120');
+    expect(all).not.toContain('10 \\\\times 9');
+    // He writes the question's line himself next.
+    expect(view(ctx, r.state)?.frameId).toBe('m1.c_total');
+    expect(play([line('10*9*8/(3*2*1)=120')], r.state).out).toMatchObject({
+      reason: 'credit',
+      advanced: true,
+    });
+  });
+
+  it('computes the bridge with the box numbers from the engine (five balls, two drawn: 10)', () => {
+    const r = play([line('5*4/2=10')], onBox(5, 2));
+    expect(r.out.reason).toBe('case_done');
+    expect(shown(r.out.reply).slice(1, 3)).toEqual([
+      '5 \\times 4 = 20',
+      '\\dfrac{5 \\times 4}{2 \\times 1} = 10',
+    ]);
+  });
+
+  it('leaves its calculations out when the box would show a count of the question he has not found', () => {
+    // Six balls, three drawn: the ordered count 6×5×4 is the question's 120.
+    const r = play([line('20')], onBox(6, 3));
+    expect(r.out.reason).toBe('case_done');
+    expect(r.out.reply.filter(x => x.kind === 'feedback')).toHaveLength(3);
+    expect(JSON.stringify(r.out.reply)).not.toContain('120');
+  });
+
+  it('keeps the box open on an unfinished list or a box slip, and leaves it on a line the question credits', () => {
+    const some = play(
+      [{ kind: 'list', groups: pairs.slice(0, 3) }],
+      onBox(4, 2),
+    );
+    expect(some.out).toMatchObject({ reason: 'case_line' });
+    expect(some.state.onCase).toBe('C1');
+    // 4×3 counts the box's ordered draws: a slip on the box, not on the question.
+    const ordered = play([line('4*3=12')], onBox(4, 2));
+    expect(ordered.out).toMatchObject({ reason: 'case_line' });
+    expect(ordered.out.reply[1]).toMatchObject({ message: 'wrong' });
+    expect(ordered.state.onCase).toBe('C1');
+    const back = play([line('10*9*8/(3*2*1)=120')], onBox(4, 2));
+    expect(back.out).toMatchObject({ reason: 'credit', advanced: true });
+    expect(back.state.onCase).toBeNull();
+  });
+
+  it('closes the box without touching the state he was in', () => {
+    const before = onBox(4, 2);
+    const copy = JSON.stringify(before);
+    const r = act(ctx, before, line('6'));
+    expect(JSON.stringify(before)).toBe(copy);
+    expect(before.onCase).toBe('C1');
+    expect(JSON.parse(JSON.stringify(r.state)) as ConductorState).toEqual(
+      r.state,
+    );
+  });
+});
+
+describe('conductor: «كمّلت» under a component', () => {
+  it('never spends or shows a hint, even when the AI does not answer', () => {
+    const dk: StudentAct = { kind: 'dont_know' };
+    const afterHint = play([dk], atTotal()).state;
+    expect(afterHint.progress.hints).toBe(1);
+    const r = act(ctx, afterHint, {
+      kind: 'component',
+      events: [],
+      result: null,
+    });
+    expect(r.out).toMatchObject({ tier: 'light', reason: 'component_result' });
+    expect(r.out.hintPending).toBeUndefined();
+    // The prepared reply sends him back to his step, not to hint 2 (10×9×8).
+    expect(JSON.stringify(r.out.reply)).not.toContain('10 \\\\times 9');
+    expect(r.out.reply).toEqual([
+      { kind: 'feedback', tone: 'info', rich: view(ctx, afterHint)?.prompt },
+    ]);
+    expect(applyFallback(r.state, r.out).progress.hints).toBe(1);
+    expect(view(ctx, applyFallback(r.state, r.out))?.hintsLeft).toBe(1);
+  });
+});

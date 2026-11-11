@@ -3,6 +3,7 @@ import {
   aiCostUsd,
   aiWorstCaseUsd,
   hasServerFallback,
+  MOVE_EXPECTED_CHARGE_USD,
 } from './config';
 
 const usage = (input: number, cacheRead: number, output: number) => ({
@@ -47,5 +48,14 @@ describe('AI prices', () => {
   it('sends a server fallback only where one exists', () => {
     expect(hasServerFallback('claude-sonnet-5-5')).toBe(true);
     expect(hasServerFallback('claude-haiku-5-5')).toBe(false);
+  });
+
+  it('expects a move to be charged about $0.0015 light and $0.0148 deep', () => {
+    expect(MOVE_EXPECTED_CHARGE_USD.light).toBeCloseTo(0.00148, 6);
+    expect(MOVE_EXPECTED_CHARGE_USD.deep).toBeCloseTo(0.0148, 6);
+    // An estimate, far under the worst case of even one deep call.
+    expect(MOVE_EXPECTED_CHARGE_USD.deep).toBeLessThan(
+      aiWorstCaseUsd('claude-sonnet-5-5', 25_000, 6_000) / 5,
+    );
   });
 });

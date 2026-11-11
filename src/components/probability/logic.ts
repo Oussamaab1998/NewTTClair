@@ -73,6 +73,7 @@ export function colorIndexes(balls: readonly Ball[]): Map<string, number> {
  * Ball id -> label. With `markDuplicates`, the second ball carrying a value
  * gets a prime (0, 0′), the third two primes, so equal values stay distinguishable.
  * A coloured ball shows its letter instead, numbered within its colour (R₁, N₂).
+ * A named ball (a small case's a b c d, R1 N1) shows its name.
  */
 export function ballLabels(
   balls: readonly Ball[],
@@ -82,6 +83,10 @@ export function ballLabels(
   const index = colorIndexes(balls);
   const out = new Map<string, string>();
   for (const b of balls) {
+    if (b.label !== undefined) {
+      out.set(b.id, b.label);
+      continue;
+    }
     if (b.color !== undefined) {
       out.set(
         b.id,

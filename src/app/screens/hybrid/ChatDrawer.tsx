@@ -2,9 +2,12 @@
  * The small drawer for free text and help, kept out of the main view: a
  * bar with how many messages it holds; open, the thread of his words and
  * the answers, a text field and send. The step card stays where it is.
+ * While an answer is on its way, send is off (dimmed); after his own send,
+ * it shows a spinner.
  */
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -37,6 +40,14 @@ export function ChatDrawer({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [text, setText] = useState('');
+  // His send is the act being answered (cleared once nothing waits).
+  const [sent, setSent] = useState(false);
+  useEffect(() => {
+    if (!disabled && sent) {
+      setSent(false);
+    }
+  }, [disabled, sent]);
+  const busy = disabled && sent;
   const scroll = useRef<ScrollViewInstance>(null);
   const send = () => {
     const v = text.trim();
@@ -44,6 +55,7 @@ export function ChatDrawer({
       return;
     }
     setText('');
+    setSent(true);
     onSend(v);
   };
   return (
@@ -95,12 +107,20 @@ export function ChatDrawer({
               style={[styles.send, disabled && styles.sendOff]}
               accessibilityRole="button"
               accessibilityLabel={t('hybrid.chat.send')}
-              accessibilityState={{ disabled }}
+              accessibilityState={{ disabled, busy }}
               disabled={disabled}
               testID="chat-send"
               onPress={send}
             >
-              <Text style={styles.sendText}>{SEND_MARK}</Text>
+              {busy ? (
+                <ActivityIndicator
+                  size="small"
+                  color={theme.color.textOnAccent}
+                  testID="chat-send-busy"
+                />
+              ) : (
+                <Text style={styles.sendText}>{SEND_MARK}</Text>
+              )}
             </Pressable>
           </View>
         </View>

@@ -1,14 +1,18 @@
 /**
  * The lesson board (plan v2, track B): one question, led by the conductor.
  * Header (back, title, question); a question opens with its trip (the
- * question's map, and «نبداو»). Then the strip (a breadcrumb of the map:
- * done ✓, now ●, later ○, the end) with the station he is on; three
- * segments that open the sheets «التمرين», «الطريق» (the map with where he
- * is; it flashes for a moment at «نبداو»), «اللي لقيناه»; his finished
+ * question's map, and «نبداو»). Then three segments that open the sheets
+ * «التمرين», «الطريق» (the map with where he is; it flashes for a moment at
+ * «نبداو»; no progress strip over the card, owner 2026-11-11), «اللي لقيناه»; his finished
  * steps folded to one line each; the card of the step he is on; the chat
  * drawer for free text. Instant replies need no network; the AI answers only where
  * the conductor asks for it (the Mover), and the prepared reply shows when
  * it does not.
+ *
+ * The screen moves only to show what just appeared on the card (the top of
+ * a new exchange, the case card, the paper back), and never while his
+ * finger is on it or it is still gliding; growing content (a group he adds
+ * on the case) does not move it.
  */
 import React, {
   useCallback,
@@ -26,6 +30,9 @@ import {
   StyleSheet,
   Text,
   View,
+  type LayoutChangeEvent,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
   type ScrollViewInstance,
 } from 'react-native';
 
@@ -47,12 +54,19 @@ import { CollapsedStep } from './CollapsedStep';
 import { DevOverlay } from './DevOverlay';
 import { ExchangeView, StepCard } from './StepCard';
 import { TripScreen } from './trip/TripScreen';
-import { TripStrip } from './trip/TripStrip';
 import { useHybridSession } from './useHybridSession';
 
 const BACK_MARK = '→';
 /** How long «الطريق» flashes once «نبداو» puts the map there. */
 const FLASH_MS = 2500;
+/** What just appeared is measured after its layout is in (ms). */
+const SETTLE_MS = 80;
+/** A top already in this upper part of the screen is left where it is. */
+const REVEAL_BAND = 0.6;
+/** Scroll events while he drags: often enough to know where the screen is. */
+const SCROLL_THROTTLE_MS = 100;
+/** A glide that never reported its end is over after this long (ms). */
+const GLIDE_MAX_MS = 2000;
 
 export interface HybridLessonScreenProps {
   loaded: LoadedExercise;
@@ -139,6 +153,59 @@ export function HybridLessonScreen(p: HybridLessonScreenProps) {
   }, [touring]);
   const start = useCallback(() => send({ kind: 'continue' }), [send]);
 
+  // Where the screen is, and whether he is moving it (B11).
+  const port = useRef({ height: 0, offset: 0, content: 0 });
+  const touching = useRef(false);
+  const glideUntil = useRef(0);
+  const cardY = useRef(0);
+  const revealTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (revealTimer.current) {
+        clearTimeout(revealTimer.current);
+      }
+    },
+    [],
+  );
+  /** Bring a top on the card into view, unless he is on the screen or it is in view already. */
+  const reveal = useCallback((at: () => number | undefined) => {
+    if (revealTimer.current) {
+      clearTimeout(revealTimer.current);
+    }
+    revealTimer.current = setTimeout(() => {
+      revealTimer.current = null;
+      const y = at();
+      if (
+        y === undefined ||
+        touching.current ||
+        Date.now() < glideUntil.current
+      ) {
+        return;
+      }
+      const top = cardY.current + y;
+      const v = port.current;
+      if (
+        v.height > 0 &&
+        top >= v.offset &&
+        top <= v.offset + v.height * REVEAL_BAND
+      ) {
+        return;
+      }
+      const want = Math.max(0, top - theme.space.sm);
+      const max = Math.max(0, v.content - v.height);
+      scroll.current?.scrollTo({
+        y: v.content > 0 ? Math.min(want, max) : want,
+        animated: true,
+      });
+    }, SETTLE_MS);
+  }, []);
+  const onScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    port.current.offset = e.nativeEvent.contentOffset.y;
+  }, []);
+  const onCardLayout = useCallback((e: LayoutChangeEvent) => {
+    cardY.current = e.nativeEvent.layout.y;
+  }, []);
+
   const title = p.loaded.exercise.title as Rich;
   const questions = useMemo(
     () => appPaperQuestions(p.loaded.exercise),
@@ -187,7 +254,6 @@ export function HybridLessonScreen(p: HybridLessonScreenProps) {
           </View>
         </View>
       </View>
-      {!touring && <TripStrip strip={s.strip} onOpen={openRoad} />}
       <View style={styles.tabs}>
         <TabBar
           selected={null}
@@ -209,9 +275,39 @@ export function HybridLessonScreen(p: HybridLessonScreenProps) {
           style={styles.main}
           contentContainerStyle={styles.mainContent}
           keyboardShouldPersistTaps="handled"
-          onContentSizeChange={() =>
-            scroll.current?.scrollToEnd({ animated: true })
-          }
+          // Growing content never moves the screen (only `reveal` does).
+          onContentSizeChange={(_w, h) => {
+            port.current.content = h;
+          }}
+          onLayout={e => {
+            port.current.height = e.nativeEvent.layout.height;
+          }}
+          onTouchStart={() => {
+            touching.current = true;
+            glideUntil.current = 0;
+          }}
+          onTouchEnd={() => {
+            touching.current = false;
+          }}
+          onTouchCancel={() => {
+            touching.current = false;
+          }}
+          onScrollBeginDrag={() => {
+            touching.current = true;
+          }}
+          onMomentumScrollBegin={() => {
+            glideUntil.current = Date.now() + GLIDE_MAX_MS;
+          }}
+          onMomentumScrollEnd={e => {
+            glideUntil.current = 0;
+            onScroll(e);
+          }}
+          onScrollEndDrag={e => {
+            touching.current = false;
+            onScroll(e);
+          }}
+          onScroll={onScroll}
+          scrollEventThrottle={SCROLL_THROTTLE_MS}
           testID="hybrid-main"
         >
           {s.steps
@@ -244,6 +340,8 @@ export function HybridLessonScreen(p: HybridLessonScreenProps) {
               onFinishPicture={spec => s.finishComponent({ spec })}
               state={s.state}
               levelOf={s.levelOf}
+              onReveal={reveal}
+              onLayout={onCardLayout}
             />
           ) : (
             <>
@@ -270,11 +368,7 @@ export function HybridLessonScreen(p: HybridLessonScreenProps) {
       <BoardSheet tab={tab} onTab={setTab} onClose={() => setTab(null)}>
         {tab === 'exercise' && <ExerciseTab sheet={s.sheets.exercise()} />}
         {tab === 'road' && (
-          <RoadTab
-            road={s.sheets.road()}
-            questionLabels={questionLabels}
-            experiment={experiment}
-          />
+          <RoadTab road={s.sheets.road()} questionLabels={questionLabels} />
         )}
         {tab === 'found' && <FoundTab found={s.sheets.found()} />}
       </BoardSheet>

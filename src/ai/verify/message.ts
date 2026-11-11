@@ -78,6 +78,9 @@ const LATIN_AFTER = /^[()\s;,=]*[A-Za-z]/;
  * phone's right-to-left layout (owner's screenshot, 2026-10-30).
  */
 const LABEL_RUN = /^(?=.{2})[A-Za-z]{1,3}\d{0,2}( [A-Za-z]{1,3}\d{0,2})*$/;
+/** A run without the brackets and punctuation around it («(ab» and «ba)» are labels too). */
+const bareRun = (s: string): string =>
+  s.replace(/^[^A-Za-z0-9]+/, '').replace(/[^A-Za-z0-9]+$/, '');
 /** A line id of the session (L1, L12): his lines are shown with student_line blocks. */
 const LINE_ID = /\bL\d+\b/;
 
@@ -185,8 +188,15 @@ interface Context {
   experiment: Experiment | null;
 }
 
-/** Values of the question's own graph he has not earned (and may not see yet). */
-function forbiddenValues(c: Context): { node: string; value: Fraction }[] {
+/**
+ * Values of the question's own graph he has not earned (and may not see
+ * yet). A node he tried `revealAfter` times is allowed again (the AI's
+ * reveal); prepared replies that never reveal pass Infinity.
+ */
+export function forbiddenValues(
+  c: Context,
+  revealAfter = REVEAL_AFTER,
+): { node: string; value: Fraction }[] {
   const main = c.rt.graphs.get('main');
   if (!main) {
     return [];
@@ -229,7 +239,7 @@ function forbiddenValues(c: Context): { node: string; value: Fraction }[] {
     .filter(n => !isSmall(n.value))
     .filter(n => !given.has(plain(n.value)))
     .filter(n => !written.some(w => sameRat(w, n.value)))
-    .filter(n => attempts(n.id) < REVEAL_AFTER)
+    .filter(n => attempts(n.id) < revealAfter)
     .map(n => ({ node: n.id, value: n.value }));
 }
 
@@ -316,7 +326,7 @@ export function verifyAsk(ask: AskStudent, c: Context): VerifyResult {
             break;
           }
           labelRuns += runs.filter(
-            r => 'fr' in r && LABEL_RUN.test(r.fr),
+            r => 'fr' in r && LABEL_RUN.test(bareRun(r.fr)),
           ).length;
           blocks.push({ type: 'ar', runs });
         }

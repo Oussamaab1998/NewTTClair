@@ -5,7 +5,13 @@
  * twice. Chip adds and ball taps are not acts.
  */
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '../../../theme';
@@ -22,6 +28,10 @@ interface Props {
   readonly: boolean;
   initial?: readonly (readonly string[])[];
   onSubmit: (list: string[][]) => void;
+  /** An answer is on its way: every control is off and dimmed (the list stays). */
+  disabled?: boolean;
+  /** "That is all" was the act being answered: it shows a spinner. */
+  busy?: boolean;
   testID?: string;
 }
 
@@ -34,13 +44,16 @@ export function ListBuilder({
   readonly,
   initial = [],
   onSubmit,
+  disabled = false,
+  busy = false,
   testID = 'list-builder',
 }: Props) {
   const { t } = useTranslation();
   const [list, setList] = useState<string[][]>(initial.map(g => [...g]));
   const [current, setCurrent] = useState<string[]>([]);
   const label = (id: string) => balls.find(b => b.id === id)?.label ?? id;
-  const canAdd = current.length === size;
+  const canAdd = current.length === size && !disabled;
+  const canSubmit = list.length > 0 && !disabled;
   const add = () => {
     if (!canAdd) {
       return;
@@ -56,16 +69,16 @@ export function ListBuilder({
           return (
             <Pressable
               key={b.id}
-              disabled={readonly || (!on && current.length >= size)}
+              disabled={readonly || disabled || (!on && current.length >= size)}
               onPress={() =>
                 setCurrent(c =>
                   c.includes(b.id) ? c.filter(x => x !== b.id) : [...c, b.id],
                 )
               }
-              style={[styles.ball, on && styles.ballOn]}
+              style={[styles.ball, on && styles.ballOn, disabled && styles.off]}
               accessibilityRole="button"
               accessibilityLabel={b.label}
-              accessibilityState={{ selected: on }}
+              accessibilityState={{ selected: on, disabled }}
               testID={`list-ball-${b.id}`}
             >
               <Text style={styles.ballText}>{b.label}</Text>
@@ -96,9 +109,11 @@ export function ListBuilder({
             {!readonly && (
               <Pressable
                 onPress={() => setList(l => l.filter((_, j) => j !== i))}
+                disabled={disabled}
                 accessibilityRole="button"
                 accessibilityLabel={t('method.list.remove')}
-                style={styles.remove}
+                accessibilityState={{ disabled }}
+                style={[styles.remove, disabled && styles.off]}
                 testID={`list-remove-${i}`}
               >
                 <Text style={styles.removeText}>{t('method.list.remove')}</Text>
@@ -110,13 +125,22 @@ export function ListBuilder({
       {!readonly && (
         <Pressable
           onPress={() => onSubmit(list)}
-          disabled={list.length === 0}
-          style={[styles.confirm, list.length === 0 && styles.actionOff]}
+          disabled={!canSubmit}
+          style={[styles.confirm, !canSubmit && !busy && styles.actionOff]}
           accessibilityRole="button"
-          accessibilityState={{ disabled: list.length === 0 }}
+          accessibilityState={{ disabled: !canSubmit, busy }}
           testID="list-done"
         >
-          <Text style={styles.confirmText}>{t('method.list.done')}</Text>
+          <View style={styles.confirmRow}>
+            {busy && (
+              <ActivityIndicator
+                size="small"
+                color={theme.color.textOnAccent}
+                testID="list-done-busy"
+              />
+            )}
+            <Text style={styles.confirmText}>{t('method.list.done')}</Text>
+          </View>
         </Pressable>
       )}
     </View>
@@ -188,6 +212,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   actionOff: { opacity: theme.opacity.disabled },
+  off: { opacity: theme.opacity.disabled },
   actionText: {
     color: theme.color.ink,
     fontFamily: theme.font.family.ui.bold,
@@ -199,6 +224,11 @@ const styles = StyleSheet.create({
     backgroundColor: theme.color.ink,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  confirmRow: {
+    flexDirection: theme.reading.row,
+    alignItems: 'center',
+    gap: theme.space.sm,
   },
   confirmText: {
     color: theme.color.textOnAccent,
