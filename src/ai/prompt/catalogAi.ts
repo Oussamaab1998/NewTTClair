@@ -9,9 +9,12 @@ import type { ComponentName } from '../../components/contract';
 import { REGISTRY } from '../../components/registry';
 import { propsOf } from '../../planner/llm/catalog';
 
+/** Drawn by the lesson from props it computes: never in the tutor's catalogue (the cached prompts stay byte-identical). */
+const LESSON_ONLY: readonly ComponentName[] = ['ProbabilityTree'];
+
 export function aiComponentNames(): ComponentName[] {
   return (Object.keys(REGISTRY) as ComponentName[])
-    .filter(id => CATALOG_META[id] !== undefined)
+    .filter(id => CATALOG_META[id] !== undefined && !LESSON_ONLY.includes(id))
     .sort();
 }
 

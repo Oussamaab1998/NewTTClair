@@ -56,7 +56,7 @@ export function ballLabel(b: Ball, all: readonly Ball[]): string {
 function urnOf(ctx: ComponentContext, caseId: string | null): UrnView | null {
   if (caseId !== null) {
     const spec = ctx.cases[caseId];
-    if (!spec) {
+    if (!spec || spec.kind === 'tree') {
       return null;
     }
     if (spec.kind === 'box') {

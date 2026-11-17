@@ -12,6 +12,7 @@ import { credit } from '../../ai/session/state';
 import { stepKey, type ResolvedAnswer } from '../../content/loader';
 import type { MethodFrameStep, Rich } from '../../content/schema';
 import { stepOrderFor } from '../../method/route';
+import tree from '../../content/trips.bac2022p-sc-ex2.json';
 import scEx2 from '../../content/trips.sc-ex2.json';
 import type { QuestionCtx } from '../conductor/conductor';
 import type { ActOut, ConductorState, Reason } from '../conductor/types';
@@ -23,8 +24,14 @@ import {
   type TripQuestion,
 } from './schema';
 
-const FILES = [scEx2].flatMap(f => {
+/** One trips file per exercise (an invalid file is dropped here; `TRIP_FILE_ISSUES` names it and a test keeps it empty). */
+const SOURCES: readonly unknown[] = [scEx2, tree];
+export const TRIP_FILE_ISSUES: string[] = [];
+const FILES = SOURCES.flatMap(f => {
   const r = TripFileSchema.safeParse(f);
+  if (!r.success) {
+    TRIP_FILE_ISSUES.push(r.error.message.slice(0, 300));
+  }
   return r.success ? [r.data] : [];
 });
 

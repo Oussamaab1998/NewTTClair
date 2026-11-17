@@ -34,14 +34,16 @@ const EST_USD: Record<Tier, number> = {
   deep: 0.012,
 };
 
-interface Script {
+export interface Script {
   exercise: string;
   question: string;
   about?: string;
   acts: StudentAct[];
+  /** What each act is meant to trigger (for the reader; a test checks the lines). */
+  expect?: string[];
 }
 
-function actText(a: StudentAct): string {
+export function actText(a: StudentAct): string {
   switch (a.kind) {
     case 'line':
       return `line: ${a.raw}${a.readback ? ` (reads it ${a.readback})` : ''}`;
@@ -91,7 +93,7 @@ function noteText(n: MethodNote): string {
   }
 }
 
-function partText(p: ReplyPart): string {
+export function partText(p: ReplyPart): string {
   switch (p.kind) {
     case 'student':
       return '';

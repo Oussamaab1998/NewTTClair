@@ -30,6 +30,7 @@ import {
   sumRat,
 } from '../../engine/rationalFormat';
 import { repeatedRuns, tally } from '../../engine/runs';
+import { checkTree, type TreeBranch } from '../../engine/tree';
 import { URN_TEMPLATES, generateUrnVariant } from '../../engine/urnVariants';
 import {
   CHECKPOINT_GRID,
@@ -919,3 +920,125 @@ export const UrnTemplatePropsSchema = z
     }
   });
 export type UrnTemplateProps = z.output<typeof UrnTemplatePropsSchema>;
+
+// ---------------------------------------------------------------------------
+// ProbabilityTree
+
+const TreeEdgeId = z.string().regex(/^[a-z][a-z0-9_.]{0,30}$/);
+/**
+ * given: the value as printed. found: a value the student found (drawn bold
+ * with a tick). hidden: a "?" in a small box. blank: nothing on the branch
+ * (the exam prints empty branches).
+ */
+const TreeShow = z.enum(['given', 'found', 'hidden', 'blank']);
+
+const TreeLeafSchema = z.strictObject({
+  /** 'a.f' */
+  id: TreeEdgeId,
+  /** The label at the end of the branch: 'F', '\\overline{F}'. */
+  latex: z.string().min(1).max(24),
+  /** The probability of the branch, when the picture knows it. */
+  p: RatSchema.optional(),
+  show: TreeShow.default('given'),
+  /** Counts mode: the people at the end of the branch. */
+  count: z.number().int().min(0).optional(),
+  countShow: z.enum(['shown', 'hidden']).default('shown'),
+  /** A method-graph node id: the view ignores it (the lesson reads it). */
+  node: z
+    .string()
+    .regex(/^[a-z][a-z0-9_]{0,30}$/)
+    .optional(),
+});
+const TreeBranchSchema = TreeLeafSchema.extend({
+  children: z.array(TreeLeafSchema).min(2).max(4).optional(),
+});
+export type TreeLeafProps = z.output<typeof TreeLeafSchema>;
+export type TreeBranchProps = z.output<typeof TreeBranchSchema>;
+
+/** The tree as the engine reads it: a branch with no `p` is not known yet. */
+export function engineTree(branches: readonly TreeBranchProps[]): TreeBranch[] {
+  const one = (b: TreeLeafProps): TreeBranch => ({
+    id: b.id,
+    p: b.p === undefined ? null : parseRat(b.p),
+  });
+  return branches.map(b =>
+    b.children ? { ...one(b), children: b.children.map(one) } : one(b),
+  );
+}
+
+export const ProbabilityTreePropsSchema = z
+  .strictObject({
+    branches: z.array(TreeBranchSchema).min(2).max(4),
+    /** Branch ids drawn marked: the step the student is on (a thicker line and an arrowhead, never colour alone). */
+    mark: z.array(TreeEdgeId).default([]),
+    /** The one "?" the student is asked for now (its box is emphasised). */
+    ask: TreeEdgeId.optional(),
+    /** Counts mode: the people at the root; every branch then shows its `count` at its end (no probability on the branch). */
+    rootCount: z.number().int().positive().optional(),
+    /** The step-card size. */
+    compact: z.boolean().default(false),
+  })
+  .superRefine((p, ctx) => {
+    const bad = (path: (string | number)[], message: string) =>
+      ctx.addIssue({ code: 'custom', path, message });
+    const counts = p.rootCount !== undefined;
+    const where = new Map<string, (string | number)[]>();
+    p.branches.forEach((b, i) => {
+      where.set(b.id, ['branches', i]);
+      b.children?.forEach((c, j) => where.set(c.id, ['branches', i, 'children', j]));
+    });
+    const at = (id: string | null) => (id === null ? [] : where.get(id) ?? []);
+
+    // ids, the range of every known probability, and the sum at each node whose branches are all known
+    const issues = engineIssue(ctx, ['branches'], () => checkTree(engineTree(p.branches)));
+    for (const issue of issues ?? []) {
+      if (issue.problem === 'sum_not_one') {
+        bad(
+          issue.at === null ? ['branches'] : [...at(issue.at), 'children'],
+          'the branches leaving one node must add up to 1',
+        );
+      } else {
+        bad(
+          at(issue.at),
+          issue.problem === 'duplicate_id'
+            ? `duplicate branch id ${issue.at}`
+            : 'a probability is between 0 and 1',
+        );
+      }
+    }
+
+    const level = (edges: readonly TreeLeafProps[], path: (string | number)[], parent: number | undefined) => {
+      edges.forEach((e, i) => {
+        const shown = e.show === 'given' || e.show === 'found';
+        if (shown && (counts ? e.count === undefined : e.p === undefined)) {
+          bad([...path, i], counts ? 'a shown branch needs its count' : 'a shown branch needs its probability');
+        }
+      });
+      if (!counts || parent === undefined) {
+        return;
+      }
+      const known = edges.flatMap(e => (e.count === undefined ? [] : [e.count]));
+      const sum = known.reduce((a, b) => a + b, 0);
+      if (sum > parent) {
+        bad(path, `the counts (${sum}) exceed the ${parent} they are taken from`);
+      } else if (known.length === edges.length && sum !== parent) {
+        bad(path, `the counts add up to ${sum}, not ${parent}`);
+      }
+    };
+    level(p.branches, ['branches'], p.rootCount);
+    p.branches.forEach((b, i) => {
+      if (b.children) {
+        level(b.children, ['branches', i, 'children'], b.count);
+      }
+    });
+
+    p.mark.forEach((id, i) => {
+      if (!where.has(id)) {
+        bad(['mark', i], `no branch ${id}`);
+      }
+    });
+    if (p.ask !== undefined && !where.has(p.ask)) {
+      bad(['ask'], `no branch ${p.ask}`);
+    }
+  });
+export type ProbabilityTreeProps = z.output<typeof ProbabilityTreePropsSchema>;

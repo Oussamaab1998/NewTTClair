@@ -111,7 +111,7 @@ const LATIN = /[A-Za-z]/;
 const DIGIT = /[0-9\u0660-\u0669\u06F0-\u06F9]/;
 /** Math that must be its own LTR run (a `fr` run) or a math block, never inside Arabic. */
 const MATH_SYMBOL =
-  /[=+^<>≤≥∞√∫\u2212×÷·±≠≈∈∉⊂ℝℕℤℚℂ⇒⇔→←↦′″\u2070-\u209F\u00B2\u00B3\u00B9]/;
+  /[=+^<>≤≥∞√∫\u2212×÷·±≠≈∈∉⊂∩∪ℝℕℤℚℂ⇒⇔→←↦′″\u2070-\u209F\u00B2\u00B3\u00B9\u0304\u0305\u0100-\u017F]/;
 const BIDI_CONTROL = /[\u200E\u200F\u202A-\u202E\u2066-\u2069]/;
 
 /**

@@ -1,0 +1,56 @@
+{
+  "exercise": "bac2022p-sc-ex2",
+  "question": "t2",
+  "about": "Question 2 (a branch of the second level). He finds the first lower branch, says «ما نعرفش» twice at the rule, picks two wrong rules before the right one, then takes the complement of the other node twice (a trap: the number is the right one) and asks in Arabizi why one divides. The lines were checked with the engine on the exam's numbers (tools/tutor-harness/moves.test.ts).",
+  "acts": [
+    {
+      "kind": "continue"
+    },
+    {
+      "kind": "line",
+      "raw": "1-2/3=1/3"
+    },
+    {
+      "kind": "dont_know"
+    },
+    {
+      "kind": "dont_know"
+    },
+    {
+      "kind": "choice",
+      "optionId": "k_comp"
+    },
+    {
+      "kind": "choice",
+      "optionId": "k_total"
+    },
+    {
+      "kind": "choice",
+      "optionId": "k_quot"
+    },
+    {
+      "kind": "line",
+      "raw": "1-1/4=3/4"
+    },
+    {
+      "kind": "line",
+      "raw": "1-1/4=3/4"
+    },
+    {
+      "kind": "free",
+      "text": "3lech na9smou? ma fhemtech 3lech mouch nattar7ou kima 9bal"
+    }
+  ],
+  "expect": [
+    "trip",
+    "credit not_a",
+    "dont_know",
+    "dont_know",
+    "pick k_comp (wrong)",
+    "pick k_total (wrong)",
+    "pick k_quot (right)",
+    "trap complement_across_nodes at f_given_na",
+    "trap complement_across_nodes at f_given_na",
+    "free"
+  ]
+}

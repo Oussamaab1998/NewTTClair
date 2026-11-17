@@ -7,7 +7,11 @@
  * similar question, a repair stage). «ما نعرفش» is always one tap away
  * while help exists for the step. On a small case an AI move put him on,
  * the «الصندوق الصغير» panel: list its groups, write its lines (they go
- * under the case on his page), or come back to the question.
+ * under the case on his page), or come back to the question. A small tree
+ * example has its own card («مثال صغير», TreeCasePanel) and keeps the page
+ * open under it. An exercise with a printed figure (a probability tree)
+ * shows it small under the prompt, with what he found so far and what the
+ * step is about (src/hybrid/figure.ts).
  *
  * One place to act at a time: on a small box the case card is the only
  * input (the paper folds to one line, «ما نعرفش» hides, the AI's component
@@ -45,6 +49,7 @@ import type {
 } from '../../../content/schema';
 import type { Strip } from '../../../hybrid/board';
 import type { FrameView } from '../../../hybrid/conductor/types';
+import type { LiveFigure } from '../../../hybrid/figure';
 import { StudentBubble, ToneBlock } from '../../../lesson/feed/Bubbles';
 import { CardsPick } from '../../../lesson/feed/method/CardsPick';
 import { ListBuilder } from '../../../lesson/feed/method/ListBuilder';
@@ -67,7 +72,9 @@ import { seededOrder } from '../../../method/shuffle';
 import { theme } from '../../../theme';
 import { TutorMessage } from '../tutor/TutorMessage';
 import { CasePanel, type CaseBusy } from './CasePanel';
+import { FigureView } from './FigureView';
 import { LineEntry } from './LineEntry';
+import { TreeCasePanel } from './TreeCasePanel';
 import { TypingBubble } from './TypingBubble';
 import type { Exchange, LiveComponent, Said } from './useHybridSession';
 import type { SkillLevel } from '../../../ai/profile/profile';
@@ -327,6 +334,10 @@ export interface StepCardProps {
   state: ConductorState;
   /** His level on a node's skill (the worksheet's scaffold fading). */
   levelOf: (node: string | null) => SkillLevel;
+  /** The exercise's figure for this step (null or absent: the exercise has none). */
+  figure?: LiveFigure | null;
+  /** Numbers a figure gives (its printed branches): tiles beside the statement's. */
+  givens?: readonly string[];
   /**
    * Bring something that just appeared into view: `at` gives its top,
    * relative to the card, once it is laid out (undefined: not measured).
@@ -496,6 +507,13 @@ export function StepCard(p: StepCardProps) {
           {...(frame.prompt.ar === undefined && { variant: 'paper' as const })}
         />
       )}
+      {p.figure && (
+        <FigureView
+          spec={p.figure.spec}
+          signature={p.figure.signature}
+          testID="step-figure"
+        />
+      )}
       {p.exchanges.map(x => {
         const last = x.id === lastId;
         const c = x.said?.kind === 'blocks' ? x.said.component : null;
@@ -546,14 +564,27 @@ export function StepCard(p: StepCardProps) {
       )}
       {caseId && caseSpec && (
         <View onLayout={layoutOf('case')}>
-          <CasePanel
-            caseId={caseId}
-            spec={caseSpec}
-            lines={frame.type === 'lines' && !box}
-            disabled={p.waiting}
-            busy={caseBusy}
-            onAct={caseAct}
-          />
+          {caseSpec.kind === 'tree' ? (
+            <TreeCasePanel
+              exerciseId={p.state.exerciseId}
+              questionId={p.state.questionId}
+              caseId={caseId}
+              spec={caseSpec}
+              lines={frame.type === 'lines'}
+              disabled={p.waiting}
+              busy={caseBusy}
+              onAct={caseAct}
+            />
+          ) : (
+            <CasePanel
+              caseId={caseId}
+              spec={caseSpec}
+              lines={frame.type === 'lines' && !box}
+              disabled={p.waiting}
+              busy={caseBusy}
+              onAct={caseAct}
+            />
+          )}
         </View>
       )}
       {box && (
@@ -631,7 +662,10 @@ function FrameInput(p: InputProps) {
   const line = (raw: string) => p.onAct({ kind: 'line', raw });
   // On a small case his lines go under the case on his page, not under the step.
   const onCase = p.state.onCase !== null;
-  const caseTitle = t('hybrid.case.title');
+  const onTree =
+    p.state.onCase !== null &&
+    p.state.session.cases[p.state.onCase]?.kind === 'tree';
+  const caseTitle = t(onTree ? 'hybrid.case.treeTitle' : 'hybrid.case.title');
   const label = useMemo(
     () =>
       onCase ? { ar: [{ ar: caseTitle }] } : step.short ?? { ar: [{ ar: '' }] },
@@ -643,6 +677,7 @@ function FrameInput(p: InputProps) {
     level: p.levelOf(node),
     disabled: p.waiting,
     busy: p.lineBusy,
+    ...(p.givens && { givens: p.givens }),
   });
   // The inputs that are not the worksheet are dimmed as one (the worksheet dims its own controls).
   const dim = p.waiting && styles.off;
@@ -788,6 +823,7 @@ function RepairInput({
             level={p.levelOf(st.node)}
             disabled={p.waiting}
             busy={p.lineBusy}
+            {...(p.givens && { givens: p.givens })}
           />
         </View>
       );

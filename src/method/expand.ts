@@ -22,6 +22,7 @@ import type {
   Step,
 } from '../content/schema';
 // The domain templates register when the library is loaded.
+import { HIS_BLANK } from './findings';
 import './library';
 import { buildGraphFor, templateOf } from './templates';
 import { studentFacingIssues } from './words';
@@ -191,7 +192,10 @@ function expandOne(
     }
   }
   for (const line of m.skeleton) {
-    for (const hit of line.fr.matchAll(/\{([a-z0-9_]+)\}/g)) {
+    for (const hit of [
+      ...line.fr.matchAll(/\{([a-z0-9_]+)\}/g),
+      ...(line.math ?? '').matchAll(HIS_BLANK),
+    ]) {
       if (nodeIds.size > 0 && !nodeIds.has(hit[1]!)) {
         err(`skeleton ${line.id}: unknown node {${hit[1]}}`);
       }

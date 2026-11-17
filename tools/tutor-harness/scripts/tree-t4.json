@@ -1,0 +1,48 @@
+{
+  "exercise": "bac2022p-sc-ex2",
+  "question": "t4",
+  "about": "Question 4 (the tree read backwards), opened alone: he finds the total of the opposite event and the path, then divides by the first branch three times (the condition the wrong way round), asks in Arabizi what one divides by, and adds two numbers nobody expects. The lines were checked with the engine on the exam's numbers (tools/tutor-harness/moves.test.ts).",
+  "acts": [
+    {
+      "kind": "continue"
+    },
+    {
+      "kind": "line",
+      "raw": "1-5/12=7/12"
+    },
+    {
+      "kind": "line",
+      "raw": "1/3*1/4=1/12"
+    },
+    {
+      "kind": "line",
+      "raw": "(1/12)/(1/3)=1/4"
+    },
+    {
+      "kind": "line",
+      "raw": "(1/12)/(1/3)=1/4"
+    },
+    {
+      "kind": "line",
+      "raw": "(1/12)/(1/3)=1/4"
+    },
+    {
+      "kind": "free",
+      "text": "ya3ni na9sem 3la chnowa? ma fhemtech el 3alama el mayla"
+    },
+    {
+      "kind": "line",
+      "raw": "(1/12)+(7/12)=2/3"
+    }
+  ],
+  "expect": [
+    "trip",
+    "credit not_f",
+    "credit na_and_nf",
+    "slip reverses_condition at na_given_nf",
+    "slip reverses_condition at na_given_nf",
+    "slip reverses_condition at na_given_nf",
+    "free",
+    "undiagnosed at na_given_nf"
+  ]
+}

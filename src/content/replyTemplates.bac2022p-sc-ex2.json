@@ -1,0 +1,92 @@
+{
+  "exerciseId": "bac2022p-sc-ex2",
+  "contentVersion": "replies-p22sc2-0.1.0",
+  "reviewed": false,
+  "templates": [
+    {
+      "id": "bare_given",
+      "about": "Q1 last card: he writes the statement's number alone (1/4), the value that must be shown. His line, what it is, one question toward the two numbers he has. The library text alone would only ask to show the work.",
+      "when": {
+        "card": "na_and_f",
+        "reasons": ["line_note"],
+        "line": "bare"
+      },
+      "say": [
+        {
+          "line": "act"
+        },
+        {
+          "ar": "هذا العدد يعطيه النص: المطلوب هو الطريق اللي يوصّل ليه."
+        },
+        {
+          "ar": "من أنا عدد تبدا: الاحتمال الكل ولا الطريق اللي حسبتو؟"
+        }
+      ]
+    },
+    {
+      "id": "unsimplified_target",
+      "about": "Q1 last card: a right calculation whose last fraction still simplifies (5/12 − 1/6 = 3/12). His line, the result as the statement prints it, one question toward the common divisor.",
+      "when": {
+        "card": "na_and_f",
+        "reasons": ["line_note"],
+        "line": "unsimplified"
+      },
+      "say": [
+        {
+          "line": "act"
+        },
+        {
+          "ar": "حسابك صحيح. النص يكتب النتيجة مبسّطة:"
+        },
+        {
+          "target": true
+        },
+        {
+          "ar": "فما عدد يقسم الفوق والتحت مع بعض؟"
+        }
+      ]
+    },
+    {
+      "id": "above_one_quotient",
+      "about": "Any card: mut.quotient_upside_down ((1/3)/(1/4) = 4/3, (7/12)/(1/12) = 7). His line, the value it gives, and: can a probability be above one?",
+      "when": {
+        "reasons": ["slip_first", "slip_again", "slip_third"],
+        "misconception": "mut.quotient_upside_down"
+      },
+      "say": [
+        {
+          "line": "act"
+        },
+        {
+          "ar": "سطرك يعطي:"
+        },
+        {
+          "value": "act"
+        },
+        {
+          "ar": "احتمال ينجّم يفوت الواحد؟"
+        }
+      ]
+    },
+    {
+      "id": "trap_complement",
+      "about": "The lower second-level branch (Q2 last card, Q3 second card): mut.complement_across_nodes, 1 − 1/4 = 3/4, the right value by a wrong road on the exam numbers. His line, that the number only looks right, one question toward the two nodes.",
+      "when": {
+        "card": "f_given_na",
+        "reasons": ["slip_first"],
+        "misconception": "mut.complement_across_nodes"
+      },
+      "say": [
+        {
+          "line": "act"
+        },
+        {
+          "ar": "العدد يطلع يشبّه للصحيح، أما الطريقة ما تصلحش هنا."
+        },
+        {
+          "ar": "الفرعين اللي في حسابك خارجين من نفس العقدة؟ شوف الشجرة."
+        }
+      ]
+    }
+  ]
+}

@@ -36,8 +36,12 @@ export const INSTANT_REASONS = [
   'tour_done',
   // Back from a small case to the question.
   'case_back',
-  // A small box finished: the case closes, the prepared bridge to the question (bridge.ts).
+  // A small box or tree finished: the case closes, the prepared bridge to the question (bridge.ts).
   'case_done',
+  // A prepared small case opened on a second «ما نعرفش», before any AI call (S1).
+  'case_open',
+  // A line on a small tree the engine can answer by itself: right so far, or a known slip.
+  'case_note',
 ] as const;
 export const LIGHT_REASONS = [
   'free_text',
@@ -83,6 +87,8 @@ export interface FrameProgress {
   /** A repair frame's stage, and list failures inside it. */
   stage: number;
   listFails: number;
+  /** Small tree examples whose own hint was given (each gives it once); absent: none. */
+  caseHints?: string[];
 }
 
 export interface ConductorState {
@@ -105,9 +111,10 @@ export interface ConductorState {
   turn: number;
   done: boolean;
   /**
-   * The small case an AI move put him on: his lines are judged there first,
-   * and on the question when the case does not read them. Closed by
-   * «نرجعو للسؤال», a line the question credits, or a finished box.
+   * The small case he is on (an AI move put him there, or a prepared tree
+   * example opened on a second «ما نعرفش»): his lines are judged there
+   * first, and on the question when the case does not read them. Closed by
+   * «نرجعو للسؤال», a line the question credits, or a finished box or tree.
    */
   onCase: string | null;
   /** The question trip (null: none authored); its map is his road. */

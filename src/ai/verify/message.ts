@@ -16,6 +16,12 @@
  *    labels or letter groups in an Arabic sentence (more are scrambled).
  * 7. Inputs: a component resolves in the registry and reveals no unearned
  *    value; a list case exists and is small; choice options pass 3 and 4.
+ * On a tree question (the pack's domain) checks 3 and 4 read a fraction as
+ * ONE value (`\frac{5}{12}`, `5/12`: never 5 and 12), allowed when that
+ * value is given (the figure's fractions and his earlier results count),
+ * his own, or an engine result; and a calculation written as the road to a
+ * node he has not earned is refused whatever its value (several values of a
+ * tree are equal: the value alone would let the how through).
  */
 import type { Experiment } from '../../engine/calls';
 import { REGISTRY, resolveSpec } from '../../components/registry';
@@ -24,11 +30,14 @@ import type { ComponentName } from '../../components/contract';
 import { frac, type Fraction } from '../../engine/rational';
 import { sameRat } from '../../engine/rationalFormat';
 import { parseLatexSubset } from '../../lesson/math/latexSubset';
-import { leaves } from '../../method/factorForm';
-import { lineLatex } from '../../method/lineChain';
+import { factorBag, leaves, sameBag } from '../../method/factorForm';
+import type { GraphNode } from '../../method/graph';
+import { isLiteralValue, lineLatex } from '../../method/lineChain';
+import { sumTerms } from '../../method/mutations';
 import { isolateLlmRuns, type ArRuns } from '../../lesson/rich/runs';
 import { numbersIn } from '../../planner/llm/numbers';
 import { latexToPlain } from '../../tutor/verify';
+import { mathSegments } from '../checks/freeText';
 import { plain, readLine } from '../checks/lines';
 import { bannedIn } from '../prompt/lexicon';
 import type { QuestionPack } from '../packs/build';
@@ -169,6 +178,36 @@ function mathNumbers(latex: string): Fraction[] {
   return numbersIn(p ?? latex);
 }
 
+/**
+ * Numbers of a text on a tree question: a fraction (`\frac{5}{12}`,
+ * `\dfrac{5}{12}`, `5/12`) is ONE value, never its numerator and its
+ * denominator, and a minus sign is an operator (`5/12 - 1/6` holds no
+ * negative number).
+ */
+export function fractionNumbers(text: string): Fraction[] {
+  const out: Fraction[] = [];
+  const whole = (a: string, b: string): string => {
+    if (Number(b) !== 0) {
+      out.push(frac(Number(a), Number(b)));
+    }
+    return ' ';
+  };
+  const rest = text
+    .replace(
+      /\\[dt]?frac\s*\{\s*(\d+)\s*\}\s*\{\s*(\d+)\s*\}/g,
+      (_m, a: string, b: string) => whole(a, b),
+    )
+    .replace(/(\d+)\s*\/\s*(\d+)/g, (_m, a: string, b: string) => whole(a, b))
+    // "0{,}7" (LaTeX decimal comma) -> 0,7
+    .replace(/\{,\}/g, ',');
+  for (const m of rest.matchAll(/\d+(?:[.,]\d+)?/g)) {
+    const [int = '0', dec = ''] = m[0].replace(',', '.').split('.');
+    const den = 10 ** dec.length;
+    out.push(frac(Number(int) * den + Number(dec || 0), den));
+  }
+  return out;
+}
+
 /** A math block "a = b" whose sides the engine can evaluate and that disagree. */
 function falseEquality(latex: string): string | null {
   if (/\\neq|\\ne\b|≠|\\approx|≈/.test(latex)) {
@@ -188,19 +227,12 @@ interface Context {
   experiment: Experiment | null;
 }
 
-/**
- * Values of the question's own graph he has not earned (and may not see
- * yet). A node he tried `revealAfter` times is allowed again (the AI's
- * reveal); prepared replies that never reveal pass Infinity.
- */
-export function forbiddenValues(
-  c: Context,
-  revealAfter = REVEAL_AFTER,
-): { node: string; value: Fraction }[] {
-  const main = c.rt.graphs.get('main');
-  if (!main) {
-    return [];
-  }
+/** What he has on the question's own graph: the nodes he earned, the numbers he wrote, his tries. */
+function evidence(c: Context): {
+  earned: Set<string>;
+  written: Fraction[];
+  attempts: (node: string) => number;
+} {
   const s = c.rt.state;
   const earned = new Set<string>();
   const written: Fraction[] = [];
@@ -233,7 +265,36 @@ export function forbiddenValues(
         (l.expected === node ||
           (l.match !== null && 'node' in l.match && l.match.node === node)),
     ).length;
-  const given = new Set(c.pack.given);
+  return { earned, written, attempts };
+}
+
+/**
+ * The numbers he may see without earning them. An urn question: the pack's
+ * given numbers. A tree question also takes the session's (the mover adds
+ * his results of the earlier questions there: the tree keeps them).
+ */
+const givenSet = (c: Context): Set<string> =>
+  new Set(
+    c.pack.domain === 'tree'
+      ? [...c.pack.given, ...c.rt.state.given]
+      : c.pack.given,
+  );
+
+/**
+ * Values of the question's own graph he has not earned (and may not see
+ * yet). A node he tried `revealAfter` times is allowed again (the AI's
+ * reveal); prepared replies that never reveal pass Infinity.
+ */
+export function forbiddenValues(
+  c: Context,
+  revealAfter = REVEAL_AFTER,
+): { node: string; value: Fraction }[] {
+  const main = c.rt.graphs.get('main');
+  if (!main) {
+    return [];
+  }
+  const { earned, written, attempts } = evidence(c);
+  const given = givenSet(c);
   return main.graph.nodes
     .filter(n => !earned.has(n.id))
     .filter(n => !isSmall(n.value))
@@ -241,6 +302,64 @@ export function forbiddenValues(
     .filter(n => !written.some(w => sameRat(w, n.value)))
     .filter(n => attempts(n.id) < revealAfter)
     .map(n => ({ node: n.id, value: n.value }));
+}
+
+/**
+ * A formula with its division and product signs as the engine reads a line
+ * (`\div`, ÷ and the French `:` are a division). Tree questions only: a
+ * quotient of two branches is the calculation that must not be shown.
+ */
+const lineOperators = (latex: string): string =>
+  latex
+    .replace(/\\[,;!: ]/g, '')
+    .replace(/\\div(?![A-Za-z])|÷|:/g, '/')
+    .replace(/×/g, '*')
+    .replace(/\u2212/g, '-');
+
+/** How a side is written: its factors, and its terms when it is a sum. */
+interface Road {
+  bag: ReturnType<typeof factorBag>;
+  terms: string[] | null;
+}
+
+/** The sides of a calculation that hold work (a side that is only a value says nothing of the road). */
+function roadsIn(text: string): Road[] {
+  const chain = readLine(text).chain;
+  if (chain.kind === 'unreadable') {
+    return [];
+  }
+  return (chain.kind === 'chain' ? chain.sides : [chain.side])
+    .filter(side => !isLiteralValue(side.ast))
+    .map(side => ({ bag: factorBag(side.ast), terms: sumTerms(side.ast) }));
+}
+
+const sameRoad = (x: Road, y: Road): boolean =>
+  sameBag(x.bag, y.bag) ||
+  (x.terms !== null &&
+    y.terms !== null &&
+    x.terms.length === y.terms.length &&
+    x.terms.every((t, i) => t === y.terms![i]));
+
+/**
+ * Tree question: the nodes whose calculation must not be shown yet (a step
+ * of the question he has not earned, tried fewer than `revealAfter` times),
+ * each with the accepted roads to it. The value test above is not enough on
+ * a tree: the figure's 1/4 is also the result of two steps, so a message
+ * could write the whole calculation of a step with "allowed" numbers only.
+ */
+function hiddenRoads(
+  c: Context,
+  revealAfter = REVEAL_AFTER,
+): { node: GraphNode; roads: Road[] }[] {
+  const main = c.rt.graphs.get('main');
+  if (!main || c.pack.domain !== 'tree') {
+    return [];
+  }
+  const { earned, attempts } = evidence(c);
+  return main.graph.nodes
+    .filter(n => n.role !== 'support' && !earned.has(n.id))
+    .filter(n => attempts(n.id) < revealAfter)
+    .map(node => ({ node, roads: node.forms.flatMap(roadsIn) }));
 }
 
 function notationOpen(c: Context): boolean {
@@ -279,13 +398,30 @@ function checkNumbers(
 export function verifyAsk(ask: AskStudent, c: Context): VerifyResult {
   const reasons: string[] = [];
   const s = c.rt.state;
-  const known = new Set([...s.known, ...c.pack.given]);
+  const tree = c.pack.domain === 'tree';
+  const known = new Set([...s.known, ...givenSet(c)]);
   const allowed = (v: Fraction) => known.has(plain(v));
   const forbidden = forbiddenValues(c);
   const notation = notationOpen(c);
   const blocks: RenderBlock[] = [];
   let questions = 0;
   let arChars = 0;
+  // A tree question reads a fraction as one value, in a sentence and in a formula.
+  const textNumbers = tree ? fractionNumbers : numbersIn;
+  const formulaNumbers = tree ? fractionNumbers : mathNumbers;
+  // Tree question: a calculation that is the road to a step he has not earned.
+  const hidden = hiddenRoads(c);
+  const checkRoad = (where: string, calculation: string): void => {
+    const roads = hidden.length > 0 ? roadsIn(calculation) : [];
+    const leak = hidden.find(h =>
+      h.roads.some(r => roads.some(x => sameRoad(r, x))),
+    );
+    if (leak) {
+      reasons.push(
+        `${where}: "${calculation}" is the calculation of "${leak.node.id}", which he has not found yet: that is the how. Ask him which branches or paths he needs, never write the calculation.`,
+      );
+    }
+  };
 
   ask.message.forEach((b, i) => {
     const where = `block ${i + 1}`;
@@ -304,11 +440,12 @@ export function verifyAsk(ask: AskStudent, c: Context): VerifyResult {
         }
         questions += (b.text.match(QUESTION) ?? []).length;
         checkWords(where, b.text, reasons);
-        checkNumbers(where, numbersIn(b.text), allowed, forbidden, reasons);
+        checkNumbers(where, textNumbers(b.text), allowed, forbidden, reasons);
         // A calculation written inside the sentence ("20+36+4 = 60") becomes
         // its own left-to-right math block; the Arabic around it stays.
         for (const part of splitCalculations(b.text)) {
           if (part.kind === 'math') {
+            checkRoad(where, part.plain);
             const wrong = falseEquality(part.plain);
             if (wrong) {
               reasons.push(
@@ -340,7 +477,10 @@ export function verifyAsk(ask: AskStudent, c: Context): VerifyResult {
       case 'fr': {
         questions += (b.text.match(QUESTION) ?? []).length;
         checkWords(where, b.text, reasons);
-        checkNumbers(where, numbersIn(b.text), allowed, forbidden, reasons);
+        checkNumbers(where, textNumbers(b.text), allowed, forbidden, reasons);
+        if (hidden.length > 0) {
+          mathSegments(b.text).forEach(seg => checkRoad(where, seg));
+        }
         blocks.push({ type: 'fr', text: b.text });
         break;
       }
@@ -353,7 +493,9 @@ export function verifyAsk(ask: AskStudent, c: Context): VerifyResult {
           parseLatexSubset(b.latex);
         } catch {
           reasons.push(
-            `${where}: the formula does not parse; use plain LaTeX (\\frac, \\times, ^, _, \\binom)`,
+            tree
+              ? `${where}: the formula does not parse; use plain LaTeX (\\frac, \\times, \\overline, \\cap) and write a conditional with a slash, p(F/\\overline{A}), never \\mid`
+              : `${where}: the formula does not parse; use plain LaTeX (\\frac, \\times, ^, _, \\binom)`,
           );
           break;
         }
@@ -362,13 +504,30 @@ export function verifyAsk(ask: AskStudent, c: Context): VerifyResult {
             `${where}: the C(n,k) notation comes only after he computed the count himself`,
           );
         }
-        const wrong = falseEquality(b.latex);
+        // A tree formula divides with \div or ":" as often as with a bar.
+        const formula = tree ? lineOperators(b.latex) : b.latex;
+        const wrong = falseEquality(formula);
         if (wrong) {
           reasons.push(
-            `${where}: "${wrong}" is false. Check it with evaluate, or show his own line with a student_line block.`,
+            `${where}: "${b.latex}" is false. Check it with evaluate, or show his own line with a student_line block.`,
           );
         }
-        checkNumbers(where, mathNumbers(b.latex), allowed, forbidden, reasons);
+        checkNumbers(
+          where,
+          formulaNumbers(b.latex),
+          allowed,
+          forbidden,
+          reasons,
+        );
+        if (hidden.length > 0) {
+          // Each side of the formula on its own: a label (p(A) = ...) is not a calculation.
+          for (const side of formula.split('=')) {
+            const p = latexToPlain(side);
+            if (p !== null && p !== '') {
+              checkRoad(where, p);
+            }
+          }
+        }
         blocks.push({ type: 'math', latex: b.latex });
         break;
       }
@@ -414,7 +573,7 @@ export function verifyAsk(ask: AskStudent, c: Context): VerifyResult {
       checkWords(`option ${i + 1}`, o.text, reasons);
       checkNumbers(
         `option ${i + 1}`,
-        numbersIn(o.text),
+        textNumbers(o.text),
         allowed,
         forbidden,
         reasons,
@@ -459,7 +618,12 @@ export function verifyAsk(ask: AskStudent, c: Context): VerifyResult {
         `component: unknown case ${input.case_id} (make_case first)`,
       );
     }
-    const experiment = spec ? caseExperiment(spec) : c.experiment;
+    // A tree case has no urn to draw: the component then has no experiment.
+    const experiment = spec
+      ? spec.kind === 'tree'
+        ? null
+        : caseExperiment(spec)
+      : c.experiment;
     if (props !== undefined && (input.case_id === null || spec)) {
       const r = resolveSpec(
         { component: input.name as ComponentName, props: props as never },

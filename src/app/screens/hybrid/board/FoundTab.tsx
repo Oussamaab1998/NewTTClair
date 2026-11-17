@@ -3,13 +3,15 @@
  * one now live), the exam write-up with blanks filled from his accepted
  * lines only, how we got there (his lines with their reasons, the slips he
  * fixed, the rule once complete, his rules in his own words), and at the
- * end of a question the method card of its type.
+ * end of a question the method card of its type. An exercise with a figure
+ * (a tree) opens the sheet with it: every value he found is on its branch.
  */
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import type { FoundQuestion } from '../../../../hybrid/board';
+import type { LiveFigure } from '../../../../hybrid/figure';
 import {
   Finding,
   SkeletonLine,
@@ -19,6 +21,7 @@ import { MathBlock } from '../../../../lesson/math/MathBlock';
 import { isolateInline } from '../../../../lesson/rich/runs';
 import { lineLatex } from '../../../../method/lineChain';
 import { theme } from '../../../../theme';
+import { FigureView } from '../FigureView';
 
 const DONE_MARK = '✓';
 
@@ -112,9 +115,23 @@ function Question({ q }: { q: FoundQuestion }) {
   );
 }
 
-export function FoundTab({ found }: { found: readonly FoundQuestion[] }) {
+export function FoundTab({
+  found,
+  figure = null,
+}: {
+  found: readonly FoundQuestion[];
+  /** The exercise's figure with what he found so far (null: none). */
+  figure?: LiveFigure | null;
+}) {
   return (
     <View style={styles.wrap} testID="found-tab">
+      {figure && (
+        <FigureView
+          spec={figure.spec}
+          signature={figure.signature}
+          testID="found-figure"
+        />
+      )}
       {found.map(q => (
         <Question key={q.questionId} q={q} />
       ))}

@@ -16,6 +16,7 @@ import type { SessionState, StudentLine } from '../../ai/session/state';
 import { restoreRuntime } from '../../ai/session/state';
 import { AskStudentSchema, type Block } from '../../ai/tools/schemas';
 import { verifyAsk, type RenderBlock } from '../../ai/verify/message';
+import tree from '../../content/replyTemplates.bac2022p-sc-ex2.json';
 import scEx2 from '../../content/replyTemplates.sc-ex2.json';
 import type { MethodFrameStep } from '../../content/schema';
 import { multiplyBackCheck } from '../../method/checks';
@@ -70,6 +71,8 @@ function kindOf(l: StudentLine): LineKind | null {
         : 'credit';
     case 'support':
       return 'support';
+    case 'unexplained':
+      return 'bare';
     case 'slip':
     case 'known_wrong':
       return 'slip';
@@ -290,10 +293,13 @@ export function pick(
 }
 
 /** The template files by exercise; a file that does not parse gives no templates (tests catch it). */
-const parsed = ReplyTemplateFileSchema.safeParse(scEx2);
-export const TEMPLATE_FILES: readonly ReplyTemplateFile[] = parsed.success
-  ? [parsed.data]
-  : [];
+export const TEMPLATE_FILES: readonly ReplyTemplateFile[] = [
+  scEx2,
+  tree,
+].flatMap(raw => {
+  const parsed = ReplyTemplateFileSchema.safeParse(raw);
+  return parsed.success ? [parsed.data] : [];
+});
 
 export const templates: Templates = (ctx, state, out) => {
   const file = TEMPLATE_FILES.find(f => f.exerciseId === ctx.exerciseId);

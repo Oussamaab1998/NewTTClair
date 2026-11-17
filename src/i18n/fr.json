@@ -477,6 +477,21 @@
       "exactlyTrials": "Nombre de succès demandé exactement :",
       "solution": "La solution :",
       "another": "Un autre exemple"
+    },
+    "tree": {
+      "title": "Arbre de probabilités.",
+      "root": "Au départ : {{count}}.",
+      "branch": "Branche {{label}} : {{value}}.",
+      "branchAfter": "Après {{parent}}, branche {{label}} : {{value}}.",
+      "not": "{{label}} barre",
+      "unknown": "inconnue",
+      "blank": "vide",
+      "found": "{{value}}, trouvée",
+      "marked": "C'est l'étape en cours.",
+      "asked": "C'est la valeur demandée.",
+      "hint": "Touche le bout d'une branche pour voir son chemin.",
+      "leafButton": "Chemin : {{path}}",
+      "pathCaption": "Le long de ce chemin :"
     }
   },
   "analysis": {
@@ -661,6 +676,7 @@
     "credit": {
       "title": "Bonne ligne.",
       "counts": "Cette ligne compte :",
+      "gives": "Cette ligne calcule :",
       "unexplained": "Écris comment tu l'as trouvé, comme sur la copie.",
       "unsimplified": "Regarde la fraction : y a-t-il un facteur commun en haut et en bas ?"
     },
@@ -701,6 +717,8 @@
       "generic": "Cette ligne compte autre chose que ce que demande l'étape.",
       "ambiguous": "Cette ligne compte autre chose que ce que demande l'étape.",
       "not_order_word": "Ce mot ne dit pas si l'ordre compte.",
+      "given_value": "Ce nombre est donné par l'énoncé. Écris le calcul qui y mène.",
+      "show_work": "Le nombre seul ne suffit pas : écris le calcul qui le donne, comme sur la copie.",
       "checkLead": "Vérifie en multipliant :"
     },
     "readback": {
@@ -790,7 +808,38 @@
       "unsimplified": "une fraction non simplifiée",
       "missing_part": "un morceau du calcul qui manque",
       "start_number_off": "un produit qui ne commence pas au bon nombre",
-      "n_times_k": "un produit à la place du nombre de groupes"
+      "n_times_k": "un produit à la place du nombre de groupes",
+      "adds_along_path": "Addition le long du chemin",
+      "branch_for_path": "Deuxième branche pour le chemin",
+      "first_branch_for_path": "Première branche pour le chemin",
+      "total_for_path": "Total pris pour un chemin",
+      "uses_the_target": "Résultat à montrer déjà utilisé",
+      "subtracts_branch_not_path": "Branche soustraite, pas le chemin",
+      "adds_instead_of_subtracts": "Addition au lieu de soustraction",
+      "first_minus_total": "Soustraction des deux données",
+      "complement_of_total": "Complément du total, hors sujet",
+      "complement_of_path": "Chemin soustrait de un",
+      "lower_branch_like_upper": "Branche du haut utilisée en bas",
+      "complement_forgotten": "Passage au contraire oublié",
+      "inverts_instead_of_complement": "Inverse au lieu du contraire",
+      "complement_of_other_branch": "Complément d'une autre branche",
+      "complement_across_nodes": "Complément entre deux nœuds",
+      "divides_by_total": "Division par le total",
+      "divides_by_first_branch": "Division par la branche d'en haut",
+      "quotient_upside_down": "Quotient à l'envers",
+      "multiplies_instead_of_divides": "Multiplication au lieu de division",
+      "intersection_for_conditional": "Chemin entier pour la branche",
+      "copies_another_branch": "Valeur d'une autre branche",
+      "complement_of_first_branch": "Complément de la première branche",
+      "quotient_for_complement": "Calcul d'une autre branche",
+      "adds_branches_for_total": "Somme de branches de deux nœuds",
+      "wrong_second_branch": "Mauvaise deuxième branche",
+      "reverses_condition": "Division par la première branche",
+      "condition_for_reverse": "Branche de l'arbre, sens inverse",
+      "divides_by_other_total": "Division par le mauvais total",
+      "coincidence": "Bonne valeur par hasard",
+      "sums_a_column": "Somme des quatre dernières branches",
+      "multiplies_paths": "Deux chemins multipliés"
     }
   },
   "ai": {
@@ -915,14 +964,28 @@
       "drawn": "Combien on en tire ensemble",
       "list": "Écris tous les groupes qui peuvent sortir",
       "lines": "Les calculs que tu écris maintenant vont sur la feuille, sous la petite boîte.",
-      "back": "Retour à la question"
+      "back": "Retour à la question",
+      "treeTitle": "Un petit exemple",
+      "treeIntro": "On essaie sur un petit exemple avec des personnes, puis on revient à la question.",
+      "treeOpen": "Regardons un petit exemple : la même idée, mais avec des nombres qu'on compte à la main.",
+      "treeTotal": "Ceux qui sont dans le deuxième événement, des deux côtés :",
+      "treeLines": "Les calculs que tu écris maintenant vont sur la feuille, sous l'exemple."
     },
     "bridge": {
       "done": "Juste : tu as trouvé tous les groupes de la petite boîte.",
       "ordered": "Si on compte avec l'ordre, on trouve :",
       "perGroup": "Mais chaque groupe est alors compté plusieurs fois : une fois par ordre de ses boules. On divise par le nombre d'ordres :",
       "question": "Maintenant la question : même idée.",
-      "write": "Écris ta ligne sur la feuille."
+      "write": "Écris ta ligne sur la feuille.",
+      "tree": {
+        "done": "Juste, c'est bien ça :",
+        "doneAlone": "Juste, tu l'as trouvé.",
+        "path": "Tu as suivi le chemin du début à la fin : une branche, puis une autre. Dans la question, c'est le même chemin, mais avec des fractions : on multiplie une branche par l'autre.",
+        "rest": "Le total vient de deux chemins. Tu as enlevé un chemin du total : il reste l'autre chemin.",
+        "complement": "Les branches qui partent du même nœud se complètent : ensemble, elles font un.",
+        "branch": "Tu as divisé par les personnes de ce côté seulement, pas par tout le monde.",
+        "reverse": "Tu as divisé par tous ceux du deuxième événement, et tu as pris parmi eux ceux qui viennent du côté demandé."
+      }
     },
     "found": {
       "question": "Question",

@@ -1,0 +1,46 @@
+{
+  "exercise": "bac2022p-sc-ex2",
+  "question": "t1",
+  "about": "Question 1 (the other path, « Montrer que »). After the trip he answers the first step with the branch alone, twice; asks in Arabizi why one multiplies; writes a line nobody expects; says «ما نعرفش» twice (the lesson opens its small class by itself); then counts among the wrong group there. The lines were checked with the engine on the exam's numbers (tools/tutor-harness/moves.test.ts).",
+  "acts": [
+    {
+      "kind": "continue"
+    },
+    {
+      "kind": "line",
+      "raw": "1/4"
+    },
+    {
+      "kind": "line",
+      "raw": "1/4"
+    },
+    {
+      "kind": "free",
+      "text": "3lech nadhrbou? ma fhemtech chnowa na3mel bel far3 lekher"
+    },
+    {
+      "kind": "line",
+      "raw": "(2/3)/(1/4)=8/3"
+    },
+    {
+      "kind": "dont_know"
+    },
+    {
+      "kind": "dont_know"
+    },
+    {
+      "kind": "line",
+      "raw": "3/7"
+    }
+  ],
+  "expect": [
+    "trip",
+    "slip branch_for_path at a_and_f",
+    "slip branch_for_path at a_and_f",
+    "free",
+    "undiagnosed at a_and_f",
+    "dont_know",
+    "dont_know (the small class opens: a_and_f)",
+    "on the small class: no match"
+  ]
+}

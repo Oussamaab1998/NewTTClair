@@ -1,0 +1,56 @@
+{
+  "exercise": "bac2022p-sc-ex2",
+  "question": "t3",
+  "about": "Question 3 (complete the tree), opened alone: he writes the two branches of the question before, then copies the sibling for the upper missing branch, twice; redoes the quotient of another branch (a trap: the number is the right one); writes his own rule in a sentence; says «ما نعرفش» twice (the lesson opens its small class by itself); then counts among the whole class there. The lines were checked with the engine on the exam's numbers (tools/tutor-harness/moves.test.ts).",
+  "acts": [
+    {
+      "kind": "continue"
+    },
+    {
+      "kind": "line",
+      "raw": "1-2/3=1/3"
+    },
+    {
+      "kind": "line",
+      "raw": "(1/4)/(1/3)=3/4"
+    },
+    {
+      "kind": "line",
+      "raw": "1/4"
+    },
+    {
+      "kind": "line",
+      "raw": "1/4"
+    },
+    {
+      "kind": "line",
+      "raw": "(1/4)/(1/3)=3/4"
+    },
+    {
+      "kind": "free",
+      "text": "ya3ni el far3 lekher houwa 1/4 + 1/4 = 1/2 ? 3lech le"
+    },
+    {
+      "kind": "dont_know"
+    },
+    {
+      "kind": "dont_know"
+    },
+    {
+      "kind": "line",
+      "raw": "13/25"
+    }
+  ],
+  "expect": [
+    "trip",
+    "credit not_a",
+    "credit f_given_na",
+    "slip copies_another_branch at nf_given_a",
+    "slip copies_another_branch at nf_given_a",
+    "trap quotient_for_complement at nf_given_a",
+    "claim",
+    "dont_know",
+    "dont_know (the small class opens: nf_given_a)",
+    "on the small class: no match"
+  ]
+}

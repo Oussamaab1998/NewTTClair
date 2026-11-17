@@ -118,7 +118,7 @@ export function saveProfile(store: KeyValueStore, p: StudentProfile): void {
   store.set(PROFILE_KEY, JSON.stringify(p));
 }
 
-/** What each node of the urn and binomial templates trains. */
+/** What each node of the urn, binomial and tree templates trains. */
 export const NODE_SKILL: Readonly<Record<string, string>> = {
   ord: 'ordering-vs-choosing',
   orderings: 'ordering-vs-choosing',
@@ -129,6 +129,19 @@ export const NODE_SKILL: Readonly<Record<string, string>> = {
   fav: 'multiplication-principle',
   result: 'probability-by-counting',
   value: 'fractions-simplify',
+  // The two-event tree (src/method/templatesTree.ts): a path is its branches
+  // multiplied; a total is its paths together; a sibling branch is a
+  // complement at its node; a second-level branch is a path over a branch.
+  a_and_f: 'probability-tree',
+  a_and_nf: 'probability-tree',
+  na_and_nf: 'probability-tree',
+  na_and_f: 'total-probability',
+  not_f: 'complement-event',
+  not_a: 'complement-event',
+  nf_given_a: 'complement-event',
+  nf_given_na: 'complement-event',
+  f_given_na: 'conditional-probability',
+  na_given_nf: 'reverse-conditional',
 };
 
 /** The skill a named slip points at. */
@@ -145,6 +158,39 @@ export const SLIP_SKILL: Readonly<Record<string, string>> = {
   missing_part: 'multiplication-principle',
   swap_numerator_denominator: 'probability-by-counting',
   unsimplified: 'fractions-simplify',
+  // The tree's wrong roads (roadsOf in src/method/templatesTree.ts), each
+  // with the skill its entry of the slip library names
+  // (docs/exercises/BAC2022P_SC_EX2.md).
+  adds_along_path: 'probability-tree',
+  branch_for_path: 'probability-tree',
+  first_branch_for_path: 'probability-tree',
+  lower_branch_like_upper: 'probability-tree',
+  wrong_second_branch: 'probability-tree',
+  copies_another_branch: 'probability-tree',
+  quotient_for_complement: 'probability-tree',
+  // The right value by a road no branch or path of the tree explains.
+  coincidence: 'probability-tree',
+  total_for_path: 'total-probability',
+  uses_the_target: 'total-probability',
+  subtracts_branch_not_path: 'total-probability',
+  adds_instead_of_subtracts: 'total-probability',
+  first_minus_total: 'total-probability',
+  complement_of_path: 'total-probability',
+  adds_branches_for_total: 'total-probability',
+  complement_of_total: 'complement-event',
+  complement_forgotten: 'complement-event',
+  inverts_instead_of_complement: 'complement-event',
+  complement_of_other_branch: 'complement-event',
+  complement_of_first_branch: 'complement-event',
+  complement_across_nodes: 'conditional-probability',
+  divides_by_total: 'conditional-probability',
+  divides_by_first_branch: 'conditional-probability',
+  multiplies_instead_of_divides: 'conditional-probability',
+  intersection_for_conditional: 'conditional-probability',
+  quotient_upside_down: 'fractions-operations',
+  reverses_condition: 'reverse-conditional',
+  condition_for_reverse: 'reverse-conditional',
+  divides_by_other_total: 'reverse-conditional',
 };
 
 const blankSkill = (): SkillRecord => ({

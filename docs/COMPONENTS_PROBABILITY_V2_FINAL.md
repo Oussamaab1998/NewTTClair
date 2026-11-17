@@ -23,6 +23,7 @@ Ten components are built, registered, documented and demoed. None is offered to 
 | UrnTemplate | 5 | demos and tests only (engine rule also used by the loader) | built |
 
 Not built (moved after the full test, as decided): ProbabilityTree, the CompareTwo demos.
+Update 2026-11-11: **ProbabilityTree is now built** (authored trees of one or two levels, 2 to 4 branches per node, for the tree exercise: as printed, the compact step-card picture with given / found / hidden / blank values, the marked step and the asked value, whole-counts mode, tap a path to see its product as an expression); the `fill` modes of C8 (`edges`, `paths`, `sum`), the urn source and the collapse above 24 leaves are **not built**. Lesson path only: not offered to the planner, not in the tutor's catalogue, no gate.
 Parts 2 and 3 of `bac2022c-sc-ex2` are **not authored** (as decided): their components have demos and tests only.
 Content: `bac2022c-sc-ex2` is `exsc2-0.3.0` (0.2.0 was Phase 4a; one bump in Stop 2, none in stops 3 to 5). Exercise 2 and Exercise 4 keep their versions (D23).
 

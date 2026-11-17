@@ -318,7 +318,7 @@ export function useTutorSession(o: {
     paper: state?.paper ?? [],
     caseBalls: (caseId: string) => {
       const spec = state?.cases[caseId];
-      if (!spec) {
+      if (!spec || spec.kind === 'tree') {
         return [];
       }
       if (spec.kind === 'box') {

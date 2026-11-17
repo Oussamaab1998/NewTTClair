@@ -3,7 +3,8 @@
  * sentences, a high view he can see whenever he wants"), from roadView
  * (src/hybrid/tour): the exercise from above (its questions, this one
  * marked, how one feeds the next), what changed since the question before,
- * what we have, what is asked, the steps as numbered stations on a line
+ * what we have (with the exam's figure as printed, when the trip is given
+ * one), what is asked, the steps as numbered stations on a line
  * (on the side the reading starts), the end (a flag: the check), then what
  * comes after (the recipe, the similar questions), smaller.
  *
@@ -18,6 +19,7 @@ import React, { memo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import type { ComponentSpec } from '../../../../components/contract';
 import type { ReusedStep } from '../../../../hybrid/board';
 import type {
   MapLine,
@@ -28,6 +30,7 @@ import { RichView } from '../../../../lesson/feed/RichView';
 import { MathBlock } from '../../../../lesson/math/MathBlock';
 import { lineLatex } from '../../../../method/lineChain';
 import { theme } from '../../../../theme';
+import { FigureView } from '../FigureView';
 import { FadeIn } from './FadeIn';
 import {
   BoxIcon,
@@ -64,6 +67,8 @@ export interface TripMapProps {
   questionLabels: Readonly<Record<string, string>>;
   /** More under a step (the sheet: what and why now, the components he used). */
   stepExtra?: (cardId: string) => React.ReactNode;
+  /** The exam's figure as printed, at the top of «عندنا» (the trip; absent: none). */
+  figure?: ComponentSpec | null;
   /** The sections fade in one after the other (the trip). */
   animate?: boolean;
   testID?: string;
@@ -367,6 +372,7 @@ export const TripMap = memo(function TripMapImpl({
   reused,
   questionLabels,
   stepExtra,
+  figure = null,
   animate = false,
   testID = 'trip-map',
 }: TripMapProps) {
@@ -413,13 +419,20 @@ export const TripMap = memo(function TripMapImpl({
             </View>
           </View>,
         )}
-      {road.have.length > 0 &&
+      {(road.have.length > 0 || figure) &&
         fade(
           <View style={styles.card} testID="trip-have">
             <Label
               text={t('hybrid.trip.have')}
               icon={<BoxIcon size={ICON} />}
             />
+            {figure && (
+              <FigureView
+                spec={figure}
+                signature="printed"
+                testID="trip-figure"
+              />
+            )}
             <LineList lines={road.have} testID="trip-have" />
           </View>,
         )}

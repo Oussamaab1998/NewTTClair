@@ -28,6 +28,7 @@ import {
   type EventSpec,
 } from '../engine/probability';
 import { parseLatexSubset } from '../lesson/math/latexSubset';
+import { HIS_BLANK } from '../method/findings';
 import { expandMethodSteps } from '../method/expand';
 import { buildGraphFor, templateOf } from '../method/templates';
 import { mutationLibrary } from '../method/library';
@@ -900,9 +901,19 @@ function checkComponents(
     }
     return r.ok ? componentKind(spec) : undefined;
   };
+  // The figure printed beside the statement, and a similar question's own.
+  if (ex.figure) {
+    check(ex.figure.spec, 'figure');
+  }
   for (const q of ex.parts) {
     const steps = q.groups.flatMap(g => g.steps);
     for (const s of steps) {
+      if (s.kind === 'mframe' && s.frame.type === 'similar') {
+        const figure = s.frame.slot.figure;
+        if (figure) {
+          check(figure.spec, `${stepKey.main(q.id, s.id)}: figure`);
+        }
+      }
       if (s.kind === 'typed') {
         const keypad = keypadFor(s);
         for (const w of s.wrongAnswers ?? []) {
@@ -1292,7 +1303,8 @@ export function loadExercise(
     }
     if (key !== undefined && MATH_KEYS.has(key)) {
       try {
-        parseLatexSubset(s);
+        // A write-up line's blanks (`\\his{node}`) are drawn as dots until he fills them.
+        parseLatexSubset(s.replace(HIS_BLANK, '\\ldots'));
       } catch (e) {
         errors.push(`formula "${s}": ${(e as Error).message}`);
       }

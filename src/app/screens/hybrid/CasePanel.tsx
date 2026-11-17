@@ -29,6 +29,9 @@ const LETTERS = 'abcdefgh';
 
 /** The balls of a case, with the ids its list is checked on. */
 export function caseBalls(spec: CaseSpec): { id: string; label: string }[] {
+  if (spec.kind === 'tree') {
+    return [];
+  }
   return spec.kind === 'box'
     ? LETTERS.slice(0, spec.n)
         .split('')
@@ -58,6 +61,10 @@ export const CasePanel = memo(function CasePanelImpl({
 }) {
   const { t } = useTranslation();
   const balls = useMemo(() => caseBalls(spec), [spec]);
+  // A tree of whole counts has its own card (TreeCasePanel); never listed.
+  if (spec.kind === 'tree') {
+    return null;
+  }
   return (
     <View style={styles.panel} testID="case-panel">
       <Text style={styles.title}>{t('hybrid.case.title')}</Text>

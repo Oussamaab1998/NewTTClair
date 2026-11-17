@@ -1,6 +1,8 @@
 /**
  * «التمرين»: the exam paper as printed (French, left to right): the
- * statement, every question (the one now highlighted, finished ones ✓),
+ * statement, its figure when it has one (a tree, exactly as printed: an
+ * empty branch stays empty), every question (the one now highlighted,
+ * finished ones ✓),
  * the data and the words he found underlined, and the results: the one the
  * statement gives, and those of the questions he finished.
  */
@@ -13,6 +15,7 @@ import { MarkedStatement } from '../../../../lesson/feed/MarkedStatement';
 import { QuestionRow, ResultTag } from '../../../../lesson/feed/paperParts';
 import { RichView } from '../../../../lesson/feed/RichView';
 import { theme } from '../../../../theme';
+import { FigureView } from '../FigureView';
 
 const DONE_MARK = '✓';
 /** A result the statement gives (not his to prove from nothing): an open diamond. */
@@ -47,6 +50,13 @@ export function ExerciseTab({ sheet }: { sheet: ExerciseSheet }) {
       </View>
       <View style={styles.statement} testID="exercise-statement">
         <Marked m={sheet.statement} testID="exercise-statement-text" />
+        {sheet.figure && (
+          <FigureView
+            spec={sheet.figure}
+            signature="printed"
+            testID="exercise-figure"
+          />
+        )}
       </View>
       {sheet.questions.map(q => (
         <QuestionRow

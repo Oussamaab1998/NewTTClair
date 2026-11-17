@@ -85,7 +85,13 @@ export type LineVerdict =
   /** Shown a note, not graded: the step stays open. */
   | {
       kind: 'ungraded';
-      outcome: 'unfinished' | 'mismatch' | 'support' | 'repeat' | 'other_step';
+      outcome:
+        | 'unfinished'
+        | 'mismatch'
+        | 'support'
+        | 'repeat'
+        | 'other_step'
+        | 'unexplained';
       node?: string;
     }
   | { kind: 'credit'; node: string; unsimplified: boolean; completes: boolean }
@@ -148,10 +154,25 @@ export function replyForLine(
         support: true,
         derivation: o.derivation,
         unsimplified: false,
+        ...(o.node.label !== undefined && { label: o.node.label }),
       }),
     );
     return {
       verdict: { kind: 'ungraded', outcome: 'support', node: o.node.id },
+      parts,
+    };
+  }
+  if (o.kind === 'unexplained') {
+    // The right value with no calculation: nothing is credited, nothing is
+    // counted against him; he writes where it comes from.
+    parts.push(
+      note('info', {
+        kind: 'neutral',
+        code: c.target ? 'given_value' : 'show_work',
+      }),
+    );
+    return {
+      verdict: { kind: 'ungraded', outcome: 'unexplained', node: o.node.id },
       parts,
     };
   }
@@ -171,6 +192,7 @@ export function replyForLine(
         support: false,
         derivation: o.derivation,
         unsimplified: o.unsimplified,
+        ...(o.node.label !== undefined && { label: o.node.label }),
       }),
     );
     const completes = !o.unsimplified && o.completes;
@@ -520,6 +542,8 @@ export function reviewSimilar(
     nodeId?: string;
   }[] = [];
   const parts: ReplyPart[] = [];
+  const labelOf = (id: string | undefined): string | undefined =>
+    graph.nodes.find(n => n.id === id)?.label;
   for (const raw of lines) {
     const r = reviewLine(graph, table, raw, credited);
     if (r.nodeId && r.outcome === 'credit') {
@@ -531,6 +555,8 @@ export function reviewSimilar(
         kind: 'review',
         raw,
         ...r,
+        ...(r.outcome === 'credit' &&
+          labelOf(r.nodeId) !== undefined && { label: labelOf(r.nodeId)! }),
       }),
     );
   }

@@ -7,10 +7,11 @@
  * Every value in the text is computed by the engine (loader + templates).
  */
 import type { Experiment } from '../../engine/calls';
+import { frac } from '../../engine/rational';
 import type { LoadedExercise } from '../../content/loader';
 import type { Rich } from '../../content/schema';
 import type { ReadEffect } from '../../method/frame';
-import type { GraphNode } from '../../method/graph';
+import type { Graph, GraphNode } from '../../method/graph';
 import { plain, type GraphRuntime } from '../checks/lines';
 import { TUTOR_NOTES, type QuestionNotes } from './notes';
 
@@ -42,17 +43,29 @@ export interface PlanCard {
   next: string;
 }
 
+/** The kind of a question that is not an urn (the main graph's `domain`). */
+export type QuestionDomain = NonNullable<Graph['domain']>;
+
 export interface QuestionPack {
   questionId: string;
   label: string;
   wording: string;
   main: GraphRuntime | null;
+  /**
+   * The main graph's domain; null (or absent, in a pack built by hand) for an
+   * urn question. The AI layer switches on it: the move prompt, the tools,
+   * the pack text and the reading of fractions in what the student is shown.
+   */
+  domain?: QuestionDomain | null;
   plan: PlanCard[];
   read: { token: string; effect: ReadEffect }[];
   /** Recipe cards: the clean recipe in order, and every card's kind. */
   recipe: { clean: string[]; kinds: Record<string, string> } | null;
   notes: QuestionNotes | null;
-  /** Numbers of the statement and the question wording ("4", "0.5", "1/2"). */
+  /**
+   * Numbers of the statement and the question wording ("4", "0.5", "1/2");
+   * on a tree question also the fractions its figure gives ("5/12").
+   */
   given: string[];
 }
 
@@ -79,6 +92,18 @@ const NODE_MEANING: Readonly<Record<string, string>> = {
   meann: 'mean of n trials',
   var1: 'variance of one trial',
   varn: 'variance of n trials',
+  // The two-event tree (src/method/templatesTree.ts).
+  a_and_f: 'the path through A to F: p(A ∩ F), its two branches multiplied',
+  na_and_f: 'the path through not A to F: p(Ā ∩ F)',
+  not_a: 'the first-level branch to not A: p(Ā)',
+  f_given_na: 'the branch to F after not A: p(F/Ā), F knowing not A',
+  nf_given_a: 'the branch to not F after A (not F knowing A)',
+  nf_given_na: 'the branch to not F after not A (not F knowing not A)',
+  not_f: 'all of not F, by both paths',
+  a_and_nf: 'the path through A to not F',
+  na_and_nf: 'the path through not A to not F',
+  na_given_nf:
+    'not A knowing not F: the tree read backwards (a path over a total)',
 };
 
 const NUMBER = /\d+(?:[.,]\d+)?(?:\s*\/\s*\d+)?/g;
@@ -108,6 +133,53 @@ function numbersIn(text: string): string[] {
     out.push('1/2');
   }
   return out;
+}
+
+/**
+ * Numbers of a tree statement: a fraction (`\frac{5}{12}`, `\dfrac{5}{12}`,
+ * `5/12`) is ONE number, in lowest terms as the engine writes it. Its
+ * numerator and denominator are never numbers of their own: a given is a
+ * tile he may tap and a number a reply may show, and 5 or 12 alone is
+ * neither. Number words are left out for the same reason (« deux évènements »
+ * is not a 2 to compute with).
+ */
+function treeNumbersIn(text: string): string[] {
+  const out: string[] = [];
+  const whole = (a: string, b: string): string => {
+    if (Number(b) !== 0) {
+      out.push(plain(frac(Number(a), Number(b))));
+    }
+    return ' ';
+  };
+  const rest = text
+    .replace(
+      /\\[dt]?frac\s*\{\s*(\d+)\s*\}\s*\{\s*(\d+)\s*\}/g,
+      (_m, a: string, b: string) => whole(a, b),
+    )
+    .replace(/(\d+)\s*\/\s*(\d+)/g, (_m, a: string, b: string) => whole(a, b));
+  return [
+    ...out,
+    ...(rest.match(/\d+(?:[.,]\d+)?/g) ?? []).map(n => n.replace(',', '.')),
+  ];
+}
+
+/**
+ * The given numbers of a question. An urn question: the numbers written in
+ * the statement and the wording. A tree question: first the fractions its
+ * graph says the statement gives (two of the three are printed only on the
+ * figure), then the statement's numbers, each fraction whole.
+ */
+export function givenNumbers(
+  main: GraphRuntime | null,
+  texts: readonly string[],
+): string[] {
+  if (main?.graph.domain !== 'tree') {
+    return texts.flatMap(numbersIn);
+  }
+  return [
+    ...(main.graph.givens ?? []).map(plain),
+    ...texts.flatMap(treeNumbersIn),
+  ];
 }
 
 function nodeLine(n: GraphNode): string {
@@ -250,8 +322,7 @@ export function buildExercisePack(
       return node ? [plain(node.value)] : [];
     });
     const given = [
-      ...numbersIn(statement),
-      ...numbersIn(wording),
+      ...givenNumbers(main, [statement, wording]),
       ...(experiment ? [String(experiment.urn.length)] : []),
       ...carried,
     ];
@@ -260,6 +331,7 @@ export function buildExercisePack(
       label: pq?.label ?? part.id,
       wording,
       main,
+      domain: main?.graph.domain ?? null,
       plan,
       read,
       recipe: step?.recipe

@@ -174,6 +174,41 @@
       "year": "4s"
     },
     {
+      "id": "probability-tree",
+      "kind": "math",
+      "requires": [
+        "complement-event",
+        "fractions-operations"
+      ],
+      "year": "4s"
+    },
+    {
+      "id": "conditional-probability",
+      "kind": "math",
+      "requires": [
+        "probability-tree",
+        "event-as-set"
+      ],
+      "year": "4s"
+    },
+    {
+      "id": "total-probability",
+      "kind": "math",
+      "requires": [
+        "conditional-probability"
+      ],
+      "year": "4s"
+    },
+    {
+      "id": "reverse-conditional",
+      "kind": "math",
+      "requires": [
+        "conditional-probability",
+        "total-probability"
+      ],
+      "year": "4s"
+    },
+    {
       "id": "au-moins-un",
       "kind": "math",
       "requires": [

@@ -12,6 +12,7 @@ import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import type { ComponentSpec } from '../../../../components/contract';
 import type { ReusedStep } from '../../../../hybrid/board';
 import type { RoadView } from '../../../../hybrid/tour/tour';
 import { theme } from '../../../../theme';
@@ -21,6 +22,8 @@ export interface TripScreenProps {
   road: RoadView;
   reused: Readonly<Record<string, ReusedStep>>;
   questionLabels: Readonly<Record<string, string>>;
+  /** The figure the exam prints (a tree), shown with what we have (absent: none). */
+  figure?: ComponentSpec | null;
   /** An answer is on its way (the chat): «نبداو» waits. */
   waiting: boolean;
   onStart: () => void;
@@ -46,6 +49,7 @@ export function TripScreen(p: TripScreenProps) {
           mode="trip"
           reused={p.reused}
           questionLabels={p.questionLabels}
+          {...(p.figure && { figure: p.figure })}
           animate
         />
       </ScrollView>

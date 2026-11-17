@@ -10,6 +10,16 @@ Written for: the product owner and the next coding session. Source: review of fo
 - **Still open:** B5, U3, U5–U9, S1–S9.
 - **2026-11-11, owner:** the progress strip over the card was removed; «الطريق» has the map, and its segment flashes at «نبداو». This cuts the header height (part of U6). «افتحها من جديد» was removed from «الطريق», so components are not reopened there for now; `board.ts` still computes them.
 
+**Status 2026-11-11 (second exercise, `bac2022p-sc-ex2`, a probability tree; not committed):**
+- **S1, partly:** on a card that has a prepared small example, the second «ما نعرفش» now opens it at once and for free (`case_open`), before any AI call; a known slip on the example gets its prepared text (`case_note`). Only the tree exercise has such examples, so the urn exercise is unchanged: its second «ما نعرفش» still goes to the deep tier. To give the urn exercise the same, its prepared cases need a `card` (`src/ai/move/prepared.ts`).
+- **S8, partly:** the decisions of this build are D55 to D64 in `docs/DECISIONS.md`. The hybrid layer as a whole still has no document.
+- **New, found while building it:**
+  - **N1.** The AI's replies are refused about half the time for "two questions in one message" and corrected on the retry (one extra call each time; seen in the paid check of 2026-11-11).
+  - **N2.** Haiku writes a few non-Tunisian words («بس», «هل», «مزيان», «دوك», «مين»). The tree prompt now names them; the shared banned list (`src/ai/prompt/lexicon.ts`) was not touched because it changes the urn exercise's cached prompt.
+  - **N3.** A first natural slip is still shown in the red box (U8).
+  - **N4.** Without an AI key the tree exercise opens in the old lesson, which does not draw the tree.
+- **Still open:** B5, U3, U5–U9, S2–S7, S9, and S1 for the urn exercise.
+
 Each item: what the student sees, the cause, the fix direction. UX items that change a screen get a mockup approved by the owner before they are built.
 
 ## A. Bugs

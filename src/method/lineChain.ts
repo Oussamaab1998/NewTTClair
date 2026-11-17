@@ -61,6 +61,17 @@ const isFractionResult = (s: Side): boolean =>
   s.ast.right.type === 'num' &&
   s.value[1] !== 1;
 
+/**
+ * A side that is only a value, with no calculation in it: a number, a signed
+ * number, or `a/b` of two written numbers (`1/4`, `3/12`).
+ */
+export const isLiteralValue = (n: Node): boolean =>
+  isPlainNumber(n) ||
+  (n.type === 'binary' &&
+    n.op === '/' &&
+    n.left.type === 'num' &&
+    n.right.type === 'num');
+
 function parseSide(raw: string, index: number): Side | ChainResult {
   const p = parseExpression(raw, { variables: [], constants: [] });
   if (!p.ok) {

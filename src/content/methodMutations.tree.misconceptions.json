@@ -1,0 +1,825 @@
+[
+  {
+    "id": "mut.adds_along_path",
+    "skillId": "probability-tree",
+    "category": "math",
+    "description": "The two branches of one path are added instead of multiplied.",
+    "signature": "2/3 + 1/4 for p(A ∩ F); 1/3 + 1/4 for p(not A ∩ not F)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "زدت الفرعين لبعضهم؟ في نفس الطريق نمشيو فرع ومن بعدو فرع."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "زدت الفرعين متاع نفس الطريق لبعضهم. الأعداد صحاح، أما في نفس الطريق نمشيو فرع ومن بعدو فرع: شنوّة العملية؟"
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.branch_for_path",
+    "skillId": "probability-tree",
+    "category": "math",
+    "description": "The second branch alone is given for the whole path.",
+    "signature": "1/4 for p(A ∩ F)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "هذا عدد فرع وحدو؟ الطريق يبدا من الأوّل."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "هذا عدد الفرع الثاني وحدو: احتمالو كي نكونو ديجا في نصّ الطريق. الطريق كامل يبدا من الأوّل: شنوّة ناقص؟"
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.first_branch_for_path",
+    "skillId": "probability-tree",
+    "category": "math",
+    "description": "The first branch alone is given for the whole path.",
+    "signature": "2/3 for p(A ∩ F); 1/3 for p(not A ∩ not F)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "هذا الفرع الأوّل وحدو؟ الطريق فيه فرع آخر بعدو."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "هذا الفرع الأوّل وحدو. الطريق يكمّل بفرع آخر: شنوّة تعمل بيه؟"
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.total_for_path",
+    "skillId": "total-probability",
+    "category": "math",
+    "description": "The total probability of the event is given for one of its paths.",
+    "signature": "5/12 for p(A ∩ F)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "هذا الاحتمال الكل متاع الحدث؟ هو جاي من طريقين."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "هذا الاحتمال الكل متاع الحدث، وهو جاي من طريقين. احنا نحبّو طريق واحد."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.uses_the_target",
+    "skillId": "total-probability",
+    "category": "math",
+    "description": "The result that must be shown is used to compute the known path (circular).",
+    "signature": "5/12 − 1/4 for p(A ∩ F)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "استعملت النتيجة اللي لازم نورّيوها؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "حسابك صحيح، أما استعملت فيه النتيجة اللي السؤال يطلب نورّيوها. احسب الطريق هذا من الفروع المكتوبين في الشجرة."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.subtracts_branch_not_path",
+    "skillId": "total-probability",
+    "category": "math",
+    "description": "A branch alone, not the whole known path, is subtracted from the total.",
+    "signature": "5/12 − 1/4 for p(not A ∩ F)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "طرحت فرع وحدو؟ اللي يتطرح هو طريق كامل."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "بديت مليح من الاحتمال الكل، أما طرحت منّو فرع وحدو. اللي يتطرح هو الطريق الكامل اللي حسبتو قبل."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.adds_instead_of_subtracts",
+    "skillId": "total-probability",
+    "category": "math",
+    "description": "The known path is added to the total instead of subtracted from it.",
+    "signature": "5/12 + 1/6 for p(not A ∩ F)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "زدت الطريق على الكل؟ الكل فيه الطريق هذا ديجا."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "خذيت الاحتمال الكل والطريق، هذا صحيح. أما الكل فيه الطريق هذا ديجا: كيفاش تطلّع الباقي؟"
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.first_minus_total",
+    "skillId": "total-probability",
+    "category": "math",
+    "description": "The two printed numbers are subtracted: the first branch minus the total (a trap on the exam numbers).",
+    "signature": "2/3 − 5/12 for p(not A ∩ F)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "طرحت العددين المكتوبين من بعضهم؟ واحد فرع والآخر احتمال كل."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "العدد يطابق النتيجة، أما بالصدفة: طرحت فرع من احتمال كل، وهاذم موش من نفس النوع. منين يجي الحدث الثاني في الشجرة؟"
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.complement_of_total",
+    "skillId": "complement-event",
+    "category": "math",
+    "description": "The complement of the total p(F) is given where another quantity is asked.",
+    "signature": "1 − 5/12 for p(not A ∩ F), p(not A) or p(not F | A)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "هذا احتمال عكس الحدث؟ احنا نحبّو حاجة أخرى."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "هذا احتمال اللي الحدث الثاني ما يصيرش. الحساب صحيح، أما موش هو المطلوب في الخطوة هاذي."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.complement_of_path",
+    "skillId": "total-probability",
+    "category": "math",
+    "description": "The known path is subtracted from 1 instead of from the total of the event.",
+    "signature": "1 − 1/6 for p(not A ∩ F)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "طرحت الطريق من الواحد؟ الباقي فيه أكثر من طريق."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "طرحت الطريق من الواحد: الباقي فيه الطرق الأخرين الكل، موش الطريق اللي نلوّجو عليه برك."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.lower_branch_like_upper",
+    "skillId": "probability-tree",
+    "category": "math",
+    "description": "The lower path is computed with the upper side's second branch.",
+    "signature": "1/3 × 1/4 for p(not A ∩ F)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "خذيت نفس الفرع متاع الجهة الفوقانية؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "ضربت فرع في فرع، هذي الفكرة الصحيحة. أما الفرع الثاني اللي خذيتو متاع الجهة الفوقانية: الجهة التحتانية عندها عددها."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.complement_forgotten",
+    "skillId": "complement-event",
+    "category": "math",
+    "description": "The printed number itself is given where its complement is asked.",
+    "signature": "2/3 for p(not A); 5/12 for p(not F)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "هذا العدد المكتوب بيدو؟ احنا نحبّو عكسو."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "هذا العدد المكتوب بيدو. احنا نلوّجو على أخوه: الفرع الآخر اللي خارج من نفس العقدة."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.inverts_instead_of_complement",
+    "skillId": "complement-event",
+    "category": "math",
+    "description": "The fraction is inverted instead of subtracted from 1.",
+    "signature": "1 ÷ (2/3) for p(not A)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "قلبت الكسر؟ الاحتمال ما يفوتش الواحد."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "قلبت الكسر، والنتيجة تفوت الواحد: تنجّم تكون احتمال؟ عكس حدث يتحسب بالطرح من الواحد."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.complement_of_other_branch",
+    "skillId": "complement-event",
+    "category": "math",
+    "description": "The complement is taken of a branch that leaves another node.",
+    "signature": "1 − 1/4 for p(not A) or p(not F)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "طرحت من الواحد فرع من عقدة أخرى؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "الطرح من الواحد صحيح كفكرة، أما الفرع اللي طرحتو خارج من عقدة أخرى. أنا فرع خارج من نفس العقدة؟"
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.complement_across_nodes",
+    "skillId": "conditional-probability",
+    "category": "math",
+    "description": "The complement of the upper node's branch is taken for a branch of the lower node (a trap on the exam numbers).",
+    "signature": "1 − 1/4 for p(F | not A) or p(not F | not A)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "طرحت من الواحد فرع من العقدة الأخرى؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "الطرح من الواحد يصلح للفروع اللي خارجين من نفس العقدة. الفرع اللي طرحتو خارج من العقدة الأخرى، حتى كان العدد يطلع يشبّه. شوف العقدتين في الشجرة."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.divides_by_total",
+    "skillId": "conditional-probability",
+    "category": "math",
+    "description": "The path is divided by the total p(F) instead of by the first branch of its side.",
+    "signature": "(1/4) ÷ (5/12) for p(F | not A)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "قسمت على الاحتمال الكل متاع الحدث الثاني؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "القسمة هي الفكرة الصحيحة، وفوق حطّيت الطريق الصحيح. أما تحت: نقسمو على الجهة اللي نعرفوها، موش على الحدث الثاني."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.divides_by_first_branch",
+    "skillId": "conditional-probability",
+    "category": "math",
+    "description": "The path is divided by the first branch of the other side.",
+    "signature": "(1/4) ÷ (2/3) for p(F | not A)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "قسمت على الفرع الفوقاني؟ الطريق متاعنا تحتاني."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "قسمت الطريق على فرع أوّل، هذي الفكرة. أما الفرع اللي خذيتو متاع الجهة الفوقانية، والطريق تحتاني."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.quotient_upside_down",
+    "skillId": "fractions-operations",
+    "category": "math",
+    "description": "The quotient is written upside down: the result is above 1.",
+    "signature": "(1/3) ÷ (1/4) for p(F | not A); (7/12) ÷ (1/12) for p(not A | not F)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "القسمة مقلوبة؟ النتيجة تفوت الواحد."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "خذيت العددين الصحاح، أما القسمة مقلوبة: النتيجة تفوت الواحد. تنجّم تكون احتمال؟"
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.multiplies_instead_of_divides",
+    "skillId": "conditional-probability",
+    "category": "math",
+    "description": "The path is multiplied by the other quantity instead of divided by it.",
+    "signature": "1/4 × 1/3 for p(F | not A); 1/12 × 7/12 for p(not A | not F)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "ضربت؟ الطريق هو ديجا ضرب الفرعين."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "العددين صحاح. أما الطريق هو ديجا ضرب الفرعين: باش نرجّعو فرع واحد، شنوّة العملية المعاكسة؟"
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.intersection_for_conditional",
+    "skillId": "conditional-probability",
+    "category": "math",
+    "description": "The probability of the whole path is given for its second branch.",
+    "signature": "1/4 (the path) for p(F | not A)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "هذا احتمال الطريق كامل؟ احنا نحبّو الفرع الثاني برك."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "هذا احتمال الطريق كامل، من الأوّل. الفرع الثاني يبدا من العقدة برك: ما هوش نفس الحاجة."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.copies_another_branch",
+    "skillId": "probability-tree",
+    "category": "math",
+    "description": "The value of another branch of the tree is copied onto this branch.",
+    "signature": "1/4 for p(not F | A); 3/4 for p(not F | not A)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "هذا عدد فرع آخر في الشجرة؟ كل فرع عندو عددو."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "هذا عدد فرع آخر في الشجرة. الفرع اللي نلوّجو عليه يتحسب من أخوه، في نفس العقدة."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.complement_of_first_branch",
+    "skillId": "complement-event",
+    "category": "math",
+    "description": "The complement of a first-level branch is taken for a quantity of another node.",
+    "signature": "1 − 2/3 for p(not F | A) or p(not F); 1 − 1/3 for p(not F | not A)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "طرحت من الواحد فرع من العقدة الأولى؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "الطرح من الواحد صحيح، أما الفرع اللي طرحتو خارج من العقدة الأولى. احنا في عقدة أخرى."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.quotient_for_complement",
+    "skillId": "probability-tree",
+    "category": "math",
+    "description": "The quotient of another branch (question 2's line) is written for this branch (a trap on the exam numbers).",
+    "signature": "(1/4) ÷ (1/3) for p(not F | A)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "عاودت حساب فرع آخر؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "العدد يطابق، أما الحساب هذا متاع فرع آخر، في العقدة التحتانية. الفرع هذا في العقدة الفوقانية: أنا فرع خارج معاه؟"
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.adds_branches_for_total",
+    "skillId": "total-probability",
+    "category": "math",
+    "description": "Second-level branches of two different nodes are added to get the total of an event.",
+    "signature": "3/4 + 1/4 for p(not F); p(F | A) + p(F | not A) for p(F)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "زدت فرعين من عقدتين مختلفين؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "زدت فرعين خارجين من عقدتين مختلفين. الفرع الأخراني وحدو موش طريق كامل."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.wrong_second_branch",
+    "skillId": "probability-tree",
+    "category": "math",
+    "description": "The first branch is multiplied by the second branch that leads to the other event.",
+    "signature": "1/3 × 3/4 for p(not A ∩ not F)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "الفرع الثاني اللي خذيتو يوصّل لحدث آخر؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "ضربت فرع في فرع، هذي الفكرة. أما الفرع الثاني اللي خذيتو يوصّل للحدث الآخر: شوف الطريق المعلَّم."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.reverses_condition",
+    "skillId": "reverse-conditional",
+    "category": "math",
+    "description": "The path is divided by the first branch: this gives back the tree's own branch, not the reversed conditional.",
+    "signature": "(1/12) ÷ (1/3) for p(not A | not F)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "قسمت على الفرع الأوّل؟ اللي نعرفوه هنا حاجة أخرى."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "فوق حطّيت الطريق الصحيح. أما قسمت على الفرع الأوّل: هكّا ترجع للفرع اللي في الشجرة. هنا اللي نعرفوه هو اللي بعد العلامة المايلة."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.condition_for_reverse",
+    "skillId": "reverse-conditional",
+    "category": "math",
+    "description": "The tree's branch p(not F | not A) is given for the reversed conditional p(not A | not F).",
+    "signature": "1/4 for p(not A | not F)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "هذا الفرع المكتوب في الشجرة؟ السؤال بالمقلوب."
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "هذا الفرع المكتوب في الشجرة: فيه نعرفو الجهة ونلوّجو على الحدث. السؤال بالمقلوب: شنوّة اللي نعرفوه هنا؟"
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.divides_by_other_total",
+    "skillId": "reverse-conditional",
+    "category": "math",
+    "description": "The path is divided by p(F) instead of by p(not F).",
+    "signature": "(1/12) ÷ (5/12) for p(not A | not F)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "قسمت على احتمال الحدث، موش على عكسو؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "القسمة والطريق صحاح. أما تحت حطّيت احتمال الحدث الثاني، واللي نعرفوه هو عكسو."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.coincidence",
+    "skillId": "probability-tree",
+    "category": "math",
+    "description": "One operation on numbers he can see lands on the right value by chance, on no road of the tree.",
+    "signature": "5/12 + 1/3 for p(F | not A); 1/3 + 1/4 for p(not F); 1/4 − 1/6 for p(not A ∩ not F)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "العدد يطابق، أما منين جاو الأعداد اللي في حسابك؟"
+        }
+      ]
+    },
+    "feedbackConfirmed": {
+      "ar": [
+        {
+          "ar": "العدد يطابق النتيجة، أما بالصدفة: الحساب هذا ما يتبعش حتى طريق في الشجرة. قول: كل عدد في سطرك، أنا فرع ولا أنا طريق هو؟"
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.sums_a_column",
+    "skillId": "probability-tree",
+    "category": "math",
+    "description": "Believes the four second-level branches add up to 1 together (a pick only, never matched on a line).",
+    "signature": "p(F | A) + p(not F | A) + p(F | not A) + p(not F | not A) = 1",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "الأربعة خارجين من عقدتين مختلفين: كل عقدة تتحسب وحدها."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "mut.multiplies_paths",
+    "skillId": "total-probability",
+    "category": "math",
+    "description": "Multiplies the two paths that lead to an event to get its total (a pick only, never matched on a line).",
+    "signature": "p(F) = p(A ∩ F) × p(not A ∩ F)",
+    "feedback": {
+      "ar": [
+        {
+          "ar": "نضربو كي نمشيو فرع ومن بعدو فرع في نفس الطريق. هنا طريقين مختلفين، والحدث يجي من هذا ولا من هذا."
+        }
+      ]
+    },
+    "trust": {
+      "reviewed": false,
+      "contentVersion": "mut-tree-0.1.0",
+      "source": "authored",
+      "status": "ok"
+    }
+  }
+]

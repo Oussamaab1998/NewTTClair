@@ -12,11 +12,21 @@ export interface QuestionNotes {
   prerequisites: string[];
   /** The app's interactive components that fit, and the moment each one helps. */
   components: { name: string; when: string }[];
+  /**
+   * Notes written for the one-move AI of the hybrid lesson only (the pack of
+   * src/ai/move): the AI-led chat is not offered on this question.
+   */
+  hybridOnly?: true;
 }
 
-/** Questions the AI tutor leads (a pack with notes); the others keep the scripted lesson for now. */
+/**
+ * Questions the AI tutor leads (a pack with notes); the others keep the
+ * scripted lesson for now. Notes marked `hybridOnly` do not count: they feed
+ * the hybrid lesson's moves, and the AI-led chat was never written for them.
+ */
 export function hasTutorNotes(exerciseId: string, questionId: string): boolean {
-  return TUTOR_NOTES[exerciseId]?.[questionId] !== undefined;
+  const notes = TUTOR_NOTES[exerciseId]?.[questionId];
+  return notes !== undefined && notes.hybridOnly !== true;
 }
 
 export const TUTOR_NOTES: Readonly<
@@ -193,6 +203,80 @@ export const TUTOR_NOTES: Readonly<
           when: 'only after both of his formulas are credited: n {min 2, max 12, init 7}, p fixed "1/2", toggles mean and variance on; he checks n p and n p q at several n against his formulas.',
         },
       ],
+    },
+  },
+  /**
+   * The probability tree (two events; src/method/templatesTree.ts, one
+   * template per question: t1 tree_other_path, t2 tree_conditional, t3
+   * tree_complete, t4 tree_reverse). Hybrid lesson only. No value is written
+   * here: the pack prints the engine's values, slips and traps next to these
+   * lines. The lesson draws the tree itself: no component.
+   */
+  'bac2022p-sc-ex2': {
+    t1: {
+      hybridOnly: true,
+      route: [
+        'He must SHOW a result the statement prints (« Montrer que »): the value is on the page, the calculation is the answer. A bare value is never his result here.',
+        'Known path (card a_and_f): the path from the start through A to F, its two written branches multiplied. Confusions: he adds the two branches; he gives one branch alone (the branch is the probability once he is already at A, the path starts at the root); he takes the total p(F) for one path; he subtracts the printed result from p(F) (that uses what must be shown).',
+        'Two paths (card split, a pick, no line): F is reached by two paths that never meet, through A and through not A, so p(F) is the two paths together. This is the idea of the question: never say it first.',
+        'Other path (card na_and_f): the total p(F) minus the known path. Confusions: he subtracts the BRANCH to F after A instead of the whole path; he adds the path to the total; he subtracts the two printed numbers from each other (a trap here: it lands on the printed value); a complement (1 minus the total, 1 minus the path); he multiplies along the lower path with the upper branch (the lower one is not known yet). The result is written simplified to the end.',
+        'Never first: which two numbers to multiply, that p(F) splits over two paths, what is subtracted from what.',
+      ],
+      notationAfter: null,
+      skills: ['probability-tree', 'total-probability', 'fractions-operations'],
+      prerequisites: ['fractions-simplify', 'complement-event'],
+      components: [],
+    },
+    t2: {
+      hybridOnly: true,
+      route: [
+        'He now looks for a BRANCH of the second level, not a path: p(F/Ā), "F knowing not A". The path through not A to F is his result of the question before.',
+        'First lower branch (card not_a): the two branches leaving the start add up to 1, so it is 1 minus the branch to A. Confusions: he copies the branch to A; he turns the fraction over (above 1); he takes 1 minus a number that does not leave this node (the branch to F after A, the total p(F)).',
+        'Rule (card rule, a pick, no line): a path is its first branch times its second, so the second branch is the path divided by the first branch. Never say it first.',
+        'Missing branch (card f_given_na): the path through not A to F divided by the branch to not A. Confusions: he divides by the total p(F) or by the branch to A; the quotient upside down (above 1: "can this be a probability?"); he multiplies instead of dividing; he gives the path itself (a whole path is not a branch); he takes 1 minus the branch to F after A (a trap here: two branches that leave DIFFERENT nodes do not add up to 1, the number only looks right).',
+        'Never first: the quotient, or which of his results goes on top.',
+      ],
+      notationAfter: null,
+      skills: [
+        'conditional-probability',
+        'complement-event',
+        'fractions-operations',
+      ],
+      prerequisites: ['probability-tree', 'fractions-simplify', 'event-as-set'],
+      components: [],
+    },
+    t3: {
+      hybridOnly: true,
+      route: [
+        'He completes the tree: a number on every branch the statement leaves empty. The first two (cards not_a, f_given_na) are his results of the question before, written again with their calculation or reused.',
+        'Each remaining branch is the sibling of a known one AT ITS OWN NODE: the branches leaving one node add up to 1. Upper node (card nf_given_a): 1 minus the branch to F after A. Lower node (card nf_given_na): 1 minus the branch to F after not A.',
+        'Confusions: he copies the sibling or another branch of the tree; he takes 1 minus a branch that leaves the OTHER node; he takes 1 minus the first branch or 1 minus the total p(F); he redoes the quotient of another branch.',
+        'Several branches of this tree are equal by chance, so a right number proves nothing here: ask which node the two branches of his line leave from.',
+        'Never first: which branch is the sibling of which.',
+      ],
+      notationAfter: null,
+      skills: ['probability-tree', 'complement-event'],
+      prerequisites: ['conditional-probability', 'fractions-operations'],
+      components: [],
+    },
+    t4: {
+      hybridOnly: true,
+      route: [
+        'The tree read backwards: "not A knowing not F". What is known is now the SECOND event (F did not happen) and he looks for the side. It is not the branch written on the tree (not F knowing not A).',
+        'What is known (card not_f): the total of not F, 1 minus the total p(F) (or the two paths that end at not F together). Confusions: he copies p(F); he takes 1 minus another number; he adds the two BRANCHES to not F (a branch alone is not a whole path).',
+        'The path (card na_and_nf): the path through not A to not F, its two branches multiplied (both are on his completed tree). Confusions: he adds along the path; one branch alone; the second branch of the other event.',
+        'The division (card na_given_nf): that path divided by the total of not F. Confusions: he divides by the first branch (that gives back the branch of the tree: the condition the wrong way round); he gives the tree branch itself; he divides by p(F) instead of its opposite; the quotient upside down (above 1); he multiplies.',
+        'Never first: that the total of not F goes under the bar, or that the two conditionals are different numbers.',
+      ],
+      notationAfter: null,
+      skills: [
+        'reverse-conditional',
+        'conditional-probability',
+        'total-probability',
+        'complement-event',
+      ],
+      prerequisites: ['probability-tree', 'fractions-operations'],
+      components: [],
     },
   },
 };

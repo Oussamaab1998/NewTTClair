@@ -15,10 +15,27 @@ import { buildGraphFor } from '../../method/templates';
 import type { GraphRuntime, GraphVerdict, LineVerdict } from '../checks/lines';
 import { plain } from '../checks/lines';
 
-/** A small case the tutor made (P12): a box of letters, or a red/black urn. */
+/**
+ * A small case (P12): a box of letters, a red/black urn, or a probability
+ * tree counted whole: `n` people, `a` of them in A, `af` of those in F and
+ * `naf` of the others in F. A tree case rehearses ONE step: `node` of the
+ * graph `template` builds on these counts (src/method/templatesTree.ts).
+ */
 export type CaseSpec =
   | { kind: 'box'; n: number; k: number }
-  | { kind: 'urn'; reds: number; blacks: number; k: number; j: number };
+  | { kind: 'urn'; reds: number; blacks: number; k: number; j: number }
+  | {
+      kind: 'tree';
+      template: string;
+      node: string;
+      n: number;
+      a: number;
+      af: number;
+      naf: number;
+    };
+
+/** A case made of balls or letters (it can be listed and drawn as an urn). */
+export type BallCase = Exclude<CaseSpec, { kind: 'tree' }>;
 
 export interface StudentLine {
   id: string;
@@ -151,6 +168,18 @@ export function credit(s: SessionState, graph: string, node: string): void {
 export const creditedSet = (s: SessionState, graph: string): Set<string> =>
   new Set(s.credited[graph] ?? []);
 
+/**
+ * Nodes whose calculation is already on one of his lines: a right line of
+ * the node, even one he still has to simplify (the conductor does not credit
+ * that one yet). The value alone then finishes the node (MatchInput.worked).
+ */
+export const workedSet = (s: SessionState, graph: string): Set<string> =>
+  new Set(
+    s.lines.flatMap(l =>
+      l.graph === graph && l.match?.verdict === 'credit' ? [l.match.node] : [],
+    ),
+  );
+
 /** Named counts of a box of n letters, k drawn. */
 export function boxValues(n: number, k: number): Record<string, Fraction> {
   return {
@@ -165,7 +194,7 @@ export function boxValues(n: number, k: number): Record<string, Fraction> {
  * (a box: letters a, b...; an urn: r1.. as R1.., n1.. as N1..), the same in
  * the urn picture, the case card and the tools' results.
  */
-export function caseBallNames(spec: CaseSpec): { id: string; label: string }[] {
+export function caseBallNames(spec: BallCase): { id: string; label: string }[] {
   return spec.kind === 'box'
     ? 'abcdefgh'
         .slice(0, spec.n)
@@ -174,13 +203,39 @@ export function caseBallNames(spec: CaseSpec): { id: string; label: string }[] {
     : ballsOf(spec.reds, spec.blacks);
 }
 
+/** The whole counts a tree case shows: at the root, after the first level, at each leaf. */
+export function treeCaseCounts(spec: Extract<CaseSpec, { kind: 'tree' }>): {
+  n: number;
+  a: number;
+  na: number;
+  af: number;
+  anf: number;
+  naf: number;
+  nanf: number;
+  /** Everyone in F, whichever side they come from. */
+  f: number;
+} {
+  const { n, a, af, naf } = spec;
+  return {
+    n,
+    a,
+    na: n - a,
+    af,
+    anf: a - af,
+    naf,
+    nanf: n - a - naf,
+    f: af + naf,
+  };
+}
+
 /**
  * A case as the random experiment components draw (Urn, OutcomeSpace...):
  * red balls r1.. (value 1) and black n1.. (value 0); a box's letters a, b...
  * get distinct values so none is marked as a duplicate. Each ball carries
  * its name (caseBallNames), so the picture shows a b c d, not the values.
+ * A tree case has no balls to draw (BallCase).
  */
-export function caseExperiment(spec: CaseSpec): Experiment {
+export function caseExperiment(spec: BallCase): Experiment {
   const urn = caseBallNames(spec).map(({ id, label }, i) =>
     spec.kind === 'box'
       ? { id, value: i + 1, label }
@@ -191,8 +246,16 @@ export function caseExperiment(spec: CaseSpec): Experiment {
   return { urn, draw: 'simultaneous', k: spec.k };
 }
 
-/** A case's graph (urn cases only; a box has named counts instead). */
+/** A case's graph (urn and tree cases; a box has named counts instead). */
 export function caseRuntime(id: string, spec: CaseSpec): GraphRuntime | null {
+  if (spec.kind === 'tree') {
+    const { n, a, af, naf } = spec;
+    const tree = buildGraphFor(
+      { template: spec.template, args: { counts: { n, a, af, naf } } },
+      { inputs: {} },
+    );
+    return { id, graph: tree, table: mutationsFor(tree), extra: [] };
+  }
   if (spec.kind !== 'urn') {
     return null;
   }

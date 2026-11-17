@@ -7,6 +7,11 @@
  * Only an engine credit, a right pick or a finished stage moves the route;
  * an AI move can change what he reads, never where he is.
  *
+ * A card that has a prepared small example (src/ai/move/prepared.ts, a
+ * probability tree counted whole) opens it by itself on the second «ما
+ * نعرفش», free, before any AI call (fix list S1); its lines are judged on
+ * the example first, and the bridge (bridge.ts) brings him back.
+ *
  * Not used by design (excluded from the hybrid lesson, plan v2): the old
  * variants (sim-1-total-1/2, alt-1-s4-boxes), the deep dive dd_count_draws,
  * the c_total walkthrough, the third hint of each frame (it gives the
@@ -19,11 +24,14 @@ import {
 } from '../../ai/checks/autoCheck';
 import { judgeLine } from '../../ai/tools/compute';
 import { mathSegments } from '../../ai/checks/freeText';
+import { preparedFor, preparedForCard } from '../../ai/move/prepared';
 import type { QuestionPack } from '../../ai/packs/build';
 import {
   credit,
   newSession,
   restoreRuntime,
+  workedSet,
+  type CaseSpec,
   type SessionRuntime,
 } from '../../ai/session/state';
 import { exercisePack } from '../../ai/tutor';
@@ -34,7 +42,8 @@ import {
 } from '../../content/loader';
 import type { MethodFrameStep, Rich, Step } from '../../content/schema';
 import { buildContent, type LessonContent } from '../../lesson/session/lesson';
-import { evaluateLine } from '../../method/frame';
+import { evaluateLine, type LineEvaluation } from '../../method/frame';
+import { evalChain, isLiteralValue } from '../../method/lineChain';
 import { recap } from '../../method/narration';
 import {
   replyForCards,
@@ -51,6 +60,7 @@ import {
   nextShortFor,
   stepOrderFor,
 } from '../../method/route';
+import { treeCaseView } from '../figure';
 import type { Move } from '../mover';
 import {
   isTouring,
@@ -69,7 +79,7 @@ import {
   type FrameView,
   type Reason,
 } from './types';
-import { caseBridge } from './bridge';
+import { caseBridge, treeBridge, treeOpening } from './bridge';
 
 /** The longest line kept (as in the lesson). */
 const LINE_MAX = 200;
@@ -283,10 +293,33 @@ export function act(
   if (a.kind === 'dont_know') {
     p.dontKnows += 1;
     s.session.dontKnows += 1;
+    // On a small tree example he is stuck on the example: its own hint, once.
+    const caseHint = treeCaseHint(ctx, s);
+    if (caseHint) {
+      return { state: s, out: out('case_note', [caseHint]) };
+    }
     const hint = nextHint(step, p);
     if (p.dontKnows === 1 && hint) {
       p.hints += 1;
       return { state: s, out: out('hint', [hint]) };
+    }
+    // Stuck again on a card that has a prepared small example: it opens by
+    // itself, free, before any AI call (S1). Its counts are on screen from
+    // now on (known numbers).
+    const example =
+      step.frame.type === 'lines'
+        ? preparedForCard(ctx.exerciseId, ctx.questionId, step.frame.key)
+        : null;
+    const counts = example ? treeCaseView(example) : null;
+    if (example && counts && s.session.cases[example.id] === undefined) {
+      s.session.cases[example.id] = example.spec;
+      s.onCase = example.id;
+      for (const n of counts.visible) {
+        if (!s.session.known.includes(String(n))) {
+          s.session.known.push(String(n));
+        }
+      }
+      return { state: s, out: out('case_open', [treeOpening()]) };
     }
     // Stuck again: the deep tier finds a smaller step; the prepared reply is
     // the next hint, else what "show me" gives (he still writes it himself).
@@ -327,7 +360,7 @@ export function act(
       s.onCase = null;
       return { state: s, out: out('case_back', []) };
     }
-    if (a.kind === 'list' && spec) {
+    if (a.kind === 'list' && spec && spec.kind !== 'tree') {
       const r = autoCheck(
         a,
         { kind: 'list', case_id: s.onCase, size: spec.k },
@@ -547,6 +580,115 @@ export function act(
   return { state: s, out: out('not_now', []) };
 }
 
+/**
+ * The hint of the small tree example he is on, the first time he says «ما
+ * نعرفش» there (null: no tree open, no hint authored, or given already).
+ */
+function treeCaseHint(ctx: QuestionCtx, s: ConductorState): ReplyPart | null {
+  const id = s.onCase;
+  if (id === null || s.session.cases[id]?.kind !== 'tree') {
+    return null;
+  }
+  const given = s.progress.caseHints ?? [];
+  const hint = preparedFor(ctx.exerciseId, ctx.questionId).find(
+    e => e.id === id,
+  )?.hint;
+  if (!hint || given.includes(id)) {
+    return null;
+  }
+  s.progress.caseHints = [...given, id];
+  return { kind: 'feedback', tone: 'info', rich: hint };
+}
+
+/**
+ * A line while a small tree example is open, judged on the example first
+ * (the node it rehearses). Right: the example closes with the bridge to the
+ * question. A known slip: its prepared text, at once. Null: the line is the
+ * question's (it credits it, so he is back there), or it is not a finished
+ * line (the usual notes). Anything else is about the example: nothing is
+ * counted against him on the question's step.
+ */
+function treeCaseLine(
+  ctx: QuestionCtx,
+  s: ConductorState,
+  rt: SessionRuntime,
+  caseId: string,
+  spec: Extract<CaseSpec, { kind: 'tree' }>,
+  raw: string,
+  ev: LineEvaluation,
+): ActOut | null {
+  const expect = { kind: 'node' as const, graph: caseId, node: spec.node };
+  const typed: ReplyPart = { kind: 'student', content: { kind: 'typed', raw } };
+  const wrong: ReplyPart = { kind: 'message', tone: 'info', message: 'wrong' };
+  const match = judgeLine(rt, raw, expect).match;
+  if (match?.verdict === 'credit') {
+    // Built before his line joins the session (see treeBridge).
+    const bridge = treeBridge(ctx, rt, spec, raw);
+    recordLine(rt, raw, expect);
+    s.onCase = null;
+    return out('case_done', [typed, ...bridge]);
+  }
+  if (match?.verdict === 'slip') {
+    recordLine(rt, raw, expect);
+    const lib = ctx.loaded.misconceptions.get(`mut.${match.slip}`);
+    const text = lib?.feedbackConfirmed ?? lib?.feedback;
+    return text
+      ? out('case_note', [
+          typed,
+          { kind: 'feedback', tone: 'warning', rich: text },
+        ])
+      : out('case_line', [typed, wrong]);
+  }
+  const o = ev.outcome.kind;
+  if (
+    o === 'credit' ||
+    o === 'support' ||
+    o === 'unreadable' ||
+    o === 'unfinished' ||
+    o === 'mismatch'
+  ) {
+    return null;
+  }
+  recordLine(rt, raw, expect);
+  return out('case_line', [typed, wrong]);
+}
+
+/**
+ * His line of a node he finished in two lines: the earlier calculation,
+ * then this line. When this line starts where the earlier one stopped
+ * (`3/12 = 1/4` after `… = 3/12`) that side is written once; a line that is
+ * only values continues the earlier one; a line with a calculation of its
+ * own stands alone. The line just written is the session's last.
+ */
+function joinedLine(s: ConductorState, node: string, raw: string): string {
+  const earlier = s.session.lines
+    .slice(0, -1)
+    .filter(
+      l =>
+        l.graph === 'main' &&
+        l.match?.verdict === 'credit' &&
+        l.match.node === node,
+    )
+    .at(-1)?.raw;
+  if (earlier === undefined) {
+    return raw;
+  }
+  const tidy = (side: string | undefined) => (side ?? '').replace(/\s+/g, '');
+  const sides = raw.split('=');
+  const chain = evalChain(raw);
+  const onlyValues =
+    chain.kind === 'bare' ||
+    (chain.kind === 'chain' && chain.sides.every(x => isLiteralValue(x.ast)));
+  const rest =
+    tidy(earlier.split('=').at(-1)) === tidy(sides[0])
+      ? sides.slice(1)
+      : onlyValues
+      ? sides
+      : [];
+  const joined = rest.length > 0 ? [earlier, ...rest].join('=') : raw;
+  return joined.length <= LINE_MAX ? joined : raw;
+}
+
 function onLine(
   ctx: QuestionCtx,
   s: ConductorState,
@@ -566,6 +708,7 @@ function onLine(
   const p = s.progress;
   let raw = a.raw.slice(0, LINE_MAX);
   const credited = new Set(s.session.credited.main ?? []);
+  const worked = workedSet(s.session, 'main');
   let ev = evaluateLine({
     raw,
     graph: answer.graph,
@@ -573,6 +716,7 @@ function onLine(
     card: f.key,
     credited,
     extra: answer.extra,
+    worked,
   });
   // An ambiguous division ("720/3*2*1"): he says how he meant it first.
   if (ev.readback && !a.readback) {
@@ -589,6 +733,7 @@ function onLine(
       card: f.key,
       credited,
       extra: answer.extra,
+      worked,
     });
   }
   // On a small case an AI move proposed, the case judges first: a line it
@@ -598,7 +743,12 @@ function onLine(
   // else is judged on the question, and a line the question credits brings
   // him back.
   const spec = s.onCase ? s.session.cases[s.onCase] : undefined;
-  if (s.onCase && spec) {
+  if (s.onCase && spec?.kind === 'tree') {
+    const onCase = treeCaseLine(ctx, s, rt, s.onCase, spec, raw, ev);
+    if (onCase) {
+      return onCase;
+    }
+  } else if (s.onCase && spec) {
     const expect = {
       kind: 'node' as const,
       graph: s.onCase,
@@ -668,7 +818,13 @@ function onLine(
   if (v.kind === 'credit') {
     if (!v.unsimplified) {
       credit(s.session, 'main', v.node);
-      s.nodeLines[v.node] = raw;
+      // A node that asks for its calculation (`proof`), written on an
+      // earlier line and finished now (`… = 3/12`, then `3/12 = 1/4`): the
+      // two lines together are his line of the node.
+      const proof =
+        answer.graph.nodes.find(n => n.id === v.node)?.proof === true;
+      s.nodeLines[v.node] =
+        proof && worked.has(v.node) ? joinedLine(s, v.node, raw) : raw;
     }
     if (v.completes) {
       advance(s);

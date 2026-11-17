@@ -26,6 +26,7 @@ import {
   sub,
   type Fraction,
 } from './rational';
+import { solveTwoEventTree, TREE_QUANTITIES } from './tree';
 
 /** The random experiment of an exercise (shared by its engine calls). */
 export const ExperimentSchema = z.strictObject({
@@ -101,6 +102,35 @@ export const ENGINE_CALLS = {
   oneMinus: def({
     args: z.strictObject({ p: FractionArg }),
     run: a => sub([1, 1], frac(a.p[0], a.p[1])),
+  }),
+  /**
+   * A quantity of a two-event probability tree (src/engine/tree.ts), from the
+   * first branch, the branch to F after A, and the total p(F) or the branch
+   * to F after not A. Needs no experiment.
+   */
+  tree: def({
+    args: z.strictObject({
+      quantity: z.enum(TREE_QUANTITIES),
+      pA: FractionArg,
+      pFgA: FractionArg,
+      pF: FractionArg.optional(),
+      pFgNotA: FractionArg.optional(),
+    }),
+    run: a => {
+      const pA = frac(a.pA[0], a.pA[1]);
+      const pFgA = frac(a.pFgA[0], a.pFgA[1]);
+      if ((a.pF === undefined) === (a.pFgNotA === undefined)) {
+        throw new EngineError('tree needs exactly one of pF and pFgNotA');
+      }
+      const t = a.pF
+        ? solveTwoEventTree({ pA, pFgA, pF: frac(a.pF[0], a.pF[1]) })
+        : solveTwoEventTree({
+            pA,
+            pFgA,
+            pFgNotA: frac(a.pFgNotA![0], a.pFgNotA![1]),
+          });
+      return t[a.quantity];
+    },
   }),
   /** Σ p(X = x) over the law of X (the "sum = 1" habit check). */
   lawSum: def({

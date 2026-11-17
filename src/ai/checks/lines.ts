@@ -104,6 +104,8 @@ export type GraphVerdict =
     }
   | { verdict: 'support'; node: string; derivation: string }
   | { verdict: 'repeat'; node: string }
+  /** The right value of a node that asks for the calculation: not credited. */
+  | { verdict: 'unexplained'; node: string }
   | { verdict: 'other_step'; node: string }
   | {
       verdict: 'slip';
@@ -129,6 +131,8 @@ function toVerdict(m: Match): GraphVerdict | null {
       return { verdict: 'support', node: m.node.id, derivation: m.derivation };
     case 'repeat':
       return { verdict: 'repeat', node: m.node.id };
+    case 'unexplained':
+      return { verdict: 'unexplained', node: m.node.id };
     case 'other_step':
       return { verdict: 'other_step', node: m.node.id };
     case 'mutation':
@@ -162,12 +166,13 @@ function asValue(
 const RANK: Record<GraphVerdict['verdict'], number> = {
   credit: 0,
   support: 1,
-  slip: 2,
-  known_wrong: 3,
-  repeat: 4,
-  other_step: 5,
-  ambiguous: 6,
-  no_match: 7,
+  unexplained: 2,
+  slip: 3,
+  known_wrong: 4,
+  repeat: 5,
+  other_step: 6,
+  ambiguous: 7,
+  no_match: 8,
 };
 
 /**
@@ -180,6 +185,7 @@ export function matchOnGraph(
   chain: ChainResult,
   credited: ReadonlySet<string>,
   node?: string,
+  worked?: ReadonlySet<string>,
 ): GraphVerdict {
   if (chain.kind === 'unreadable') {
     return { verdict: 'no_match' };
@@ -199,6 +205,7 @@ export function matchOnGraph(
         credited,
         line,
         extra: rt.extra,
+        ...(worked && { worked }),
       }),
     );
     if (v && RANK[v.verdict] < RANK[best.verdict]) {

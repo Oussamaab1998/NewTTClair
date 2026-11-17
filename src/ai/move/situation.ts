@@ -7,10 +7,19 @@
  * exchanges (the mover's own memory: ConductorState keeps none), what was
  * already tried, earlier results, a short profile digest, the allowed moves,
  * and the prepared reply rendered as text.
+ * A tree question adds what only a tree has: the prepared small case he is
+ * on (which one, the step it rehearses), a right value with no calculation
+ * (unexplained), a slip that is a trap (the right value by a wrong road),
+ * and his results of the earlier questions (the tree keeps them).
  */
 import type { StudentAct } from '../checks/autoCheck';
 import { mathSegments } from '../checks/freeText';
-import { plain, readLine } from '../checks/lines';
+import {
+  matchOnGraph,
+  plain,
+  readLine,
+  type GraphVerdict,
+} from '../checks/lines';
 import type { MethodFrameStep, Rich } from '../../content/schema';
 import { view, type QuestionCtx } from '../../hybrid/conductor/conductor';
 import type {
@@ -22,8 +31,11 @@ import type {
 import type { AiTier, MoveRequest } from '../../hybrid/mover';
 import type { ReplyPart } from '../../method/replies';
 import type { MethodNote } from '../../method/note';
+import { COINCIDENCE } from '../../method/templatesTree';
 import { richText } from '../packs/build';
-import type { StudentLine } from '../session/state';
+import { creditedSet, workedSet, type StudentLine } from '../session/state';
+import { caseLabel } from './pack';
+import { preparedFor } from './prepared';
 import type { MoveKind } from './tool';
 
 export const SITUATION_MAX = 4_000;
@@ -41,6 +53,16 @@ const REASON_TEXT: Readonly<Record<LightReason | DeepReason, string>> = {
   stuck_again: 'a second «ما نعرفش» on this step',
   claim: 'a sentence with his own calculation or rule: test it',
   slip_third: 'the same known slip a third time on this step',
+};
+
+/** On a tree question the lesson opens a prepared case by itself: the case is not always the AI's. */
+const TREE_REASON_TEXT: Readonly<
+  Partial<Record<LightReason | DeepReason, string>>
+> = {
+  case_line:
+    'a line he wrote on the small case he is on (the engine judged it on that case)',
+  stuck_again:
+    '«ما نعرفش» again on this step, after the lesson gave its hint (and opened its prepared small case, when the step has one)',
 };
 
 /** One act the mover answered (or let the prepared reply answer). */
@@ -209,7 +231,47 @@ export function actedFrame(
 
 const bare = (id: string): string => id.replace(/^mut\./, '');
 
-function lineSummary(l: StudentLine): string {
+/**
+ * A slip that reaches the RIGHT value on this question's numbers: a trap of
+ * the main graph's table, or the catch-all coincidence. Only a tree has any.
+ */
+function isTrap(
+  ctx: QuestionCtx | undefined,
+  l: StudentLine,
+  slip: string,
+  node: string,
+): boolean {
+  if (slip === COINCIDENCE) {
+    return true;
+  }
+  return (
+    l.graph === 'main' &&
+    (ctx?.pack.main?.table.traps ?? []).some(
+      c => c.id === slip && c.nodeId === node,
+    )
+  );
+}
+
+/** The engine's verdict on a line, in the words of the prompt's diagnosis list. */
+function matchText(m: GraphVerdict, l: StudentLine, ctx?: QuestionCtx): string {
+  return m.verdict === 'slip'
+    ? `slip ${m.slip} at ${m.node} (${m.strength}${
+        isTrap(ctx, l, m.slip, m.node)
+          ? ', a trap: the right value by a wrong road'
+          : ''
+      })`
+    : m.verdict === 'known_wrong'
+    ? `known wrong ${bare(m.misconception)}`
+    : m.verdict === 'ambiguous'
+    ? `ambiguous slips ${m.slips.join(', ')}`
+    : m.verdict === 'no_match'
+    ? 'no match'
+    : m.verdict === 'unexplained'
+    ? `unexplained ${m.node} (the right value, no calculation: not credited)`
+    : `${m.verdict} ${m.node}`;
+}
+
+function lineSummary(l: StudentLine, ctx?: QuestionCtx): string {
   const v = l.verdict;
   const parts: string[] = [];
   if (!v.readable) {
@@ -232,21 +294,57 @@ function lineSummary(l: StudentLine): string {
       parts.push('not simplified');
     }
   }
-  const m = l.match;
-  if (m) {
-    parts.push(
-      m.verdict === 'slip'
-        ? `slip ${m.slip} at ${m.node} (${m.strength})`
-        : m.verdict === 'known_wrong'
-        ? `known wrong ${bare(m.misconception)}`
-        : m.verdict === 'ambiguous'
-        ? `ambiguous slips ${m.slips.join(', ')}`
-        : m.verdict === 'no_match'
-        ? 'no match'
-        : `${m.verdict} ${m.node}`,
-    );
+  if (l.match) {
+    parts.push(matchText(l.match, l, ctx));
   }
-  return clip(`${l.id} «${clip(l.raw, 120)}»: ${parts.join('; ')}`, 240);
+  // On a tree several values are equal: say which lines are about a small case.
+  const onCase =
+    ctx?.pack.domain === 'tree' && l.graph !== null && l.graph !== 'main'
+      ? ` (on the small case ${l.graph})`
+      : '';
+  return clip(
+    `${l.id} «${clip(l.raw, 120)}»${onCase}: ${parts.join('; ')}`,
+    240,
+  );
+}
+
+/**
+ * A tree question, a line the open small case does not read: he may have
+ * gone back to the question's own numbers (the lesson judges on the case
+ * while it is open). What the same line is on the step of the question.
+ */
+function onQuestion(
+  ctx: QuestionCtx,
+  req: MoveRequest,
+  l: StudentLine,
+  step: MethodFrameStep | undefined,
+): string | null {
+  const main = ctx.pack.main;
+  if (
+    ctx.pack.domain !== 'tree' ||
+    !main ||
+    l.graph === null ||
+    l.graph === 'main' ||
+    l.match?.verdict !== 'no_match'
+  ) {
+    return null;
+  }
+  const key = step?.frame.type === 'lines' ? step.frame.key : undefined;
+  const session = req.state.session;
+  const m = matchOnGraph(
+    main,
+    readLine(l.raw).chain,
+    creditedSet(session, 'main'),
+    main.graph.nodes.some(n => n.id === key) ? key : undefined,
+    workedSet(session, 'main'),
+  );
+  return m.verdict === 'no_match'
+    ? null
+    : `On the question's own step (not judged there while the small case is open) the same line is: ${matchText(
+        m,
+        { ...l, graph: 'main' },
+        ctx,
+      )}.`;
 }
 
 export interface Diagnosis {
@@ -271,11 +369,19 @@ export function diagnose(ctx: QuestionCtx, req: MoveRequest): Diagnosis {
     const mine = state.session.lines.filter(l => l.turn === state.turn);
     const last = mine[mine.length - 1];
     if (last) {
-      lines.push(`His line ${lineSummary(last)}`);
+      lines.push(`His line ${lineSummary(last, ctx)}`);
       if (last.match?.verdict === 'slip') {
         slip = last.match.slip;
       } else if (last.match?.verdict === 'known_wrong') {
         slip = bare(last.match.misconception);
+      } else if (last.match?.verdict === 'unexplained') {
+        lines.push(
+          `Unexplained: his number is the right value of ${last.match.node}, written with no calculation. It is NOT credited: ask where it comes from (which branches, which paths); never confirm it as his result.`,
+        );
+      }
+      const there = onQuestion(ctx, req, last, step);
+      if (there) {
+        lines.push(there);
       }
     }
     const seen = Object.entries(p.slips).sort((x, y) => y[1] - x[1]);
@@ -288,6 +394,12 @@ export function diagnose(ctx: QuestionCtx, req: MoveRequest): Diagnosis {
       );
     } else if (slip) {
       lines.push(`Slip ${slip}${describe(slip)}`);
+    }
+    const m = last?.match;
+    if (last && m?.verdict === 'slip' && isTrap(ctx, last, m.slip, m.node)) {
+      lines.push(
+        `Trap: this wrong road lands on the right value of ${m.node} on these numbers, by chance. Never call his result right, never call it wrong: ask which branch or which path each number of his line is.`,
+      );
     }
   } else if (a.kind === 'choice' && step?.frame.type === 'cards') {
     const card = step.frame.cards.find(c => c.id === a.optionId);
@@ -401,10 +513,48 @@ function stepLines(
   return out;
 }
 
-/** Results of earlier questions this one builds on (his own, carried). */
-function earlierResults(ctx: QuestionCtx): string[] {
+/**
+ * A tree question: the prepared small case he is on (which one, the step it
+ * rehearses, what it is for). The lesson opens one by itself on a second
+ * «ما نعرفش», or a case move did.
+ */
+function caseLines(ctx: QuestionCtx, req: MoveRequest): string[] {
+  const id = req.state.onCase;
+  const spec = id === null ? undefined : req.state.session.cases[id];
+  if (ctx.pack.domain !== 'tree' || id === null || spec?.kind !== 'tree') {
+    return [];
+  }
+  const use = preparedFor(ctx.exerciseId, ctx.questionId).find(
+    c => c.id === id,
+  )?.use;
+  return [
+    `He is on the small case ${id}: ${caseLabel(spec)}.${
+      use ? ` For: ${use}` : ''
+    }`,
+    'Its whole counts are on his screen. His lines are judged on the case first (a count over a count is a full line there); the question waits. Link what he finds there back to the step, in one question.',
+  ];
+}
+
+/** A tree question: his own results of the earlier questions (the records), with his line. */
+function carriedLines(ctx: QuestionCtx, req: MoveRequest): string[] {
+  if (ctx.pack.domain !== 'tree') {
+    return [];
+  }
+  return Object.entries(req.state.carried ?? {}).map(
+    ([key, c]) => `${key} = ${c.value} (his line «${clip(c.line, 60)}»)`,
+  );
+}
+
+/**
+ * Results of earlier questions this one builds on (his own, carried); the
+ * ones listed in `have` already (a tree's carried lines) are left out.
+ */
+function earlierResults(
+  ctx: QuestionCtx,
+  have: ReadonlySet<string> = new Set(),
+): string[] {
   const out: string[] = [];
-  const seen = new Set<string>();
+  const seen = new Set<string>(have);
   for (const step of ctx.frames.values()) {
     for (const [name, ref] of Object.entries(step.inputs ?? {})) {
       const part = ref.from.split('/')[0] ?? '';
@@ -503,16 +653,21 @@ export function buildSituation(o: SituationInput): string {
   const step = actedFrame(ctx, req);
   const diag = o.diagnosis ?? diagnose(ctx, req);
   const lines = req.state.session.lines;
+  const tree = ctx.pack.domain === 'tree';
+  const carried = carriedLines(ctx, req);
   const sections: Section[] = [
     {
       title: `Move request: tier ${o.tier}, reason ${reason} (${
-        REASON_TEXT[reason] ?? reason
+        (tree ? TREE_REASON_TEXT[reason] : undefined) ??
+        REASON_TEXT[reason] ??
+        reason
       })${o.escalated ? '. The light tutor handed this moment to you' : ''}.`,
       lines: [],
       drop: 0,
     },
     { title: 'Engine diagnosis:', lines: diag.lines, drop: 0 },
     { title: 'Step:', lines: stepLines(ctx, req, step), drop: 0 },
+    { title: 'Small case:', lines: caseLines(ctx, req), drop: 0 },
     {
       title: 'His act (verbatim):',
       lines: [clip(actText(req.act, step), 800)],
@@ -521,7 +676,7 @@ export function buildSituation(o: SituationInput): string {
     {
       title:
         'His lines (show them with student_line / compare by id; never write the id):',
-      lines: lines.slice(-6).map(lineSummary),
+      lines: lines.slice(-6).map(l => lineSummary(l, ctx)),
       drop: 3,
     },
     {
@@ -531,7 +686,13 @@ export function buildSituation(o: SituationInput): string {
     },
     {
       title: 'Earlier results he may reuse:',
-      lines: earlierResults(ctx),
+      lines: [
+        ...carried,
+        ...earlierResults(
+          ctx,
+          new Set(Object.keys(tree ? req.state.carried ?? {} : {})),
+        ),
+      ],
       drop: 5,
     },
     {

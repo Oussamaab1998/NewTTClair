@@ -17,4 +17,5 @@ export const PROBABILITY2_COMPONENTS: readonly ComponentName[] = [
   'BinomialExplorer',
   'EventAreaModel',
   'UrnTemplate',
+  'ProbabilityTree',
 ];

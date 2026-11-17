@@ -361,6 +361,61 @@ export const pv2 = {
   tableCol: 72,
 } as const;
 
+/**
+ * ProbabilityTree (probability2, react-native-svg): root at the left, leaves
+ * at the right. Four leaves share 224 pt (56 pt rows; COMPONENTS_CONTRACT.md
+ * rule 5: 180-260 pt) or, on a step card, 152 pt (38 pt rows: a stacked
+ * fraction of 12 pt digits still fits between two branches of one node).
+ */
+export const tree = {
+  /** Width used until the first layout pass (and in tests). */
+  defaultWidth: 320,
+  /** Height the rows share; a row is never tighter than rowMin nor looser than rowMax. */
+  height: 224,
+  rowMin: 44,
+  rowMax: 64,
+  /** The same three for the step-card size. */
+  compactHeight: 152,
+  compactRowMin: 38,
+  compactRowMax: 44,
+  padX: 6,
+  padY: 4,
+  /** A branch is never shorter than this, however wide the labels are. */
+  minSpan: 48,
+  /** Between the end of a branch and its label, a label and its count. */
+  gap: 4,
+  /** Where a value sits along its branch (0: the node it leaves, 1: its end). */
+  valueAt: 0.62,
+  /**
+   * Tight rows: the values of the branches of one node sit by turns far and
+   * near, when two fractions one above the other would have less than
+   * valueRoom between them.
+   */
+  valueAtFar: 0.74,
+  valueAtNear: 0.46,
+  valueRoom: 8,
+  /** A branch stops this far from the value written on it. */
+  valueClear: 3,
+  /** Between a fraction bar and its digits; between a label and its overline. */
+  barGap: 2.5,
+  branchWidth: 1.5,
+  /** The branch of the current step (it also carries an arrowhead). */
+  markedWidth: 3,
+  /** Fraction bar, overline, the edge of a "?" box. */
+  ruleWidth: 1,
+  /** The edge of the "?" box the student is asked for now. */
+  askWidth: 2.5,
+  rootDot: 2.5,
+  /** The filled arrowhead at the end of a marked branch: its length and half its width. */
+  headLength: 9,
+  headHalf: 4.5,
+  /** The tick beside a value the student found: its width and its stroke. */
+  tick: 8,
+  tickWidth: 1.5,
+  /** Interactive: room kept under the tree for the expression of a path (a tap moves nothing). */
+  pathSlot: 76,
+} as const;
+
 /** Screen layout (Cahier). */
 export const layout = {
   /** Side gutter of screens. */

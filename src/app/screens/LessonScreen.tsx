@@ -67,6 +67,8 @@ import { appQueue } from '../appQueue';
 import { appEventStore } from '../appEventStore';
 import { appDoneRecord } from '../appDoneRecord';
 import { doneParts, resetExercise } from '../../state/doneParts';
+import { clearExerciseProgress } from '../../hybrid/records';
+import { appStore } from '../../storage/appStore';
 import { PaperSheet, type PaperCloseVia } from '../../lesson/feed/PaperSheet';
 import {
   MethodSheet,
@@ -172,6 +174,13 @@ export function LessonScreen({
     const entry = CATALOG.find(e => e.id === id)?.result;
     if (entry?.ok) {
       resetExercise(entry.loaded.exercise, { eventStore, doneRecord });
+      // As «ابدا من جديد» on the picker: the lesson board's saved questions
+      // and resume points go too, else a question reopens where it was left.
+      clearExerciseProgress(
+        appStore(),
+        entry.loaded.exercise.id,
+        entry.loaded.exercise.parts.map(q => q.id),
+      );
     }
     // `-devMarkDone exerciseId/questionId` (debug builds): mark it done once.
     const mark = devOnly?.devMarkDoneAtLaunch();

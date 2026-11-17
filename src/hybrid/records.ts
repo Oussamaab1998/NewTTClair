@@ -101,6 +101,15 @@ const CaseSchema = z.union([
     k: z.number(),
     j: z.number(),
   }),
+  z.object({
+    kind: z.literal('tree'),
+    template: z.string(),
+    node: z.string(),
+    n: z.number(),
+    a: z.number(),
+    af: z.number(),
+    naf: z.number(),
+  }),
 ]);
 
 const RecordSchema = z.object({

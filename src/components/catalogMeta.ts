@@ -178,6 +178,17 @@ export const CATALOG_META: Partial<Record<ComponentName, CatalogMeta>> = {
       'the urn, the draw, the engine solution lines and the answer of the example (a different urn from the step)',
     ],
   },
+  ProbabilityTree: {
+    whenToUse:
+      'Lesson path only. A probability tree of two events (A or not A, then F or not F) drawn as the exam prints it, with the given values, the values the student found, a "?" for the rest and the branch of the current step marked; or the same tree in whole counts for a small example.',
+    studentAction:
+      'Reads it; in interactive mode taps the end of a path to see it marked and its written values as a product, never the result.',
+    propsNote:
+      'The lesson computes the props: each branch has an id, a label and a rational string p, shown as given, found, hidden ("?") or blank. Counts mode: rootCount and a count on every branch.',
+    reveals: [
+      'only the values passed in its props and shown as given or found (in counts mode: the counts shown); a hidden or blank branch writes nothing, and no product or sum is ever computed on screen',
+    ],
+  },
   FunctionPlot: {
     whenToUse:
       'A picture of the curve helps (shape, symmetry, behaviour at infinity) before any computation.',

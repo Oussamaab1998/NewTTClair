@@ -45,9 +45,11 @@ export function noteSpoken(t: TFunction, note: MethodNote): string {
           : t('method.recap.last')
       }`;
     case 'credit':
-      return `${t('method.credit.title')} ${t(
-        'method.credit.counts',
-      )} ${nodeLabel(t, note.nodeId)}`;
+      return note.label !== undefined
+        ? `${t('method.credit.title')} ${t('method.credit.gives')}`
+        : `${t('method.credit.title')} ${t(
+            'method.credit.counts',
+          )} ${nodeLabel(t, note.nodeId)}`;
     case 'plan_violation':
       return `${plain(note.card)} ${t('method.plan.needs')} ${note.needs
         .map(plain)
@@ -85,7 +87,9 @@ const reviewLabel = (
   note: Extract<MethodNote, { kind: 'review' }>,
 ): string =>
   note.outcome === 'credit'
-    ? `${t('method.review.credit')} ${nodeLabel(t, note.nodeId ?? '')}`
+    ? note.label !== undefined
+      ? t('method.credit.gives')
+      : `${t('method.review.credit')} ${nodeLabel(t, note.nodeId ?? '')}`
     : note.outcome === 'slip'
     ? `${t('method.review.slip')} ${t(`method.mut.${note.id ?? ''}`, {
         defaultValue: t('method.review.slipUnknown'),
@@ -151,10 +155,21 @@ export function MethodNoteView({ note }: { note: MethodNote }) {
     case 'credit':
       return (
         <View style={styles.block} testID="note-credit">
-          <Text style={styles.text}>
-            {note.support ? '' : `${t('method.credit.title')} `}
-            {t('method.credit.counts')} {nodeLabel(t, note.nodeId)}
-          </Text>
+          {note.label !== undefined ? (
+            // A node named by a formula: the words, then the formula on its own line.
+            <>
+              <Text style={styles.text}>
+                {note.support ? '' : `${t('method.credit.title')} `}
+                {t('method.credit.gives')}
+              </Text>
+              <MathBlock latex={note.label} fontSize={theme.font.size.body} />
+            </>
+          ) : (
+            <Text style={styles.text}>
+              {note.support ? '' : `${t('method.credit.title')} `}
+              {t('method.credit.counts')} {nodeLabel(t, note.nodeId)}
+            </Text>
+          )}
           {note.derivation === 'absent' && (
             <Text style={styles.text}>{t('method.credit.unexplained')}</Text>
           )}
@@ -268,6 +283,9 @@ export function MethodNoteView({ note }: { note: MethodNote }) {
             fontSize={theme.font.size.body}
           />
           <Text style={styles.text}>{reviewLabel(t, note)}</Text>
+          {note.outcome === 'credit' && note.label !== undefined && (
+            <MathBlock latex={note.label} fontSize={theme.font.size.body} />
+          )}
         </View>
       );
     case 'target':

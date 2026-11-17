@@ -10,6 +10,7 @@ import { listBoxes, orderingsOfBox } from '../../engine/grouping';
 import type { Ball } from '../../engine/probability';
 import { frac, type Fraction } from '../../engine/rational';
 import { sameRat } from '../../engine/rationalFormat';
+import { treeFromCounts } from '../../engine/tree';
 import { boxNumbers, evalWith } from '../../method/claims';
 import { leaves } from '../../method/factorForm';
 import { ballsOf } from '../../method/repair';
@@ -27,8 +28,10 @@ import {
   boxValues,
   caseRuntime,
   creditedSet,
+  treeCaseCounts,
   type CaseSpec,
   type SessionRuntime,
+  workedSet,
 } from '../session/state';
 import type {
   CheckLineSchema,
@@ -171,7 +174,13 @@ export function judgeLine(
   return {
     read,
     verdict,
-    match: matchOnGraph(g, c, creditedSet(rt.state, graphId), node),
+    match: matchOnGraph(
+      g,
+      c,
+      creditedSet(rt.state, graphId),
+      node,
+      workedSet(rt.state, graphId),
+    ),
     graph: graphId,
   };
 }
@@ -351,12 +360,31 @@ function boxCoincidences(n: number, k: number): string[] {
   return out;
 }
 
-function makeCase(
-  ctx: ToolContext,
-  input: z.infer<typeof MakeCaseSchema>,
-): ToolOutcome {
+/**
+ * What make_case takes. The tool's schema (MakeCaseSchema) offers a box or an
+ * urn; a tree case never comes from the model: it is a prepared case of the
+ * pack (src/ai/move/prepared.ts), checked here like the others.
+ */
+export interface MakeCaseInput {
+  case: CaseSpec;
+  purpose: z.infer<typeof MakeCaseSchema>['purpose'];
+}
+
+/** Why the whole counts of a tree case make no tree (engine check), or null. */
+function treeCaseError(
+  spec: Extract<CaseSpec, { kind: 'tree' }>,
+): string | null {
+  try {
+    treeFromCounts(spec);
+  } catch {
+    return 'the counts do not make a tree (n people, a in A with 0 < a < n, af of them in F, naf of the others in F)';
+  }
+  return null;
+}
+
+function makeCase(ctx: ToolContext, input: MakeCaseInput): ToolOutcome {
   const s = ctx.rt.state;
-  const spec: CaseSpec = input.case;
+  const spec = input.case;
   if (spec.kind === 'box' && spec.k > spec.n) {
     return fail('k must be at most n');
   }
@@ -372,6 +400,12 @@ function makeCase(
       return fail('j reds and k - j blacks must fit in the urn');
     }
   }
+  if (spec.kind === 'tree') {
+    const error = treeCaseError(spec);
+    if (error) {
+      return fail(error);
+    }
+  }
   const id = `C${Object.keys(s.cases).length + 1}`;
   const known = new Set(s.known);
   let values: Record<string, Fraction>;
@@ -380,12 +414,22 @@ function makeCase(
     values = boxValues(spec.n, spec.k);
     coincidences = boxCoincidences(spec.n, spec.k);
   } else {
-    const rt = caseRuntime(id, spec);
+    let rt: ReturnType<typeof caseRuntime>;
+    try {
+      rt = caseRuntime(id, spec);
+    } catch {
+      // An unknown template (a tree case names its own).
+      rt = null;
+    }
     if (!rt) {
       return fail('could not build the case');
     }
+    if (spec.kind === 'tree' && !rt.graph.nodes.some(n => n.id === spec.node)) {
+      return fail(`the template ${spec.template} has no step ${spec.node}`);
+    }
     ctx.rt.graphs.set(id, rt);
     values = Object.fromEntries(rt.graph.nodes.map(n => [n.id, n.value]));
+    // The named slips whose value is the right value on this case.
     coincidences = rt.table.dropped
       .filter(d => d.why === 'equals_right_value')
       .map(d => `${d.id} at ${d.nodeId}`);
@@ -395,6 +439,28 @@ function makeCase(
     .filter(([, v]) => v[0] > 2 && known.has(plain(v)))
     .map(([name, v]) => `${name}=${plain(v)}`);
   addKnown(s, Object.values(values));
+  const private_values = Object.fromEntries(
+    Object.entries(values).map(([name, v]) => [name, plain(v)]),
+  );
+  if (spec.kind === 'tree') {
+    // The whole counts are on his screen: known like the case's values.
+    const counts = treeCaseCounts(spec);
+    addKnown(
+      s,
+      Object.values(counts).map(c => frac(c)),
+    );
+    return {
+      ok: true,
+      result: {
+        case_id: id,
+        counts,
+        rehearses: spec.node,
+        private_values,
+        coincidences,
+        reused_numbers: reused,
+      },
+    };
+  }
   return {
     ok: true,
     result: {
@@ -404,9 +470,7 @@ function makeCase(
           ? 'abcdefgh'.slice(0, spec.n).split('')
           : ballsOf(spec.reds, spec.blacks).map(b => b.label),
       k: spec.k,
-      private_values: Object.fromEntries(
-        Object.entries(values).map(([name, v]) => [name, plain(v)]),
-      ),
+      private_values,
       coincidences,
       reused_numbers: reused,
     },

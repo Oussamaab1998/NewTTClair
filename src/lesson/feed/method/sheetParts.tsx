@@ -3,7 +3,8 @@
  * of MethodSheet.tsx with no change of behaviour): a step row (a check when
  * done, the current one a highlighter row with an ink border, its status in
  * words), a finding (his own lines with their reasons, the bridge to the
- * exam notation, the rule with its condition) and a paper skeleton line.
+ * exam notation, the rule with its condition) and a paper skeleton line
+ * (with its calculation as math on a line of its own, when it has one).
  */
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
@@ -134,10 +135,14 @@ export function Finding({ finding }: { finding: FindingResult }) {
   );
 }
 
-/** An exam line: the French text in the paper font, a blank dashed until his own accepted line fills it. */
+/**
+ * An exam line: the French text in the paper font, a blank dashed until his
+ * own accepted line fills it. A line with a calculation shows it under the
+ * words, as math, left to right (his values in it, dots where he has none).
+ */
 export function SkeletonLine({ row }: { row: SkeletonRow }) {
   const { t } = useTranslation();
-  return (
+  const line = (
     <View style={styles.skeletonLine} testID={`skeleton-${row.id}`}>
       {row.parts.map((p, i) =>
         'text' in p ? (
@@ -162,6 +167,20 @@ export function SkeletonLine({ row }: { row: SkeletonRow }) {
           />
         ),
       )}
+    </View>
+  );
+  if (row.math === undefined) {
+    return line;
+  }
+  return (
+    <View style={styles.skeletonBlock}>
+      {line}
+      <MathBlock
+        latex={row.math}
+        fontSize={theme.font.size.body}
+        color={theme.color.ink}
+        testID={`skeleton-math-${row.id}`}
+      />
     </View>
   );
 }
@@ -230,6 +249,7 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.card,
     backgroundColor: theme.color.highlighterSoft,
   },
+  skeletonBlock: { gap: theme.space.xxs, direction: 'ltr' },
   skeletonLine: {
     flexDirection: 'row',
     flexWrap: 'wrap',

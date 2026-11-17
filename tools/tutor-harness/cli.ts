@@ -5,6 +5,9 @@
  *
  *   npm run tutor -- pack [exercise]                 print the prompt sizes and the exercise pack
  *   npm run tutor -- conduct --script owner-q1       hybrid conductor dry run, no AI (conduct.ts)
+ *   npm run tutor -- moves --exercise bac2022p-sc-ex2 --question t2 --script tree-t2 --cap 1 [--dry]
+ *                        a script against the real one-move AI of the hybrid lesson, PAID unless
+ *                        --dry (moves.ts; see README.md)
  *   npm run tutor -- run --question 1 --persona owner [--exercise bac2022c-sc-ex2]
  *                        [--model sonnet|haiku] [--effort low|medium] [--turns 30] [--cap 2]
  *   npm run tutor -- run --questions 1,2,3a,3b --persona owner [--turns 30] [--cap 8]
@@ -14,6 +17,9 @@
  * starting with what he earned in the earlier ones (carriedSummary) and an
  * in-memory profile updated after each question (profileDigest). --turns is
  * per question.
+ *
+ * Exercises are looked up in the app's catalog (src/app/exercises.ts), so a
+ * new exercise needs no line here; the default is bac2022c-sc-ex2.
  *
  * Key: CLAUDE_API_KEY from the shell, else .env.llm.local; never printed.
  * Outputs (gitignored) in tools/tutor-harness/out/: <run>.md (transcript, a
@@ -55,10 +61,8 @@ import {
   DEFAULT_TUTOR_CONFIG,
   exercisePack,
 } from '../../src/ai/tutor';
+import { CATALOG } from '../../src/app/exercises';
 import type { LoadedExercise } from '../../src/content/loader';
-import { loadExercise } from '../../src/content/loader';
-import scEx2 from '../../src/content/exercises/bac2022c-sc-ex2.json';
-import scEx2Mis from '../../src/content/exercises/bac2022c-sc-ex2.misconceptions.json';
 import { parseEnv } from '../replay/evalLib';
 import { PERSONAS, type Persona } from './personas';
 import {
@@ -68,13 +72,13 @@ import {
   SimStudent,
 } from './simStudent';
 import { conductCommand } from './conduct';
+import { movesCommand } from './moves';
 
 const root = path.resolve(__dirname, '..', '..');
 const outDir = path.join(__dirname, 'out');
 
-const EXERCISES: Record<string, { raw: unknown; mis: unknown }> = {
-  'bac2022c-sc-ex2': { raw: scEx2, mis: scEx2Mis },
-};
+/** The exercise every command runs on when none is named. */
+export const DEFAULT_EXERCISE = 'bac2022c-sc-ex2';
 
 function apiKey(): string {
   const envPath = path.join(root, '.env.llm.local');
@@ -84,24 +88,35 @@ function apiKey(): string {
   return process.env.CLAUDE_API_KEY ?? file.CLAUDE_API_KEY ?? '';
 }
 
-function load(id: string) {
-  const e = EXERCISES[id];
+/** An exercise of the app's catalog, loaded as the app loads it. */
+export function load(id: string): { loaded: LoadedExercise; raw: never } {
+  const e = CATALOG.find(x => x.id === id);
   if (!e) {
-    throw new Error(`unknown exercise ${id}`);
+    throw new Error(
+      `unknown exercise ${id}; the catalog has ${CATALOG.map(x => x.id).join(
+        ', ',
+      )}`,
+    );
   }
-  const r = loadExercise(e.raw, e.mis);
-  if (!r.ok) {
-    throw new Error(`load ${id}: ${r.errors.slice(0, 3).join('; ')}`);
+  if (!e.result.ok) {
+    throw new Error(`load ${id}: ${e.result.errors.slice(0, 3).join('; ')}`);
   }
-  return { loaded: r.loaded, raw: e.raw as never };
+  return { loaded: e.result.loaded, raw: e.raw as never };
 }
 
-function args(argv: string[]): Record<string, string> {
+/** `--key value` pairs; a flag with no value (`--dry`) is 'true'. */
+export function args(argv: string[]): Record<string, string> {
   const out: Record<string, string> = {};
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i]!;
-    if (a.startsWith('--')) {
-      out[a.slice(2)] = argv[i + 1] ?? '';
+    if (!a.startsWith('--')) {
+      continue;
+    }
+    const next = argv[i + 1];
+    if (next === undefined || next.startsWith('--')) {
+      out[a.slice(2)] = 'true';
+    } else {
+      out[a.slice(2)] = next;
       i++;
     }
   }
@@ -396,7 +411,7 @@ function appendCsv(file: string, head: string, row: string): void {
 }
 
 async function runCommand(a: Record<string, string>): Promise<void> {
-  const exerciseId = a.exercise ?? 'bac2022c-sc-ex2';
+  const exerciseId = a.exercise ?? DEFAULT_EXERCISE;
   const questions = (a.questions ?? a.question ?? '1')
     .split(',')
     .map(q => q.trim())
@@ -535,15 +550,23 @@ async function main(): Promise<void> {
   const a = args(rest);
   if (cmd === 'pack') {
     packCommand(
-      rest[0] && !rest[0].startsWith('--') ? rest[0] : 'bac2022c-sc-ex2',
+      rest[0] && !rest[0].startsWith('--') ? rest[0] : DEFAULT_EXERCISE,
     );
   } else if (cmd === 'run') {
     await runCommand(a);
   } else if (cmd === 'conduct') {
     conductCommand(a, load, root, outDir);
+  } else if (cmd === 'moves') {
+    await movesCommand(a, load, root, outDir, () => {
+      const key = apiKey();
+      if (!key) {
+        throw new Error('no CLAUDE_API_KEY (shell or .env.llm.local)');
+      }
+      return createMessagesTransport({ apiKey: key });
+    });
   } else {
     console.log(
-      'usage: npm run tutor -- pack [exercise] | conduct --script owner-q1 (free dry run) | run --question 1 | --questions 1,2,3a,3b --persona owner [--model sonnet|haiku] [--effort medium] [--turns 30] [--cap 2 per question]',
+      'usage: npm run tutor -- pack [exercise] | conduct --script owner-q1 (free dry run) | moves --script tree-t1 [--exercise id] [--question q] [--cap 1] [--dry] (PAID unless --dry) | run --question 1 | --questions 1,2,3a,3b --persona owner [--model sonnet|haiku] [--effort medium] [--turns 30] [--cap 2 per question]',
     );
   }
 }

@@ -16,6 +16,9 @@
  * after. It never throws: any failure is null.
  * The mover keeps its own memory per question (the exchanges it saw); the
  * conductor state stays the only source of truth for where he is.
+ * The question's domain (the pack's: null for an urn, 'tree') picks the core
+ * prompt, the tool list and the moves: a tree question gets the tree prompt,
+ * tutor_move without components or new cases, and evaluate alone on deep.
  */
 import type { QuestionCtx } from '../../hybrid/conductor/conductor';
 import type { DeepReason, LightReason } from '../../hybrid/conductor/types';
@@ -26,9 +29,10 @@ import type {
   MoveRequest,
   Mover,
 } from '../../hybrid/mover';
+import { frac } from '../../engine/rational';
 import { numbersIn } from '../../planner/llm/numbers';
 import { mathSegments } from '../checks/freeText';
-import { readLine } from '../checks/lines';
+import { plain, readLine } from '../checks/lines';
 import {
   AI_MODELS,
   aiChargeUsd,
@@ -36,10 +40,12 @@ import {
   aiWorstCaseUsd,
   hasServerFallback,
 } from '../config';
+import type { QuestionDomain } from '../packs/build';
 import {
   addKnown,
   boxValues,
   restoreRuntime,
+  treeCaseCounts,
   type CaseSpec,
   type SessionRuntime,
   type SessionState,
@@ -60,7 +66,7 @@ import {
 } from '../transport/wire';
 import type { RenderBlock } from '../verify/message';
 import { movePack, type MovePack } from './pack';
-import { movePrompt } from './prompt';
+import { movePromptFor } from './prompt';
 import {
   actedFrame,
   actText,
@@ -126,6 +132,16 @@ export const DEFAULT_MOVER_CONFIG: MoverConfig = {
 
 /** The compute tools of the deep tier. */
 export const DEEP_COMPUTE = ['evaluate', 'list_outcomes', 'test_rule'] as const;
+/**
+ * On a tree question: evaluate alone (list_outcomes lists the draws of an
+ * urn or a box of letters, test_rule tests a rule on boxes of n letters).
+ */
+export const TREE_DEEP_COMPUTE = ['evaluate'] as const;
+
+/** The compute tools a deep call may run, by the question's domain. */
+export const deepCompute = (
+  domain?: QuestionDomain | null,
+): readonly string[] => (domain === 'tree' ? TREE_DEEP_COMPUTE : DEEP_COMPUTE);
 
 /** Models that accept a forced tool (with thinking off). */
 const FORCED_TOOL_MODELS: ReadonlySet<string> = new Set([AI_MODELS.haiku]);
@@ -175,9 +191,39 @@ const toolResult = (
 
 let deepTools: ToolDefinition[] | null = null;
 let lightTools: ToolDefinition[] | null = null;
+let treeDeepTools: ToolDefinition[] | null = null;
+let treeLightTools: ToolDefinition[] | null = null;
 
-/** Byte-stable tool lists (the first part of the cached prefix), sorted by name. */
-export function moveTools(compute: boolean): ToolDefinition[] {
+/** evaluate as a tree question describes it (the same input, examples without counting notation). */
+const TREE_EVALUATE =
+  'Exact value of each side of calculation lines ("(3/5)*(1/2)", "1-3/8=5/8", "(1/10)/(2/5)"). Use it before you show any number the student has not written himself, and to see both readings of an ambiguous line.';
+
+/**
+ * Byte-stable tool lists (the first part of the cached prefix), sorted by
+ * name. No domain: the urn lists, the same objects on every call. A tree
+ * question has its own two lists (its own cached prefix).
+ */
+export function moveTools(
+  compute: boolean,
+  domain?: QuestionDomain | null,
+): ToolDefinition[] {
+  if (domain === 'tree') {
+    if (compute) {
+      treeDeepTools ??= [
+        ...toolDefinitions()
+          .filter(t =>
+            (TREE_DEEP_COMPUTE as readonly string[]).includes(t.name),
+          )
+          .map(t =>
+            t.name === 'evaluate' ? { ...t, description: TREE_EVALUATE } : t,
+          ),
+        moveToolDefinition('tree'),
+      ].sort((a, b) => a.name.localeCompare(b.name));
+      return treeDeepTools;
+    }
+    treeLightTools ??= [moveToolDefinition('tree')];
+    return treeLightTools;
+  }
   if (compute) {
     deepTools ??= [
       ...toolDefinitions().filter(t =>
@@ -195,7 +241,7 @@ export function moveSystem(pack: MovePack): SystemBlock[] {
   return [
     {
       type: 'text',
-      text: movePrompt(),
+      text: movePromptFor(pack.domain),
       cache_control: { type: 'ephemeral', ttl: '1h' },
     },
     {
@@ -220,7 +266,7 @@ export function moveBody(
     max_tokens: cfg.maxTokens,
     system: moveSystem(pack),
     messages: [...messages],
-    tools: moveTools(cfg.compute),
+    tools: moveTools(cfg.compute, pack.domain),
     thinking: forced ? { type: 'disabled' } : { type: 'adaptive' },
     output_config: { effort: cfg.effort },
     tool_choice: forced ? { type: 'tool', name: MOVE_TOOL } : { type: 'auto' },
@@ -287,6 +333,27 @@ function callRuntime(
         ? Object.values(boxValues(c.spec.n, c.spec.k))
         : rt.graphs.get(c.id)?.graph.nodes.map(n => n.value) ?? [];
     addKnown(state, values);
+    // A tree case is drawn with its whole counts: numbers of his screen too.
+    if (c.spec.kind === 'tree') {
+      addKnown(
+        state,
+        Object.values(treeCaseCounts(c.spec)).map(n => frac(n)),
+      );
+    }
+  }
+  // A tree keeps its quantities from one question to the next: his results
+  // of the earlier questions are numbers he has, like the statement's (the
+  // verifier reads the session's given numbers on a tree question).
+  if (pack.domain === 'tree') {
+    const carried = Object.values(req.state.carried ?? {}).flatMap(c =>
+      numbersIn(c.value),
+    );
+    addKnown(state, carried);
+    for (const p of carried.map(plain)) {
+      if (!state.given.includes(p)) {
+        state.given.push(p);
+      }
+    }
   }
   const own = [
     ...(req.act.kind === 'free' ? [req.act.text] : []),
@@ -303,7 +370,8 @@ const copyRuntime = (ctx: QuestionCtx, rt: SessionRuntime): SessionRuntime =>
     ctx.pack.main,
   );
 
-function blocksText(blocks: readonly RenderBlock[]): string {
+/** A move's blocks as one line of text (the mover's memory, the harness transcript). */
+export function blocksText(blocks: readonly RenderBlock[]): string {
   return blocks
     .map(b =>
       b.type === 'ar'
@@ -370,7 +438,8 @@ export function createMover(o: MoverOptions): Mover {
     const pack = movePack(ctx);
     const rt = callRuntime(ctx, req, pack);
     const diagnosis = diagnose(ctx, req);
-    const allowed = allowedMoves(reason, tier);
+    const allowed = allowedMoves(reason, tier, pack.domain);
+    const computeNames = deepCompute(pack.domain);
     const prepared: Record<string, CaseFacts> = Object.fromEntries(
       pack.prepared.map(c => [c.id, c.facts]),
     );
@@ -473,9 +542,7 @@ export function createMover(o: MoverOptions): Mover {
           }
           const spec = toolNamed(t.name);
           const run =
-            cfg.compute &&
-            spec &&
-            (DEEP_COMPUTE as readonly string[]).includes(spec.name)
+            cfg.compute && spec && computeNames.includes(spec.name)
               ? COMPUTE[spec.name]
               : undefined;
           if (!spec || !run) {
@@ -521,6 +588,8 @@ export function createMover(o: MoverOptions): Mover {
                 made !== null
                   ? made.spec.kind === 'box'
                     ? `new box n=${made.spec.n} k=${made.spec.k}`
+                    : made.spec.kind === 'tree'
+                    ? `new tree n=${made.spec.n} a=${made.spec.a} af=${made.spec.af} naf=${made.spec.naf}`
                     : `new urn ${made.spec.reds} red ${made.spec.blacks} black k=${made.spec.k} j=${made.spec.j}`
                   : chk.caseId,
               costUsd: 0,

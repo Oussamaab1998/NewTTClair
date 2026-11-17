@@ -23,6 +23,7 @@ import {
   size,
   slider,
   space,
+  tree,
 } from './tokens';
 import { mathSide, reading } from './sides';
 
@@ -45,6 +46,7 @@ export const theme = {
   chart,
   plot,
   pv2,
+  tree,
   slider,
   katex,
   editor,

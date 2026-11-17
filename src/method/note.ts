@@ -14,7 +14,11 @@ export type NeutralCode =
   | 'other_step'
   | 'generic'
   | 'ambiguous'
-  | 'not_order_word';
+  | 'not_order_word'
+  /** The value alone: the statement gives it («Montrer que»), he writes the calculation. */
+  | 'given_value'
+  /** The value alone on a step whose road matters: he writes the calculation. */
+  | 'show_work';
 
 export type MethodNote =
   /** After the plan is ordered: "‹card› comes after ‹cards›, because it uses their results". */
@@ -28,6 +32,11 @@ export type MethodNote =
       support: boolean;
       derivation: 'exact' | 'other' | 'absent';
       unsimplified: boolean;
+      /**
+       * What the node is, as the exam writes it (LaTeX), when its name is a
+       * formula and not words (a tree: p(A ∩ F)): shown on its own line.
+       */
+      label?: string;
     }
   /** A card placed before what it uses: the card and what it still needs. */
   | { kind: 'plan_violation'; card: Rich; needs: Rich[] }
@@ -59,6 +68,8 @@ export type MethodNote =
       outcome: 'credit' | 'slip' | 'other';
       nodeId?: string;
       id?: string;
+      /** The credited node as the exam writes it (see the credit note). */
+      label?: string;
     }
   /** The result differs from what the statement gives: his line and the target, side by side. */
   | { kind: 'target'; line: string; target: Rich };

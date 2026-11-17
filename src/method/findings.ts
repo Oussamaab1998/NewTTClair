@@ -5,7 +5,8 @@
  * nothing is ever shown that he did not compute. Pure.
  */
 import { chooseLine } from '../engine/calcLines';
-import { fractionToPlain } from '../engine/format';
+import { fractionToLatex, fractionToPlain } from '../engine/format';
+import type { Fraction } from '../engine/rational';
 import type { Finding, Rich } from '../content/schema';
 import type { Graph, GraphNode } from './graph';
 import { evalChain } from './lineChain';
@@ -123,23 +124,44 @@ export type SkeletonPart =
 export interface SkeletonRow {
   id: string;
   parts: SkeletonPart[];
+  /**
+   * The line's calculation (LaTeX), when it has one: each `\\his{node}` is
+   * the value of his accepted line of that node.
+   */
+  math?: string;
 }
 
-/** `{node}` blanks of the exam lines, filled with the value of his accepted line of that node. */
+/** A blank of a `math` skeleton line: `\\his{node}`. */
+export const HIS_BLANK = /\\his\{([a-z0-9_]+)\}/g;
+
+/**
+ * `{node}` blanks of the exam lines, filled with the value of his accepted
+ * line of that node. A line with a calculation (`math`) spells the method
+ * out, so it is on the paper only once he has every value in it: until then
+ * the row is left out (rule 6: nothing of the answer before he found it).
+ */
 export function fillSkeleton(input: {
-  skeleton: readonly { id: string; fr: string }[];
+  skeleton: readonly { id: string; fr: string; math?: string | undefined }[];
   graph: Graph;
   lines: Readonly<Record<string, string>>;
 }): SkeletonRow[] {
-  const valueOf = (id: string): string | null => {
+  const fractionOf = (id: string): Fraction | null => {
     const raw = input.lines[id];
     if (raw === undefined || !isExplained(input.graph, id, raw)) {
       return null;
     }
     const c = evalChain(raw);
-    return c.kind === 'unreadable' ? null : fractionToPlain(c.value);
+    return c.kind === 'unreadable' ? null : c.value;
   };
-  return input.skeleton.map(line => {
+  const valueOf = (id: string): string | null => {
+    const v = fractionOf(id);
+    return v ? fractionToPlain(v) : null;
+  };
+  return input.skeleton.flatMap((line): SkeletonRow[] => {
+    const blanks = [...(line.math ?? '').matchAll(HIS_BLANK)].map(m => m[1]!);
+    if (blanks.some(id => fractionOf(id) === null)) {
+      return [];
+    }
     const parts: SkeletonPart[] = [];
     let last = 0;
     for (const m of line.fr.matchAll(/\{([a-z0-9_]+)\}/g)) {
@@ -153,6 +175,13 @@ export function fillSkeleton(input: {
     if (last < line.fr.length) {
       parts.push({ text: line.fr.slice(last) });
     }
-    return { id: line.id, parts };
+    if (line.math !== undefined) {
+      const math = line.math.replace(HIS_BLANK, (_all, id: string) => {
+        const v = fractionOf(id);
+        return v ? fractionToLatex(v) : '\\ldots';
+      });
+      return [{ id: line.id, parts, math }];
+    }
+    return [{ id: line.id, parts }];
   });
 }

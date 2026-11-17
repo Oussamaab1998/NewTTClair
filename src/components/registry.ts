@@ -30,6 +30,7 @@ import {
   EventAreaModelPropsSchema,
   GroupBoxesPropsSchema,
   PartWholeBarPropsSchema,
+  ProbabilityTreePropsSchema,
   RepeatedRunsPropsSchema,
   SlotsPatternPropsSchema,
   SpreadSliderPropsSchema,
@@ -39,6 +40,7 @@ import {
 import { SLOTS_PATTERN_REVEALS } from './probability2/slots';
 import { SPREAD_SLIDER_REVEALS } from './probability2/spread';
 import { VARIABLE_TABLE_REVEALS } from './probability2/table';
+import { PROBABILITY_TREE_REVEALS } from './probability2/treeModel';
 import { URN_TEMPLATE_REVEALS } from './probability2/urnExample';
 import {
   FoldSymmetryPropsSchema,
@@ -246,6 +248,17 @@ export const REGISTRY: Partial<Record<ComponentName, Entry>> = {
     usesExperiment: false,
     gate: ['explored'],
     reveals: URN_TEMPLATE_REVEALS,
+    offeredToPlanner: false,
+  }),
+  // No gate: the lesson draws it read-only on its step card with props it
+  // computes, and a picture that asks nothing must never hold the lesson.
+  ProbabilityTree: entry({
+    schema: ProbabilityTreePropsSchema,
+    kind: 'visual',
+    weight: 'light',
+    teaches: ['conditional-probability', 'probability-tree'],
+    usesExperiment: false,
+    reveals: PROBABILITY_TREE_REVEALS,
     offeredToPlanner: false,
   }),
   // Analysis (COMPONENTS_ANALYSIS.md).

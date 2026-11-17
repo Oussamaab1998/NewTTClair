@@ -7,7 +7,9 @@
  * steps folded to one line each; the card of the step he is on; the chat
  * drawer for free text. Instant replies need no network; the AI answers only where
  * the conductor asks for it (the Mover), and the prepared reply shows when
- * it does not.
+ * it does not. An exercise with a printed figure (a probability tree)
+ * shows it on the trip, in «التمرين», small on the step card and, with what
+ * he found, in «اللي لقيناه» (src/hybrid/figure.ts).
  *
  * The screen moves only to show what just appeared on the card (the top of
  * a new exchange, the case card, the paper back), and never while his
@@ -39,11 +41,13 @@ import {
 import type { LoadedExercise } from '../../../content/loader';
 import { appPaperQuestions } from '../../../content/paper';
 import type { Rich } from '../../../content/schema';
+import { printedFigure } from '../../../hybrid/figure';
 import type { Mover, Templates } from '../../../hybrid/mover';
 import { RichView } from '../../../lesson/feed/RichView';
 import type { DoneRecord } from '../../../state/doneParts';
 import type { KeyValueStore } from '../../../storage/kv';
 import { theme } from '../../../theme';
+import type { DevHybridAct } from '../../dev/launch';
 import { BoardSheet } from './board/BoardSheet';
 import { ExerciseTab } from './board/ExerciseTab';
 import { FoundTab } from './board/FoundTab';
@@ -81,6 +85,11 @@ export interface HybridLessonScreenProps {
   /** Tests: memory stores. */
   store?: KeyValueStore;
   doneRecord?: DoneRecord;
+  /**
+   * Debug builds only (`-devHybridActs`, src/app/dev/launch.ts): acts played
+   * once after the board opens, through the path its buttons use.
+   */
+  devActs?: readonly DevHybridAct[];
 }
 
 function Ended({
@@ -153,6 +162,48 @@ export function HybridLessonScreen(p: HybridLessonScreenProps) {
   }, [touring]);
   const start = useCallback(() => send({ kind: 'continue' }), [send]);
 
+  // Debug builds: the acts given at launch, one per answer (the next one
+  // waits while the AI side is asked). An act that has no button at that
+  // moment («نبداو» after the trip, «نرجعو للسؤال» with no example) is skipped.
+  const { devActs } = p;
+  const [devAt, setDevAt] = useState(0);
+  const devPlayed = useRef(0);
+  const { waiting } = s;
+  const onExample = s.state.onCase !== null;
+  useEffect(() => {
+    const a = __DEV__ && !waiting ? devActs?.[devAt] : undefined;
+    // Each act once, even if the effect runs again before the next render.
+    if (!a || devPlayed.current !== devAt) {
+      return;
+    }
+    devPlayed.current = devAt + 1;
+    switch (a.type) {
+      case 'start':
+        if (touring) {
+          send({ kind: 'continue' });
+        }
+        break;
+      case 'back':
+        if (onExample) {
+          send({ kind: 'continue' });
+        }
+        break;
+      case 'dontKnow':
+        send({ kind: 'dont_know' });
+        break;
+      case 'line':
+        send({ kind: 'line', raw: a.raw });
+        break;
+      case 'choice':
+        send({ kind: 'choice', optionId: a.optionId });
+        break;
+      case 'sheet':
+        setTab(a.tab);
+        break;
+    }
+    setDevAt(devAt + 1);
+  }, [devActs, devAt, waiting, touring, onExample, send]);
+
   // Where the screen is, and whether he is moving it (B11).
   const port = useRef({ height: 0, offset: 0, content: 0 });
   const touching = useRef(false);
@@ -224,6 +275,7 @@ export function HybridLessonScreen(p: HybridLessonScreenProps) {
       : null;
   const step = s.frame ? s.ctx.frames.get(s.frame.frameId) : undefined;
   const experiment = p.loaded.exercise.experiment;
+  const figure = printedFigure(s.ctx);
   const labelOf = (id: string) => questionLabels[id] ?? id;
 
   return (
@@ -266,6 +318,7 @@ export function HybridLessonScreen(p: HybridLessonScreenProps) {
           road={s.road}
           reused={s.reused}
           questionLabels={questionLabels}
+          figure={figure}
           waiting={s.waiting}
           onStart={start}
         />
@@ -340,6 +393,8 @@ export function HybridLessonScreen(p: HybridLessonScreenProps) {
               onFinishPicture={spec => s.finishComponent({ spec })}
               state={s.state}
               levelOf={s.levelOf}
+              figure={s.figure}
+              givens={s.givens}
               onReveal={reveal}
               onLayout={onCardLayout}
             />
@@ -370,7 +425,9 @@ export function HybridLessonScreen(p: HybridLessonScreenProps) {
         {tab === 'road' && (
           <RoadTab road={s.sheets.road()} questionLabels={questionLabels} />
         )}
-        {tab === 'found' && <FoundTab found={s.sheets.found()} />}
+        {tab === 'found' && (
+          <FoundTab found={s.sheets.found()} figure={s.sheets.foundFigure()} />
+        )}
       </BoardSheet>
     </KeyboardAvoidingView>
   );

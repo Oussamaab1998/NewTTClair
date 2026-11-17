@@ -37,6 +37,7 @@ import type {
   JsonObject,
 } from '../../../components/contract';
 import type { LoadedExercise } from '../../../content/loader';
+import { fractionToPlain } from '../../../engine/format';
 import { appPaperQuestions } from '../../../content/paper';
 import {
   boardSteps,
@@ -72,6 +73,11 @@ import type {
   Reason,
   Tier,
 } from '../../../hybrid/conductor/types';
+import {
+  foundFigure,
+  stepFigure,
+  type LiveFigure,
+} from '../../../hybrid/figure';
 import {
   noMover,
   noTemplates,
@@ -152,6 +158,10 @@ export interface HybridView {
   reused: Record<string, ReusedStep>;
   /** The frame he is on (null during the trip and after the end). */
   frame: FrameView | null;
+  /** The exercise's figure as the step card draws it (null: none, the trip, the end). */
+  figure: LiveFigure | null;
+  /** Numbers the figure gives (its printed branches), for the worksheet's tiles. */
+  givens: readonly string[];
   steps: BoardStep[];
   strip: Strip;
   /** Exchanges on the step now (the reply that moved him here first). */
@@ -177,6 +187,8 @@ export interface HybridView {
     exercise: () => ExerciseSheet;
     road: () => RoadSheet;
     found: () => FoundQuestion[];
+    /** The figure with what he found so far (null: the exercise has none). */
+    foundFigure: () => LiveFigure | null;
   };
 }
 
@@ -579,6 +591,18 @@ export function useHybridSession(o: {
   const reused = useMemo(() => reusedSteps(ctx, state), [ctx, state]);
   const strip = useMemo(() => stripOf(steps, road), [steps, road]);
   const frame = useMemo(() => view(ctx, state), [ctx, state]);
+  const figure = useMemo(() => stepFigure(ctx, state), [ctx, state]);
+  // The numbers the figure shows: what the statement prints on it, then what
+  // he found in earlier questions (the live tree writes them on its branches).
+  const carriedKey = Object.values(state.carried ?? {})
+    .map(c => c.value)
+    .join(' ');
+  const givens = useMemo(() => {
+    const printed = (ctx.pack.main?.graph.givens ?? []).map(fractionToPlain);
+    const earlier =
+      printed.length > 0 && carriedKey ? carriedKey.split(' ') : [];
+    return [...new Set([...printed, ...earlier])];
+  }, [ctx, carriedKey]);
 
   const sheets = useMemo(
     () => ({
@@ -616,6 +640,7 @@ export function useHybridSession(o: {
           ).map(foundInputOfRecord),
           foundInputOf(ctx, state, extras.current.rules),
         ),
+      foundFigure: () => foundFigure(ctx, state),
     }),
     [ctx, state, road, steps, components, store, doneRecord],
   );
@@ -627,6 +652,8 @@ export function useHybridSession(o: {
     road,
     reused,
     frame,
+    figure,
+    givens,
     steps,
     strip,
     card,

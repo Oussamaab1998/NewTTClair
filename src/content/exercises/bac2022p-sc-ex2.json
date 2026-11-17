@@ -1,0 +1,4383 @@
+{
+  "id": "bac2022p-sc-ex2",
+  "contentVersion": "p22sc2-0.1.0",
+  "reviewed": false,
+  "title": {
+    "fr": "Exercice 2 : arbre de probabilité",
+    "ar": [
+      {
+        "ar": "تمرين الشجرة"
+      }
+    ]
+  },
+  "number": 2,
+  "subject": "probability",
+  "section": "sciences-experimentales",
+  "statement": {
+    "fr": "On considère l'arbre de probabilité ci-contre où A et F sont deux évènements tels que la probabilité de F est",
+    "math": "p(F) = \\frac{5}{12}"
+  },
+  "figure": {
+    "spec": {
+      "component": "ProbabilityTree",
+      "props": {
+        "branches": [
+          {
+            "id": "a",
+            "latex": "A",
+            "p": "2/3",
+            "show": "given",
+            "children": [
+              {
+                "id": "a.f",
+                "latex": "F",
+                "p": "1/4",
+                "show": "given"
+              },
+              {
+                "id": "a.nf",
+                "latex": "\\overline{F}",
+                "show": "blank",
+                "node": "nf_given_a"
+              }
+            ]
+          },
+          {
+            "id": "na",
+            "latex": "\\overline{A}",
+            "show": "blank",
+            "node": "not_a",
+            "children": [
+              {
+                "id": "na.f",
+                "latex": "F",
+                "show": "blank",
+                "node": "f_given_na"
+              },
+              {
+                "id": "na.nf",
+                "latex": "\\overline{F}",
+                "show": "blank",
+                "node": "nf_given_na"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "marks": {
+      "a_and_f": ["a", "a.f"],
+      "split": ["a", "a.f", "na", "na.f"],
+      "na_and_f": ["na", "na.f"],
+      "not_a": ["na"],
+      "rule": ["na", "na.f"],
+      "f_given_na": ["na.f"],
+      "nf_given_a": ["a.nf"],
+      "nf_given_na": ["na.nf"],
+      "not_f": ["a.nf", "na.nf"],
+      "na_and_nf": ["na", "na.nf"],
+      "na_given_nf": ["na", "na.nf"]
+    }
+  },
+  "paper": {
+    "source": "Examen du baccalauréat · Session principale 2022 · Sciences expérimentales",
+    "points": 3.5,
+    "parts": [
+      {
+        "questions": [
+          {
+            "id": "t1",
+            "label": "1",
+            "status": "available",
+            "wording": [
+              {
+                "fr": "Montrer que",
+                "math": "p(\\overline{A} \\cap F) = \\frac{1}{4}"
+              }
+            ]
+          },
+          {
+            "id": "t2",
+            "label": "2",
+            "status": "available",
+            "wording": [
+              {
+                "fr": "Calculer alors",
+                "math": "p(F/\\overline{A})"
+              }
+            ]
+          },
+          {
+            "id": "t3",
+            "label": "3",
+            "status": "available",
+            "wording": [
+              {
+                "fr": "Recopier et compléter l'arbre de probabilité."
+              }
+            ]
+          },
+          {
+            "id": "t4",
+            "label": "4",
+            "status": "available",
+            "wording": [
+              {
+                "fr": "Calculer",
+                "math": "p(\\overline{A}/\\overline{F})"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "values": {
+    "vAF": {
+      "fn": "tree",
+      "args": {
+        "quantity": "a_and_f",
+        "pA": [2, 3],
+        "pFgA": [1, 4],
+        "pF": [5, 12]
+      }
+    },
+    "vNAF": {
+      "fn": "tree",
+      "args": {
+        "quantity": "na_and_f",
+        "pA": [2, 3],
+        "pFgA": [1, 4],
+        "pF": [5, 12]
+      }
+    },
+    "vNA": {
+      "fn": "tree",
+      "args": {
+        "quantity": "not_a",
+        "pA": [2, 3],
+        "pFgA": [1, 4],
+        "pF": [5, 12]
+      }
+    },
+    "vFgNA": {
+      "fn": "tree",
+      "args": {
+        "quantity": "f_given_na",
+        "pA": [2, 3],
+        "pFgA": [1, 4],
+        "pF": [5, 12]
+      }
+    },
+    "vNFgA": {
+      "fn": "tree",
+      "args": {
+        "quantity": "nf_given_a",
+        "pA": [2, 3],
+        "pFgA": [1, 4],
+        "pF": [5, 12]
+      }
+    },
+    "vNFgNA": {
+      "fn": "tree",
+      "args": {
+        "quantity": "nf_given_na",
+        "pA": [2, 3],
+        "pFgA": [1, 4],
+        "pF": [5, 12]
+      }
+    },
+    "vNF": {
+      "fn": "tree",
+      "args": {
+        "quantity": "not_f",
+        "pA": [2, 3],
+        "pFgA": [1, 4],
+        "pF": [5, 12]
+      }
+    },
+    "vNANF": {
+      "fn": "tree",
+      "args": {
+        "quantity": "na_and_nf",
+        "pA": [2, 3],
+        "pFgA": [1, 4],
+        "pF": [5, 12]
+      }
+    },
+    "vNAgNF": {
+      "fn": "tree",
+      "args": {
+        "quantity": "na_given_nf",
+        "pA": [2, 3],
+        "pFgA": [1, 4],
+        "pF": [5, 12]
+      }
+    }
+  },
+  "results": [
+    {
+      "id": "r_t1",
+      "statement": {
+        "math": "p(\\overline{A} \\cap F) = \\val{vNAF}"
+      }
+    },
+    {
+      "id": "r_t2",
+      "statement": {
+        "math": "p(F/\\overline{A}) = \\val{vFgNA}"
+      }
+    },
+    {
+      "id": "r_t3",
+      "statement": {
+        "math": "p(\\overline{A}) = \\val{vNA},\\ p(\\overline{F}/A) = \\val{vNFgA},\\ p(F/\\overline{A}) = \\val{vFgNA},\\ p(\\overline{F}/\\overline{A}) = \\val{vNFgNA}"
+      }
+    },
+    {
+      "id": "r_t4",
+      "statement": {
+        "math": "p(\\overline{A}/\\overline{F}) = \\val{vNAgNF}"
+      }
+    }
+  ],
+  "parts": [
+    {
+      "id": "t1",
+      "goal": {
+        "fr": "Montrer que",
+        "math": "p(\\overline{A} \\cap F) = \\val{vNAF}"
+      },
+      "expected": "r_t1",
+      "uses": [],
+      "groups": [
+        {
+          "id": "g1",
+          "steps": [
+            {
+              "id": "s1",
+              "blockId": "qp22sc-t1-s1",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "p22sc2-0.1.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": ["probability-tree"],
+              "kind": "text",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "في الشجرة زوز فروع مكتوبين برك، والنص يعطينا الاحتمال الكل متاع الحدث الثاني. نحبّو نورّيو احتمال طريق ما هوش مكتوب في الشجرة:"
+                  }
+                ],
+                "math": "p(\\overline{A} \\cap F) = \\val{vNAF}"
+              }
+            },
+            {
+              "id": "mt1",
+              "blockId": "qp22sc-t1-mt1",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "p22sc2-0.1.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "probability-tree",
+                "total-probability",
+                "fractions-operations"
+              ],
+              "kind": "method",
+              "opening": {
+                "route": [
+                  {
+                    "ar": [
+                      {
+                        "ar": "نبداو بخطة: نرتّبو الخطوات قبل ما نحسبو."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "نشوفو في الشجرة شنوّة مكتوب وشنوّة ناقص."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "بعد نكتبو الحساب سطر بسطر."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "نثبّتو اللي النتيجة هي اللي في النص، ونكتبوها في الورقة."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "وبعدها نحلّو سؤالين شبيهين وحدنا."
+                      }
+                    ]
+                  }
+                ],
+                "help": {
+                  "ar": [
+                    {
+                      "ar": "كان ما تعرفش، اضغط على «ما نعرفش» وتشوف مثال أصغر."
+                    }
+                  ]
+                }
+              },
+              "plan": {
+                "short": {
+                  "ar": [
+                    {
+                      "ar": "الخطة"
+                    }
+                  ]
+                },
+                "header": {
+                  "now": {
+                    "ar": [
+                      {
+                        "ar": "نرتّبو الخطوات"
+                      }
+                    ]
+                  },
+                  "why": {
+                    "ar": [
+                      {
+                        "ar": "كل خطوة تحتاج اللي قبلها"
+                      }
+                    ]
+                  },
+                  "next": {
+                    "ar": [
+                      {
+                        "ar": "نقراو النص"
+                      }
+                    ]
+                  }
+                },
+                "prompt": {
+                  "ar": [
+                    {
+                      "ar": "رتّب الخطوات: شنوّة نعمل الأوّل، وشنوّة بعد؟"
+                    }
+                  ]
+                },
+                "hints": [
+                  {
+                    "ar": [
+                      {
+                        "ar": "فكّر: شنوّة النتيجة اللي تحتاجها كل خطوة باش تتعمل؟"
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "الطريق الآخر ما نلقاوهش قبل ما نحسبو الطريق المعروف."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "ابدا بالطريق اللي فروعو مكتوبين، وخلّي الطريق الآخر للآخر."
+                      }
+                    ]
+                  }
+                ],
+                "cards": [
+                  {
+                    "id": "c_path",
+                    "key": "a_and_f",
+                    "short": {
+                      "ar": [
+                        {
+                          "ar": "الطريق المعروف"
+                        }
+                      ]
+                    },
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نحسبو احتمال الطريق اللي فروعو مكتوبين"
+                        }
+                      ]
+                    },
+                    "header": {
+                      "now": {
+                        "ar": [
+                          {
+                            "ar": "نحسبو احتمال الطريق المعروف"
+                          }
+                        ]
+                      },
+                      "why": {
+                        "ar": [
+                          {
+                            "ar": "هو الطريق الوحيد اللي أعدادو عندنا"
+                          }
+                        ]
+                      },
+                      "next": {
+                        "ar": [
+                          {
+                            "ar": "نشوفو منين يجي الحدث الثاني"
+                          }
+                        ]
+                      }
+                    },
+                    "needs": [],
+                    "prompt": {
+                      "ar": [
+                        {
+                          "ar": "اكتب الحساب: احتمال الطريق المعلَّم في الشجرة."
+                        }
+                      ],
+                      "math": "p(A \\cap F)"
+                    },
+                    "hints": [
+                      {
+                        "ar": [
+                          {
+                            "ar": "شوف الطريق المعلَّم: قدّاش من فرع نتعدّاو عليه من الأوّل للآخر؟"
+                          }
+                        ]
+                      },
+                      {
+                        "ar": [
+                          {
+                            "ar": "باش نمشيو الطريق كامل، ناخذو الفرع الأوّل ومن بعدو الفرع الثاني: احتمال الطريق هو ضرب الفرعين."
+                          }
+                        ]
+                      },
+                      {
+                        "ar": [
+                          {
+                            "ar": "القاعدة:"
+                          }
+                        ],
+                        "math": "p(A \\cap F) = p(A) \\times p(F/A)"
+                      }
+                    ]
+                  },
+                  {
+                    "id": "c_split",
+                    "key": "split",
+                    "short": {
+                      "ar": [
+                        {
+                          "ar": "طريقين"
+                        }
+                      ]
+                    },
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نشوفو منين يجي الحدث الثاني"
+                        }
+                      ]
+                    },
+                    "header": {
+                      "now": {
+                        "ar": [
+                          {
+                            "ar": "نشوفو منين يجي الحدث الثاني"
+                          }
+                        ]
+                      },
+                      "why": {
+                        "ar": [
+                          {
+                            "ar": "الاحتمال الكل متاعو جاي من الطرق اللي توصّل ليه"
+                          }
+                        ]
+                      },
+                      "next": {
+                        "ar": [
+                          {
+                            "ar": "نطلّعو الطريق الآخر"
+                          }
+                        ]
+                      }
+                    },
+                    "needs": ["c_path"],
+                    "prompt": {
+                      "ar": [
+                        {
+                          "ar": "الحدث الثاني يتحقّق من أنا طريق في الشجرة؟ اختار الكتيبة الصحيحة."
+                        }
+                      ]
+                    },
+                    "hints": [
+                      {
+                        "ar": [
+                          {
+                            "ar": "تبّع بإصبعك في الشجرة: قدّاش من طريق يوفى عند نفس الحدث؟"
+                          }
+                        ]
+                      },
+                      {
+                        "ar": [
+                          {
+                            "ar": "فما طريق يتعدّى من فوق وطريق يتعدّى من تحت، وما يتقابلوش: الاحتمال الكل هو متاع الأوّل ومتاع الثاني مع بعضهم."
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "c_rest",
+                    "key": "na_and_f",
+                    "short": {
+                      "ar": [
+                        {
+                          "ar": "الطريق الآخر"
+                        }
+                      ]
+                    },
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نطلّعو احتمال الطريق الآخر من الاحتمال الكل"
+                        }
+                      ]
+                    },
+                    "header": {
+                      "now": {
+                        "ar": [
+                          {
+                            "ar": "نطلّعو احتمال الطريق الآخر"
+                          }
+                        ]
+                      },
+                      "why": {
+                        "ar": [
+                          {
+                            "ar": "نعرفو الاحتمال الكل ونعرفو طريق منهم"
+                          }
+                        ]
+                      },
+                      "next": {
+                        "ar": [
+                          {
+                            "ar": "نكتبو في الورقة"
+                          }
+                        ]
+                      }
+                    },
+                    "needs": ["c_path", "c_split"],
+                    "prompt": {
+                      "ar": [
+                        {
+                          "ar": "اكتب الحساب اللي يوصّل للنتيجة متاع النص."
+                        }
+                      ],
+                      "math": "p(\\overline{A} \\cap F)"
+                    },
+                    "hints": [
+                      {
+                        "ar": [
+                          {
+                            "ar": "عندك الاحتمال الكل، وعندك طريق من الزوز. كيفاش تلقى الطريق الآخر؟"
+                          }
+                        ]
+                      },
+                      {
+                        "ar": [
+                          {
+                            "ar": "الاحتمال الكل هو الطريق الأوّل مع الطريق الثاني: نطرحو منّو الطريق اللي حسبناه."
+                          }
+                        ]
+                      },
+                      {
+                        "ar": [
+                          {
+                            "ar": "القاعدة:"
+                          }
+                        ],
+                        "math": "p(\\overline{A} \\cap F) = p(F) - p(A \\cap F)"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "builtFrames": ["c_path", "c_rest"],
+              "read": {
+                "short": {
+                  "ar": [
+                    {
+                      "ar": "القراءة"
+                    }
+                  ]
+                },
+                "header": {
+                  "now": {
+                    "ar": [
+                      {
+                        "ar": "نقراو النص"
+                      }
+                    ]
+                  },
+                  "why": {
+                    "ar": [
+                      {
+                        "ar": "النص يقول منين نجيبو الأعداد"
+                      }
+                    ]
+                  },
+                  "next": {
+                    "ar": [
+                      {
+                        "ar": "نحسبو الطريق المعروف"
+                      }
+                    ]
+                  }
+                },
+                "prompt": {
+                  "ar": [
+                    {
+                      "ar": "اضغط على الكلمة اللي تقول منين نجيبو الأعداد."
+                    }
+                  ]
+                },
+                "hints": [
+                  {
+                    "ar": [
+                      {
+                        "ar": "النص فيه عدد واحد برك. الأعداد الأخرين وين مكتوبين؟"
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "كلمة وحدة تسمّي الرسم اللي فيه الفروع."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "اضغط على "
+                      },
+                      {
+                        "fr": "arbre"
+                      }
+                    ]
+                  }
+                ],
+                "targets": [
+                  {
+                    "token": "arbre",
+                    "effect": {
+                      "figure": "tree"
+                    }
+                  },
+                  {
+                    "token": "l'arbre",
+                    "effect": {
+                      "figure": "tree"
+                    }
+                  }
+                ],
+                "notOrderWord": {
+                  "ar": [
+                    {
+                      "ar": "الكلمة هاذي ما تجاوبش على السؤال. اقرا من جديد."
+                    }
+                  ]
+                }
+              },
+              "paper": {
+                "short": {
+                  "ar": [
+                    {
+                      "ar": "الورقة"
+                    }
+                  ]
+                },
+                "header": {
+                  "now": {
+                    "ar": [
+                      {
+                        "ar": "نكتبو الجواب في الورقة"
+                      }
+                    ]
+                  },
+                  "why": {
+                    "ar": [
+                      {
+                        "ar": "الامتحان يطلب الكتابة بالتفصيل"
+                      }
+                    ]
+                  },
+                  "next": {
+                    "ar": [
+                      {
+                        "ar": "نحلّو سؤال شبيه"
+                      }
+                    ]
+                  }
+                }
+              },
+              "graph": {
+                "template": "tree_other_path",
+                "args": {
+                  "pA": [2, 3],
+                  "pFgA": [1, 4],
+                  "pF": [5, 12]
+                }
+              },
+              "target": {
+                "math": "p(\\overline{A} \\cap F) = \\val{vNAF}"
+              },
+              "picks": [
+                {
+                  "id": "c_split",
+                  "after": "c_split",
+                  "short": {
+                    "ar": [
+                      {
+                        "ar": "طريقين"
+                      }
+                    ]
+                  },
+                  "header": {
+                    "now": {
+                      "ar": [
+                        {
+                          "ar": "نشوفو منين يجي الحدث الثاني"
+                        }
+                      ]
+                    },
+                    "why": {
+                      "ar": [
+                        {
+                          "ar": "الاحتمال الكل متاعو جاي من الطرق اللي توصّل ليه"
+                        }
+                      ]
+                    },
+                    "next": {
+                      "ar": [
+                        {
+                          "ar": "نطلّعو الطريق الآخر"
+                        }
+                      ]
+                    }
+                  },
+                  "prompt": {
+                    "ar": [
+                      {
+                        "ar": "الحدث الثاني يتحقّق من أنا طريق في الشجرة؟ اختار الكتيبة الصحيحة."
+                      }
+                    ]
+                  },
+                  "hints": [
+                    {
+                      "ar": [
+                        {
+                          "ar": "تبّع بإصبعك في الشجرة: قدّاش من طريق يوفى عند نفس الحدث؟"
+                        }
+                      ]
+                    },
+                    {
+                      "ar": [
+                        {
+                          "ar": "فما طريق يتعدّى من فوق وطريق يتعدّى من تحت، وما يتقابلوش: الاحتمال الكل هو متاع الأوّل ومتاع الثاني مع بعضهم."
+                        }
+                      ]
+                    }
+                  ],
+                  "evaluator": "pick",
+                  "args": {},
+                  "cards": [
+                    {
+                      "id": "k_sum",
+                      "text": {
+                        "ar": [
+                          {
+                            "ar": "من طريقين: واحد يتعدّى من الفرع الفوقاني وواحد من التحتاني."
+                          }
+                        ],
+                        "math": "p(F) = p(A \\cap F) + p(\\overline{A} \\cap F)"
+                      },
+                      "truth": "true"
+                    },
+                    {
+                      "id": "k_branches",
+                      "text": {
+                        "ar": [
+                          {
+                            "ar": "نزيدو الفرعين الأخرانيين لبعضهم."
+                          }
+                        ],
+                        "math": "p(F) = p(F/A) + p(F/\\overline{A})"
+                      },
+                      "truth": "false",
+                      "misconceptionId": "mut.adds_branches_for_total",
+                      "feedback": {
+                        "ar": [
+                          {
+                            "ar": "الفرع الأخراني وحدو موش طريق كامل: يلزمو الفرع اللي قبلو. شوف: كل طريق فيه قدّاش من فرع؟"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "id": "k_product",
+                      "text": {
+                        "ar": [
+                          {
+                            "ar": "نضربو الطريقين في بعضهم."
+                          }
+                        ],
+                        "math": "p(F) = p(A \\cap F) \\times p(\\overline{A} \\cap F)"
+                      },
+                      "truth": "false",
+                      "misconceptionId": "mut.multiplies_paths",
+                      "feedback": {
+                        "ar": [
+                          {
+                            "ar": "نضربو كي نمشيو فرع ومن بعدو فرع في نفس الطريق. هنا طريقين مختلفين، والحدث يجي من هذا ولا من هذا."
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ],
+              "recipe": {
+                "short": {
+                  "ar": [
+                    {
+                      "ar": "الوصفة"
+                    }
+                  ]
+                },
+                "header": {
+                  "now": {
+                    "ar": [
+                      {
+                        "ar": "نكتبو الوصفة متاعنا"
+                      }
+                    ]
+                  },
+                  "why": {
+                    "ar": [
+                      {
+                        "ar": "الوصفة تعاونّا في الأسئلة الشبيهة"
+                      }
+                    ]
+                  },
+                  "next": {
+                    "ar": [
+                      {
+                        "ar": "نكتبو في الورقة"
+                      }
+                    ]
+                  }
+                },
+                "prompt": {
+                  "ar": [
+                    {
+                      "ar": "اختار من ثلاثة لخمسة جمل ورتّبهم: هذي وصفتك لهذا النوع من الأسئلة."
+                    }
+                  ]
+                },
+                "hints": [],
+                "pool": [
+                  {
+                    "id": "rq_path",
+                    "kind": "step",
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نحسبو الطريق اللي فروعو مكتوبين: نضربو فرع في فرع."
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "rq_split",
+                    "kind": "step",
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نكتبو الحدث على طريقين في الشجرة."
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "rq_rest",
+                    "kind": "step",
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نطرحو الطريق المعروف من الاحتمال الكل."
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "rq_check",
+                    "kind": "check",
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نثبّت: النتيجة هي اللي في النص، والكسر مبسّط."
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "rq_d1",
+                    "kind": "distractor",
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نطرحو العددين المكتوبين في النص من بعضهم."
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "rq_d2",
+                    "kind": "distractor",
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نكتبو النتيجة متاع النص ونقولو هي الجواب."
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "rq_d3",
+                    "kind": "distractor",
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نزيدو الفرعين متاع نفس الطريق لبعضهم."
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "clean": ["rq_path", "rq_split", "rq_rest", "rq_check"]
+              },
+              "methodCard": {
+                "type": {
+                  "ar": [
+                    {
+                      "ar": "احتمال طريق من "
+                    },
+                    {
+                      "fr": "arbre"
+                    },
+                    {
+                      "ar": " كي نعرفو الاحتمال الكل"
+                    }
+                  ]
+                },
+                "steps": [
+                  {
+                    "ar": [
+                      {
+                        "ar": "نحسبو الطريق المعروف: فرع في فرع."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "الحدث يجي من طريقين: الاحتمال الكل هو متاعهم مع بعض."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "نطرحو الطريق المعروف من الكل."
+                      }
+                    ]
+                  }
+                ],
+                "checks": [
+                  {
+                    "ar": [
+                      {
+                        "ar": "الاحتمال بين الصفر والواحد."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "الكسر مبسّط."
+                      }
+                    ]
+                  }
+                ]
+              },
+              "similar": [
+                {
+                  "id": "same",
+                  "kind": "same_structure",
+                  "statement": {
+                    "fr": "Dans l'arbre de probabilité ci-contre, A et F sont deux évènements tels que p(F) = 2/5. Montrer que la probabilité de l'évènement « non A et F » est 1/10."
+                  },
+                  "figure": {
+                    "spec": {
+                      "component": "ProbabilityTree",
+                      "props": {
+                        "branches": [
+                          {
+                            "id": "a",
+                            "latex": "A",
+                            "p": "4/5",
+                            "show": "given",
+                            "children": [
+                              {
+                                "id": "a.f",
+                                "latex": "F",
+                                "p": "3/8",
+                                "show": "given"
+                              },
+                              {
+                                "id": "a.nf",
+                                "latex": "\\overline{F}",
+                                "show": "blank"
+                              }
+                            ]
+                          },
+                          {
+                            "id": "na",
+                            "latex": "\\overline{A}",
+                            "show": "blank",
+                            "children": [
+                              {
+                                "id": "na.f",
+                                "latex": "F",
+                                "show": "blank"
+                              },
+                              {
+                                "id": "na.nf",
+                                "latex": "\\overline{F}",
+                                "show": "blank"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "graph": {
+                    "template": "tree_other_path",
+                    "args": {
+                      "pA": [4, 5],
+                      "pFgA": [3, 8],
+                      "pF": [2, 5]
+                    }
+                  },
+                  "allow": []
+                },
+                {
+                  "id": "twist",
+                  "kind": "twist",
+                  "statement": {
+                    "fr": "Dans l'arbre de probabilité ci-contre, A et F sont deux évènements tels que p(F) = 2/5. Montrer que p(A ∩ F) = 3/10."
+                  },
+                  "figure": {
+                    "spec": {
+                      "component": "ProbabilityTree",
+                      "props": {
+                        "branches": [
+                          {
+                            "id": "a",
+                            "latex": "A",
+                            "show": "blank",
+                            "children": [
+                              {
+                                "id": "a.f",
+                                "latex": "F",
+                                "show": "blank"
+                              },
+                              {
+                                "id": "a.nf",
+                                "latex": "\\overline{F}",
+                                "show": "blank"
+                              }
+                            ]
+                          },
+                          {
+                            "id": "na",
+                            "latex": "\\overline{A}",
+                            "p": "1/8",
+                            "show": "given",
+                            "children": [
+                              {
+                                "id": "na.f",
+                                "latex": "F",
+                                "p": "4/5",
+                                "show": "given"
+                              },
+                              {
+                                "id": "na.nf",
+                                "latex": "\\overline{F}",
+                                "show": "blank"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "graph": {
+                    "template": "tree_other_path",
+                    "args": {
+                      "pA": [1, 8],
+                      "pFgA": [4, 5],
+                      "pF": [2, 5],
+                      "swap": true
+                    }
+                  },
+                  "allow": []
+                }
+              ],
+              "findings": [
+                {
+                  "id": "f_path",
+                  "title": {
+                    "ar": [
+                      {
+                        "ar": "احتمال الطريق المعروف"
+                      }
+                    ]
+                  },
+                  "nodes": ["a_and_f"],
+                  "reasons": {
+                    "a_and_f": {
+                      "ar": [
+                        {
+                          "ar": "نمشيو فرع ومن بعدو فرع: نضربو."
+                        }
+                      ]
+                    }
+                  },
+                  "rule": {
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "احتمال طريق هو ضرب الفروع اللي فيه."
+                        }
+                      ]
+                    },
+                    "condition": {
+                      "ar": [
+                        {
+                          "ar": "كي الفرع الثاني مكتوب بعد الفرع الأوّل في نفس الطريق."
+                        }
+                      ]
+                    }
+                  },
+                  "bridge": true
+                },
+                {
+                  "id": "f_rest",
+                  "title": {
+                    "ar": [
+                      {
+                        "ar": "احتمال الطريق الآخر"
+                      }
+                    ]
+                  },
+                  "nodes": ["na_and_f"],
+                  "reasons": {
+                    "na_and_f": {
+                      "ar": [
+                        {
+                          "ar": "الحدث يجي من طريقين برك، نحّينا واحد."
+                        }
+                      ]
+                    }
+                  },
+                  "viaCard": "c_split",
+                  "rule": {
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "الاحتمال الكل متاع حدث هو الطرق اللي توصّل ليه مع بعضهم."
+                        }
+                      ]
+                    },
+                    "condition": {
+                      "ar": [
+                        {
+                          "ar": "كي الطرق ما يتقابلوش."
+                        }
+                      ]
+                    }
+                  },
+                  "bridge": true
+                }
+              ],
+              "skeleton": [
+                {
+                  "id": "k1",
+                  "fr": "Le long de la première branche :",
+                  "math": "p(A \\cap F) = p(A) \\times p(F/A) = \\frac{2}{3} \\times \\frac{1}{4} = \\his{a_and_f}"
+                },
+                {
+                  "id": "k2",
+                  "fr": "F est la réunion de deux évènements incompatibles, A ∩ F et « non A » ∩ F, donc p(F) est la somme de leurs probabilités. D'où :",
+                  "math": "p(\\overline{A} \\cap F) = p(F) - p(A \\cap F) = \\frac{5}{12} - \\his{a_and_f} = \\his{na_and_f}"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "writeup": {
+        "elements": [
+          "two_disjoint_paths",
+          "path_product",
+          "subtract_known_path",
+          "conclusion"
+        ],
+        "modelFr": [
+          "F est réalisé par deux chemins de l'arbre qui ne se rencontrent pas : p(F) = p(A ∩ F) + p(Ā ∩ F).",
+          "Or p(A ∩ F) = p(A) × p(F / A) = 2/3 × 1/4 = \\val{vAF}.",
+          "Donc p(Ā ∩ F) = 5/12 − \\val{vAF} = 3/12 = \\val{vNAF}."
+        ]
+      }
+    },
+    {
+      "id": "t2",
+      "goal": {
+        "fr": "Calculer alors",
+        "math": "p(F/\\overline{A})"
+      },
+      "expected": "r_t2",
+      "uses": ["r_t1"],
+      "groups": [
+        {
+          "id": "g2",
+          "steps": [
+            {
+              "id": "s1",
+              "blockId": "qp22sc-t2-s1",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "p22sc2-0.1.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": ["probability-tree"],
+              "kind": "text",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "توّا نعرفو احتمال الطريق التحتاني اللي يوصّل للحدث الثاني. نحبّو الفرع الثاني متاعو: احتمال الحدث الثاني كي نكونو ديجا في الجهة التحتانية."
+                  }
+                ],
+                "math": "p(F/\\overline{A})"
+              }
+            },
+            {
+              "id": "mt2",
+              "blockId": "qp22sc-t2-mt2",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "p22sc2-0.1.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "conditional-probability",
+                "complement-event",
+                "fractions-operations"
+              ],
+              "kind": "method",
+              "opening": {
+                "route": [
+                  {
+                    "ar": [
+                      {
+                        "ar": "نبداو بخطة: نرتّبو الخطوات قبل ما نحسبو."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "نشوفو شنوّة نعرفو توّا من السؤال اللي قبل."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "بعد نكتبو الحساب سطر بسطر."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "في الآخر نكتبو الجواب في الورقة."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "وبعدها نحلّو سؤالين شبيهين وحدنا."
+                      }
+                    ]
+                  }
+                ],
+                "help": {
+                  "ar": [
+                    {
+                      "ar": "كان ما تعرفش، اضغط على «ما نعرفش» وتشوف مثال أصغر."
+                    }
+                  ]
+                }
+              },
+              "plan": {
+                "short": {
+                  "ar": [
+                    {
+                      "ar": "الخطة"
+                    }
+                  ]
+                },
+                "header": {
+                  "now": {
+                    "ar": [
+                      {
+                        "ar": "نرتّبو الخطوات"
+                      }
+                    ]
+                  },
+                  "why": {
+                    "ar": [
+                      {
+                        "ar": "كل خطوة تحتاج اللي قبلها"
+                      }
+                    ]
+                  },
+                  "next": {
+                    "ar": [
+                      {
+                        "ar": "نقراو النص"
+                      }
+                    ]
+                  }
+                },
+                "prompt": {
+                  "ar": [
+                    {
+                      "ar": "رتّب الخطوات: شنوّة نعمل الأوّل، وشنوّة بعد؟"
+                    }
+                  ]
+                },
+                "hints": [
+                  {
+                    "ar": [
+                      {
+                        "ar": "فكّر: شنوّة النتيجة اللي تحتاجها كل خطوة باش تتعمل؟"
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "الفرع الناقص يتحسب من الطريق ومن الفرع الأوّل متاعو."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "ابدا بالفرع الأوّل التحتاني، ومن بعد القاعدة، وخلّي الفرع الناقص للآخر."
+                      }
+                    ]
+                  }
+                ],
+                "cards": [
+                  {
+                    "id": "c_other",
+                    "key": "not_a",
+                    "short": {
+                      "ar": [
+                        {
+                          "ar": "الفرع الأوّل"
+                        }
+                      ]
+                    },
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نلقاو الفرع الأوّل متاع الجهة التحتانية"
+                        }
+                      ]
+                    },
+                    "header": {
+                      "now": {
+                        "ar": [
+                          {
+                            "ar": "نلقاو الفرع الأوّل التحتاني"
+                          }
+                        ]
+                      },
+                      "why": {
+                        "ar": [
+                          {
+                            "ar": "الطريق التحتاني يبدا بيه"
+                          }
+                        ]
+                      },
+                      "next": {
+                        "ar": [
+                          {
+                            "ar": "نختارو القاعدة"
+                          }
+                        ]
+                      }
+                    },
+                    "needs": [],
+                    "prompt": {
+                      "ar": [
+                        {
+                          "ar": "اكتب الحساب: الفرع المعلَّم في الشجرة."
+                        }
+                      ],
+                      "math": "p(\\overline{A})"
+                    },
+                    "hints": [
+                      {
+                        "ar": [
+                          {
+                            "ar": "شوف العقدة الأولى: يخرجو منها زوز فروع، وواحد منهم مكتوب."
+                          }
+                        ]
+                      },
+                      {
+                        "ar": [
+                          {
+                            "ar": "الفروع اللي خارجين من نفس العقدة يكمّلو بعضهم للواحد: نطرحو الفرع المكتوب من الواحد."
+                          }
+                        ]
+                      },
+                      {
+                        "ar": [
+                          {
+                            "ar": "القاعدة:"
+                          }
+                        ],
+                        "math": "p(\\overline{A}) = 1 - p(A)"
+                      }
+                    ]
+                  },
+                  {
+                    "id": "c_rule",
+                    "key": "rule",
+                    "short": {
+                      "ar": [
+                        {
+                          "ar": "القاعدة"
+                        }
+                      ]
+                    },
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نختارو الكتيبة متاع الفرع الثاني"
+                        }
+                      ]
+                    },
+                    "header": {
+                      "now": {
+                        "ar": [
+                          {
+                            "ar": "نختارو القاعدة"
+                          }
+                        ]
+                      },
+                      "why": {
+                        "ar": [
+                          {
+                            "ar": "الطريق هو فرع في فرع: نعرفو الطريق ونعرفو فرع"
+                          }
+                        ]
+                      },
+                      "next": {
+                        "ar": [
+                          {
+                            "ar": "نحسبو الفرع الناقص"
+                          }
+                        ]
+                      }
+                    },
+                    "needs": ["c_other"],
+                    "prompt": {
+                      "ar": [
+                        {
+                          "ar": "أنا كتيبة تعطينا الفرع الثاني التحتاني؟"
+                        }
+                      ]
+                    },
+                    "hints": [
+                      {
+                        "ar": [
+                          {
+                            "ar": "الطريق التحتاني هو الفرع الأوّل في الفرع الثاني. نعرفو الطريق ونعرفو الفرع الأوّل."
+                          }
+                        ]
+                      },
+                      {
+                        "ar": [
+                          {
+                            "ar": "كي نعرفو ضرب عددين ونعرفو واحد منهم، الآخر نلقاوه بالقسمة."
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "c_branch",
+                    "key": "f_given_na",
+                    "short": {
+                      "ar": [
+                        {
+                          "ar": "الفرع الناقص"
+                        }
+                      ]
+                    },
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نطلّعو الفرع الثاني من الطريق"
+                        }
+                      ]
+                    },
+                    "header": {
+                      "now": {
+                        "ar": [
+                          {
+                            "ar": "نحسبو الفرع الناقص"
+                          }
+                        ]
+                      },
+                      "why": {
+                        "ar": [
+                          {
+                            "ar": "عندنا الطريق وعندنا الفرع الأوّل"
+                          }
+                        ]
+                      },
+                      "next": {
+                        "ar": [
+                          {
+                            "ar": "نكتبو في الورقة"
+                          }
+                        ]
+                      }
+                    },
+                    "needs": ["c_other", "c_rule"],
+                    "prompt": {
+                      "ar": [
+                        {
+                          "ar": "اكتب الحساب: الفرع المعلَّم في الشجرة."
+                        }
+                      ],
+                      "math": "p(F/\\overline{A})"
+                    },
+                    "hints": [
+                      {
+                        "ar": [
+                          {
+                            "ar": "شنوّة تقسم على شنوّة؟ شوف القاعدة اللي اخترتها."
+                          }
+                        ]
+                      },
+                      {
+                        "ar": [
+                          {
+                            "ar": "فوق: احتمال الطريق التحتاني. تحت: الفرع الأوّل التحتاني. والقسمة على كسر هي ضرب في مقلوبو."
+                          }
+                        ]
+                      },
+                      {
+                        "ar": [
+                          {
+                            "ar": "القاعدة:"
+                          }
+                        ],
+                        "math": "p(F/\\overline{A}) = \\frac{p(\\overline{A} \\cap F)}{p(\\overline{A})}"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "builtFrames": ["c_other", "c_branch"],
+              "read": {
+                "short": {
+                  "ar": [
+                    {
+                      "ar": "القراءة"
+                    }
+                  ]
+                },
+                "header": {
+                  "now": {
+                    "ar": [
+                      {
+                        "ar": "نقراو السؤال"
+                      }
+                    ]
+                  },
+                  "why": {
+                    "ar": [
+                      {
+                        "ar": "كلمة فيه تربطو بالسؤال اللي قبل"
+                      }
+                    ]
+                  },
+                  "next": {
+                    "ar": [
+                      {
+                        "ar": "نلقاو الفرع الأوّل التحتاني"
+                      }
+                    ]
+                  }
+                },
+                "prompt": {
+                  "ar": [
+                    {
+                      "ar": "اضغط على الكلمة اللي تقول اللي نتيجة السؤال اللي قبل تخدمنا."
+                    }
+                  ]
+                },
+                "hints": [
+                  {
+                    "ar": [
+                      {
+                        "ar": "السؤال هذا ما يبداش من الصفر: فما كلمة تربطو باللي قبلو."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "كلمة صغيرة تجي بعد الفعل الأوّل، ومعناها: بعد اللي لقيناه."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "اضغط على "
+                      },
+                      {
+                        "fr": "alors"
+                      }
+                    ]
+                  }
+                ],
+                "targets": [
+                  {
+                    "token": "alors",
+                    "effect": {
+                      "uses": "previous"
+                    }
+                  }
+                ],
+                "notOrderWord": {
+                  "ar": [
+                    {
+                      "ar": "الكلمة هاذي ما تجاوبش على السؤال. اقرا من جديد."
+                    }
+                  ]
+                },
+                "sentence": "Calculer alors la probabilité de F sachant non A."
+              },
+              "paper": {
+                "short": {
+                  "ar": [
+                    {
+                      "ar": "الورقة"
+                    }
+                  ]
+                },
+                "header": {
+                  "now": {
+                    "ar": [
+                      {
+                        "ar": "نكتبو الجواب في الورقة"
+                      }
+                    ]
+                  },
+                  "why": {
+                    "ar": [
+                      {
+                        "ar": "الامتحان يطلب الكتابة بالتفصيل"
+                      }
+                    ]
+                  },
+                  "next": {
+                    "ar": [
+                      {
+                        "ar": "نحلّو سؤال شبيه"
+                      }
+                    ]
+                  }
+                }
+              },
+              "graph": {
+                "template": "tree_conditional",
+                "args": {
+                  "pA": [2, 3],
+                  "pFgA": [1, 4],
+                  "pF": [5, 12]
+                }
+              },
+              "picks": [
+                {
+                  "id": "c_rule",
+                  "after": "c_rule",
+                  "short": {
+                    "ar": [
+                      {
+                        "ar": "القاعدة"
+                      }
+                    ]
+                  },
+                  "header": {
+                    "now": {
+                      "ar": [
+                        {
+                          "ar": "نختارو القاعدة"
+                        }
+                      ]
+                    },
+                    "why": {
+                      "ar": [
+                        {
+                          "ar": "الطريق هو فرع في فرع: نعرفو الطريق ونعرفو فرع"
+                        }
+                      ]
+                    },
+                    "next": {
+                      "ar": [
+                        {
+                          "ar": "نحسبو الفرع الناقص"
+                        }
+                      ]
+                    }
+                  },
+                  "prompt": {
+                    "ar": [
+                      {
+                        "ar": "أنا كتيبة تعطينا الفرع الثاني التحتاني؟"
+                      }
+                    ]
+                  },
+                  "hints": [
+                    {
+                      "ar": [
+                        {
+                          "ar": "الطريق التحتاني هو الفرع الأوّل في الفرع الثاني. نعرفو الطريق ونعرفو الفرع الأوّل."
+                        }
+                      ]
+                    },
+                    {
+                      "ar": [
+                        {
+                          "ar": "كي نعرفو ضرب عددين ونعرفو واحد منهم، الآخر نلقاوه بالقسمة."
+                        }
+                      ]
+                    }
+                  ],
+                  "evaluator": "pick",
+                  "args": {},
+                  "cards": [
+                    {
+                      "id": "k_quot",
+                      "text": {
+                        "ar": [
+                          {
+                            "ar": "نقسمو احتمال الطريق على الفرع الأوّل متاعو."
+                          }
+                        ],
+                        "math": "p(F/\\overline{A}) = \\frac{p(\\overline{A} \\cap F)}{p(\\overline{A})}"
+                      },
+                      "truth": "true"
+                    },
+                    {
+                      "id": "k_comp",
+                      "text": {
+                        "ar": [
+                          {
+                            "ar": "نطرحو الفرع الفوقاني من الواحد."
+                          }
+                        ],
+                        "math": "p(F/\\overline{A}) = 1 - p(F/A)"
+                      },
+                      "truth": "false",
+                      "misconceptionId": "mut.complement_across_nodes",
+                      "feedback": {
+                        "ar": [
+                          {
+                            "ar": "الطرح من الواحد يصلح للفروع اللي خارجين من نفس العقدة. الفرعين هاذم خارجين من عقدتين مختلفين: شوفهم في الشجرة."
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "id": "k_total",
+                      "text": {
+                        "ar": [
+                          {
+                            "ar": "نقسمو احتمال الطريق على الاحتمال الكل متاع الحدث الثاني."
+                          }
+                        ],
+                        "math": "p(F/\\overline{A}) = \\frac{p(\\overline{A} \\cap F)}{p(F)}"
+                      },
+                      "truth": "false",
+                      "misconceptionId": "mut.divides_by_total",
+                      "feedback": {
+                        "ar": [
+                          {
+                            "ar": "القسمة تكون على اللي نعرفوه ديجا: الجهة اللي احنا فيها. شنوّة مكتوب بعد العلامة المايلة؟"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "id": "k_same",
+                      "text": {
+                        "ar": [
+                          {
+                            "ar": "هو بيدو احتمال الطريق، ما فيها حساب."
+                          }
+                        ],
+                        "math": "p(F/\\overline{A}) = p(\\overline{A} \\cap F)"
+                      },
+                      "truth": "false",
+                      "misconceptionId": "mut.intersection_for_conditional",
+                      "feedback": {
+                        "ar": [
+                          {
+                            "ar": "الطريق كامل يبدا من الأوّل. الفرع الثاني يبدا من العقدة التحتانية برك: ما هوش نفس الحاجة."
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ],
+              "recipe": {
+                "short": {
+                  "ar": [
+                    {
+                      "ar": "الوصفة"
+                    }
+                  ]
+                },
+                "header": {
+                  "now": {
+                    "ar": [
+                      {
+                        "ar": "نكتبو الوصفة متاعنا"
+                      }
+                    ]
+                  },
+                  "why": {
+                    "ar": [
+                      {
+                        "ar": "الوصفة تعاونّا في الأسئلة الشبيهة"
+                      }
+                    ]
+                  },
+                  "next": {
+                    "ar": [
+                      {
+                        "ar": "نكتبو في الورقة"
+                      }
+                    ]
+                  }
+                },
+                "prompt": {
+                  "ar": [
+                    {
+                      "ar": "اختار من ثلاثة لخمسة جمل ورتّبهم: هذي وصفتك لهذا النوع من الأسئلة."
+                    }
+                  ]
+                },
+                "hints": [],
+                "pool": [
+                  {
+                    "id": "rq_other",
+                    "kind": "step",
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نلقاو الفرع الأوّل: نطرحو أخوه من الواحد."
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "rq_rule",
+                    "kind": "step",
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نكتبو القاعدة: الطريق على الفرع الأوّل."
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "rq_divide",
+                    "kind": "step",
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نقسمو، ونبسّطو."
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "rq_check",
+                    "kind": "check",
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نثبّت: النتيجة بين الصفر والواحد."
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "rq_d1",
+                    "kind": "distractor",
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نطرحو الفرع الفوقاني من الواحد."
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "rq_d2",
+                    "kind": "distractor",
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نقسمو على الاحتمال الكل متاع الحدث الثاني."
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "rq_d3",
+                    "kind": "distractor",
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نضربو الطريق في الفرع الأوّل."
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "clean": ["rq_other", "rq_rule", "rq_divide", "rq_check"]
+              },
+              "methodCard": {
+                "type": {
+                  "ar": [
+                    {
+                      "ar": "فرع ثاني من "
+                    },
+                    {
+                      "fr": "arbre"
+                    },
+                    {
+                      "ar": " كي نعرفو الطريق ("
+                    },
+                    {
+                      "fr": "probabilité conditionnelle"
+                    },
+                    {
+                      "ar": ")"
+                    }
+                  ]
+                },
+                "steps": [
+                  {
+                    "ar": [
+                      {
+                        "ar": "نلقاو الفرع الأوّل متاع نفس الجهة."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "نكتبو: الفرع الثاني هو الطريق على الفرع الأوّل."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "نقسمو ونبسّطو."
+                      }
+                    ]
+                  }
+                ],
+                "checks": [
+                  {
+                    "ar": [
+                      {
+                        "ar": "النتيجة بين الصفر والواحد."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "قسمنا على الجهة اللي احنا فيها، موش على حاجة أخرى."
+                      }
+                    ]
+                  }
+                ]
+              },
+              "similar": [
+                {
+                  "id": "same",
+                  "kind": "same_structure",
+                  "statement": {
+                    "fr": "Dans l'arbre de probabilité ci-contre, on sait de plus que la probabilité de « non A et F » est 3/10. Calculer la probabilité de F sachant non A."
+                  },
+                  "figure": {
+                    "spec": {
+                      "component": "ProbabilityTree",
+                      "props": {
+                        "branches": [
+                          {
+                            "id": "a",
+                            "latex": "A",
+                            "p": "1/5",
+                            "show": "given",
+                            "children": [
+                              {
+                                "id": "a.f",
+                                "latex": "F",
+                                "p": "2/5",
+                                "show": "given"
+                              },
+                              {
+                                "id": "a.nf",
+                                "latex": "\\overline{F}",
+                                "show": "blank"
+                              }
+                            ]
+                          },
+                          {
+                            "id": "na",
+                            "latex": "\\overline{A}",
+                            "show": "blank",
+                            "children": [
+                              {
+                                "id": "na.f",
+                                "latex": "F",
+                                "show": "blank"
+                              },
+                              {
+                                "id": "na.nf",
+                                "latex": "\\overline{F}",
+                                "show": "blank"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "graph": {
+                    "template": "tree_conditional",
+                    "args": {
+                      "pA": [1, 5],
+                      "pFgA": [2, 5],
+                      "pFgNotA": [3, 8]
+                    }
+                  },
+                  "allow": []
+                },
+                {
+                  "id": "twist",
+                  "kind": "twist",
+                  "statement": {
+                    "fr": "Dans l'arbre de probabilité ci-contre, on sait de plus que p(A ∩ F) = 3/10. Calculer la probabilité de F sachant A."
+                  },
+                  "figure": {
+                    "spec": {
+                      "component": "ProbabilityTree",
+                      "props": {
+                        "branches": [
+                          {
+                            "id": "a",
+                            "latex": "A",
+                            "show": "blank",
+                            "children": [
+                              {
+                                "id": "a.f",
+                                "latex": "F",
+                                "show": "blank"
+                              },
+                              {
+                                "id": "a.nf",
+                                "latex": "\\overline{F}",
+                                "show": "blank"
+                              }
+                            ]
+                          },
+                          {
+                            "id": "na",
+                            "latex": "\\overline{A}",
+                            "p": "2/5",
+                            "show": "given",
+                            "children": [
+                              {
+                                "id": "na.f",
+                                "latex": "F",
+                                "p": "1/8",
+                                "show": "given"
+                              },
+                              {
+                                "id": "na.nf",
+                                "latex": "\\overline{F}",
+                                "show": "blank"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "graph": {
+                    "template": "tree_conditional",
+                    "args": {
+                      "pA": [2, 5],
+                      "pFgA": [1, 8],
+                      "pFgNotA": [1, 2],
+                      "swap": true
+                    }
+                  },
+                  "allow": []
+                }
+              ],
+              "findings": [
+                {
+                  "id": "f_other",
+                  "title": {
+                    "ar": [
+                      {
+                        "ar": "الفرع الأوّل التحتاني"
+                      }
+                    ]
+                  },
+                  "nodes": ["not_a"],
+                  "reasons": {
+                    "not_a": {
+                      "ar": [
+                        {
+                          "ar": "الفرعين خارجين من نفس العقدة."
+                        }
+                      ]
+                    }
+                  },
+                  "rule": {
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "الفروع اللي خارجين من نفس العقدة مجموعهم واحد."
+                        }
+                      ]
+                    },
+                    "condition": {
+                      "ar": [
+                        {
+                          "ar": "في نفس العقدة برك."
+                        }
+                      ]
+                    }
+                  },
+                  "bridge": true
+                },
+                {
+                  "id": "f_branch",
+                  "title": {
+                    "ar": [
+                      {
+                        "ar": "الفرع الثاني التحتاني"
+                      }
+                    ]
+                  },
+                  "nodes": ["f_given_na"],
+                  "reasons": {
+                    "f_given_na": {
+                      "ar": [
+                        {
+                          "ar": "الطريق هو فرع في فرع، نقسمو باش نطلّعو فرع."
+                        }
+                      ]
+                    }
+                  },
+                  "viaCard": "c_rule",
+                  "rule": {
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "الفرع الثاني هو احتمال الطريق مقسوم على الفرع الأوّل."
+                        }
+                      ]
+                    },
+                    "condition": {
+                      "ar": [
+                        {
+                          "ar": "كي الفرع الأوّل موش صفر."
+                        }
+                      ]
+                    }
+                  },
+                  "bridge": true
+                }
+              ],
+              "skeleton": [
+                {
+                  "id": "k1",
+                  "fr": "Les deux premières branches partent du même nœud :",
+                  "math": "p(\\overline{A}) = 1 - p(A) = 1 - \\frac{2}{3} = \\his{not_a}"
+                },
+                {
+                  "id": "k2",
+                  "fr": "Par définition de la probabilité conditionnelle :",
+                  "math": "p(F/\\overline{A}) = \\frac{p(\\overline{A} \\cap F)}{p(\\overline{A})} = \\frac{\\frac{1}{4}}{\\his{not_a}} = \\his{f_given_na}"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "writeup": {
+        "elements": [
+          "complement_first_branch",
+          "conditional_definition",
+          "conclusion"
+        ],
+        "modelFr": [
+          "p(Ā) = 1 − 2/3 = \\val{vNA}, donc p(F / Ā) = p(Ā ∩ F) / p(Ā) = (\\val{vNAF}) / (\\val{vNA}) = \\val{vFgNA}."
+        ]
+      }
+    },
+    {
+      "id": "t3",
+      "goal": {
+        "fr": "Recopier et compléter l'arbre de probabilité."
+      },
+      "expected": "r_t3",
+      "uses": ["r_t2"],
+      "groups": [
+        {
+          "id": "g3",
+          "steps": [
+            {
+              "id": "s1",
+              "blockId": "qp22sc-t3-s1",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "p22sc2-0.1.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": ["probability-tree"],
+              "kind": "text",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "الشجرة مازالت ناقصة: فما فروع بلا عدد. نحبّو نكتبو عدد على كل فرع."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "mt3",
+              "blockId": "qp22sc-t3-mt3",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "p22sc2-0.1.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": ["probability-tree", "complement-event"],
+              "kind": "method",
+              "opening": {
+                "route": [
+                  {
+                    "ar": [
+                      {
+                        "ar": "نبداو بخطة: نرتّبو الخطوات قبل ما نحسبو."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "نلمّو الفروع اللي لقيناهم في الأسئلة اللي قبل."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "بعد نكمّلو الفروع الناقصين، عقدة بعقدة."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "نثبّتو الشجرة ونكتبوها في الورقة."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "وبعدها نحلّو سؤالين شبيهين وحدنا."
+                      }
+                    ]
+                  }
+                ],
+                "help": {
+                  "ar": [
+                    {
+                      "ar": "كان ما تعرفش، اضغط على «ما نعرفش» وتشوف مثال أصغر."
+                    }
+                  ]
+                }
+              },
+              "plan": {
+                "short": {
+                  "ar": [
+                    {
+                      "ar": "الخطة"
+                    }
+                  ]
+                },
+                "header": {
+                  "now": {
+                    "ar": [
+                      {
+                        "ar": "نرتّبو الخطوات"
+                      }
+                    ]
+                  },
+                  "why": {
+                    "ar": [
+                      {
+                        "ar": "كل خطوة تحتاج اللي قبلها"
+                      }
+                    ]
+                  },
+                  "next": {
+                    "ar": [
+                      {
+                        "ar": "نقراو النص"
+                      }
+                    ]
+                  }
+                },
+                "prompt": {
+                  "ar": [
+                    {
+                      "ar": "رتّب الخطوات: شنوّة نعمل الأوّل، وشنوّة بعد؟"
+                    }
+                  ]
+                },
+                "hints": [
+                  {
+                    "ar": [
+                      {
+                        "ar": "فكّر: أنا فرع يتحسب من فرع آخر؟"
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "الفرع الأخير يحتاج أخوه في العقدة التحتانية."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "ابدا بالفرع الأوّل التحتاني، ومن بعدو الفرع الثاني التحتاني، ومن بعد كمّل كل عقدة."
+                      }
+                    ]
+                  }
+                ],
+                "cards": [
+                  {
+                    "id": "c_first",
+                    "key": "not_a",
+                    "short": {
+                      "ar": [
+                        {
+                          "ar": "الأوّل التحتاني"
+                        }
+                      ]
+                    },
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نلقاو الفرع الأوّل التحتاني"
+                        }
+                      ]
+                    },
+                    "header": {
+                      "now": {
+                        "ar": [
+                          {
+                            "ar": "نلقاو الفرع الأوّل التحتاني"
+                          }
+                        ]
+                      },
+                      "why": {
+                        "ar": [
+                          {
+                            "ar": "الطريق التحتاني يبدا بيه"
+                          }
+                        ]
+                      },
+                      "next": {
+                        "ar": [
+                          {
+                            "ar": "نلقاو الفرع الثاني التحتاني"
+                          }
+                        ]
+                      }
+                    },
+                    "needs": [],
+                    "prompt": {
+                      "ar": [
+                        {
+                          "ar": "اكتب الحساب: الفرع المعلَّم في الشجرة."
+                        }
+                      ],
+                      "math": "p(\\overline{A})"
+                    },
+                    "hints": [
+                      {
+                        "ar": [
+                          {
+                            "ar": "شوف العقدة الأولى: يخرجو منها زوز فروع، وواحد منهم مكتوب."
+                          }
+                        ]
+                      },
+                      {
+                        "ar": [
+                          {
+                            "ar": "الفروع اللي خارجين من نفس العقدة يكمّلو بعضهم للواحد: نطرحو الفرع المكتوب من الواحد."
+                          }
+                        ]
+                      },
+                      {
+                        "ar": [
+                          {
+                            "ar": "القاعدة:"
+                          }
+                        ],
+                        "math": "p(\\overline{A}) = 1 - p(A)"
+                      }
+                    ]
+                  },
+                  {
+                    "id": "c_low",
+                    "key": "f_given_na",
+                    "short": {
+                      "ar": [
+                        {
+                          "ar": "التحتاني للحدث"
+                        }
+                      ]
+                    },
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نلقاو الفرع التحتاني اللي يوصّل للحدث الثاني"
+                        }
+                      ]
+                    },
+                    "header": {
+                      "now": {
+                        "ar": [
+                          {
+                            "ar": "نلقاو الفرع الثاني التحتاني"
+                          }
+                        ]
+                      },
+                      "why": {
+                        "ar": [
+                          {
+                            "ar": "عندنا الطريق وعندنا الفرع الأوّل"
+                          }
+                        ]
+                      },
+                      "next": {
+                        "ar": [
+                          {
+                            "ar": "نكمّلو العقدة الفوقانية"
+                          }
+                        ]
+                      }
+                    },
+                    "needs": ["c_first"],
+                    "prompt": {
+                      "ar": [
+                        {
+                          "ar": "اكتب الحساب: الفرع المعلَّم في الشجرة."
+                        }
+                      ],
+                      "math": "p(F/\\overline{A})"
+                    },
+                    "hints": [
+                      {
+                        "ar": [
+                          {
+                            "ar": "الطريق التحتاني هو الفرع الأوّل في الفرع الثاني: نعرفو الطريق ونعرفو الفرع الأوّل."
+                          }
+                        ]
+                      },
+                      {
+                        "ar": [
+                          {
+                            "ar": "نقسمو احتمال الطريق على الفرع الأوّل."
+                          }
+                        ]
+                      },
+                      {
+                        "ar": [
+                          {
+                            "ar": "القاعدة:"
+                          }
+                        ],
+                        "math": "p(F/\\overline{A}) = \\frac{p(\\overline{A} \\cap F)}{p(\\overline{A})}"
+                      }
+                    ]
+                  },
+                  {
+                    "id": "c_up",
+                    "key": "nf_given_a",
+                    "short": {
+                      "ar": [
+                        {
+                          "ar": "الفوقاني الناقص"
+                        }
+                      ]
+                    },
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نكمّلو العقدة الفوقانية"
+                        }
+                      ]
+                    },
+                    "header": {
+                      "now": {
+                        "ar": [
+                          {
+                            "ar": "نكمّلو العقدة الفوقانية"
+                          }
+                        ]
+                      },
+                      "why": {
+                        "ar": [
+                          {
+                            "ar": "يخرجو منها زوز فروع وواحد مكتوب"
+                          }
+                        ]
+                      },
+                      "next": {
+                        "ar": [
+                          {
+                            "ar": "نكمّلو العقدة التحتانية"
+                          }
+                        ]
+                      }
+                    },
+                    "needs": [],
+                    "prompt": {
+                      "ar": [
+                        {
+                          "ar": "اكتب الحساب: الفرع المعلَّم في الشجرة."
+                        }
+                      ],
+                      "math": "p(\\overline{F}/A)"
+                    },
+                    "hints": [
+                      {
+                        "ar": [
+                          {
+                            "ar": "شوف العقدة الفوقانية: أنا فرع خارج منها مكتوب؟"
+                          }
+                        ]
+                      },
+                      {
+                        "ar": [
+                          {
+                            "ar": "الفرعين خارجين من نفس العقدة: نطرحو المكتوب من الواحد."
+                          }
+                        ]
+                      },
+                      {
+                        "ar": [
+                          {
+                            "ar": "القاعدة:"
+                          }
+                        ],
+                        "math": "p(\\overline{F}/A) = 1 - p(F/A)"
+                      }
+                    ]
+                  },
+                  {
+                    "id": "c_last",
+                    "key": "nf_given_na",
+                    "short": {
+                      "ar": [
+                        {
+                          "ar": "الأخير"
+                        }
+                      ]
+                    },
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نكمّلو العقدة التحتانية"
+                        }
+                      ]
+                    },
+                    "header": {
+                      "now": {
+                        "ar": [
+                          {
+                            "ar": "نكمّلو العقدة التحتانية"
+                          }
+                        ]
+                      },
+                      "why": {
+                        "ar": [
+                          {
+                            "ar": "أخوه لقيناه"
+                          }
+                        ]
+                      },
+                      "next": {
+                        "ar": [
+                          {
+                            "ar": "نثبّتو الشجرة"
+                          }
+                        ]
+                      }
+                    },
+                    "needs": ["c_low"],
+                    "prompt": {
+                      "ar": [
+                        {
+                          "ar": "اكتب الحساب: الفرع المعلَّم في الشجرة."
+                        }
+                      ],
+                      "math": "p(\\overline{F}/\\overline{A})"
+                    },
+                    "hints": [
+                      {
+                        "ar": [
+                          {
+                            "ar": "شوف العقدة التحتانية: أنا فرع خارج منها نعرفوه توّا؟"
+                          }
+                        ]
+                      },
+                      {
+                        "ar": [
+                          {
+                            "ar": "نطرحو الفرع اللي لقيناه في نفس العقدة من الواحد. ما ناخذوش عدد من العقدة الفوقانية."
+                          }
+                        ]
+                      },
+                      {
+                        "ar": [
+                          {
+                            "ar": "القاعدة:"
+                          }
+                        ],
+                        "math": "p(\\overline{F}/\\overline{A}) = 1 - p(F/\\overline{A})"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "read": {
+                "short": {
+                  "ar": [
+                    {
+                      "ar": "القراءة"
+                    }
+                  ]
+                },
+                "header": {
+                  "now": {
+                    "ar": [
+                      {
+                        "ar": "نقراو السؤال"
+                      }
+                    ]
+                  },
+                  "why": {
+                    "ar": [
+                      {
+                        "ar": "الكلمة تقول شنوّة المطلوب في الشجرة"
+                      }
+                    ]
+                  },
+                  "next": {
+                    "ar": [
+                      {
+                        "ar": "نلقاو الفرع الأوّل التحتاني"
+                      }
+                    ]
+                  }
+                },
+                "prompt": {
+                  "ar": [
+                    {
+                      "ar": "اضغط على الكلمة اللي تقول شنوّة نعملو بالشجرة."
+                    }
+                  ]
+                },
+                "hints": [
+                  {
+                    "ar": [
+                      {
+                        "ar": "السؤال فيه زوز أفعال: واحد للنقل، وواحد للخدمة اللي مازالت."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "الشجرة فيها فروع فارغين: أنا كلمة تقول نعمّروهم؟"
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "اضغط على "
+                      },
+                      {
+                        "fr": "compléter"
+                      }
+                    ]
+                  }
+                ],
+                "targets": [
+                  {
+                    "token": "compléter",
+                    "effect": {
+                      "figure": "complete"
+                    }
+                  }
+                ],
+                "notOrderWord": {
+                  "ar": [
+                    {
+                      "ar": "الكلمة هاذي ما تجاوبش على السؤال. اقرا من جديد."
+                    }
+                  ]
+                },
+                "sentence": "Recopier et compléter l'arbre de probabilité."
+              },
+              "paper": {
+                "short": {
+                  "ar": [
+                    {
+                      "ar": "الورقة"
+                    }
+                  ]
+                },
+                "header": {
+                  "now": {
+                    "ar": [
+                      {
+                        "ar": "نكتبو الجواب في الورقة"
+                      }
+                    ]
+                  },
+                  "why": {
+                    "ar": [
+                      {
+                        "ar": "الامتحان يطلب الكتابة بالتفصيل"
+                      }
+                    ]
+                  },
+                  "next": {
+                    "ar": [
+                      {
+                        "ar": "نحلّو سؤال شبيه"
+                      }
+                    ]
+                  }
+                }
+              },
+              "graph": {
+                "template": "tree_complete",
+                "args": {
+                  "pA": [2, 3],
+                  "pFgA": [1, 4],
+                  "pF": [5, 12]
+                }
+              },
+              "picks": [
+                {
+                  "id": "p_check",
+                  "after": "c_last",
+                  "short": {
+                    "ar": [
+                      {
+                        "ar": "التثبيت"
+                      }
+                    ]
+                  },
+                  "header": {
+                    "now": {
+                      "ar": [
+                        {
+                          "ar": "نثبّتو الشجرة"
+                        }
+                      ]
+                    },
+                    "why": {
+                      "ar": [
+                        {
+                          "ar": "غلطة في فرع تغلّط كل اللي بعدو"
+                        }
+                      ]
+                    },
+                    "next": {
+                      "ar": [
+                        {
+                          "ar": "نكتبو في الورقة"
+                        }
+                      ]
+                    }
+                  },
+                  "prompt": {
+                    "ar": [
+                      {
+                        "ar": "كيفاش نثبّتو اللي الشجرة صحيحة؟"
+                      }
+                    ]
+                  },
+                  "hints": [
+                    {
+                      "ar": [
+                        {
+                          "ar": "شوف عقدة وحدة والفروع اللي خارجين منها."
+                        }
+                      ]
+                    },
+                    {
+                      "ar": [
+                        {
+                          "ar": "كل عقدة وحدها: فروعها يكمّلو بعضهم للواحد."
+                        }
+                      ]
+                    }
+                  ],
+                  "evaluator": "pick",
+                  "args": {},
+                  "cards": [
+                    {
+                      "id": "k_node",
+                      "text": {
+                        "ar": [
+                          {
+                            "ar": "في كل عقدة، الفروع اللي خارجين منها مجموعهم واحد."
+                          }
+                        ]
+                      },
+                      "truth": "true"
+                    },
+                    {
+                      "id": "k_column",
+                      "text": {
+                        "ar": [
+                          {
+                            "ar": "الفروع الأخرانيين الأربعة مجموعهم واحد."
+                          }
+                        ]
+                      },
+                      "truth": "false",
+                      "misconceptionId": "mut.sums_a_column",
+                      "feedback": {
+                        "ar": [
+                          {
+                            "ar": "الأربعة خارجين من عقدتين مختلفين: كل عقدة تتحسب وحدها."
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "id": "k_equal",
+                      "text": {
+                        "ar": [
+                          {
+                            "ar": "الفروع اللي يوصّلو لنفس الحدث عندهم نفس العدد."
+                          }
+                        ]
+                      },
+                      "truth": "false",
+                      "misconceptionId": "mut.copies_another_branch",
+                      "feedback": {
+                        "ar": [
+                          {
+                            "ar": "كل عقدة عندها أعدادها. نفس الحدث ينجّم يكون عندو احتمال آخر في الجهة الأخرى."
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ],
+              "recipe": {
+                "short": {
+                  "ar": [
+                    {
+                      "ar": "الوصفة"
+                    }
+                  ]
+                },
+                "header": {
+                  "now": {
+                    "ar": [
+                      {
+                        "ar": "نكتبو الوصفة متاعنا"
+                      }
+                    ]
+                  },
+                  "why": {
+                    "ar": [
+                      {
+                        "ar": "الوصفة تعاونّا في الأسئلة الشبيهة"
+                      }
+                    ]
+                  },
+                  "next": {
+                    "ar": [
+                      {
+                        "ar": "نكتبو في الورقة"
+                      }
+                    ]
+                  }
+                },
+                "prompt": {
+                  "ar": [
+                    {
+                      "ar": "اختار من ثلاثة لخمسة جمل ورتّبهم: هذي وصفتك لهذا النوع من الأسئلة."
+                    }
+                  ]
+                },
+                "hints": [],
+                "pool": [
+                  {
+                    "id": "rq_given",
+                    "kind": "step",
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نكتبو في الشجرة الأعداد اللي عندنا واللي لقيناهم."
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "rq_node",
+                    "kind": "step",
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "ناخذو عقدة عقدة."
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "rq_comp",
+                    "kind": "step",
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "في كل عقدة: نطرحو الفرع المعروف من الواحد."
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "rq_check",
+                    "kind": "check",
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نثبّت: فروع كل عقدة مجموعهم واحد."
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "rq_d1",
+                    "kind": "distractor",
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نعاودو نفس الأعداد في الجهة الأخرى."
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "rq_d2",
+                    "kind": "distractor",
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نطرحو من الواحد فرع من عقدة أخرى."
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "rq_d3",
+                    "kind": "distractor",
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نخلّيو الفروع الفارغين كيما هوما."
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "clean": ["rq_given", "rq_node", "rq_comp", "rq_check"]
+              },
+              "methodCard": {
+                "type": {
+                  "ar": [
+                    {
+                      "ar": "نكمّلو "
+                    },
+                    {
+                      "fr": "arbre"
+                    },
+                    {
+                      "ar": " ناقص"
+                    }
+                  ]
+                },
+                "steps": [
+                  {
+                    "ar": [
+                      {
+                        "ar": "نكتبو اللي نعرفوه."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "ناخذو عقدة عقدة."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "الفرع الناقص هو واحد ناقص أخوه."
+                      }
+                    ]
+                  }
+                ],
+                "checks": [
+                  {
+                    "ar": [
+                      {
+                        "ar": "فروع كل عقدة مجموعهم واحد."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "ما خذيناش عدد من عقدة أخرى."
+                      }
+                    ]
+                  }
+                ]
+              },
+              "similar": [
+                {
+                  "id": "same",
+                  "kind": "same_structure",
+                  "statement": {
+                    "fr": "Dans l'arbre de probabilité ci-contre, on sait de plus que la probabilité de « non A et F » est 3/8. Recopier et compléter l'arbre."
+                  },
+                  "figure": {
+                    "spec": {
+                      "component": "ProbabilityTree",
+                      "props": {
+                        "branches": [
+                          {
+                            "id": "a",
+                            "latex": "A",
+                            "p": "1/8",
+                            "show": "given",
+                            "children": [
+                              {
+                                "id": "a.f",
+                                "latex": "F",
+                                "p": "1/5",
+                                "show": "given"
+                              },
+                              {
+                                "id": "a.nf",
+                                "latex": "\\overline{F}",
+                                "show": "blank"
+                              }
+                            ]
+                          },
+                          {
+                            "id": "na",
+                            "latex": "\\overline{A}",
+                            "show": "blank",
+                            "children": [
+                              {
+                                "id": "na.f",
+                                "latex": "F",
+                                "show": "blank"
+                              },
+                              {
+                                "id": "na.nf",
+                                "latex": "\\overline{F}",
+                                "show": "blank"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "graph": {
+                    "template": "tree_complete",
+                    "args": {
+                      "pA": [1, 8],
+                      "pFgA": [1, 5],
+                      "pF": [2, 5]
+                    }
+                  },
+                  "allow": []
+                },
+                {
+                  "id": "twist",
+                  "kind": "twist",
+                  "statement": {
+                    "fr": "Recopier et compléter l'arbre de probabilité ci-contre."
+                  },
+                  "figure": {
+                    "spec": {
+                      "component": "ProbabilityTree",
+                      "props": {
+                        "branches": [
+                          {
+                            "id": "a",
+                            "latex": "A",
+                            "p": "3/8",
+                            "show": "given",
+                            "children": [
+                              {
+                                "id": "a.f",
+                                "latex": "F",
+                                "p": "1/8",
+                                "show": "given"
+                              },
+                              {
+                                "id": "a.nf",
+                                "latex": "\\overline{F}",
+                                "show": "blank"
+                              }
+                            ]
+                          },
+                          {
+                            "id": "na",
+                            "latex": "\\overline{A}",
+                            "show": "blank",
+                            "children": [
+                              {
+                                "id": "na.f",
+                                "latex": "F",
+                                "p": "3/5",
+                                "show": "given"
+                              },
+                              {
+                                "id": "na.nf",
+                                "latex": "\\overline{F}",
+                                "show": "blank"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "graph": {
+                    "template": "tree_complete",
+                    "args": {
+                      "pA": [3, 8],
+                      "pFgA": [1, 8],
+                      "pFgNotA": [3, 5]
+                    }
+                  },
+                  "allow": []
+                }
+              ],
+              "findings": [
+                {
+                  "id": "f_nodes",
+                  "title": {
+                    "ar": [
+                      {
+                        "ar": "الفروع الناقصين"
+                      }
+                    ]
+                  },
+                  "nodes": ["nf_given_a", "nf_given_na"],
+                  "reasons": {
+                    "nf_given_a": {
+                      "ar": [
+                        {
+                          "ar": "أخوه في العقدة الفوقانية مكتوب."
+                        }
+                      ]
+                    },
+                    "nf_given_na": {
+                      "ar": [
+                        {
+                          "ar": "أخوه في العقدة التحتانية لقيناه."
+                        }
+                      ]
+                    }
+                  },
+                  "viaCard": "p_check",
+                  "rule": {
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "في كل عقدة، الفروع مجموعهم واحد."
+                        }
+                      ]
+                    },
+                    "condition": {
+                      "ar": [
+                        {
+                          "ar": "الفروع اللي خارجين من نفس العقدة برك."
+                        }
+                      ]
+                    }
+                  },
+                  "bridge": true
+                }
+              ],
+              "skeleton": [
+                {
+                  "id": "k1",
+                  "fr": "À chaque nœud, la somme des probabilités des branches vaut 1. Donc :",
+                  "math": "p(\\overline{F}/A) = 1 - \\frac{1}{4} = \\his{nf_given_a}"
+                },
+                {
+                  "id": "k2",
+                  "fr": "De même :",
+                  "math": "p(\\overline{F}/\\overline{A}) = 1 - \\his{f_given_na} = \\his{nf_given_na}"
+                },
+                {
+                  "id": "k3",
+                  "fr": "On recopie l'arbre avec p(« non A ») = {not_a} sur la première branche du bas."
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "writeup": {
+        "elements": ["node_sum_rule", "complement_each_node", "copy_tree"],
+        "modelFr": [
+          "À chaque nœud la somme des branches vaut 1 : p(F̄ / A) = 1 − 1/4 = \\val{vNFgA} et p(F̄ / Ā) = 1 − \\val{vFgNA} = \\val{vNFgNA} ; on recopie l'arbre avec \\val{vNA} sur la branche de Ā et \\val{vFgNA} sur la branche de F après Ā."
+        ]
+      }
+    },
+    {
+      "id": "t4",
+      "goal": {
+        "fr": "Calculer",
+        "math": "p(\\overline{A}/\\overline{F})"
+      },
+      "expected": "r_t4",
+      "uses": ["r_t3"],
+      "groups": [
+        {
+          "id": "g4",
+          "steps": [
+            {
+              "id": "s1",
+              "blockId": "qp22sc-t4-s1",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "p22sc2-0.1.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": ["probability-tree"],
+              "kind": "text",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "الشجرة توّا كاملة. السؤال هذا يقراها بالمقلوب: نعرفو اللي الحدث الثاني ما صارش، ونلوّجو على احتمال الجهة التحتانية."
+                  }
+                ],
+                "math": "p(\\overline{A}/\\overline{F})"
+              }
+            },
+            {
+              "id": "mt4",
+              "blockId": "qp22sc-t4-mt4",
+              "trust": {
+                "reviewed": false,
+                "contentVersion": "p22sc2-0.1.0",
+                "source": "authored",
+                "status": "ok"
+              },
+              "skills": [
+                "reverse-conditional",
+                "conditional-probability",
+                "total-probability",
+                "complement-event"
+              ],
+              "kind": "method",
+              "opening": {
+                "route": [
+                  {
+                    "ar": [
+                      {
+                        "ar": "نبداو بخطة: نرتّبو الخطوات قبل ما نحسبو."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "نشوفو شنوّة اللي نعرفوه وشنوّة اللي نلوّجو عليه."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "بعد نكتبو الحساب سطر بسطر."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "في الآخر نكتبو الجواب في الورقة."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "وبعدها نحلّو سؤالين شبيهين وحدنا."
+                      }
+                    ]
+                  }
+                ],
+                "help": {
+                  "ar": [
+                    {
+                      "ar": "كان ما تعرفش، اضغط على «ما نعرفش» وتشوف مثال أصغر."
+                    }
+                  ]
+                }
+              },
+              "plan": {
+                "short": {
+                  "ar": [
+                    {
+                      "ar": "الخطة"
+                    }
+                  ]
+                },
+                "header": {
+                  "now": {
+                    "ar": [
+                      {
+                        "ar": "نرتّبو الخطوات"
+                      }
+                    ]
+                  },
+                  "why": {
+                    "ar": [
+                      {
+                        "ar": "كل خطوة تحتاج اللي قبلها"
+                      }
+                    ]
+                  },
+                  "next": {
+                    "ar": [
+                      {
+                        "ar": "نقراو النص"
+                      }
+                    ]
+                  }
+                },
+                "prompt": {
+                  "ar": [
+                    {
+                      "ar": "رتّب الخطوات: شنوّة نعمل الأوّل، وشنوّة بعد؟"
+                    }
+                  ]
+                },
+                "hints": [
+                  {
+                    "ar": [
+                      {
+                        "ar": "فكّر: شنوّة النتيجة اللي تحتاجها كل خطوة باش تتعمل؟"
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "القسمة تحتاج نتيجتين قبلها."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "ابدا باللي نعرفوه، ومن بعد الطريق، وخلّي القسمة للآخر."
+                      }
+                    ]
+                  }
+                ],
+                "cards": [
+                  {
+                    "id": "c_cond",
+                    "key": "not_f",
+                    "short": {
+                      "ar": [
+                        {
+                          "ar": "اللي نعرفوه"
+                        }
+                      ]
+                    },
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نحسبو احتمال اللي نعرفوه"
+                        }
+                      ]
+                    },
+                    "header": {
+                      "now": {
+                        "ar": [
+                          {
+                            "ar": "نحسبو احتمال اللي نعرفوه"
+                          }
+                        ]
+                      },
+                      "why": {
+                        "ar": [
+                          {
+                            "ar": "هو اللي نقسمو عليه"
+                          }
+                        ]
+                      },
+                      "next": {
+                        "ar": [
+                          {
+                            "ar": "نحسبو الطريق"
+                          }
+                        ]
+                      }
+                    },
+                    "needs": [],
+                    "prompt": {
+                      "ar": [
+                        {
+                          "ar": "اكتب الحساب: احتمال الحاجة اللي نعرفوها."
+                        }
+                      ],
+                      "math": "p(\\overline{F})"
+                    },
+                    "hints": [
+                      {
+                        "ar": [
+                          {
+                            "ar": "النص يعطي الاحتمال الكل متاع الحدث الثاني. توّا نحبّو عكسو."
+                          }
+                        ]
+                      },
+                      {
+                        "ar": [
+                          {
+                            "ar": "الحدث وعكسو يكمّلو بعضهم للواحد: نطرحو الاحتمال متاع النص من الواحد."
+                          }
+                        ]
+                      },
+                      {
+                        "ar": [
+                          {
+                            "ar": "القاعدة:"
+                          }
+                        ],
+                        "math": "p(\\overline{F}) = 1 - p(F)"
+                      }
+                    ]
+                  },
+                  {
+                    "id": "c_path",
+                    "key": "na_and_nf",
+                    "short": {
+                      "ar": [
+                        {
+                          "ar": "الطريق"
+                        }
+                      ]
+                    },
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نحسبو الطريق التحتاني اللي يوفى غادي"
+                        }
+                      ]
+                    },
+                    "header": {
+                      "now": {
+                        "ar": [
+                          {
+                            "ar": "نحسبو الطريق التحتاني"
+                          }
+                        ]
+                      },
+                      "why": {
+                        "ar": [
+                          {
+                            "ar": "هو اللي يجمع الجهة المطلوبة واللي نعرفوه"
+                          }
+                        ]
+                      },
+                      "next": {
+                        "ar": [
+                          {
+                            "ar": "نقسمو"
+                          }
+                        ]
+                      }
+                    },
+                    "needs": [],
+                    "prompt": {
+                      "ar": [
+                        {
+                          "ar": "اكتب الحساب: احتمال الطريق المعلَّم في الشجرة."
+                        }
+                      ],
+                      "math": "p(\\overline{A} \\cap \\overline{F})"
+                    },
+                    "hints": [
+                      {
+                        "ar": [
+                          {
+                            "ar": "الطريق المعلَّم فيه زوز فروع، والزوز توّا مكتوبين في الشجرة."
+                          }
+                        ]
+                      },
+                      {
+                        "ar": [
+                          {
+                            "ar": "كيما في السؤال الأوّل: احتمال الطريق هو ضرب الفرع الأوّل في الفرع الثاني."
+                          }
+                        ]
+                      },
+                      {
+                        "ar": [
+                          {
+                            "ar": "القاعدة:"
+                          }
+                        ],
+                        "math": "p(\\overline{A} \\cap \\overline{F}) = p(\\overline{A}) \\times p(\\overline{F}/\\overline{A})"
+                      }
+                    ]
+                  },
+                  {
+                    "id": "c_back",
+                    "key": "na_given_nf",
+                    "short": {
+                      "ar": [
+                        {
+                          "ar": "القسمة"
+                        }
+                      ]
+                    },
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نقسمو الطريق على اللي نعرفوه"
+                        }
+                      ]
+                    },
+                    "header": {
+                      "now": {
+                        "ar": [
+                          {
+                            "ar": "نقسمو الطريق على اللي نعرفوه"
+                          }
+                        ]
+                      },
+                      "why": {
+                        "ar": [
+                          {
+                            "ar": "نلوّجو على الجهة من وسط اللي نعرفوه برك"
+                          }
+                        ]
+                      },
+                      "next": {
+                        "ar": [
+                          {
+                            "ar": "نكتبو في الورقة"
+                          }
+                        ]
+                      }
+                    },
+                    "needs": ["c_cond", "c_path"],
+                    "prompt": {
+                      "ar": [
+                        {
+                          "ar": "اكتب القسمة."
+                        }
+                      ],
+                      "math": "p(\\overline{A}/\\overline{F})"
+                    },
+                    "hints": [
+                      {
+                        "ar": [
+                          {
+                            "ar": "شنوّة مكتوب بعد العلامة المايلة؟ هذاكا اللي نقسمو عليه."
+                          }
+                        ]
+                      },
+                      {
+                        "ar": [
+                          {
+                            "ar": "فوق: احتمال الطريق اللي يجمع الزوز. تحت: احتمال اللي نعرفوه. موش الفرع الأوّل."
+                          }
+                        ]
+                      },
+                      {
+                        "ar": [
+                          {
+                            "ar": "القاعدة:"
+                          }
+                        ],
+                        "math": "p(\\overline{A}/\\overline{F}) = \\frac{p(\\overline{A} \\cap \\overline{F})}{p(\\overline{F})}"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "read": {
+                "short": {
+                  "ar": [
+                    {
+                      "ar": "القراءة"
+                    }
+                  ]
+                },
+                "header": {
+                  "now": {
+                    "ar": [
+                      {
+                        "ar": "نقراو السؤال"
+                      }
+                    ]
+                  },
+                  "why": {
+                    "ar": [
+                      {
+                        "ar": "الكلمة تورّي شنوّة اللي نعرفوه"
+                      }
+                    ]
+                  },
+                  "next": {
+                    "ar": [
+                      {
+                        "ar": "نحسبو احتمال اللي نعرفوه"
+                      }
+                    ]
+                  }
+                },
+                "prompt": {
+                  "ar": [
+                    {
+                      "ar": "اضغط على الكلمة اللي تجي قبل الحاجة اللي نعرفوها."
+                    }
+                  ]
+                },
+                "hints": [
+                  {
+                    "ar": [
+                      {
+                        "ar": "في السؤال فما حدث نلوّجو على احتمالو، وحاجة أخرى نعرفوها ديجا."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "كلمة وحدة تفصل بيناتهم: اللي يجي بعدها هو اللي نعرفوه."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "اضغط على "
+                      },
+                      {
+                        "fr": "sachant"
+                      }
+                    ]
+                  }
+                ],
+                "targets": [
+                  {
+                    "token": "sachant",
+                    "effect": {
+                      "condition": "not_f"
+                    }
+                  }
+                ],
+                "notOrderWord": {
+                  "ar": [
+                    {
+                      "ar": "الكلمة هاذي ما تجاوبش على السؤال. اقرا من جديد."
+                    }
+                  ]
+                },
+                "sentence": "Calculer la probabilité de non A sachant non F."
+              },
+              "paper": {
+                "short": {
+                  "ar": [
+                    {
+                      "ar": "الورقة"
+                    }
+                  ]
+                },
+                "header": {
+                  "now": {
+                    "ar": [
+                      {
+                        "ar": "نكتبو الجواب في الورقة"
+                      }
+                    ]
+                  },
+                  "why": {
+                    "ar": [
+                      {
+                        "ar": "الامتحان يطلب الكتابة بالتفصيل"
+                      }
+                    ]
+                  },
+                  "next": {
+                    "ar": [
+                      {
+                        "ar": "نحلّو سؤال شبيه"
+                      }
+                    ]
+                  }
+                }
+              },
+              "graph": {
+                "template": "tree_reverse",
+                "args": {
+                  "pA": [2, 3],
+                  "pFgA": [1, 4],
+                  "pF": [5, 12]
+                }
+              },
+              "picks": [
+                {
+                  "id": "p_order",
+                  "after": "c_back",
+                  "short": {
+                    "ar": [
+                      {
+                        "ar": "الفرق"
+                      }
+                    ]
+                  },
+                  "header": {
+                    "now": {
+                      "ar": [
+                        {
+                          "ar": "نفرّقو بين الاحتمالين"
+                        }
+                      ]
+                    },
+                    "why": {
+                      "ar": [
+                        {
+                          "ar": "الترتيب بعد العلامة المايلة يبدّل المعنى"
+                        }
+                      ]
+                    },
+                    "next": {
+                      "ar": [
+                        {
+                          "ar": "نكتبو في الورقة"
+                        }
+                      ]
+                    }
+                  },
+                  "prompt": {
+                    "ar": [
+                      {
+                        "ar": "العدد اللي لقيتو، هو نفس الفرع الأخير في الشجرة؟"
+                      }
+                    ]
+                  },
+                  "hints": [
+                    {
+                      "ar": [
+                        {
+                          "ar": "شوف في كل واحد: شنوّة اللي نعرفوه؟"
+                        }
+                      ]
+                    },
+                    {
+                      "ar": [
+                        {
+                          "ar": "في الشجرة نعرفو الجهة ونلوّجو على الحدث. هنا نعرفو الحدث ونلوّجو على الجهة."
+                        }
+                      ]
+                    }
+                  ],
+                  "evaluator": "pick",
+                  "args": {},
+                  "cards": [
+                    {
+                      "id": "k_diff",
+                      "text": {
+                        "ar": [
+                          {
+                            "ar": "لا: في واحد نعرفو الجهة، وفي الآخر نعرفو اللي الحدث ما صارش."
+                          }
+                        ],
+                        "math": "p(\\overline{A}/\\overline{F}) \\neq p(\\overline{F}/\\overline{A})"
+                      },
+                      "truth": "true"
+                    },
+                    {
+                      "id": "k_same",
+                      "text": {
+                        "ar": [
+                          {
+                            "ar": "إيه: نفس الحدثين، يعني نفس الاحتمال."
+                          }
+                        ]
+                      },
+                      "truth": "false",
+                      "misconceptionId": "mut.condition_for_reverse",
+                      "feedback": {
+                        "ar": [
+                          {
+                            "ar": "نفس الحدثين، أما اللي نعرفوه تبدّل. شوف أعدادك: الزوز نتايج موش كيف كيف."
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "id": "k_inverse",
+                      "text": {
+                        "ar": [
+                          {
+                            "ar": "واحد مقلوب الآخر."
+                          }
+                        ]
+                      },
+                      "truth": "false",
+                      "misconceptionId": "mut.quotient_upside_down",
+                      "feedback": {
+                        "ar": [
+                          {
+                            "ar": "المقلوب متاع احتمال يفوت الواحد. اللي تبدّل هو اللي نقسمو عليه برك."
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ],
+              "recipe": {
+                "short": {
+                  "ar": [
+                    {
+                      "ar": "الوصفة"
+                    }
+                  ]
+                },
+                "header": {
+                  "now": {
+                    "ar": [
+                      {
+                        "ar": "نكتبو الوصفة متاعنا"
+                      }
+                    ]
+                  },
+                  "why": {
+                    "ar": [
+                      {
+                        "ar": "الوصفة تعاونّا في الأسئلة الشبيهة"
+                      }
+                    ]
+                  },
+                  "next": {
+                    "ar": [
+                      {
+                        "ar": "نكتبو في الورقة"
+                      }
+                    ]
+                  }
+                },
+                "prompt": {
+                  "ar": [
+                    {
+                      "ar": "اختار من ثلاثة لخمسة جمل ورتّبهم: هذي وصفتك لهذا النوع من الأسئلة."
+                    }
+                  ]
+                },
+                "hints": [],
+                "pool": [
+                  {
+                    "id": "rq_cond",
+                    "kind": "step",
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نحسبو احتمال اللي نعرفوه."
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "rq_path",
+                    "kind": "step",
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نحسبو الطريق اللي يجمع الزوز: فرع في فرع."
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "rq_divide",
+                    "kind": "step",
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نقسمو الطريق على اللي نعرفوه، ونبسّطو."
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "rq_check",
+                    "kind": "check",
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نثبّت: قسمنا على اللي مكتوب بعد العلامة المايلة."
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "rq_d1",
+                    "kind": "distractor",
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "ناخذو الفرع المكتوب في الشجرة كيما هو."
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "rq_d2",
+                    "kind": "distractor",
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نقسمو على الفرع الأوّل."
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "rq_d3",
+                    "kind": "distractor",
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "نضربو الطريق في اللي نعرفوه."
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "clean": ["rq_cond", "rq_path", "rq_divide", "rq_check"]
+              },
+              "methodCard": {
+                "type": {
+                  "ar": [
+                    {
+                      "ar": "نقراو "
+                    },
+                    {
+                      "fr": "arbre"
+                    },
+                    {
+                      "ar": " بالمقلوب"
+                    }
+                  ]
+                },
+                "steps": [
+                  {
+                    "ar": [
+                      {
+                        "ar": "نحسبو احتمال اللي نعرفوه."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "نحسبو الطريق اللي يجمع الزوز."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "نقسمو الطريق على اللي نعرفوه."
+                      }
+                    ]
+                  }
+                ],
+                "checks": [
+                  {
+                    "ar": [
+                      {
+                        "ar": "النتيجة بين الصفر والواحد."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "قسمنا على اللي بعد العلامة المايلة."
+                      }
+                    ]
+                  },
+                  {
+                    "ar": [
+                      {
+                        "ar": "النتيجة موش لازم تكون كيما الفرع متاع الشجرة."
+                      }
+                    ]
+                  }
+                ]
+              },
+              "similar": [
+                {
+                  "id": "same",
+                  "kind": "same_structure",
+                  "statement": {
+                    "fr": "L'arbre de probabilité ci-contre est complet. Calculer la probabilité de non A sachant non F."
+                  },
+                  "figure": {
+                    "spec": {
+                      "component": "ProbabilityTree",
+                      "props": {
+                        "branches": [
+                          {
+                            "id": "a",
+                            "latex": "A",
+                            "p": "3/10",
+                            "show": "given",
+                            "children": [
+                              {
+                                "id": "a.f",
+                                "latex": "F",
+                                "p": "3/5",
+                                "show": "given"
+                              },
+                              {
+                                "id": "a.nf",
+                                "latex": "\\overline{F}",
+                                "p": "2/5",
+                                "show": "given"
+                              }
+                            ]
+                          },
+                          {
+                            "id": "na",
+                            "latex": "\\overline{A}",
+                            "p": "7/10",
+                            "show": "given",
+                            "children": [
+                              {
+                                "id": "na.f",
+                                "latex": "F",
+                                "p": "1/5",
+                                "show": "given"
+                              },
+                              {
+                                "id": "na.nf",
+                                "latex": "\\overline{F}",
+                                "p": "4/5",
+                                "show": "given"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "graph": {
+                    "template": "tree_reverse",
+                    "args": {
+                      "pA": [3, 10],
+                      "pFgA": [3, 5],
+                      "pFgNotA": [1, 5]
+                    }
+                  },
+                  "allow": []
+                },
+                {
+                  "id": "twist",
+                  "kind": "twist",
+                  "statement": {
+                    "fr": "Dans un lycée, 40 % des élèves sont internes. Parmi les internes, 50 % viennent au lycée à pied ; parmi les autres élèves, 40 % viennent à pied. On choisit un élève au hasard : il ne vient pas à pied. Quelle est la probabilité qu'il ne soit pas interne ?"
+                  },
+                  "graph": {
+                    "template": "tree_reverse",
+                    "args": {
+                      "pA": [2, 5],
+                      "pFgA": [1, 2],
+                      "pFgNotA": [2, 5]
+                    }
+                  },
+                  "allow": []
+                }
+              ],
+              "findings": [
+                {
+                  "id": "f_cond",
+                  "title": {
+                    "ar": [
+                      {
+                        "ar": "احتمال اللي نعرفوه"
+                      }
+                    ]
+                  },
+                  "nodes": ["not_f"],
+                  "reasons": {
+                    "not_f": {
+                      "ar": [
+                        {
+                          "ar": "الحدث وعكسو يكمّلو بعضهم للواحد."
+                        }
+                      ]
+                    }
+                  },
+                  "rule": {
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "احتمال عكس حدث هو واحد ناقص احتمالو."
+                        }
+                      ]
+                    },
+                    "condition": {
+                      "ar": [
+                        {
+                          "ar": "ديما."
+                        }
+                      ]
+                    }
+                  },
+                  "bridge": true
+                },
+                {
+                  "id": "f_path",
+                  "title": {
+                    "ar": [
+                      {
+                        "ar": "الطريق اللي يجمع الزوز"
+                      }
+                    ]
+                  },
+                  "nodes": ["na_and_nf"],
+                  "reasons": {
+                    "na_and_nf": {
+                      "ar": [
+                        {
+                          "ar": "فرع ومن بعدو فرع: نضربو."
+                        }
+                      ]
+                    }
+                  },
+                  "rule": {
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "احتمال طريق هو ضرب فروعو."
+                        }
+                      ]
+                    },
+                    "condition": {
+                      "ar": [
+                        {
+                          "ar": "في نفس الطريق."
+                        }
+                      ]
+                    }
+                  },
+                  "bridge": true
+                },
+                {
+                  "id": "f_back",
+                  "title": {
+                    "ar": [
+                      {
+                        "ar": "الاحتمال بالمقلوب"
+                      }
+                    ]
+                  },
+                  "nodes": ["na_given_nf"],
+                  "reasons": {
+                    "na_given_nf": {
+                      "ar": [
+                        {
+                          "ar": "نقسمو على اللي نعرفوه."
+                        }
+                      ]
+                    }
+                  },
+                  "viaCard": "p_order",
+                  "rule": {
+                    "text": {
+                      "ar": [
+                        {
+                          "ar": "احتمال حدث كي نعرفو حدث آخر: الطريق اللي يجمعهم على احتمال اللي نعرفوه."
+                        }
+                      ]
+                    },
+                    "condition": {
+                      "ar": [
+                        {
+                          "ar": "كي احتمال اللي نعرفوه موش صفر."
+                        }
+                      ]
+                    }
+                  },
+                  "bridge": true
+                }
+              ],
+              "skeleton": [
+                {
+                  "id": "k1",
+                  "fr": "On a :",
+                  "math": "p(\\overline{F}) = 1 - p(F) = 1 - \\frac{5}{12} = \\his{not_f}"
+                },
+                {
+                  "id": "k2",
+                  "fr": "Le long de la branche du bas :",
+                  "math": "p(\\overline{A} \\cap \\overline{F}) = p(\\overline{A}) \\times p(\\overline{F}/\\overline{A}) = \\his{na_and_nf}"
+                },
+                {
+                  "id": "k3",
+                  "fr": "Donc :",
+                  "math": "p(\\overline{A}/\\overline{F}) = \\frac{p(\\overline{A} \\cap \\overline{F})}{p(\\overline{F})} = \\frac{\\his{na_and_nf}}{\\his{not_f}} = \\his{na_given_nf}"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "writeup": {
+        "elements": [
+          "complement_event",
+          "path_product",
+          "conditional_definition",
+          "conclusion"
+        ],
+        "modelFr": [
+          "p(F̄) = 1 − 5/12 = \\val{vNF} et p(Ā ∩ F̄) = \\val{vNA} × \\val{vNFgNA} = \\val{vNANF}, donc p(Ā / F̄) = (\\val{vNANF}) / (\\val{vNF}) = \\val{vNAgNF}."
+        ]
+      }
+    }
+  ],
+  "deepDives": [],
+  "variants": []
+}

@@ -8,10 +8,12 @@ import exSc2 from '../content/exercises/bac2022c-sc-ex2.json';
 import exSc2Misconceptions from '../content/exercises/bac2022c-sc-ex2.misconceptions.json';
 import ex4 from '../content/exercises/bac2022c-ex4.json';
 import ex4Misconceptions from '../content/exercises/bac2022c-ex4.misconceptions.json';
+import exTree from '../content/exercises/bac2022p-sc-ex2.json';
+import exTreeMisconceptions from '../content/exercises/bac2022p-sc-ex2.misconceptions.json';
 import { loadExercise, type LoadResult } from '../content/loader';
 import { checkWalkthroughs } from '../lesson/walkthroughCheck';
 import { appPaperQuestions } from '../content/paper';
-import type { Rich } from '../content/schema';
+import { allPaperQuestions, type Rich } from '../content/schema';
 import { partKey } from '../state/doneParts';
 
 export interface CatalogEntry {
@@ -44,6 +46,8 @@ export const CATALOG: readonly CatalogEntry[] = [
   // Same session, Sciences expérimentales paper: also «Exercice 2» (section tag tells them apart).
   entry(exSc2, exSc2Misconceptions),
   entry(ex4, ex4Misconceptions),
+  // Session principale, Sciences expérimentales: the probability tree.
+  entry(exTree, exTreeMisconceptions),
 ];
 
 export interface Opened {
@@ -88,9 +92,31 @@ export const allParts = (
       : [],
   );
 
-/** "1b" -> "1.b", "A1" -> "A.1"; a question without a sub-letter stays "1". */
+/** The paper's own label of each part that has one, by part id (ids are unique across exercises). */
+const PAPER_LABELS = new Map<string, string>(
+  CATALOG.flatMap(e =>
+    e.result.ok && e.result.loaded.exercise.paper
+      ? allPaperQuestions(e.result.loaded.exercise.paper).map(
+          q => [q.id, q.label] as [string, string],
+        )
+      : [],
+  ),
+);
+
+/** A part id written as the exam numbers its questions: "1", "1b", "A1". */
+const EXAM_NUMBERED = /^[A-Z]?\d+[a-z]?$/;
+
+/**
+ * "1b" -> "1.b", "A1" -> "A.1"; a question without a sub-letter stays "1".
+ * An id that is not the exam's numbering (two papers both have a question
+ * «1», so a later exercise's parts are named "t1"...) shows the paper's label.
+ */
 export const partLabel = (id: string) =>
-  id.length < 2 ? id : `${id.slice(0, -1)}.${id.slice(-1)}`;
+  !EXAM_NUMBERED.test(id) && PAPER_LABELS.has(id)
+    ? PAPER_LABELS.get(id)!
+    : id.length < 2
+    ? id
+    : `${id.slice(0, -1)}.${id.slice(-1)}`;
 
 /** A part chip on a picker card (DESIGN.md §4.1). */
 export type ChipState = 'done' | 'current' | 'available' | 'soon';

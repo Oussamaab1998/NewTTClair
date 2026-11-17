@@ -6,14 +6,17 @@
 import baseLibrary from '../content/methodMutations.misconceptions.json';
 import q2Library from '../content/methodMutations.q2.misconceptions.json';
 import q3Library from '../content/methodMutations.q3.misconceptions.json';
+import treeLibrary from '../content/methodMutations.tree.misconceptions.json';
 // Registers the domain templates (Question 2, 3) the moment the library is loaded.
 import './templatesUrn';
 import './templatesBinomial';
+import './templatesTree';
 
 export const MUTATION_LIBRARIES: readonly unknown[][] = [
   baseLibrary,
   q2Library,
   q3Library,
+  treeLibrary,
 ];
 
 export const mutationLibrary = (): unknown[] => MUTATION_LIBRARIES.flat();

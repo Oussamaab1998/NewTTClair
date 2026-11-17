@@ -1,0 +1,354 @@
+{
+  "note": "Test fixture only (src/hybrid/conductor/treeFixture.ts): one small tree question, its slips and its prepared small example. Placeholder Arabic, reviewed: false.",
+  "exercise": {
+    "id": "tree-mini",
+    "contentVersion": "treemini-0.1.0",
+    "reviewed": false,
+    "title": {
+      "fr": "Fixture : un arbre de probabilités",
+      "ar": [{ "ar": "تمرين الشجرة الصغير" }]
+    },
+    "number": 2,
+    "subject": "probability",
+    "statement": {
+      "fr": "A et F sont deux événements. Un arbre pondéré est donné ci-dessous."
+    },
+    "figure": {
+      "spec": {
+        "component": "ProbabilityTree",
+        "props": {
+          "branches": [
+            {
+              "id": "a",
+              "latex": "A",
+              "p": "3/5",
+              "show": "given",
+              "children": [
+                { "id": "a.f", "latex": "F", "p": "1/2", "show": "given" },
+                {
+                  "id": "a.nf",
+                  "latex": "\\overline{F}",
+                  "show": "blank",
+                  "node": "nf_given_a"
+                }
+              ]
+            },
+            {
+              "id": "na",
+              "latex": "\\overline{A}",
+              "show": "blank",
+              "node": "not_a",
+              "children": [
+                {
+                  "id": "na.f",
+                  "latex": "F",
+                  "show": "blank",
+                  "node": "f_given_na"
+                },
+                {
+                  "id": "na.nf",
+                  "latex": "\\overline{F}",
+                  "show": "blank",
+                  "node": "nf_given_na"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "marks": {
+        "a_and_f": ["a", "a.f"],
+        "split": ["a.f", "na.f"],
+        "na_and_f": ["na", "na.f"]
+      }
+    },
+    "paper": {
+      "parts": [
+        {
+          "questions": [
+            {
+              "id": "t1",
+              "label": "1",
+              "status": "available",
+              "wording": [
+                {
+                  "fr": "Montrer que la probabilité de l'événement « F et non A » est égale à 2/5."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "results": [
+      {
+        "id": "r_naf",
+        "statement": { "math": "p(\\overline{A} \\cap F) = \\frac{2}{5}" }
+      }
+    ],
+    "deepDives": [],
+    "parts": [
+      {
+        "id": "t1",
+        "goal": {
+          "fr": "Montrer que",
+          "math": "p(\\overline{A} \\cap F) = \\frac{2}{5}"
+        },
+        "expected": "r_naf",
+        "uses": [],
+        "groups": [
+          {
+            "id": "g1",
+            "steps": [
+              {
+                "id": "m1",
+                "blockId": "tm-m1",
+                "trust": {
+                  "reviewed": false,
+                  "contentVersion": "treemini-0.1.0",
+                  "source": "authored",
+                  "status": "ok"
+                },
+                "skills": [],
+                "kind": "method",
+                "opening": {
+                  "route": [
+                    { "ar": [{ "ar": "نبداو بخطة." }] },
+                    { "ar": [{ "ar": "بعد نكتبو الحساب سطر بسطر." }] },
+                    { "ar": [{ "ar": "بعد نتأكّدو من النتيجة." }] },
+                    { "ar": [{ "ar": "في الآخر نكتبوها في الورقة." }] }
+                  ],
+                  "help": {
+                    "ar": [{ "ar": "كان ما تعرفش، اضغط على «ما نعرفش»." }]
+                  }
+                },
+                "plan": {
+                  "short": { "ar": [{ "ar": "الخطة" }] },
+                  "header": {
+                    "now": { "ar": [{ "ar": "نرتّبو الخطوات" }] },
+                    "why": { "ar": [{ "ar": "باش نعرفو شنوّة نعملو قبل" }] },
+                    "next": { "ar": [{ "ar": "نقراو النص" }] }
+                  },
+                  "prompt": { "ar": [{ "ar": "رتّب الخطوات." }] },
+                  "hints": [
+                    { "ar": [{ "ar": "ابدا بالطريق اللي نعرفو فروعو." }] }
+                  ],
+                  "cards": [
+                    {
+                      "id": "c_af",
+                      "key": "a_and_f",
+                      "short": { "ar": [{ "ar": "الطريق الأوّل" }] },
+                      "text": { "ar": [{ "ar": "نحسبو الطريق الأوّل" }] },
+                      "header": {
+                        "now": { "ar": [{ "ar": "نحسبو الطريق الأوّل" }] },
+                        "why": {
+                          "ar": [{ "ar": "نحتاجوه باش نلقاو الطريق الآخر" }]
+                        },
+                        "next": { "ar": [{ "ar": "نشوفو المجموع منين جاي" }] }
+                      },
+                      "needs": [],
+                      "prompt": {
+                        "ar": [{ "ar": "اكتب الحساب متاع الطريق الأوّل." }]
+                      },
+                      "hints": [
+                        { "ar": [{ "ar": "شوف الفروع اللي على الطريق." }] },
+                        { "ar": [{ "ar": "امشي مع الطريق فرع بفرع." }] }
+                      ]
+                    },
+                    {
+                      "id": "c_split",
+                      "key": "split",
+                      "short": { "ar": [{ "ar": "المجموع" }] },
+                      "text": { "ar": [{ "ar": "نشوفو المجموع منين جاي" }] },
+                      "header": {
+                        "now": { "ar": [{ "ar": "نشوفو المجموع منين جاي" }] },
+                        "why": { "ar": [{ "ar": "باش نعرفو شنوّة ناقص" }] },
+                        "next": { "ar": [{ "ar": "نلقاو الطريق الآخر" }] }
+                      },
+                      "needs": ["c_af"],
+                      "prompt": { "ar": [{ "ar": "المجموع منين جاي؟" }] },
+                      "hints": []
+                    },
+                    {
+                      "id": "c_naf",
+                      "key": "na_and_f",
+                      "short": { "ar": [{ "ar": "الطريق الآخر" }] },
+                      "text": { "ar": [{ "ar": "نلقاو الطريق الآخر" }] },
+                      "header": {
+                        "now": { "ar": [{ "ar": "نلقاو الطريق الآخر" }] },
+                        "why": { "ar": [{ "ar": "هذا هو المطلوب" }] },
+                        "next": { "ar": [{ "ar": "نكتبو في الورقة" }] }
+                      },
+                      "needs": ["c_af", "c_split"],
+                      "prompt": {
+                        "ar": [{ "ar": "اكتب الحساب متاع الطريق الآخر." }]
+                      },
+                      "hints": [
+                        { "ar": [{ "ar": "المجموع جاي من طريقين." }] },
+                        {
+                          "ar": [{ "ar": "نحّي الطريق اللي لقيتو من المجموع." }]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "read": {
+                  "short": { "ar": [{ "ar": "القراءة" }] },
+                  "header": {
+                    "now": { "ar": [{ "ar": "نقراو النص" }] },
+                    "why": { "ar": [{ "ar": "النص يقول شنوّة عندنا" }] },
+                    "next": { "ar": [{ "ar": "نحسبو" }] }
+                  },
+                  "prompt": {
+                    "ar": [
+                      { "ar": "اضغط على الكلمة اللي تقول وين مرسومة المعطيات." }
+                    ]
+                  },
+                  "hints": [{ "ar": [{ "ar": "المعطيات مرسومة." }] }],
+                  "targets": [
+                    { "token": "arbre", "effect": { "figure": "tree" } }
+                  ],
+                  "notOrderWord": {
+                    "ar": [{ "ar": "موش هذي الكلمة. اقرا النص من جديد." }]
+                  }
+                },
+                "paper": {
+                  "short": { "ar": [{ "ar": "الورقة" }] },
+                  "header": {
+                    "now": { "ar": [{ "ar": "نكتبو الجواب في الورقة" }] },
+                    "why": {
+                      "ar": [{ "ar": "الامتحان يطلب الكتابة بالتفصيل" }]
+                    },
+                    "next": { "ar": [{ "ar": "كمّلنا" }] }
+                  }
+                },
+                "graph": {
+                  "template": "tree_other_path",
+                  "args": { "pA": [3, 5], "pFgA": [1, 2], "pF": [7, 10] }
+                },
+                "target": {
+                  "math": "p(\\overline{A} \\cap F) = \\frac{2}{5}"
+                },
+                "builtFrames": ["c_af", "c_naf"],
+                "picks": [
+                  {
+                    "id": "c_split",
+                    "after": "c_split",
+                    "short": { "ar": [{ "ar": "المجموع" }] },
+                    "header": {
+                      "now": { "ar": [{ "ar": "نشوفو المجموع منين جاي" }] },
+                      "why": { "ar": [{ "ar": "باش نعرفو شنوّة ناقص" }] },
+                      "next": { "ar": [{ "ar": "نلقاو الطريق الآخر" }] }
+                    },
+                    "prompt": {
+                      "ar": [
+                        { "ar": "المجموع منين جاي؟ اختار الجملة الصحيحة." }
+                      ]
+                    },
+                    "hints": [
+                      {
+                        "ar": [{ "ar": "شوف الطرق اللي توصل للحدث الثاني." }]
+                      }
+                    ],
+                    "cards": [
+                      {
+                        "id": "s_true",
+                        "text": {
+                          "ar": [{ "ar": "المجموع جاي من الطريقين مع بعضهم." }]
+                        },
+                        "truth": "true"
+                      },
+                      {
+                        "id": "s_false",
+                        "text": {
+                          "ar": [{ "ar": "المجموع جاي من الطريق الأوّل برك." }]
+                        },
+                        "truth": "false"
+                      }
+                    ]
+                  }
+                ],
+                "skeleton": [
+                  { "id": "k1", "fr": "On a p(A et F) = {a_and_f}." },
+                  { "id": "k2", "fr": "Donc p(F et non A) = {na_and_f}." }
+                ]
+              }
+            ]
+          }
+        ],
+        "writeup": {
+          "elements": ["conclusion"],
+          "modelFr": ["Donc la probabilité cherchée est 2/5."]
+        }
+      }
+    ]
+  },
+  "misconceptions": [
+    {
+      "id": "mut.first_branch_for_path",
+      "skillId": "probability-tree",
+      "category": "math",
+      "description": "The first branch alone was given for the whole path.",
+      "signature": "p(A) for p(A and F)",
+      "feedback": {
+        "ar": [{ "ar": "هذا الفرع الأوّل برك. والفرع اللي بعدو؟" }]
+      },
+      "feedbackConfirmed": {
+        "ar": [
+          {
+            "ar": "هذا الفرع الأوّل برك: مازال الفرع اللي بعدو على نفس الطريق."
+          }
+        ]
+      },
+      "trust": {
+        "reviewed": false,
+        "contentVersion": "treemini-0.1.0",
+        "source": "authored",
+        "status": "ok"
+      }
+    }
+  ],
+  "cases": {
+    "exerciseId": "tree-mini",
+    "contentVersion": "treemini-0.1.0",
+    "reviewed": false,
+    "questions": {
+      "t1": [
+        {
+          "card": "a_and_f",
+          "spec": {
+            "kind": "tree",
+            "template": "tree_other_path",
+            "node": "a_and_f",
+            "n": 20,
+            "a": 8,
+            "af": 2,
+            "naf": 3
+          },
+          "use": "the path A then F counted whole on twenty pupils",
+          "story": {
+            "ar": [
+              {
+                "ar": "في قسم فيه عشرين تلميذ، ثمانية يلعبو كورة. من اللي يلعبو كورة، زوز يلعبو زادة شطرنج."
+              }
+            ]
+          },
+          "legend": [
+            { "latex": "A", "says": { "ar": [{ "ar": "التلميذ يلعب كورة" }] } },
+            { "latex": "F", "says": { "ar": [{ "ar": "التلميذ يلعب شطرنج" }] } }
+          ],
+          "ask": {
+            "ar": [
+              {
+                "ar": "من القسم الكل، قدّاش يلعبو كورة وشطرنج مع بعض؟ اكتبها كسر."
+              }
+            ]
+          },
+          "hint": {
+            "ar": [{ "ar": "عدّ اللي في آخر الطريق، واقسمهم على القسم الكل." }]
+          }
+        }
+      ]
+    }
+  }
+}

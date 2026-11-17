@@ -11,7 +11,7 @@
  * of the nodes he earned.
  */
 import type { SessionState } from '../ai/session/state';
-import type { JsonObject } from '../components/contract';
+import type { ComponentSpec, JsonObject } from '../components/contract';
 import type { Experiment } from '../engine/calls';
 import { stepKey, type LoadedExercise } from '../content/loader';
 import { appPaperQuestions } from '../content/paper';
@@ -25,6 +25,7 @@ import {
 import type { Graph } from '../method/graph';
 import type { QuestionCtx } from './conductor/conductor';
 import type { ConductorState } from './conductor/types';
+import { printedFigure } from './figure';
 import type { QuestionRecord } from './records';
 import type { Carried, RoadStatus, RoadView } from './tour/tour';
 
@@ -404,6 +405,8 @@ export type PaperRowState = 'done' | 'current' | 'available' | 'soon';
 
 export interface ExerciseSheet {
   statement: MarkedRich;
+  /** The figure the exam prints beside the statement, as printed (null: none). */
+  figure: ComponentSpec | null;
   questions: {
     id: string;
     label: string;
@@ -445,8 +448,16 @@ const NUMBER = /^\d+(?:[.,]\d+)?$/;
 export const tidyWord = (w: string) =>
   w.replace(/^[(«"']+|[.,;:!?)»"']+$/gu, '');
 
-/** The words of a French line to underline: the numbers (data), the words he found. */
-export function marksOf(fr: string, tapped: readonly string[]): MarkSpan[] {
+/**
+ * The words of a French line to underline: the numbers (data), the words he
+ * found. With `numberWords` false only written digits are data (a statement
+ * whose data are on its figure: « deux évènements » is not a datum).
+ */
+export function marksOf(
+  fr: string,
+  tapped: readonly string[],
+  numberWords = true,
+): MarkSpan[] {
   const found = new Set(tapped.map(w => w.toLowerCase()));
   const out: MarkSpan[] = [];
   const seen = new Set<string>();
@@ -455,7 +466,7 @@ export function marksOf(fr: string, tapped: readonly string[]): MarkSpan[] {
     const low = word.toLowerCase();
     const kind = found.has(low)
       ? 'tapped'
-      : NUMBER_WORDS.has(low) || NUMBER.test(word)
+      : (numberWords && NUMBER_WORDS.has(low)) || NUMBER.test(word)
       ? 'data'
       : null;
     if (kind && !seen.has(`${kind}:${low}`)) {
@@ -466,9 +477,13 @@ export function marksOf(fr: string, tapped: readonly string[]): MarkSpan[] {
   return out;
 }
 
-const marked = (rich: Rich, tapped: readonly string[]): MarkedRich => ({
+const marked = (
+  rich: Rich,
+  tapped: readonly string[],
+  numberWords = true,
+): MarkedRich => ({
   rich,
-  marks: rich.fr !== undefined ? marksOf(rich.fr, tapped) : [],
+  marks: rich.fr !== undefined ? marksOf(rich.fr, tapped, numberWords) : [],
 });
 
 /** Does the statement give this question's result (« Montrer que P(A) = 0,5 »)? */
@@ -491,6 +506,8 @@ export function exerciseSheet(
   tapped: readonly string[],
 ): ExerciseSheet {
   const ex = loaded.exercise;
+  // With a figure the data are printed on it, not written as number words.
+  const numberWords = ex.figure === undefined;
   const questions = appPaperQuestions(ex).map(q => ({
     id: q.id,
     label: q.label,
@@ -501,7 +518,7 @@ export function exerciseSheet(
       : done.has(q.id)
       ? 'done'
       : 'available') as PaperRowState,
-    wording: (q.wording ?? []).map(w => marked(w, tapped)),
+    wording: (q.wording ?? []).map(w => marked(w, tapped, numberWords)),
   }));
   const results = ex.parts.flatMap(p => {
     const r = ex.results.find(x => x.id === p.expected);
@@ -517,7 +534,12 @@ export function exerciseSheet(
       ? [{ id: r.id, questionId: p.id, statement: r.statement, why }]
       : [];
   });
-  return { statement: marked(ex.statement, tapped), questions, results };
+  return {
+    statement: marked(ex.statement, tapped, numberWords),
+    figure: printedFigure({ loaded }),
+    questions,
+    results,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -724,7 +746,9 @@ export function slipsFixed(session: SessionState): SlipFixed[] {
           b.match !== null &&
           b.match.verdict !== 'credit' &&
           b.match.verdict !== 'support' &&
-          b.match.verdict !== 'repeat',
+          b.match.verdict !== 'repeat' &&
+          // The value with no calculation was not a mistake.
+          b.match.verdict !== 'unexplained',
       )
       .at(-1);
     if (wrong && !out.some(x => x.node === node)) {

@@ -15,7 +15,11 @@
  * Nothing here prints a number: the caller turns a Match into words, and
  * the leak rules of plan 4.4 apply there.
  */
-import { evaluateExact, parseExpression } from '../engine/expression';
+import {
+  evaluateExact,
+  parseExpression,
+  type Node,
+} from '../engine/expression';
 import type { Fraction } from '../engine/rational';
 import { sameRat } from '../engine/rationalFormat';
 import { factorBag, leaves, sameBag, type FactorBag } from './factorForm';
@@ -27,7 +31,7 @@ import {
   type RawMutation,
   type Unit,
 } from './graph';
-import type { ChainResult } from './lineChain';
+import { isLiteralValue, type ChainResult } from './lineChain';
 
 export const MUTATION_IDS = [
   'drop_division',
@@ -72,6 +76,12 @@ export interface MutationTable {
   dropped: Dropped[];
   /** Two different slips with the same value at one node. */
   ambiguous: { nodeId: string; value: Fraction; ids: MutationId[] }[];
+  /**
+   * Wrong roads whose value IS the node's right value (Graph.traps): matched
+   * on how the line is written, before the value credits it. Absent when
+   * the graph has none.
+   */
+  traps?: Candidate[];
 }
 
 export const URN_CARDS: readonly PlanCardKey[] = ['total', 'fav', 'ratio'];
@@ -251,8 +261,81 @@ export function mutationsFor(g: Graph): MutationTable {
       ambiguous.push({ nodeId: c.nodeId, value: c.value, ids });
     }
   }
-  return { kept, dropped, ambiguous };
+  const traps: Candidate[] = [];
+  for (const node of g.nodes) {
+    for (const r of g.traps ? g.traps(node) : []) {
+      const ast = parseAst(r.expr);
+      const value = ast ? evaluateExact(ast) : null;
+      // A trap is a coincidence on these numbers: on other numbers the same
+      // road gives another value and is an ordinary slip (`mutate`).
+      if (!ast || value === null || !sameRat(value, node.value)) {
+        continue;
+      }
+      const same = traps.find(c => c.id === r.id && c.nodeId === r.nodeId);
+      if (same) {
+        if (!same.exprs.includes(r.expr)) {
+          same.exprs.push(r.expr);
+          same.bags.push(factorBag(ast));
+          same.numbers.push(leaves(ast));
+        }
+        continue;
+      }
+      traps.push({
+        id: r.id,
+        nodeId: r.nodeId,
+        exprs: [r.expr],
+        value,
+        bags: [factorBag(ast)],
+        numbers: [leaves(ast)],
+      });
+    }
+  }
+  return {
+    kept,
+    dropped,
+    ambiguous,
+    ...(traps.length > 0 && { traps }),
+  };
 }
+
+/**
+ * The terms of a sum or a difference, each as its exact value with its sign,
+ * sorted: `5/12 - 2/12` and `5/12 - 1/6` are the same sum however the terms
+ * are written. Null for a side that is not a sum (one term).
+ */
+export function sumTerms(ast: Node): string[] | null {
+  const terms: string[] = [];
+  let ok = true;
+  const walk = (n: Node, negative: boolean): void => {
+    if (n.type === 'binary' && (n.op === '+' || n.op === '-')) {
+      walk(n.left, negative);
+      walk(n.right, n.op === '-' ? !negative : negative);
+      return;
+    }
+    if (n.type === 'unary') {
+      walk(n.arg, n.op === '-' ? !negative : negative);
+      return;
+    }
+    const v = evaluateExact(n);
+    if (v === null) {
+      ok = false;
+      return;
+    }
+    const [num, den] = negative ? [-v[0], v[1]] : v;
+    terms.push(`${num}/${den}`);
+  };
+  if (ast.type !== 'binary' || (ast.op !== '+' && ast.op !== '-')) {
+    return null;
+  }
+  walk(ast, false);
+  return ok ? terms.sort() : null;
+}
+
+const sameTerms = (a: string[] | null, b: string[] | null): boolean =>
+  a !== null &&
+  b !== null &&
+  a.length === b.length &&
+  a.every((x, i) => x === b[i]);
 
 // ---------------------------------------------------------------------------
 // Matching
@@ -273,6 +356,11 @@ export interface MatchInput {
   credited: ReadonlySet<string>;
   line: Exclude<ChainResult, { kind: 'unreadable' }>;
   extra?: readonly ExtraCandidate[];
+  /**
+   * Nodes whose calculation he already wrote on an earlier line (a right
+   * line not simplified yet): the value alone then finishes a `proof` node.
+   */
+  worked?: ReadonlySet<string>;
 }
 
 export type Derivation = 'exact' | 'other' | 'absent';
@@ -289,6 +377,8 @@ export type Match =
   /** A right intermediate (the ordered count, k!): accepted and named, never the card's answer. */
   | { kind: 'support'; node: GraphNode; derivation: Derivation }
   | { kind: 'repeat'; node: GraphNode }
+  /** The right value of a `proof` node with no calculation: not credited yet. */
+  | { kind: 'unexplained'; node: GraphNode }
   | { kind: 'other_step'; node: GraphNode }
   | { kind: 'mutation'; candidate: Candidate; strength: 'confirmed' | 'asked' }
   | { kind: 'value_only'; extra: ExtraCandidate }
@@ -359,7 +449,9 @@ export function matchLine(inp: MatchInput): Match {
           kind: 'credit',
           node: n,
           derivation: derivationOf(n),
-          unsimplified: n.shape.kind === 'ratio' && writtenUnreduced(line),
+          unsimplified:
+            (n.shape.kind === 'ratio' || n.reduced === true) &&
+            writtenUnreduced(line),
           completes: n.main,
         };
   const pick = (nodes: GraphNode[]): GraphNode => {
@@ -368,14 +460,51 @@ export function matchLine(inp: MatchInput): Match {
     return [...nodes].sort((x, y) => rank(x) - rank(y))[0]!;
   };
 
+  // The sides that hold a calculation (a side that is only a value says
+  // nothing of the road: `(1/4)/(1/3)` and `3/4` have the same factors), and
+  // whether one of them is written as one of `exprs` (the same factors, or
+  // the same terms of a sum however each term is written).
+  const work = sides.filter(s => !isLiteralValue(s.ast));
+  const written = (exprs: readonly string[]): boolean =>
+    exprs.some(e => {
+      const ast = parseAst(e);
+      if (ast === null) {
+        return false;
+      }
+      const bag = factorBag(ast);
+      const terms = sumTerms(ast);
+      return work.some(
+        s =>
+          sameBag(factorBag(s.ast), bag) || sameTerms(sumTerms(s.ast), terms),
+      );
+    });
+
   // (a) a node of the step he is on
   const here = equalNodes.filter(n => n.planCard === card);
   if (here.length > 0) {
-    return creditOf(pick(here));
+    const n = pick(here);
+    if (!credited.has(n.id) && n.role !== 'support') {
+      // The right value by a wrong road (a coincidence of these numbers).
+      const trap = (table.traps ?? []).find(
+        c => c.nodeId === n.id && written(c.exprs),
+      );
+      if (trap && !written(n.forms)) {
+        return { kind: 'mutation', candidate: trap, strength: 'confirmed' };
+      }
+      if (n.proof === true && work.length === 0 && !inp.worked?.has(n.id)) {
+        return { kind: 'unexplained', node: n };
+      }
+    }
+    return creditOf(n);
   }
 
   // (c) the same factors as a known slip of this step
   const score = (c: Candidate): number => {
+    // On a tree several slips share a value: the road he wrote outranks a
+    // slip that only looks like the result he ended on.
+    if (graph.domain === 'tree' && written(c.exprs)) {
+      return 2;
+    }
     if (c.bags.some(cb => bags.some(b => sameBag(b, cb)))) {
       return 1;
     }

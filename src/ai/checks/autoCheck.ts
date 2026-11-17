@@ -82,7 +82,8 @@ function caseGroups(
   size: number,
 ): { keys: Set<string>; label: (id: string) => string } | null {
   const spec = rt.state.cases[caseId];
-  if (!spec) {
+  // A tree case has nothing to list.
+  if (!spec || spec.kind === 'tree') {
     return null;
   }
   const labelled =

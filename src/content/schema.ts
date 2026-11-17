@@ -488,12 +488,27 @@ export const MethodCardSchema = z.strictObject({
   checks: z.array(RichSchema).min(1).max(4),
 });
 
+/**
+ * A figure the exam prints beside a statement (a probability tree): a
+ * component of the registry drawn read-only. `marks` says, for a plan-card
+ * key, which parts of the figure that step is about (the component's own
+ * ids: the branches of a tree); the lesson draws them marked while he is on
+ * that step and fills in the values he has found (src/hybrid/figure.ts).
+ */
+export const FigureSchema = z.strictObject({
+  spec: ComponentSpecSchema,
+  marks: z.record(Id, z.array(z.string().min(1)).min(1)).default({}),
+});
+export type Figure = z.infer<typeof FigureSchema>;
+
 /** One of the two similar questions without help (addendum E, 25). */
 export const SimilarSlotSchema = z.strictObject({
   id: Id,
   kind: z.enum(['same_structure', 'twist']),
   /** The statement, exam French; formulas as `math`. */
   statement: RichSchema,
+  /** The figure of this question, when it has its own (another tree). */
+  figure: FigureSchema.optional(),
   /** A template and its arguments (an urn of its own, a die...). */
   graph: MethodGraphSchema,
   /** Numbers that are on screen elsewhere and allowed on purpose (printed by the guard). */
@@ -515,10 +530,16 @@ export const FindingSchema = z.strictObject({
 });
 export type Finding = z.infer<typeof FindingSchema>;
 
-/** The paper skeleton: exam French (LTR), blanks `{node}` filled from his accepted lines only. */
+/**
+ * The paper skeleton: exam French (LTR), blanks `{node}` filled from his
+ * accepted lines only. A line may end with a calculation in `math` (LaTeX,
+ * drawn with stacked fractions, under the French words): its blanks are
+ * written `\\his{node}`, because LaTeX has braces of its own.
+ */
 export const SkeletonLineSchema = z.strictObject({
   id: Id,
   fr: z.string().min(1),
+  math: z.string().min(1).optional(),
 });
 
 /** A value another question's graph gives (the student's sheet): `from` is `part/blockId`, e.g. `1/m1`. */
@@ -1098,6 +1119,8 @@ export const ExerciseSchema = z
      */
     section: z.enum(['mathematiques', 'sciences-experimentales']).optional(),
     statement: RichSchema,
+    /** The figure printed beside the statement (a probability tree), with what each step marks on it. */
+    figure: FigureSchema.optional(),
     /** The exam paper: parts, questions, sub-questions (optional; see PaperSchema). */
     paper: PaperSchema.optional(),
     parts: z.array(QuestionSchema).min(1),

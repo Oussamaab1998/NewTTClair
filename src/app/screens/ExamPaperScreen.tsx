@@ -15,6 +15,7 @@ import { partLabel, resumeTarget } from '../exercises';
 import { ResetDialog, ResetLink } from '../ResetDialog';
 import type * as DevOnly from '../dev';
 import { paperStyle } from '../paperStyle';
+import { FigureView } from './hybrid/FigureView';
 
 /** Debug builds only (launch arguments); Metro drops it in release. */
 const devOnly: typeof DevOnly | null = __DEV__
@@ -192,6 +193,14 @@ export function ExamPaperScreen({
               {heading}
             </Text>
             <RichView rich={ex.statement} variant="paper" />
+            {ex.figure && (
+              // The figure the exam prints beside the statement (a probability tree), as printed.
+              <FigureView
+                spec={ex.figure.spec}
+                signature="printed"
+                testID="exam-paper-figure"
+              />
+            )}
             {parts.map((part, i) => (
               <View key={i} style={styles.part} testID={`exam-part-${i}`}>
                 {part.heading && (

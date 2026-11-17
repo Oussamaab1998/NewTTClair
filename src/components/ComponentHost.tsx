@@ -32,6 +32,7 @@ import { ChoiceProduct } from './probability2/ChoiceProduct';
 import { EventAreaModel } from './probability2/EventAreaModel';
 import { GroupBoxes } from './probability2/GroupBoxes';
 import { PartWholeBar } from './probability2/PartWholeBar';
+import { ProbabilityTree } from './probability2/ProbabilityTree';
 import { RepeatedRuns } from './probability2/RepeatedRuns';
 import { SlotsPattern } from './probability2/SlotsPattern';
 import { SpreadSlider } from './probability2/SpreadSlider';
@@ -64,6 +65,7 @@ export const VIEWS: Partial<Record<ComponentName, AnyView>> = {
   BinomialExplorer: BinomialExplorer as AnyView,
   EventAreaModel: EventAreaModel as AnyView,
   UrnTemplate: UrnTemplate as AnyView,
+  ProbabilityTree: ProbabilityTree as AnyView,
   FunctionPlot: FunctionPlot as AnyView,
   PointOnCurve: PointOnCurve as AnyView,
   FoldSymmetry: FoldSymmetry as AnyView,

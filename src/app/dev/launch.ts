@@ -21,7 +21,8 @@
  *   -devDemo paperSheet  the opened lesson starts with «الورقة» open
  *   -devReset bac2022c-ex4  "start from scratch" for this exercise at launch
  *                      (the real reset: an exercise_reset event, its done
- *                      marks cleared; other exercises untouched)
+ *                      marks cleared, the lesson board's saved questions and
+ *                      resume points removed; other exercises untouched)
  *   -devDemo methodSheet  the opened method lesson starts with the route sheet open
  *   -devDemo resetDialog  the picker starts with exercise 4's reset dialog open
  *   -devPaperScreen bac2022c-ex4  the exam paper screen of this exercise
@@ -47,6 +48,13 @@
  *   -devMover slow     the lesson board's AI side waits about 5 s, then gives
  *                      no move: the waiting state, then the prepared reply
  *                      (no model call, nothing spent; src/hybrid/live.ts)
+ *   -devHybridActs "start,dontKnow,dontKnow,line:(2/3)*(1/4)=1/6,back"
+ *                      the lesson board plays these acts once it is open, one
+ *                      per answer, through the path its buttons use: `start`
+ *                      («نبداو» on the trip), `dontKnow`, `line:<raw>`,
+ *                      `choice:<optionId>`, `back` («نرجعو للسؤال» on a small
+ *                      example), and `sheet:exercise|road|found` to open that
+ *                      sheet (screenshots without tap automation)
  */
 import { Settings } from 'react-native';
 
@@ -181,6 +189,49 @@ export const devScrollAtLaunch = (): number => {
   const v = Number(arg('devScroll'));
   return Number.isFinite(v) && v > 0 ? v : 0;
 };
+
+/** One act the lesson board plays at launch (`-devHybridActs`). */
+export type DevHybridAct =
+  | { type: 'start' }
+  | { type: 'dontKnow' }
+  | { type: 'back' }
+  | { type: 'line'; raw: string }
+  | { type: 'choice'; optionId: string }
+  | { type: 'sheet'; tab: 'exercise' | 'road' | 'found' };
+
+/** A comma starts a new act only before a known token (a line keeps its own commas: `C(10,3)`, `0,5`). */
+const HYBRID_ACT_BREAK = /,(?=\s*(?:start|dontKnow|back|line:|choice:|sheet:))/;
+
+/** `start,dontKnow,line:10*9*8=720,sheet:road`: known forms only; anything else is ignored. */
+export function parseDevHybridActs(value: string | null): DevHybridAct[] {
+  return (
+    (value ?? '')
+      .split(HYBRID_ACT_BREAK)
+      .map(a => a.trim())
+      // Only a line holds commas of its own.
+      .flatMap(a => (a.startsWith('line:') ? [a] : a.split(',')))
+      .flatMap((a): DevHybridAct[] => {
+        const t = a.trim();
+        if (t === 'start' || t === 'dontKnow' || t === 'back') {
+          return [{ type: t }];
+        }
+        if (t.startsWith('line:') && t.length > 5) {
+          return [{ type: 'line', raw: t.slice(5).trim() }];
+        }
+        if (t.startsWith('choice:') && t.length > 7) {
+          return [{ type: 'choice', optionId: t.slice(7).trim() }];
+        }
+        const tab = t.startsWith('sheet:') ? t.slice(6).trim() : null;
+        return tab === 'exercise' || tab === 'road' || tab === 'found'
+          ? [{ type: 'sheet', tab }]
+          : [];
+      })
+  );
+}
+
+/** `-devHybridActs …`: the acts the lesson board plays once it is open. */
+export const devHybridActsAtLaunch = (): DevHybridAct[] =>
+  parseDevHybridActs(stringArg('devHybridActs'));
 
 /** How long the `-devMover slow` stand-in waits. */
 export const SLOW_MOVER_MS = 5_000;

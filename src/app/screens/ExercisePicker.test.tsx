@@ -320,9 +320,11 @@ describe('two papers of one session (E5)', () => {
       'رياضيات',
     );
   });
-  it('the two «Exercice 2» cards differ by their section tag and title', async () => {
+  it('the «Exercice 2» cards differ by their section tag and title', async () => {
     await renderApp();
-    expect(screen.getAllByText('Exercice 2')).toHaveLength(2);
+    // Three papers have an «Exercice 2»: Maths and Sc. exp. (contrôle), Sc. exp. (principale).
+    expect(screen.getAllByText('Exercice 2')).toHaveLength(3);
+    expect(screen.getByLabelText('تمرين الشجرة')).toBeOnTheScreen();
     expect(screen.getByTestId('section-bac2022c-sc-ex2')).toHaveTextContent(
       'علوم تجريبية',
     );

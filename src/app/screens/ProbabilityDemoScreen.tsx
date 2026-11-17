@@ -127,6 +127,25 @@ const areaState = (over: JsonObject): JsonObject => ({
   ...over,
 });
 
+/** ProbabilityTree demo: A or not A, then F or not F; `over` changes a branch by its id. */
+const treeBranches = (over: Record<string, JsonObject>): JsonObject[] =>
+  (
+    [
+      ['a', 'A'],
+      ['na', '\\overline{A}'],
+    ] as const
+  ).map(([id, latex]) => ({
+    id,
+    latex,
+    ...over[id],
+    children: [
+      { id: `${id}.f`, latex: 'F', ...over[`${id}.f`] },
+      { id: `${id}.nf`, latex: '\\overline{F}', ...over[`${id}.nf`] },
+    ],
+  }));
+const BLANK = { show: 'blank' };
+const HIDDEN = { show: 'hidden' };
+
 export interface DemoCase {
   title: string;
   /** A registered component; or `key` + `render` for a non-registry view (editor). */
@@ -824,6 +843,80 @@ const CASES: DemoCase[] = [
     title: 'UrnTemplate (no parent: any fresh urn, seed 1)',
     spec: { component: 'UrnTemplate', props: { templateId: 'urn_exactly_j' } },
     replay: { snapshot: { bump: 3, explored: 'done' } },
+  },
+  // ProbabilityTree (appended after the cases above). The replay copy is the
+  // picture as a lesson shows it: no touch, no frame in the compact size.
+  {
+    title: 'ProbabilityTree (default: the tree as the exam prints it, two values given, the other branches empty)',
+    spec: {
+      component: 'ProbabilityTree',
+      props: {
+        branches: treeBranches({
+          a: { p: '2/3' },
+          'a.f': { p: '1/4' },
+          'a.nf': BLANK,
+          na: BLANK,
+          'na.f': BLANK,
+          'na.nf': BLANK,
+        }),
+      },
+    },
+    replay: {},
+  },
+  {
+    title: 'ProbabilityTree (hard case: the step-card size, one value found, the others hidden, the branches of the step marked, one value asked)',
+    spec: {
+      component: 'ProbabilityTree',
+      props: {
+        compact: true,
+        mark: ['a', 'a.f'],
+        ask: 'a.nf',
+        branches: treeBranches({
+          a: { p: '2/3' },
+          'a.f': { p: '1/4' },
+          'a.nf': HIDDEN,
+          na: { p: '1/3', show: 'found' },
+          'na.f': HIDDEN,
+          'na.nf': HIDDEN,
+        }),
+      },
+    },
+    replay: {},
+  },
+  {
+    title: 'ProbabilityTree (other parameters: whole counts, a class of 25, one count hidden)',
+    spec: {
+      component: 'ProbabilityTree',
+      props: {
+        rootCount: 25,
+        branches: treeBranches({
+          a: { count: 15 },
+          'a.f': { count: 6 },
+          'a.nf': { count: 9, countShow: 'hidden' },
+          na: { count: 10 },
+          'na.f': { count: 5 },
+          'na.nf': { count: 5 },
+        }),
+      },
+    },
+    replay: {},
+  },
+  {
+    title: 'ProbabilityTree (other parameters: every value written; tap the end of a path to see its product, never the result)',
+    spec: {
+      component: 'ProbabilityTree',
+      props: {
+        branches: treeBranches({
+          a: { p: '2/3' },
+          'a.f': { p: '1/4' },
+          'a.nf': { p: '3/4' },
+          na: { p: '1/3' },
+          'na.f': { p: '1/2' },
+          'na.nf': { p: '1/2' },
+        }),
+      },
+    },
+    replay: { snapshot: { selected: 'a.f', tapped: ['a.f'], explored: null } },
   },
 ];
 

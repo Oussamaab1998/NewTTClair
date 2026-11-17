@@ -13,94 +13,20 @@ import type { ComponentName } from '../../components/contract';
 import { REGISTRY } from '../../components/registry';
 import type { Experiment } from '../../engine/calls';
 import type { Rich } from '../../content/schema';
+import type { TreeQuantity } from '../../engine/tree';
 import type { QuestionCtx } from '../../hybrid/conductor/conductor';
-import type { GraphNode } from '../../method/graph';
+import type { Graph, GraphNode } from '../../method/graph';
+import { treeLabel } from '../../method/templatesTree';
 import { propsOf } from '../../planner/llm/catalog';
 import { plain, type GraphRuntime } from '../checks/lines';
-import { richText } from '../packs/build';
+import { richText, type QuestionDomain } from '../packs/build';
+import type { QuestionNotes } from '../packs/notes';
 import { newSession, type CaseSpec } from '../session/state';
 import { COMPUTE } from '../tools/compute';
+import { preparedFor } from './prepared';
 import { PREPARED_IDS, type CaseFacts } from './tool';
 
 export const PACK_MAX = 8_000;
-
-/** A prepared small case and what it is for (model-facing, English). */
-interface PreparedSpec {
-  spec: CaseSpec;
-  use: string;
-}
-
-/**
- * Small cases per question, chosen so their values do not collide with the
- * question's unearned values; their coincidences are listed in the pack and
- * a move is refused on a case where his own slip gives the right number.
- */
-const PREPARED: Readonly<
-  Record<string, Readonly<Record<string, readonly PreparedSpec[]>>>
-> = {
-  'bac2022c-sc-ex2': {
-    '1': [
-      {
-        spec: { kind: 'box', n: 4, k: 2 },
-        use: 'pairs: with order against together (the link between the two counts). Never to check a division by k (k = 2 hides it).',
-      },
-      {
-        spec: { kind: 'box', n: 4, k: 3 },
-        use: 'triples: his rule tested beyond pairs; one group is written in several orders.',
-      },
-      {
-        spec: { kind: 'urn', reds: 2, blacks: 4, k: 3, j: 1 },
-        use: 'the favourable count in small: one red with every black pair, listed by hand.',
-      },
-      {
-        spec: { kind: 'box', n: 7, k: 3 },
-        use: 'a bigger box when his rule must hold beyond what he can list (the engine counts, he predicts).',
-      },
-    ],
-    '2': [
-      {
-        spec: { kind: 'urn', reds: 2, blacks: 3, k: 3, j: 0 },
-        use: 'what a draw with no red ball is: he lists them by hand.',
-      },
-      {
-        spec: { kind: 'urn', reds: 3, blacks: 4, k: 3, j: 0 },
-        use: 'his claim «B is the opposite of A» tested on a new urn: he lists the no-red draws and compares with what the claim predicts.',
-      },
-      {
-        spec: { kind: 'box', n: 5, k: 3 },
-        use: 'groups of 3 among 5: each group is written in several orders (after a missing division at the favourable count).',
-      },
-      {
-        spec: { kind: 'box', n: 4, k: 2 },
-        use: 'pairs: with order against together.',
-      },
-    ],
-    '3a': [
-      {
-        spec: { kind: 'box', n: 5, k: 3 },
-        use: 'the places of 3 successes among 5 trials, as groups of 3 letters among 5 (his Question 1 rule).',
-      },
-      {
-        spec: { kind: 'box', n: 4, k: 2 },
-        use: 'the places of 2 successes among 4 trials (SSFF, SFSF...), listed by hand.',
-      },
-      {
-        spec: { kind: 'box', n: 4, k: 3 },
-        use: 'the places of 3 successes among 4 trials.',
-      },
-    ],
-    '3b': [
-      {
-        spec: { kind: 'urn', reds: 1, blacks: 3, k: 1, j: 1 },
-        use: 'one trial with p = 1/4 (success: the red ball): a twin law for the mean and the spread of one trial.',
-      },
-      {
-        spec: { kind: 'urn', reds: 2, blacks: 3, k: 1, j: 1 },
-        use: 'one trial with p = 2/5: a second twin, where p q and p p differ.',
-      },
-    ],
-  },
-};
 
 /** What each urn-template node counts (model-facing; as in src/ai/packs/build.ts). */
 const NODE_MEANING: Readonly<Record<string, string>> = {
@@ -118,6 +44,18 @@ const NODE_MEANING: Readonly<Record<string, string>> = {
   meann: 'mean of n trials',
   var1: 'variance of one trial',
   varn: 'variance of n trials',
+  // The two-event tree (src/method/templatesTree.ts).
+  a_and_f: 'the path through A to F: p(A ∩ F), its two branches multiplied',
+  na_and_f: 'the path through not A to F: p(Ā ∩ F)',
+  not_a: 'the first-level branch to not A: p(Ā)',
+  f_given_na: 'the branch to F after not A: p(F/Ā), F knowing not A',
+  nf_given_a: 'the branch to not F after A (not F knowing A)',
+  nf_given_na: 'the branch to not F after not A (not F knowing not A)',
+  not_f: 'all of not F, by both paths',
+  a_and_nf: 'the path through A to not F',
+  na_and_nf: 'the path through not A to not F',
+  na_given_nf:
+    'not A knowing not F: the tree read backwards (a path over a total)',
 };
 
 /**
@@ -138,6 +76,8 @@ export interface MovePack {
   text: string;
   prepared: PreparedCase[];
   experiment: Experiment | null;
+  /** The question's domain (null: an urn question): it picks the prompt and the tools. */
+  domain: QuestionDomain | null;
 }
 
 /** The engine's values of a case (make_case on a scratch session). */
@@ -169,12 +109,19 @@ export function experimentOf(ctx: QuestionCtx): Experiment | null {
     : null;
 }
 
-const caseLabel = (spec: CaseSpec): string =>
+/** A small case in words (model-facing). */
+export const caseLabel = (spec: CaseSpec): string =>
   spec.kind === 'box'
     ? `box of ${spec.n} letters ${'abcdefgh'
         .slice(0, spec.n)
         .split('')
         .join(' ')}, ${spec.k} drawn together`
+    : spec.kind === 'tree'
+    ? `tree of whole counts: ${spec.n} people, ${spec.a} in A (${
+        spec.af
+      } of them in F), ${spec.n - spec.a} not in A (${
+        spec.naf
+      } of them in F); it rehearses the step ${spec.node}`
     : `urn of ${spec.reds} red and ${spec.blacks} black, ${spec.k} drawn${
         spec.k > 1 ? ' together' : ''
       }, exactly ${spec.j} red wanted`;
@@ -186,8 +133,11 @@ function nodeLine(n: GraphNode): string {
   }; forms ${n.forms.slice(0, 2).join(' | ')}`;
 }
 
-/** The known slips, one example per slip id and node. */
-function slipLines(rt: GraphRuntime): string[] {
+/**
+ * The known slips, one example per slip id and node. A tree question lists
+ * the roads that give the right number as its traps (treeBlock), not here.
+ */
+function slipLines(rt: GraphRuntime, tree = false): string[] {
   const byNode = new Map<string, Map<string, string>>();
   for (const c of rt.table.kept) {
     const list = byNode.get(c.nodeId) ?? new Map<string, string>();
@@ -199,9 +149,11 @@ function slipLines(rt: GraphRuntime): string[] {
   const lines = [...byNode].map(
     ([node, list]) => `- at ${node}: ${[...list.values()].join('; ')}`,
   );
-  const hidden = rt.table.dropped
-    .filter(d => d.why === 'equals_right_value')
-    .map(d => `${d.id} at ${d.nodeId}`);
+  const hidden = tree
+    ? []
+    : rt.table.dropped
+        .filter(d => d.why === 'equals_right_value')
+        .map(d => `${d.id} at ${d.nodeId}`);
   if (hidden.length > 0) {
     lines.push(
       `- hidden here (they give the right number): ${[...new Set(hidden)].join(
@@ -210,6 +162,118 @@ function slipLines(rt: GraphRuntime): string[] {
     );
   }
   return lines;
+}
+
+// ---------------------------------------------------------------------------
+// A tree question (two events: A or not A, then F or not F).
+
+/** Ways a trap is written that the pack prints for one slip and node. */
+const TRAP_EXAMPLES = 3;
+
+/** The statement's branches are on the "not A" side (the labels of A and not A exchanged). */
+const swapped = (g: Graph): boolean =>
+  g.nodes.some(n => {
+    const id = n.id as TreeQuantity;
+    return (
+      n.label !== undefined &&
+      n.label === treeLabel(id, true) &&
+      n.label !== treeLabel(id, false)
+    );
+  });
+
+/** A node of a tree graph; with the labels exchanged only the exam's writing says what it is. */
+function treeNodeLine(n: GraphNode, swap: boolean): string {
+  const meaning = swap ? undefined : NODE_MEANING[n.id];
+  return `- ${n.id} = ${plain(n.value)}: ${[
+    ...(meaning ? [meaning] : []),
+    ...(n.label ? [`the exam writes ${n.label}`] : []),
+    `card ${n.planCard}${
+      n.main ? '' : ' (support: named when he writes it, never the answer)'
+    }`,
+    ...(n.proof ? ['proof'] : []),
+    `forms ${n.forms.slice(0, 3).join(' | ')}`,
+  ].join('; ')}`;
+}
+
+/**
+ * The "Tree:" block of a tree question's pack, from its graph: what the
+ * statement gives (two of the three fractions are printed only on the
+ * figure), how the exam writes a conditional, what a `proof` node asks, and
+ * the wrong roads that reach the RIGHT value on these numbers (the traps of
+ * the mutation table: the engine reports them as slips, the AI must never
+ * accept one).
+ */
+export function treeBlock(rt: GraphRuntime): string[] {
+  const g = rt.graph;
+  const swap = swapped(g);
+  const [a, fGivenA, f] = (g.givens ?? []).map(plain);
+  const out = [
+    'Tree: two events, A or not A at the first level, then F or not F. The lesson draws it on his step card (the given values, the values he found, "?" for the rest, the branch of the step marked).',
+  ];
+  if (a !== undefined && fGivenA !== undefined && f !== undefined) {
+    out.push(
+      `- Given: ${treeLabel(
+        'a',
+        swap,
+      )} = ${a} (the first branch, drawn on top), ${treeLabel(
+        'f_given_a',
+        swap,
+      )} = ${fGivenA} (the branch to F after it), ${treeLabel(
+        'f',
+        swap,
+      )} = ${f} (the total of F: its two paths together). Two of them are printed only on the figure: they are numbers of the statement all the same.`,
+    );
+  }
+  out.push(
+    '- Notation: the exam writes a conditional with a slash: p(F/\\overline{A}) is "F knowing not A", a branch of the second level; p(\\overline{A} \\cap F) is a whole path from the start. Never \\mid.',
+  );
+  if (g.nodes.some(n => n.proof)) {
+    out.push(
+      '- "proof" on a node: the value alone is not accepted (the statement prints some results, and several values of this tree are equal by chance); he writes the calculation. A right value written alone comes back as "unexplained".',
+    );
+  }
+  const traps = rt.table.traps ?? [];
+  if (traps.length > 0) {
+    out.push(
+      '- Traps: wrong roads that reach the RIGHT value on these numbers. The engine reports each as a slip; never accept one, and never call its result right:',
+      ...traps.map(
+        c =>
+          `  - ${c.id} at ${c.nodeId}: ${c.exprs
+            .slice(0, TRAP_EXAMPLES)
+            .join(' | ')}${
+            c.exprs.length > TRAP_EXAMPLES
+              ? ` (and ${c.exprs.length - TRAP_EXAMPLES} more)`
+              : ''
+          }`,
+      ),
+    );
+  }
+  return out;
+}
+
+/** The private graph of a tree question: the tree block, its nodes, its slips. */
+function treeGraphLines(rt: GraphRuntime): string[] {
+  return [
+    ...treeBlock(rt),
+    'Private solution graph "main" (a value he has not earned is refused in your messages, and so is its calculation):',
+    ...rt.graph.nodes.map(n => treeNodeLine(n, swapped(rt.graph))),
+    'Known slips (id, an example line = its engine value):',
+    ...slipLines(rt, true),
+  ];
+}
+
+/** The route notes of a tree question: no component, no C(n,k) gate. */
+function treeNotesLines(notes: QuestionNotes): string[] {
+  return [
+    'Route notes (how this question usually goes):',
+    ...notes.route.filter(r => !ROUTE_SKIPPED.test(r)).map(r => `- ${r}`),
+    ...(notes.notationAfter
+      ? [
+          `The name of the rule only after he computed node "${notes.notationAfter}" himself.`,
+        ]
+      : []),
+    `Older skills to probe if he stalls: ${notes.prerequisites.join(', ')}.`,
+  ];
 }
 
 /**
@@ -251,10 +315,17 @@ function build(ctx: QuestionCtx): MovePack {
   if (target) {
     out.push(`Result the exam gives: ${richText(target as Rich)}`);
   }
+  const tree = q.domain === 'tree';
   if (q.plan.length > 0) {
     out.push(
       'Plan cards (he ordered them; a card comes after the cards it needs):',
-      ...q.plan.map(c => `- ${c.id} «${c.text}» needs [${c.needs.join(', ')}]`),
+      // On a tree a card's key is the step of the graph it settles.
+      ...q.plan.map(
+        c =>
+          `- ${c.id}${tree ? ` (step ${c.key})` : ''} «${
+            c.text
+          }» needs [${c.needs.join(', ')}]`,
+      ),
     );
   }
   if (q.read.length > 0) {
@@ -264,7 +335,9 @@ function build(ctx: QuestionCtx): MovePack {
         .join('; ')}`,
     );
   }
-  if (q.main) {
+  if (q.main && tree) {
+    out.push(...treeGraphLines(q.main));
+  } else if (q.main) {
     out.push(
       'Private solution graph "main" (a value he has not earned is refused in your messages):',
       ...q.main.graph.nodes.map(nodeLine),
@@ -273,7 +346,9 @@ function build(ctx: QuestionCtx): MovePack {
     );
   }
   const notes = q.notes;
-  if (notes) {
+  if (notes && tree) {
+    out.push(...treeNotesLines(notes));
+  } else if (notes) {
     out.push(
       'Route notes (how this question usually goes):',
       ...notes.route.filter(r => !ROUTE_SKIPPED.test(r)).map(r => `- ${r}`),
@@ -293,10 +368,10 @@ function build(ctx: QuestionCtx): MovePack {
       .map(n => plain(n.value))
       .filter(v => !known.includes(v)),
   );
-  const prepared: PreparedCase[] = (PREPARED[ex.id]?.[q.questionId] ?? [])
+  const prepared: PreparedCase[] = preparedFor(ex.id, q.questionId)
     .slice(0, PREPARED_IDS.length)
-    .map((p, i) => ({
-      id: PREPARED_IDS[i]!,
+    .map(p => ({
+      id: p.id,
       spec: p.spec,
       use: p.use,
       facts: caseFacts(p.spec, known),
@@ -314,7 +389,7 @@ function build(ctx: QuestionCtx): MovePack {
                 ? `${k} (a value of this question: never show)`
                 : `${k} ${v}`,
             )
-            .join(', ')}. For: ${c.use}${
+            .join(', ')}. For: ${c.use}${/[.!?]$/.test(c.use) ? '' : '.'}${
             c.facts.coincidences.length > 0
               ? ` Coincidences: ${[...new Set(c.facts.coincidences)].join(
                   ', ',
@@ -324,7 +399,12 @@ function build(ctx: QuestionCtx): MovePack {
       ),
     );
   }
-  return { text: out.join('\n'), prepared, experiment };
+  return {
+    text: out.join('\n'),
+    prepared,
+    experiment,
+    domain: q.domain ?? null,
+  };
 }
 
 const cache = new Map<string, MovePack>();

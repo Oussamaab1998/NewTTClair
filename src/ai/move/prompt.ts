@@ -9,9 +9,11 @@
  */
 import { CATALOG_META } from '../../components/catalogMeta';
 import { DARIJA_LEXICON } from '../../planner/llm/prompts';
+import type { QuestionDomain } from '../packs/build';
 import { aiComponentNames } from '../prompt/catalogAi';
 import { bannedSentence } from '../prompt/lexicon';
 import { PRINCIPLES } from '../prompt/principles';
+import { treeMovePrompt } from './promptTree';
 
 export const MOVE_PROMPT_VERSION = 'm1';
 export const MOVE_PROMPT_MAX = 10_000;
@@ -108,4 +110,14 @@ let cached: string | null = null;
 export function movePrompt(): string {
   cached ??= buildMovePrompt();
   return cached;
+}
+
+/**
+ * The core prompt of a question by its domain: the urn prompt above (no
+ * domain: its bytes never change), or the tree prompt (./promptTree.ts).
+ */
+export function movePromptFor(
+  domain: QuestionDomain | null | undefined,
+): string {
+  return domain === 'tree' ? treeMovePrompt() : movePrompt();
 }

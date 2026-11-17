@@ -24,6 +24,7 @@ export const COMPONENT_NAMES = [
   'VariableTable',
   'EventAreaModel',
   'UrnTemplate',
+  'ProbabilityTree',
   // Analyse
   'FunctionPlot',
   'PointOnCurve',

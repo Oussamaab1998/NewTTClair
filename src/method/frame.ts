@@ -96,6 +96,8 @@ export function evaluateLine(input: {
   card: PlanCardKey;
   credited: ReadonlySet<string>;
   extra?: readonly ExtraCandidate[];
+  /** Nodes whose calculation is on an earlier line (see MatchInput.worked). */
+  worked?: ReadonlySet<string>;
 }): LineEvaluation {
   const line = evalChain(input.raw);
   if (line.kind === 'unreadable') {
@@ -112,6 +114,7 @@ export function evaluateLine(input: {
     credited: input.credited,
     line,
     ...(input.extra && { extra: input.extra }),
+    ...(input.worked && { worked: input.worked }),
   });
   switch (m.kind) {
     case 'unfinished':
@@ -174,7 +177,12 @@ export function reviewLine(
   let slip: ReviewedLine | null = null;
   for (const card of graph.cards ?? URN_CARDS) {
     const m = matchLine({ graph, table, card, credited, line });
-    if (m.kind === 'credit' || m.kind === 'support') {
+    // Without help he is not asked for the road: the value alone counts here.
+    if (
+      m.kind === 'credit' ||
+      m.kind === 'support' ||
+      m.kind === 'unexplained'
+    ) {
       return { outcome: 'credit', nodeId: m.node.id };
     }
     if (m.kind === 'mutation' && !slip) {

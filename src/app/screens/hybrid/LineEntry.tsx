@@ -2,10 +2,13 @@
  * Where he writes on the board: the multi-line worksheet (src/lesson/worksheet)
  * for the step he is on. The page keeps his lines of this step with the
  * engine's mark on each (from the shared session); the tiles are the
- * statement's numbers and the values he earned; a scaffold comes only from
+ * statement's numbers (those a figure prints first: the branches of a tree
+ * are not in the text) and the values he earned; a scaffold comes only from
  * his own credited line of that node (a small case, an earlier try), at the
- * level his profile and his «ما نعرفش» on this step call for. The worksheet
- * never writes an ambiguous division, so no readback is asked.
+ * level his profile and his «ما نعرفش» on this step call for (never from a
+ * small tree example: counted whole, its line is a count over a count, not
+ * the shape of the question's line). The worksheet never writes an
+ * ambiguous division, so no readback is asked.
  */
 import React, { useMemo, useState } from 'react';
 
@@ -44,6 +47,8 @@ export interface LineEntryProps {
   disabled?: boolean;
   /** His line is the act being answered: «نثبّت» shows a spinner. */
   busy?: boolean;
+  /** Numbers the exercise's figure gives ("2/3"): tiles before the statement's; keep the array stable. */
+  givens?: readonly string[];
   testID?: string;
 }
 
@@ -72,17 +77,29 @@ function markOf(
 export function LineEntry(p: LineEntryProps) {
   const [page, setPage] = useState<Page>(emptyPage);
   const session = p.state.session;
+  const givens = p.givens;
   const tiles = useMemo(
-    () => buildTiles(session.given, session.lines),
-    [session.given, session.lines],
+    () =>
+      buildTiles(
+        // Equal values are shown once (buildTiles), whichever list they are in.
+        givens && givens.length > 0
+          ? [...givens, ...session.given]
+          : session.given,
+        session.lines,
+      ),
+    [givens, session.given, session.lines],
   );
   const dontKnows = p.state.progress.dontKnows;
   const scaffold = useMemo(() => {
-    const source = p.step.node ? sourceFor(session.lines, p.step.node) : null;
+    // A line of a small tree example is no model for the question's line.
+    const models = session.lines.filter(
+      l => l.graph === null || session.cases[l.graph]?.kind !== 'tree',
+    );
+    const source = p.step.node ? sourceFor(models, p.step.node) : null;
     return source
       ? buildScaffold(source, scaffoldLevel(p.level, dontKnows))
       : null;
-  }, [session.lines, p.step.node, p.level, dontKnows]);
+  }, [session.lines, session.cases, p.step.node, p.level, dontKnows]);
   // Each line of the page gets the mark of the session line with its text.
   const marked = useMemo(() => {
     const byRaw = new Map(session.lines.map(l => [l.raw, l]));

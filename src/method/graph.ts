@@ -53,6 +53,16 @@ export interface GraphNode {
   shape: Shape;
   /** False for a supporting step (the ordered count, k!): accepted, but it does not complete its card. */
   main: boolean;
+  /**
+   * The value alone is not his work yet (a « Montrer que » result the
+   * statement prints, a step whose road matters): a line that is only the
+   * value is not credited, he is asked for the calculation.
+   */
+  proof?: boolean;
+  /** A result that must be written in lowest terms (the rule of a `ratio` node, for another shape). */
+  reduced?: boolean;
+  /** How the exam writes what the node is (LaTeX: `p(\\overline{A} \\cap F)`). */
+  label?: string;
 }
 
 export interface UrnSpec {
@@ -85,6 +95,16 @@ export interface Graph {
   extraMutate?: (node: GraphNode) => RawMutation[];
   /** Named values a card's claim can use (single letters, like `t` total, `a` another event's count). */
   vars?: Readonly<Record<string, Fraction>>;
+  /**
+   * Wrong roads that reach a node's RIGHT value on this question's numbers
+   * (a coincidence): a line written that way is that slip, not a credit.
+   * Only the ones whose value equals the node's are kept (mutations.ts).
+   */
+  traps?: (node: GraphNode) => RawMutation[];
+  /** The kind of question, when it is not an urn (the AI pack, the small cases). */
+  domain?: 'tree';
+  /** Numbers the statement gives that are not in its text (the branches printed on a figure). */
+  givens?: readonly Fraction[];
 }
 
 export const nodeOf = (g: Graph, id: string): GraphNode => {

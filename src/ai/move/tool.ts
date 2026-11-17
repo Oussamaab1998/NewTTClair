@@ -11,6 +11,9 @@
  * 5. verifyAsk (src/ai/verify/message.ts): numbers, leaks, notation, line
  *    ids, non-Tunisian words, one question, and the component's props
  *    (resolveSpec) and what it would reveal.
+ * A tree question (the pack's domain) has its own tool definition and fewer
+ * moves: the lesson draws the tree itself, so no component, and only the
+ * prepared cases (never a new one).
  */
 import { z } from 'zod';
 
@@ -18,7 +21,7 @@ import type { Experiment } from '../../engine/calls';
 import type { DeepReason, LightReason } from '../../hybrid/conductor/types';
 import type { AiTier } from '../../hybrid/mover';
 import { zodToJsonSchema } from '../../planner/llm/strictSchema';
-import type { QuestionPack } from '../packs/build';
+import type { QuestionDomain, QuestionPack } from '../packs/build';
 import type { CaseSpec, SessionRuntime } from '../session/state';
 import { COMPUTE } from '../tools/compute';
 import { BlockSchema, type AskStudent } from '../tools/schemas';
@@ -73,12 +76,16 @@ export const ALLOWED_MOVES: Readonly<
   slip_third: ['repair', 'case', 'component', 'scaffold'],
 };
 
+/** A tree question has no component move (the lesson draws the tree itself). */
 export function allowedMoves(
   reason: LightReason | DeepReason,
   tier: AiTier,
+  domain?: QuestionDomain | null,
 ): MoveKind[] {
   return ALLOWED_MOVES[reason].filter(
-    m => tier === 'light' || m !== 'escalate',
+    m =>
+      (tier === 'light' || m !== 'escalate') &&
+      (domain !== 'tree' || m !== 'component'),
   );
 }
 
@@ -143,10 +150,56 @@ export type TutorMove = z.infer<typeof TutorMoveSchema>;
 const DESCRIPTION =
   'Your one move: what the student reads now (one short message, one thing to do that fits the step he is on) and, when the move needs it, a component he uses or a small case. Call it exactly once. A refused move comes back once with the reasons.';
 
-export function moveToolDefinition(): ToolDefinition {
-  const schema = zodToJsonSchema(TutorMoveSchema);
+/** The moves of a tree question, as its tool lists them. */
+export const TREE_MOVE_KINDS = [
+  'say',
+  'repair',
+  'case',
+  'scaffold',
+  'probe',
+  'readback',
+  'escalate',
+] as const;
+
+/**
+ * `tutor_move` as a tree question's model sees it: no component fields and
+ * only a prepared case. What comes back is still read with TutorMoveSchema
+ * (checkMove), so a component or a new case is answered with its reason.
+ */
+const TreeMoveSchema = z.strictObject({
+  move: z.enum(TREE_MOVE_KINDS),
+  message: z
+    .array(BlockSchema)
+    .max(6)
+    .describe(
+      'What he reads, in order. His lines only as student_line / compare blocks. Empty only for escalate.',
+    ),
+  case: z
+    .strictObject({
+      kind: z.literal('prepared'),
+      id: z.enum(PREPARED_IDS).describe('A prepared case of the pack.'),
+    })
+    .nullable()
+    .default(null)
+    .describe(
+      'For a case move: the prepared small case of the pack he works on. Null for every other move.',
+    ),
+});
+
+const TREE_DESCRIPTION =
+  'Your one move on this probability tree question: what the student reads now (one short message, one thing to do that fits the step he is on) and, for a case move, the prepared small case he works on. Call it exactly once. A refused move comes back once with the reasons.';
+
+export function moveToolDefinition(
+  domain?: QuestionDomain | null,
+): ToolDefinition {
+  const tree = domain === 'tree';
+  const schema = zodToJsonSchema(tree ? TreeMoveSchema : TutorMoveSchema);
   delete schema.$schema;
-  return { name: MOVE_TOOL, description: DESCRIPTION, input_schema: schema };
+  return {
+    name: MOVE_TOOL,
+    description: tree ? TREE_DESCRIPTION : DESCRIPTION,
+    input_schema: schema,
+  };
 }
 
 /** What the engine says about a small case (make_case on a scratch session). */
@@ -237,16 +290,32 @@ export function checkMove(input: unknown, env: MoveEnv): MoveCheck {
       made: null,
     };
   }
+  // A tree question: the lesson draws the tree, and its cases are prepared.
+  const tree = env.pack.domain === 'tree';
   if (m.message.length === 0) {
     reasons.push('the message is empty: write what he reads');
+  }
+  if (tree && m.component) {
+    reasons.push(
+      'no component on a tree question: the lesson draws the tree itself. Send the move without a component',
+    );
+  }
+  if (tree && m.case && m.case.kind !== 'prepared') {
+    reasons.push(
+      'on a tree question only a prepared case of the pack (case {kind "prepared", id "S1".."S4"}), never a new one',
+    );
   }
   if (m.move === 'component' && !m.component) {
     reasons.push('a component move needs a component');
   }
   if (m.move === 'case' && !m.case) {
-    reasons.push('a case move needs a case (prepared S1..S4 or a new one)');
+    reasons.push(
+      tree
+        ? 'a case move needs a prepared case (S1..S4)'
+        : 'a case move needs a case (prepared S1..S4 or a new one)',
+    );
   }
-  if (m.component && !WITH_COMPONENT.has(m.move)) {
+  if (!tree && m.component && !WITH_COMPONENT.has(m.move)) {
     reasons.push(
       `a component goes with a component, case or repair move, not "${m.move}"`,
     );
@@ -281,7 +350,7 @@ export function checkMove(input: unknown, env: MoveEnv): MoveCheck {
     if (preparedOk('case', m.case.id)) {
       caseId = m.case.id;
     }
-  } else if (m.case) {
+  } else if (m.case && !tree) {
     const spec: CaseSpec = m.case;
     const r = COMPUTE.make_case!({ rt: env.rt, experiment: env.experiment }, {
       case: spec,
@@ -302,7 +371,9 @@ export function checkMove(input: unknown, env: MoveEnv): MoveCheck {
     }
   }
   let componentCase: string | null = null;
-  if (m.component?.case_id === 'new') {
+  if (tree) {
+    // No component: nothing to draw a case with.
+  } else if (m.component?.case_id === 'new') {
     if (made === null) {
       reasons.push('component: case_id "new" needs a new case in this move');
     } else {
