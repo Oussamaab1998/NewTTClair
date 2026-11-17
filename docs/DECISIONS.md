@@ -614,9 +614,10 @@ Phases 2 to 4 of the same plan, built in one run on the owner's word ("just fini
 ## The home screen, D85 (2026-11-17)
 - **D85. A home screen comes first** (owner chose design A, "continue first", improved in the Cahier look from a mockup he approved).
   - **The top part, on squared paper:**
-    - «عسلامة» (or «مرحبا بيك» before anything is started) and the bac section in French.
+    - «عسلامة» (or «مرحبا بيك» before anything is started) and his class in French, as the chapter screens write it («Bac · Mathématiques»). The class is the one he picked in the class picker (`student.class.v1`). Without one, it falls back to his profile's section, then to bac Maths (owner, same day). The first suggestion uses the same class.
     - The ink card «كمّل وين وقفت»: the most recent unfinished exercise, at the question he was on (else the first one not done). It shows the subject tag, the exam line in French, a segmented progress bar, «كمّل» and the exam-sheet button.
     - With nothing started, the card is «نقترحو تبدا بـ» with the first exercise of his section, plus the warm-up note if he hasn't done its warm-up.
+    - The suggestion comes only from his class's exercises (the curriculum map's track for `student.class.v1`). If his class has none yet (1ère, or a section with no paper yet), the card is «التمارين متاع قسمك في الطريق» with a quiet link «شوف تمارين الباك». A bac exercise is never pushed on him; one he already started is still offered with «كمّل» (owner, same day).
     - With everything done, the card is «كمّلت التمارين الكل».
   - **Effort counts only:** questions finished, exercises started, and days this week (from Monday). Never a level or a weakness (D8).
   - **The domains:** probability, analysis, sequences and complex, using the curriculum map's `domain` ids. Each card has its exercise count and a progress ring. The empty domains are «قريبا».

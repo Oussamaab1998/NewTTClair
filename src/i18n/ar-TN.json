@@ -1040,10 +1040,6 @@
   "home": {
     "hello": "عسلامة",
     "welcome": "مرحبا بيك",
-    "bac": {
-      "mathematiques": "Bac Mathématiques",
-      "sciences-experimentales": "Bac Sciences expérimentales"
-    },
     "resumeLabel": "كمّل وين وقفت",
     "startLabel": "نقترحو تبدا بـ",
     "warmupNote": "قبل التمرين، شوية أسئلة صغار باش نعرفو منين نبداو معاك.",
@@ -1052,6 +1048,8 @@
     "allDoneTitle": "كمّلت التمارين الكل",
     "allDoneText": "تمارين جدد جايين قريب. تنجّم تعاود أي تمرين تحبّو.",
     "seeAll": "شوف التمارين",
+    "soonNote": "نخدمو عليهم توّا. كي يحضرو، يبانو هنا.",
+    "seeBac": "شوف تمارين الباك",
     "paper": "الورقة",
     "examLine": "{{session}} · {{section}} · Exercice {{n}}",
     "examQuestion": "Question {{q}}",
@@ -1099,5 +1097,81 @@
         "sub": "الأعداد المركّبة"
       }
     }
+  },
+  "chapters": {
+    "title": "الدروس",
+    "change": "بدّل",
+    "changeA11y": "بدّل القسم",
+    "inProgramme": "درس في البرنامج",
+    "withExercises": "فيهم تمارين توّا",
+    "startNow": "نبداو منهم توّا",
+    "wholeProgramme": "البرنامج الكل",
+    "all": "الكل",
+    "soon": "قريبا",
+    "questionsA11y": "عدد الأسئلة: {{n}}",
+    "emptyTitle": "التمارين متاع قسمك في الطريق",
+    "emptyBody": "البرنامج الكل هنا، وكل درس يتحلّ كي تحضر التمارين متاعو.",
+    "exercises": "التمارين",
+    "partial": "الأسئلة اللي تخصّ الدرس هذا برك",
+    "soonBody": "ما زال ما حضّرناش تمارين للدرس هذا.",
+    "start": "نبداو",
+    "resumeFrom": "كمّل من",
+    "again": "عاود",
+    "classTitle": "في أنا قسم تقرا؟",
+    "classLead": "باش نوريوك الدروس متاع البرنامج متاعك بالضبط.",
+    "classSection": "والشعبة؟",
+    "classNext": "نكمّلو",
+    "domain": {
+      "analysis": "Analyse",
+      "sequences": "Suites",
+      "probability": "Probabilités",
+      "counting": "Dénombrement",
+      "statistics": "Statistiques",
+      "geometry": "Géométrie",
+      "trigonometry": "Trigonométrie",
+      "space": "Géométrie dans l'espace",
+      "complex": "Nombres complexes",
+      "arithmetic": "Arithmétique",
+      "algebra": "Algèbre",
+      "numbers": "Calcul numérique",
+      "logic": "Logique"
+    },
+    "yearShort": {
+      "1s": "1ère année",
+      "2s": "2ème",
+      "3s": "3ème",
+      "4s": "Bac"
+    },
+    "examLine": "Bac {{year}} · {{session}} · {{section}}",
+    "session": {
+      "principale": "Session principale",
+      "controle": "Session de contrôle"
+    },
+    "points": "{{n}} pts",
+    "progress": "{{done}}/{{total}}"
+  },
+  "onboarding": {
+    "brandA": "TTe",
+    "brandB": "Clair",
+    "tutorName": "TTeClair",
+    "tagline": "الرياضيات، خطوة بخطوة، بالدارجة.",
+    "classLead": "باش نوريوك أمثلة من البرنامج متاعك بالضبط.",
+    "pickFirst": "اختار القسم والشعبة باش نكمّلو.",
+    "fromYourProgramme": "من البرنامج متاعك",
+    "mapTitle": "يفهّمك السؤال قبل ما تحلّ",
+    "linesTitle": "يقرا اللي تكتبو، سطر بسطر",
+    "inDerja": "نفهموه بالدارجة",
+    "have": "عندنا",
+    "goal": "المطلوب",
+    "road": "الطريق",
+    "stepByStep": "خطوة بخطوة",
+    "hint": "تلميح",
+    "okLine": "سطر صحيح",
+    "wrongLine": "سطر فيه غلطة",
+    "remembered": "تسجّلت، ونرجعولها في تمرين آخر.",
+    "page": "الصفحة {{n}} من {{total}}",
+    "next": "نكمّلو",
+    "start": "نبداو",
+    "skip": "تخطّي"
   }
 }

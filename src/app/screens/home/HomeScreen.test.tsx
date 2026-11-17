@@ -13,6 +13,7 @@ import { partKey } from '../../../state/doneParts';
 import { memoryStore } from '../../../storage/kv';
 import { HomeScreen } from './HomeScreen';
 import { noteActiveDay } from './activeDays';
+import { saveStudentClass } from '../chapters/studentClass';
 
 beforeAll(() => i18n.changeLanguage('ar-TN'));
 
@@ -53,6 +54,10 @@ describe('the home screen', () => {
       screen.getByText('Contrôle 2022 · Maths · Exercice 2'),
     ).toBeOnTheScreen();
     expect(screen.queryByTestId('home-stats')).toBeNull();
+    // No class picked yet: the bac Maths.
+    expect(screen.getByTestId('home-class')).toHaveTextContent(
+      'Bac · Mathématiques',
+    );
     await fireEvent.press(screen.getByTestId('home-start'));
     expect(h.onOpen).toHaveBeenCalledWith({
       exerciseId: 'bac2022c-ex2',
@@ -112,5 +117,37 @@ describe('the home screen', () => {
       kind: 'session',
       session: 'bac2022p',
     });
+  });
+
+  it('reads his class from the class picker: its line and its first suggestion', async () => {
+    const store = memoryStore();
+    saveStudentClass(store, { year: '4s', section: 'sciences-experimentales' });
+    const h = home({ store });
+    await render(h.el);
+    expect(screen.getByTestId('home-class')).toHaveTextContent(
+      'Bac · Sciences expérimentales',
+    );
+    expect(
+      screen.getByText('Contrôle 2022 · Sc. exp. · Exercice 2'),
+    ).toBeOnTheScreen();
+    await fireEvent.press(screen.getByTestId('home-start'));
+    expect(h.onOpen).toHaveBeenCalledWith({
+      exerciseId: 'bac2022c-sc-ex2',
+      partId: '1',
+    });
+  });
+
+  it('a class with no exercise yet (1ère): «التمارين متاع قسمك في الطريق», the bac ones one link away', async () => {
+    const store = memoryStore();
+    saveStudentClass(store, { year: '1s', section: null });
+    const h = home({ store });
+    await render(h.el);
+    expect(screen.getByTestId('home-class')).toHaveTextContent('1ère année');
+    expect(screen.getByTestId('home-hero-soon')).toHaveTextContent(
+      /التمارين متاع قسمك في الطريق/,
+    );
+    expect(screen.queryByTestId('home-start')).toBeNull();
+    await fireEvent.press(screen.getByTestId('home-see-bac'));
+    expect(h.onList).toHaveBeenCalledWith({ kind: 'all' });
   });
 });

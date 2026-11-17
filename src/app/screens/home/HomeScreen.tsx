@@ -29,6 +29,9 @@ import {
   type CatalogEntry,
   type Opened,
 } from '../../exercises';
+import { CURRICULUM, SECTION_IDS, trackFor } from '../../../content/curriculum';
+import type { StudentClass } from '../chapters/chapters';
+import { loadStudentClass } from '../chapters/studentClass';
 import { loadActiveDays } from './activeDays';
 import {
   catalogOf,
@@ -72,6 +75,7 @@ function readHome(
   doneRecord: Pick<DoneRecord, 'all'> | undefined,
   store: KeyValueStore,
   now: number,
+  forClass: ReadonlySet<string> | null,
 ): HomeData {
   const events = eventStore?.load() ?? [];
   const resets = latestResets(events);
@@ -105,14 +109,38 @@ function readHome(
     activity,
     activeDays: loadActiveDays(store),
     warmupSeen: id => profile?.warmups?.[id] !== undefined,
-    section: profile?.section ?? null,
+    forClass,
     now,
   });
+}
+
+/**
+ * His class: the one he picked in the class picker (`student.class.v1`, the
+ * onboarding will write it too), else his profile's section in the bac year,
+ * else the bac Maths (the app's first section).
+ */
+function readClass(store: KeyValueStore): StudentClass {
+  const picked = loadStudentClass(store);
+  if (picked) {
+    return picked;
+  }
+  const s = loadProfile(store)?.section;
+  const section = SECTION_IDS.find(id => id === s) ?? 'mathematiques';
+  return { year: '4s', section };
+}
+
+/** The exercises of his class's programme (the curriculum map); null: unknown class. */
+function exercisesOfClass(cls: StudentClass): ReadonlySet<string> | null {
+  const track = trackFor(cls.year, cls.section);
+  return track
+    ? new Set(track.chapters.flatMap(c => c.exercises.map(e => e.id)))
+    : null;
 }
 
 export function HomeScreen(p: HomeScreenProps) {
   const { t } = useTranslation();
   const catalog = p.catalog ?? CATALOG;
+  const [cls] = useState(() => readClass(p.store ?? appStore()));
   const [data] = useState(() =>
     readHome(
       catalog,
@@ -120,13 +148,15 @@ export function HomeScreen(p: HomeScreenProps) {
       p.doneRecord,
       p.store ?? appStore(),
       (p.now ?? Date.now)(),
+      exercisesOfClass(cls),
     ),
   );
-  const [section] = useState<'mathematiques' | 'sciences-experimentales'>(() =>
-    loadProfile(p.store ?? appStore())?.section === 'sciences-experimentales'
-      ? 'sciences-experimentales'
-      : 'mathematiques',
-  );
+  // As the chapter screens write it: «Bac · Mathématiques».
+  const sectionName = CURRICULUM.sections.find(x => x.id === cls.section)?.fr;
+  const classLine = [
+    t(`chapters.yearShort.${cls.year}`),
+    ...(sectionName ? [sectionName] : []),
+  ].join(SEP);
   const live = data.domains.filter(d => d.exercises > 0);
   const soon = data.domains.filter(d => d.exercises === 0);
   return (
@@ -140,7 +170,9 @@ export function HomeScreen(p: HomeScreenProps) {
         <Text style={styles.hello} accessibilityRole="header">
           {t(data.stats ? 'home.hello' : 'home.welcome')}
         </Text>
-        <Text style={styles.bac}>{t(`home.bac.${section}`)}</Text>
+        <Text style={styles.bac} testID="home-class">
+          {classLine}
+        </Text>
         <Hero hero={data.hero} catalog={catalog} {...p} />
       </View>
       <View style={styles.body}>
@@ -217,6 +249,25 @@ function Hero({
   onList,
 }: { hero: HomeHero; catalog: readonly CatalogEntry[] } & HomeScreenProps) {
   const { t } = useTranslation();
+  if (hero.kind === 'soon') {
+    // His class has no exercise yet: never a bac exercise pushed on him; the
+    // bac ones stay one quiet link away.
+    return (
+      <View style={styles.hero} testID="home-hero-soon">
+        <Text style={styles.heroTitleText}>{t('chapters.emptyTitle')}</Text>
+        <Text style={styles.heroNote}>{t('home.soonNote')}</Text>
+        <Pressable
+          style={styles.heroLink}
+          accessibilityRole="button"
+          testID="home-see-bac"
+          onPress={() => onList({ kind: 'all' })}
+          hitSlop={theme.space.sm}
+        >
+          <Text style={styles.heroLinkText}>{t('home.seeBac')}</Text>
+        </Pressable>
+      </View>
+    );
+  }
   if (hero.kind === 'allDone') {
     return (
       <View style={styles.hero} testID="home-hero-allDone">
@@ -549,6 +600,17 @@ const styles = StyleSheet.create({
     ...ltrEnd,
   },
   heroNote: { ...theme.font.small, color: theme.color.onInk.muted, ...rtl },
+  heroLink: {
+    alignSelf: theme.reading.startAlign,
+    minHeight: theme.size.touch,
+    justifyContent: 'center',
+  },
+  heroLinkText: {
+    ...theme.font.small,
+    color: theme.color.textOnAccent,
+    textDecorationLine: 'underline',
+    writingDirection: 'rtl',
+  },
   progress: {
     flexDirection: theme.reading.row,
     alignItems: 'center',

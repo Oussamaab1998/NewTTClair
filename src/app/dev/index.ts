@@ -37,6 +37,7 @@ export {
   devMoverAtLaunch,
   devWarmupAtLaunch,
   devWarmupActsAtLaunch,
+  devOnboardingAtLaunch,
   slowMover,
   runDevBench,
 } from './launch';

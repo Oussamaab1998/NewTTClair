@@ -1,0 +1,2015 @@
+{
+  "contentVersion": "curriculum-0.1.0",
+  "reviewed": false,
+  "note": "Official Tunisian secondary maths chapters, scientific sections only. Order and titles follow the CNP textbooks (tables of contents read on sigmaths.net on 2026-11-17); content cross-checked with the official programmes (Sept. 2005 for 1ère/2ème, Sept. 2006 for 3ème/4ème). Titles lightly normalised: 'IR' written ℝ; the missing set symbol in 'Divisibilité dans' read as ℕ (3ème, programme: division euclidienne dans ℕ) and ℤ (4ème, programme: congruence dans ℤ); 4ème Sc. info chapter 14 ('Probabilité' in the book) named 'Variables aléatoires'. 2ème Sciences and Technologie de l'informatique share one programme and one textbook. topics are short hints, not the full programme. skills link existing skillMap ids by the chapter that teaches them. Not reviewed by a teacher.",
+  "years": [
+    {
+      "id": "1s",
+      "fr": "1ère année secondaire",
+      "ar": "أولى ثانوي"
+    },
+    {
+      "id": "2s",
+      "fr": "2ème année secondaire",
+      "ar": "ثانية ثانوي"
+    },
+    {
+      "id": "3s",
+      "fr": "3ème année secondaire",
+      "ar": "ثالثة ثانوي"
+    },
+    {
+      "id": "4s",
+      "fr": "4ème année secondaire (Bac)",
+      "ar": "باكالوريا"
+    }
+  ],
+  "sections": [
+    {
+      "id": "sciences",
+      "fr": "Sciences",
+      "ar": "علوم"
+    },
+    {
+      "id": "technologies-informatique",
+      "fr": "Technologies de l'informatique",
+      "ar": "تكنولوجيا الإعلامية"
+    },
+    {
+      "id": "mathematiques",
+      "fr": "Mathématiques",
+      "ar": "رياضيات"
+    },
+    {
+      "id": "sciences-experimentales",
+      "fr": "Sciences expérimentales",
+      "ar": "علوم تجريبية"
+    },
+    {
+      "id": "sciences-techniques",
+      "fr": "Sciences techniques",
+      "ar": "علوم تقنية"
+    },
+    {
+      "id": "sciences-informatique",
+      "fr": "Sciences de l'informatique",
+      "ar": "علوم الإعلامية"
+    }
+  ],
+  "sources": [
+    {
+      "id": "prog-1-2",
+      "kind": "programme",
+      "title": "Programmes de mathématiques, 1ère & 2ème années secondaires",
+      "date": "2005-09",
+      "url": "https://www.sigmaths.net/Programme%20math_1_2anne.pdf"
+    },
+    {
+      "id": "prog-3-4",
+      "kind": "programme",
+      "title": "Programmes de mathématiques, 3ème & 4ème années de l'enseignement secondaire",
+      "date": "2006-09",
+      "url": "https://www.sigmaths.net/Programme%20math_3_4.pdf"
+    },
+    {
+      "id": "man-1s",
+      "kind": "manual",
+      "title": "Mathématiques, 1ère année secondaire (CNP), parties 1 et 2",
+      "url": "https://www.sigmaths.net/manuels/1s_p1.pdf"
+    },
+    {
+      "id": "man-2sc-t1",
+      "kind": "manual",
+      "title": "Mathématiques, 2ème année secondaire Sciences et Technologie de l'informatique (CNP), tome 1",
+      "url": "https://www.sigmaths.net/manuels/2sc_t1.pdf"
+    },
+    {
+      "id": "man-2sc-t2",
+      "kind": "manual",
+      "title": "Mathématiques, 2ème année secondaire Sciences et Technologie de l'informatique (CNP), tome 2",
+      "url": "https://www.sigmaths.net/manuels/2sc_t2.pdf"
+    },
+    {
+      "id": "man-3m-t1",
+      "kind": "manual",
+      "title": "Mathématiques, 3ème année section Mathématiques (CNP), tome 1",
+      "url": "https://www.sigmaths.net/manuels/3M_t1.pdf"
+    },
+    {
+      "id": "man-3m-t2",
+      "kind": "manual",
+      "title": "Mathématiques, 3ème année section Mathématiques (CNP), tome 2",
+      "url": "https://www.sigmaths.net/manuels/3M_t2.pdf"
+    },
+    {
+      "id": "man-3se-t1",
+      "kind": "manual",
+      "title": "Mathématiques, 3ème année section Sciences expérimentales (CNP), tome 1",
+      "url": "https://www.sigmaths.net/manuels/3sc_t1.pdf"
+    },
+    {
+      "id": "man-3se-t2",
+      "kind": "manual",
+      "title": "Mathématiques, 3ème année section Sciences expérimentales (CNP), tome 2",
+      "url": "https://www.sigmaths.net/manuels/3sc_t2.pdf"
+    },
+    {
+      "id": "man-3st",
+      "kind": "manual",
+      "title": "Mathématiques, 3ème année section Sciences techniques (CNP), parties 1 et 2",
+      "url": "https://www.sigmaths.net/manuels/3t.pdf"
+    },
+    {
+      "id": "man-3si",
+      "kind": "manual",
+      "title": "Mathématiques, 3ème année section Sciences de l'informatique (CNP)",
+      "url": "https://www.sigmaths.net/manuels/3scInfo.pdf"
+    },
+    {
+      "id": "man-4m-t1",
+      "kind": "manual",
+      "title": "Mathématiques, 4ème année section Mathématiques (CNP), tome 1",
+      "url": "https://www.sigmaths.net/manuels/4M_t1.pdf"
+    },
+    {
+      "id": "man-4m-t2",
+      "kind": "manual",
+      "title": "Mathématiques, 4ème année section Mathématiques (CNP), tome 2",
+      "url": "https://www.sigmaths.net/manuels/4M_t2.pdf"
+    },
+    {
+      "id": "man-4se-t1",
+      "kind": "manual",
+      "title": "Mathématiques, 4ème année section Sciences expérimentales (CNP), tome 1",
+      "url": "https://www.sigmaths.net/manuels/4sc_t1.pdf"
+    },
+    {
+      "id": "man-4se-t2",
+      "kind": "manual",
+      "title": "Mathématiques, 4ème année section Sciences expérimentales (CNP), tome 2",
+      "url": "https://www.sigmaths.net/manuels/4sc_t2.pdf"
+    },
+    {
+      "id": "man-4st",
+      "kind": "manual",
+      "title": "Mathématiques, 4ème année Sciences techniques (CNP), parties 1 et 2, édition 2007-2008",
+      "date": "2007",
+      "url": "https://www.sigmaths.net/manuels/4t_new.pdf"
+    },
+    {
+      "id": "man-4si",
+      "kind": "manual",
+      "title": "Mathématiques, 4ème année section Sciences de l'informatique (CNP)",
+      "url": "https://www.sigmaths.net/manuels/4scInfo.pdf"
+    }
+  ],
+  "tracks": [
+    {
+      "id": "1s",
+      "year": "1s",
+      "sections": [],
+      "programme": "prog-1-2",
+      "chapters": [
+        {
+          "id": "1s.angles",
+          "title": {
+            "fr": "Angles"
+          },
+          "domain": "geometry",
+          "manual": "man-1s"
+        },
+        {
+          "id": "1s.theoreme-de-thales-et-sa-reciproque",
+          "title": {
+            "fr": "Théorème de Thalès et sa réciproque"
+          },
+          "domain": "geometry",
+          "manual": "man-1s"
+        },
+        {
+          "id": "1s.rapports-trigonometriques",
+          "title": {
+            "fr": "Rapports trigonométriques d'un angle aigu. Relations métriques dans un triangle rectangle"
+          },
+          "domain": "trigonometry",
+          "manual": "man-1s"
+        },
+        {
+          "id": "1s.vecteurs-et-translations",
+          "title": {
+            "fr": "Vecteurs et translations"
+          },
+          "domain": "geometry",
+          "manual": "man-1s"
+        },
+        {
+          "id": "1s.somme-de-vecteurs",
+          "title": {
+            "fr": "Somme de deux vecteurs - Vecteurs colinéaires"
+          },
+          "domain": "geometry",
+          "manual": "man-1s"
+        },
+        {
+          "id": "1s.activites-dans-un-repere",
+          "title": {
+            "fr": "Activités dans un repère"
+          },
+          "domain": "geometry",
+          "manual": "man-1s",
+          "topics": [
+            "Repère d'une droite et du plan",
+            "Coordonnées, milieu, distance",
+            "Représentation graphique d'une fonction linéaire ou affine"
+          ]
+        },
+        {
+          "id": "1s.quart-de-tour",
+          "title": {
+            "fr": "Quart de tour"
+          },
+          "domain": "geometry",
+          "manual": "man-1s"
+        },
+        {
+          "id": "1s.sections-planes-d-un-solide",
+          "title": {
+            "fr": "Sections planes d'un solide"
+          },
+          "domain": "space",
+          "manual": "man-1s"
+        },
+        {
+          "id": "1s.activites-numeriques-i",
+          "title": {
+            "fr": "Activités numériques I"
+          },
+          "domain": "arithmetic",
+          "manual": "man-1s",
+          "topics": [
+            "Division euclidienne, PGCD, PPCM",
+            "Nombres premiers"
+          ]
+        },
+        {
+          "id": "1s.activites-numeriques-ii",
+          "title": {
+            "fr": "Activités numériques II"
+          },
+          "domain": "numbers",
+          "manual": "man-1s",
+          "topics": [
+            "Opérations dans ℝ, puissances",
+            "Ordre dans ℝ, valeur absolue"
+          ]
+        },
+        {
+          "id": "1s.activites-algebriques",
+          "title": {
+            "fr": "Activités algébriques"
+          },
+          "domain": "algebra",
+          "manual": "man-1s",
+          "topics": [
+            "Identités remarquables"
+          ]
+        },
+        {
+          "id": "1s.fonctions-lineaires",
+          "title": {
+            "fr": "Fonctions linéaires"
+          },
+          "domain": "analysis",
+          "manual": "man-1s"
+        },
+        {
+          "id": "1s.equations-premier-degre",
+          "title": {
+            "fr": "Équations et inéquations du premier degré à une inconnue"
+          },
+          "domain": "algebra",
+          "manual": "man-1s"
+        },
+        {
+          "id": "1s.fonctions-affines",
+          "title": {
+            "fr": "Fonctions affines"
+          },
+          "domain": "analysis",
+          "manual": "man-1s"
+        },
+        {
+          "id": "1s.systemes",
+          "title": {
+            "fr": "Systèmes de deux équations à deux inconnues"
+          },
+          "domain": "algebra",
+          "manual": "man-1s"
+        },
+        {
+          "id": "1s.exploitation-de-l-information",
+          "title": {
+            "fr": "Exploitation de l'information"
+          },
+          "domain": "statistics",
+          "manual": "man-1s",
+          "topics": [
+            "Statistiques : moyenne, médiane, mode, étendue",
+            "Histogramme, diagrammes"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "2s-sc",
+      "year": "2s",
+      "sections": [
+        "sciences",
+        "technologies-informatique"
+      ],
+      "programme": "prog-1-2",
+      "chapters": [
+        {
+          "id": "2s-sc.calcul-dans-r",
+          "title": {
+            "fr": "Calcul dans ℝ"
+          },
+          "domain": "numbers",
+          "manual": "man-2sc-t1"
+        },
+        {
+          "id": "2s-sc.premier-et-second-degre",
+          "title": {
+            "fr": "Problèmes du premier degré et problèmes du second degré"
+          },
+          "domain": "algebra",
+          "manual": "man-2sc-t1"
+        },
+        {
+          "id": "2s-sc.notion-de-polynomes",
+          "title": {
+            "fr": "Notion de polynômes"
+          },
+          "domain": "algebra",
+          "manual": "man-2sc-t1"
+        },
+        {
+          "id": "2s-sc.arithmetique",
+          "title": {
+            "fr": "Arithmétique"
+          },
+          "domain": "arithmetic",
+          "manual": "man-2sc-t1",
+          "topics": [
+            "Critères de divisibilité",
+            "Dénombrement : principe additif, arbres de choix"
+          ]
+        },
+        {
+          "id": "2s-sc.calcul-vectoriel",
+          "title": {
+            "fr": "Calcul vectoriel"
+          },
+          "domain": "geometry",
+          "manual": "man-2sc-t1"
+        },
+        {
+          "id": "2s-sc.barycentre",
+          "title": {
+            "fr": "Barycentre"
+          },
+          "domain": "geometry",
+          "manual": "man-2sc-t1"
+        },
+        {
+          "id": "2s-sc.translations",
+          "title": {
+            "fr": "Translations"
+          },
+          "domain": "geometry",
+          "manual": "man-2sc-t1"
+        },
+        {
+          "id": "2s-sc.homotheties",
+          "title": {
+            "fr": "Homothéties"
+          },
+          "domain": "geometry",
+          "manual": "man-2sc-t1"
+        },
+        {
+          "id": "2s-sc.rotations",
+          "title": {
+            "fr": "Rotations"
+          },
+          "domain": "geometry",
+          "manual": "man-2sc-t1"
+        },
+        {
+          "id": "2s-sc.suites-arithmetiques",
+          "title": {
+            "fr": "Suites arithmétiques"
+          },
+          "domain": "sequences",
+          "manual": "man-2sc-t2"
+        },
+        {
+          "id": "2s-sc.suites-geometriques",
+          "title": {
+            "fr": "Suites géométriques"
+          },
+          "domain": "sequences",
+          "manual": "man-2sc-t2"
+        },
+        {
+          "id": "2s-sc.generalites-sur-les-fonctions",
+          "title": {
+            "fr": "Généralités sur les fonctions"
+          },
+          "domain": "analysis",
+          "manual": "man-2sc-t2",
+          "skills": [
+            "domain-symmetric",
+            "function-parity"
+          ]
+        },
+        {
+          "id": "2s-sc.fonctions-de-reference",
+          "title": {
+            "fr": "Fonctions de référence"
+          },
+          "domain": "analysis",
+          "manual": "man-2sc-t2",
+          "topics": [
+            "Fonctions affines, trinômes, homographiques, racine carrée",
+            "Problèmes d'optimisation"
+          ]
+        },
+        {
+          "id": "2s-sc.trigonometrie",
+          "title": {
+            "fr": "Trigonométrie et mesure des grandeurs"
+          },
+          "domain": "trigonometry",
+          "manual": "man-2sc-t2"
+        },
+        {
+          "id": "2s-sc.geometrie-analytique",
+          "title": {
+            "fr": "Géométrie analytique"
+          },
+          "domain": "geometry",
+          "manual": "man-2sc-t2"
+        },
+        {
+          "id": "2s-sc.droites-et-plans-de-l-espace",
+          "title": {
+            "fr": "Droites et plans de l'espace"
+          },
+          "domain": "space",
+          "manual": "man-2sc-t2"
+        },
+        {
+          "id": "2s-sc.parallelisme-dans-l-espace",
+          "title": {
+            "fr": "Parallélisme dans l'espace"
+          },
+          "domain": "space",
+          "manual": "man-2sc-t2"
+        },
+        {
+          "id": "2s-sc.orthogonalite-dans-l-espace",
+          "title": {
+            "fr": "Orthogonalité dans l'espace"
+          },
+          "domain": "space",
+          "manual": "man-2sc-t2"
+        },
+        {
+          "id": "2s-sc.statistiques",
+          "title": {
+            "fr": "Statistiques"
+          },
+          "domain": "statistics",
+          "manual": "man-2sc-t2"
+        }
+      ]
+    },
+    {
+      "id": "3s-m",
+      "year": "3s",
+      "sections": [
+        "mathematiques"
+      ],
+      "programme": "prog-3-4",
+      "chapters": [
+        {
+          "id": "3s-m.generalites-sur-les-fonctions",
+          "title": {
+            "fr": "Généralités sur les fonctions"
+          },
+          "domain": "analysis",
+          "manual": "man-3m-t1",
+          "skills": [
+            "domain-symmetric",
+            "function-parity"
+          ]
+        },
+        {
+          "id": "3s-m.continuite",
+          "title": {
+            "fr": "Continuité"
+          },
+          "domain": "analysis",
+          "manual": "man-3m-t1"
+        },
+        {
+          "id": "3s-m.limites-et-continuite",
+          "title": {
+            "fr": "Limites et continuité"
+          },
+          "domain": "analysis",
+          "manual": "man-3m-t1",
+          "skills": [
+            "limit-at-infinity",
+            "forme-indeterminee",
+            "asymptote-interpretation"
+          ]
+        },
+        {
+          "id": "3s-m.limites-et-asymptotes",
+          "title": {
+            "fr": "Limites et comportements asymptotiques"
+          },
+          "domain": "analysis",
+          "manual": "man-3m-t1",
+          "skills": [
+            "limit-at-infinity",
+            "forme-indeterminee",
+            "asymptote-interpretation"
+          ]
+        },
+        {
+          "id": "3s-m.nombre-derive",
+          "title": {
+            "fr": "Nombre dérivé"
+          },
+          "domain": "analysis",
+          "manual": "man-3m-t1",
+          "skills": [
+            "derivative-meaning"
+          ]
+        },
+        {
+          "id": "3s-m.fonction-derivee",
+          "title": {
+            "fr": "Fonction dérivée"
+          },
+          "domain": "analysis",
+          "manual": "man-3m-t1",
+          "skills": [
+            "derivative-meaning",
+            "quotient-rule"
+          ]
+        },
+        {
+          "id": "3s-m.etude-de-fonctions",
+          "title": {
+            "fr": "Exemples d'étude de fonctions"
+          },
+          "domain": "analysis",
+          "manual": "man-3m-t1",
+          "skills": [
+            "variation-table"
+          ]
+        },
+        {
+          "id": "3s-m.fonctions-trigonometriques",
+          "title": {
+            "fr": "Fonctions trigonométriques"
+          },
+          "domain": "analysis",
+          "manual": "man-3m-t1"
+        },
+        {
+          "id": "3s-m.suites-reelles",
+          "title": {
+            "fr": "Suites réelles"
+          },
+          "domain": "sequences",
+          "manual": "man-3m-t1"
+        },
+        {
+          "id": "3s-m.limites-de-suites-reelles",
+          "title": {
+            "fr": "Limites de suites réelles"
+          },
+          "domain": "sequences",
+          "manual": "man-3m-t1"
+        },
+        {
+          "id": "3s-m.statistiques",
+          "title": {
+            "fr": "Statistiques"
+          },
+          "domain": "statistics",
+          "manual": "man-3m-t1"
+        },
+        {
+          "id": "3s-m.probabilites",
+          "title": {
+            "fr": "Probabilités"
+          },
+          "domain": "probability",
+          "manual": "man-3m-t1",
+          "skills": [
+            "sample-space",
+            "event-as-set",
+            "equiprobability",
+            "probability-sure-event",
+            "probability-by-counting",
+            "complement-event",
+            "simultaneous-draw",
+            "au-moins-un",
+            "probability-tree"
+          ]
+        },
+        {
+          "id": "3s-m.produit-scalaire-dans-le-plan",
+          "title": {
+            "fr": "Produit scalaire dans le plan"
+          },
+          "domain": "geometry",
+          "manual": "man-3m-t2"
+        },
+        {
+          "id": "3s-m.angles-orientes",
+          "title": {
+            "fr": "Angles orientés"
+          },
+          "domain": "trigonometry",
+          "manual": "man-3m-t2"
+        },
+        {
+          "id": "3s-m.trigonometrie",
+          "title": {
+            "fr": "Trigonométrie"
+          },
+          "domain": "trigonometry",
+          "manual": "man-3m-t2"
+        },
+        {
+          "id": "3s-m.rotations",
+          "title": {
+            "fr": "Rotations"
+          },
+          "domain": "geometry",
+          "manual": "man-3m-t2"
+        },
+        {
+          "id": "3s-m.nombres-complexes",
+          "title": {
+            "fr": "Nombres complexes"
+          },
+          "domain": "complex",
+          "manual": "man-3m-t2"
+        },
+        {
+          "id": "3s-m.denombrement",
+          "title": {
+            "fr": "Dénombrement"
+          },
+          "domain": "counting",
+          "manual": "man-3m-t2",
+          "skills": [
+            "counting-principle",
+            "multiplication-principle",
+            "choices-and-product",
+            "combinations-count",
+            "ordering-vs-choosing",
+            "counting-pairs"
+          ]
+        },
+        {
+          "id": "3s-m.divisibilite",
+          "title": {
+            "fr": "Divisibilité dans ℕ"
+          },
+          "domain": "arithmetic",
+          "manual": "man-3m-t2"
+        },
+        {
+          "id": "3s-m.nombres-premiers",
+          "title": {
+            "fr": "Nombres premiers"
+          },
+          "domain": "arithmetic",
+          "manual": "man-3m-t2"
+        },
+        {
+          "id": "3s-m.vecteurs-de-l-espace",
+          "title": {
+            "fr": "Vecteurs de l'espace"
+          },
+          "domain": "space",
+          "manual": "man-3m-t2"
+        },
+        {
+          "id": "3s-m.produit-scalaire-et-vectoriel-espace",
+          "title": {
+            "fr": "Produit scalaire et produit vectoriel dans l'espace"
+          },
+          "domain": "space",
+          "manual": "man-3m-t2"
+        },
+        {
+          "id": "3s-m.droites-plans-sphere",
+          "title": {
+            "fr": "Équations de droites et de plans. Équation d'une sphère"
+          },
+          "domain": "space",
+          "manual": "man-3m-t2"
+        }
+      ]
+    },
+    {
+      "id": "3s-se",
+      "year": "3s",
+      "sections": [
+        "sciences-experimentales"
+      ],
+      "programme": "prog-3-4",
+      "chapters": [
+        {
+          "id": "3s-se.generalites-sur-les-fonctions",
+          "title": {
+            "fr": "Généralités sur les fonctions"
+          },
+          "domain": "analysis",
+          "manual": "man-3se-t1",
+          "skills": [
+            "domain-symmetric",
+            "function-parity"
+          ]
+        },
+        {
+          "id": "3s-se.continuite",
+          "title": {
+            "fr": "Continuité"
+          },
+          "domain": "analysis",
+          "manual": "man-3se-t1"
+        },
+        {
+          "id": "3s-se.limites-et-continuite",
+          "title": {
+            "fr": "Limites et continuité"
+          },
+          "domain": "analysis",
+          "manual": "man-3se-t1",
+          "skills": [
+            "limit-at-infinity",
+            "forme-indeterminee",
+            "asymptote-interpretation"
+          ]
+        },
+        {
+          "id": "3s-se.limites-et-asymptotes",
+          "title": {
+            "fr": "Limites et comportements asymptotiques"
+          },
+          "domain": "analysis",
+          "manual": "man-3se-t1",
+          "skills": [
+            "limit-at-infinity",
+            "forme-indeterminee",
+            "asymptote-interpretation"
+          ]
+        },
+        {
+          "id": "3s-se.nombre-derive",
+          "title": {
+            "fr": "Nombre dérivé"
+          },
+          "domain": "analysis",
+          "manual": "man-3se-t1",
+          "skills": [
+            "derivative-meaning"
+          ]
+        },
+        {
+          "id": "3s-se.fonction-derivee",
+          "title": {
+            "fr": "Fonction dérivée"
+          },
+          "domain": "analysis",
+          "manual": "man-3se-t1",
+          "skills": [
+            "derivative-meaning",
+            "quotient-rule"
+          ]
+        },
+        {
+          "id": "3s-se.etude-de-fonctions",
+          "title": {
+            "fr": "Exemples d'étude de fonctions"
+          },
+          "domain": "analysis",
+          "manual": "man-3se-t1",
+          "skills": [
+            "variation-table"
+          ]
+        },
+        {
+          "id": "3s-se.fonctions-trigonometriques",
+          "title": {
+            "fr": "Fonctions trigonométriques"
+          },
+          "domain": "analysis",
+          "manual": "man-3se-t1"
+        },
+        {
+          "id": "3s-se.suites-reelles",
+          "title": {
+            "fr": "Suites réelles"
+          },
+          "domain": "sequences",
+          "manual": "man-3se-t1"
+        },
+        {
+          "id": "3s-se.limites-de-suites-reelles",
+          "title": {
+            "fr": "Limites de suites réelles"
+          },
+          "domain": "sequences",
+          "manual": "man-3se-t1"
+        },
+        {
+          "id": "3s-se.produit-scalaire-dans-le-plan",
+          "title": {
+            "fr": "Produit scalaire dans le plan"
+          },
+          "domain": "geometry",
+          "manual": "man-3se-t2"
+        },
+        {
+          "id": "3s-se.angles-orientes",
+          "title": {
+            "fr": "Angles orientés"
+          },
+          "domain": "trigonometry",
+          "manual": "man-3se-t2"
+        },
+        {
+          "id": "3s-se.trigonometrie",
+          "title": {
+            "fr": "Trigonométrie"
+          },
+          "domain": "trigonometry",
+          "manual": "man-3se-t2"
+        },
+        {
+          "id": "3s-se.nombres-complexes",
+          "title": {
+            "fr": "Nombres complexes"
+          },
+          "domain": "complex",
+          "manual": "man-3se-t2"
+        },
+        {
+          "id": "3s-se.vecteurs-de-l-espace",
+          "title": {
+            "fr": "Vecteurs de l'espace"
+          },
+          "domain": "space",
+          "manual": "man-3se-t2"
+        },
+        {
+          "id": "3s-se.produit-scalaire-dans-l-espace",
+          "title": {
+            "fr": "Produit scalaire dans l'espace"
+          },
+          "domain": "space",
+          "manual": "man-3se-t2"
+        },
+        {
+          "id": "3s-se.droites-et-plans",
+          "title": {
+            "fr": "Équations de droites et de plans"
+          },
+          "domain": "space",
+          "manual": "man-3se-t2"
+        },
+        {
+          "id": "3s-se.denombrement",
+          "title": {
+            "fr": "Dénombrement"
+          },
+          "domain": "counting",
+          "manual": "man-3se-t2",
+          "skills": [
+            "counting-principle",
+            "multiplication-principle",
+            "choices-and-product",
+            "combinations-count",
+            "ordering-vs-choosing",
+            "counting-pairs"
+          ]
+        },
+        {
+          "id": "3s-se.statistiques",
+          "title": {
+            "fr": "Statistiques"
+          },
+          "domain": "statistics",
+          "manual": "man-3se-t2"
+        },
+        {
+          "id": "3s-se.probabilites",
+          "title": {
+            "fr": "Probabilités"
+          },
+          "domain": "probability",
+          "manual": "man-3se-t2",
+          "skills": [
+            "sample-space",
+            "event-as-set",
+            "equiprobability",
+            "probability-sure-event",
+            "probability-by-counting",
+            "complement-event",
+            "simultaneous-draw",
+            "au-moins-un",
+            "probability-tree"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "3s-st",
+      "year": "3s",
+      "sections": [
+        "sciences-techniques"
+      ],
+      "programme": "prog-3-4",
+      "chapters": [
+        {
+          "id": "3s-st.generalites-sur-les-fonctions",
+          "title": {
+            "fr": "Généralités sur les fonctions"
+          },
+          "domain": "analysis",
+          "manual": "man-3st",
+          "skills": [
+            "domain-symmetric",
+            "function-parity"
+          ]
+        },
+        {
+          "id": "3s-st.notion-de-limite",
+          "title": {
+            "fr": "Notion de limite"
+          },
+          "domain": "analysis",
+          "manual": "man-3st",
+          "skills": [
+            "limit-at-infinity",
+            "forme-indeterminee",
+            "asymptote-interpretation"
+          ]
+        },
+        {
+          "id": "3s-st.continuite",
+          "title": {
+            "fr": "Continuité"
+          },
+          "domain": "analysis",
+          "manual": "man-3st"
+        },
+        {
+          "id": "3s-st.derivabilite",
+          "title": {
+            "fr": "Dérivabilité"
+          },
+          "domain": "analysis",
+          "manual": "man-3st",
+          "skills": [
+            "derivative-meaning",
+            "quotient-rule"
+          ]
+        },
+        {
+          "id": "3s-st.etude-de-fonctions",
+          "title": {
+            "fr": "Étude de fonctions"
+          },
+          "domain": "analysis",
+          "manual": "man-3st",
+          "skills": [
+            "variation-table"
+          ]
+        },
+        {
+          "id": "3s-st.fonctions-circulaires",
+          "title": {
+            "fr": "Fonctions circulaires"
+          },
+          "domain": "analysis",
+          "manual": "man-3st"
+        },
+        {
+          "id": "3s-st.suites-reelles",
+          "title": {
+            "fr": "Suites réelles"
+          },
+          "domain": "sequences",
+          "manual": "man-3st"
+        },
+        {
+          "id": "3s-st.denombrement",
+          "title": {
+            "fr": "Dénombrement"
+          },
+          "domain": "counting",
+          "manual": "man-3st",
+          "skills": [
+            "counting-principle",
+            "multiplication-principle",
+            "choices-and-product",
+            "combinations-count",
+            "ordering-vs-choosing",
+            "counting-pairs"
+          ]
+        },
+        {
+          "id": "3s-st.probabilites",
+          "title": {
+            "fr": "Probabilités"
+          },
+          "domain": "probability",
+          "manual": "man-3st",
+          "skills": [
+            "sample-space",
+            "event-as-set",
+            "equiprobability",
+            "probability-sure-event",
+            "probability-by-counting",
+            "complement-event",
+            "simultaneous-draw",
+            "au-moins-un",
+            "probability-tree"
+          ]
+        },
+        {
+          "id": "3s-st.statistiques",
+          "title": {
+            "fr": "Statistiques"
+          },
+          "domain": "statistics",
+          "manual": "man-3st"
+        },
+        {
+          "id": "3s-st.angles-orientes",
+          "title": {
+            "fr": "Angles orientés"
+          },
+          "domain": "trigonometry",
+          "manual": "man-3st"
+        },
+        {
+          "id": "3s-st.formules-trigonometriques",
+          "title": {
+            "fr": "Formules trigonométriques"
+          },
+          "domain": "trigonometry",
+          "manual": "man-3st"
+        },
+        {
+          "id": "3s-st.equations-trigonometriques",
+          "title": {
+            "fr": "Équations et inéquations trigonométriques"
+          },
+          "domain": "trigonometry",
+          "manual": "man-3st"
+        },
+        {
+          "id": "3s-st.produit-scalaire-dans-le-plan",
+          "title": {
+            "fr": "Produit scalaire dans le plan"
+          },
+          "domain": "geometry",
+          "manual": "man-3st"
+        },
+        {
+          "id": "3s-st.nombres-complexes",
+          "title": {
+            "fr": "Nombres complexes"
+          },
+          "domain": "complex",
+          "manual": "man-3st"
+        },
+        {
+          "id": "3s-st.vecteurs-de-l-espace",
+          "title": {
+            "fr": "Vecteurs de l'espace, repère cartésien de l'espace"
+          },
+          "domain": "space",
+          "manual": "man-3st"
+        },
+        {
+          "id": "3s-st.droites-et-plans-de-l-espace",
+          "title": {
+            "fr": "Droites et plans de l'espace"
+          },
+          "domain": "space",
+          "manual": "man-3st"
+        },
+        {
+          "id": "3s-st.produit-scalaire-espace",
+          "title": {
+            "fr": "Produit scalaire dans un repère orthonormé de l'espace"
+          },
+          "domain": "space",
+          "manual": "man-3st"
+        },
+        {
+          "id": "3s-st.produit-vectoriel-mixte",
+          "title": {
+            "fr": "Produit vectoriel. Produit mixte"
+          },
+          "domain": "space",
+          "manual": "man-3st"
+        }
+      ]
+    },
+    {
+      "id": "3s-si",
+      "year": "3s",
+      "sections": [
+        "sciences-informatique"
+      ],
+      "programme": "prog-3-4",
+      "chapters": [
+        {
+          "id": "3s-si.suites-reelles",
+          "title": {
+            "fr": "Les suites réelles"
+          },
+          "domain": "sequences",
+          "manual": "man-3si"
+        },
+        {
+          "id": "3s-si.generalites-sur-les-fonctions",
+          "title": {
+            "fr": "Généralités sur les fonctions numériques à variable réelle"
+          },
+          "domain": "analysis",
+          "manual": "man-3si",
+          "skills": [
+            "domain-symmetric",
+            "function-parity"
+          ]
+        },
+        {
+          "id": "3s-si.limites-continuite",
+          "title": {
+            "fr": "Limites, continuité, branches infinies"
+          },
+          "domain": "analysis",
+          "manual": "man-3si",
+          "skills": [
+            "limit-at-infinity",
+            "forme-indeterminee",
+            "asymptote-interpretation"
+          ]
+        },
+        {
+          "id": "3s-si.derivabilite",
+          "title": {
+            "fr": "Dérivabilité d'une fonction"
+          },
+          "domain": "analysis",
+          "manual": "man-3si",
+          "skills": [
+            "derivative-meaning"
+          ]
+        },
+        {
+          "id": "3s-si.fonctions-derivees",
+          "title": {
+            "fr": "Fonctions dérivées - Applications"
+          },
+          "domain": "analysis",
+          "manual": "man-3si",
+          "skills": [
+            "derivative-meaning",
+            "quotient-rule"
+          ]
+        },
+        {
+          "id": "3s-si.etude-fonctions-polynomes",
+          "title": {
+            "fr": "Étude de fonctions 1 : exemples de fonctions polynômes"
+          },
+          "domain": "analysis",
+          "manual": "man-3si",
+          "skills": [
+            "variation-table"
+          ]
+        },
+        {
+          "id": "3s-si.etude-fonctions-rationnelles",
+          "title": {
+            "fr": "Étude de fonctions 2 : fonctions rationnelles, irrationnelles et trigonométriques"
+          },
+          "domain": "analysis",
+          "manual": "man-3si",
+          "skills": [
+            "variation-table"
+          ]
+        },
+        {
+          "id": "3s-si.trigonometrie",
+          "title": {
+            "fr": "Trigonométrie"
+          },
+          "domain": "trigonometry",
+          "manual": "man-3si"
+        },
+        {
+          "id": "3s-si.produit-scalaire",
+          "title": {
+            "fr": "Produit scalaire"
+          },
+          "domain": "geometry",
+          "manual": "man-3si"
+        },
+        {
+          "id": "3s-si.systemes-lineaires",
+          "title": {
+            "fr": "Systèmes d'équations linéaires"
+          },
+          "domain": "algebra",
+          "manual": "man-3si"
+        },
+        {
+          "id": "3s-si.logique",
+          "title": {
+            "fr": "La logique mathématique"
+          },
+          "domain": "logic",
+          "manual": "man-3si"
+        },
+        {
+          "id": "3s-si.arithmetique",
+          "title": {
+            "fr": "Arithmétique"
+          },
+          "domain": "arithmetic",
+          "manual": "man-3si"
+        },
+        {
+          "id": "3s-si.systemes-de-numeration",
+          "title": {
+            "fr": "Systèmes de numération"
+          },
+          "domain": "arithmetic",
+          "manual": "man-3si"
+        },
+        {
+          "id": "3s-si.denombrement",
+          "title": {
+            "fr": "Dénombrement"
+          },
+          "domain": "counting",
+          "manual": "man-3si",
+          "skills": [
+            "counting-principle",
+            "multiplication-principle",
+            "choices-and-product",
+            "combinations-count",
+            "ordering-vs-choosing",
+            "counting-pairs"
+          ]
+        },
+        {
+          "id": "3s-si.probabilites",
+          "title": {
+            "fr": "Probabilité"
+          },
+          "domain": "probability",
+          "manual": "man-3si",
+          "skills": [
+            "sample-space",
+            "event-as-set",
+            "equiprobability",
+            "probability-sure-event",
+            "probability-by-counting",
+            "complement-event",
+            "simultaneous-draw",
+            "au-moins-un",
+            "probability-tree"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "4s-m",
+      "year": "4s",
+      "sections": [
+        "mathematiques"
+      ],
+      "programme": "prog-3-4",
+      "chapters": [
+        {
+          "id": "4s-m.continuite-et-limites",
+          "title": {
+            "fr": "Continuité et limites"
+          },
+          "domain": "analysis",
+          "manual": "man-4m-t1"
+        },
+        {
+          "id": "4s-m.suites-reelles",
+          "title": {
+            "fr": "Suites réelles"
+          },
+          "domain": "sequences",
+          "manual": "man-4m-t1"
+        },
+        {
+          "id": "4s-m.derivabilite",
+          "title": {
+            "fr": "Dérivabilité"
+          },
+          "domain": "analysis",
+          "manual": "man-4m-t1"
+        },
+        {
+          "id": "4s-m.fonctions-reciproques",
+          "title": {
+            "fr": "Fonctions réciproques"
+          },
+          "domain": "analysis",
+          "manual": "man-4m-t1"
+        },
+        {
+          "id": "4s-m.primitives",
+          "title": {
+            "fr": "Primitives"
+          },
+          "domain": "analysis",
+          "manual": "man-4m-t1"
+        },
+        {
+          "id": "4s-m.integrales",
+          "title": {
+            "fr": "Intégrales"
+          },
+          "domain": "analysis",
+          "manual": "man-4m-t1"
+        },
+        {
+          "id": "4s-m.fonction-logarithme",
+          "title": {
+            "fr": "Fonction logarithme népérien"
+          },
+          "domain": "analysis",
+          "manual": "man-4m-t1"
+        },
+        {
+          "id": "4s-m.fonction-exponentielle",
+          "title": {
+            "fr": "Fonction exponentielle"
+          },
+          "domain": "analysis",
+          "manual": "man-4m-t1",
+          "skills": [
+            "exp-rules",
+            "exp-limits",
+            "chain-rule-exp"
+          ],
+          "exercises": [
+            {
+              "id": "bac2022c-ex4"
+            }
+          ]
+        },
+        {
+          "id": "4s-m.equations-differentielles",
+          "title": {
+            "fr": "Équations différentielles"
+          },
+          "domain": "analysis",
+          "manual": "man-4m-t1"
+        },
+        {
+          "id": "4s-m.nombres-complexes",
+          "title": {
+            "fr": "Nombres complexes"
+          },
+          "domain": "complex",
+          "manual": "man-4m-t2"
+        },
+        {
+          "id": "4s-m.isometries-du-plan",
+          "title": {
+            "fr": "Isométries du plan"
+          },
+          "domain": "geometry",
+          "manual": "man-4m-t2"
+        },
+        {
+          "id": "4s-m.deplacements",
+          "title": {
+            "fr": "Déplacements - Antidéplacements"
+          },
+          "domain": "geometry",
+          "manual": "man-4m-t2"
+        },
+        {
+          "id": "4s-m.similitudes",
+          "title": {
+            "fr": "Similitudes"
+          },
+          "domain": "geometry",
+          "manual": "man-4m-t2"
+        },
+        {
+          "id": "4s-m.coniques",
+          "title": {
+            "fr": "Coniques"
+          },
+          "domain": "geometry",
+          "manual": "man-4m-t2"
+        },
+        {
+          "id": "4s-m.geometrie-dans-l-espace",
+          "title": {
+            "fr": "Géométrie dans l'espace"
+          },
+          "domain": "space",
+          "manual": "man-4m-t2"
+        },
+        {
+          "id": "4s-m.divisibilite",
+          "title": {
+            "fr": "Divisibilité dans ℤ"
+          },
+          "domain": "arithmetic",
+          "manual": "man-4m-t2"
+        },
+        {
+          "id": "4s-m.identite-de-bezout",
+          "title": {
+            "fr": "Identité de Bézout"
+          },
+          "domain": "arithmetic",
+          "manual": "man-4m-t2"
+        },
+        {
+          "id": "4s-m.probabilites",
+          "title": {
+            "fr": "Probabilités"
+          },
+          "domain": "probability",
+          "manual": "man-4m-t2",
+          "skills": [
+            "conditional-probability",
+            "total-probability",
+            "reverse-conditional",
+            "probability-tree",
+            "random-variable-values",
+            "random-variable-law",
+            "law-sum-one",
+            "expectation",
+            "variance",
+            "binomial-law",
+            "binomial-mean"
+          ],
+          "exercises": [
+            {
+              "id": "bac2022c-ex2"
+            }
+          ]
+        },
+        {
+          "id": "4s-m.statistiques",
+          "title": {
+            "fr": "Statistiques"
+          },
+          "domain": "statistics",
+          "manual": "man-4m-t2"
+        }
+      ]
+    },
+    {
+      "id": "4s-se",
+      "year": "4s",
+      "sections": [
+        "sciences-experimentales"
+      ],
+      "programme": "prog-3-4",
+      "chapters": [
+        {
+          "id": "4s-se.continuite-et-limites",
+          "title": {
+            "fr": "Continuité et limites"
+          },
+          "domain": "analysis",
+          "manual": "man-4se-t1"
+        },
+        {
+          "id": "4s-se.suites-reelles",
+          "title": {
+            "fr": "Suites réelles"
+          },
+          "domain": "sequences",
+          "manual": "man-4se-t1"
+        },
+        {
+          "id": "4s-se.derivabilite",
+          "title": {
+            "fr": "Dérivabilité"
+          },
+          "domain": "analysis",
+          "manual": "man-4se-t1"
+        },
+        {
+          "id": "4s-se.fonctions-reciproques",
+          "title": {
+            "fr": "Fonctions réciproques"
+          },
+          "domain": "analysis",
+          "manual": "man-4se-t1"
+        },
+        {
+          "id": "4s-se.etude-de-fonctions",
+          "title": {
+            "fr": "Études de fonctions"
+          },
+          "domain": "analysis",
+          "manual": "man-4se-t1"
+        },
+        {
+          "id": "4s-se.primitives",
+          "title": {
+            "fr": "Primitives"
+          },
+          "domain": "analysis",
+          "manual": "man-4se-t1"
+        },
+        {
+          "id": "4s-se.integrales",
+          "title": {
+            "fr": "Intégrales"
+          },
+          "domain": "analysis",
+          "manual": "man-4se-t1"
+        },
+        {
+          "id": "4s-se.fonction-logarithme",
+          "title": {
+            "fr": "Fonction logarithme népérien"
+          },
+          "domain": "analysis",
+          "manual": "man-4se-t1"
+        },
+        {
+          "id": "4s-se.fonction-exponentielle",
+          "title": {
+            "fr": "Fonction exponentielle"
+          },
+          "domain": "analysis",
+          "manual": "man-4se-t1",
+          "skills": [
+            "exp-rules",
+            "exp-limits",
+            "chain-rule-exp"
+          ]
+        },
+        {
+          "id": "4s-se.equations-differentielles",
+          "title": {
+            "fr": "Équations différentielles"
+          },
+          "domain": "analysis",
+          "manual": "man-4se-t1"
+        },
+        {
+          "id": "4s-se.nombres-complexes",
+          "title": {
+            "fr": "Nombres complexes"
+          },
+          "domain": "complex",
+          "manual": "man-4se-t2"
+        },
+        {
+          "id": "4s-se.equations-a-coefficients-complexes",
+          "title": {
+            "fr": "Équations à coefficients complexes"
+          },
+          "domain": "complex",
+          "manual": "man-4se-t2"
+        },
+        {
+          "id": "4s-se.produit-scalaire-vectoriel-espace",
+          "title": {
+            "fr": "Produit scalaire - Produit vectoriel dans l'espace"
+          },
+          "domain": "space",
+          "manual": "man-4se-t2"
+        },
+        {
+          "id": "4s-se.droites-plans-spheres",
+          "title": {
+            "fr": "Équations de droites, de plans et de sphères"
+          },
+          "domain": "space",
+          "manual": "man-4se-t2"
+        },
+        {
+          "id": "4s-se.probabilites-ensemble-fini",
+          "title": {
+            "fr": "Probabilités sur un ensemble fini"
+          },
+          "domain": "probability",
+          "manual": "man-4se-t2",
+          "skills": [
+            "conditional-probability",
+            "total-probability",
+            "reverse-conditional",
+            "probability-tree"
+          ],
+          "exercises": [
+            {
+              "id": "bac2022c-sc-ex2",
+              "parts": [
+                "1",
+                "2"
+              ]
+            },
+            {
+              "id": "bac2022p-sc-ex2"
+            }
+          ]
+        },
+        {
+          "id": "4s-se.variables-aleatoires",
+          "title": {
+            "fr": "Variables aléatoires"
+          },
+          "domain": "probability",
+          "manual": "man-4se-t2",
+          "skills": [
+            "random-variable-values",
+            "random-variable-law",
+            "law-sum-one",
+            "expectation",
+            "variance",
+            "binomial-law",
+            "binomial-mean"
+          ],
+          "exercises": [
+            {
+              "id": "bac2022c-sc-ex2",
+              "parts": [
+                "3a",
+                "3b"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "4s-se.statistiques",
+          "title": {
+            "fr": "Statistiques"
+          },
+          "domain": "statistics",
+          "manual": "man-4se-t2"
+        }
+      ]
+    },
+    {
+      "id": "4s-st",
+      "year": "4s",
+      "sections": [
+        "sciences-techniques"
+      ],
+      "programme": "prog-3-4",
+      "chapters": [
+        {
+          "id": "4s-st.continuite-et-limites",
+          "title": {
+            "fr": "Limite et continuité"
+          },
+          "domain": "analysis",
+          "manual": "man-4st"
+        },
+        {
+          "id": "4s-st.derivabilite",
+          "title": {
+            "fr": "Dérivabilité"
+          },
+          "domain": "analysis",
+          "manual": "man-4st"
+        },
+        {
+          "id": "4s-st.fonction-strictement-monotone",
+          "title": {
+            "fr": "Fonction continue et strictement monotone"
+          },
+          "domain": "analysis",
+          "manual": "man-4st"
+        },
+        {
+          "id": "4s-st.etude-de-fonctions",
+          "title": {
+            "fr": "Étude de fonctions"
+          },
+          "domain": "analysis",
+          "manual": "man-4st"
+        },
+        {
+          "id": "4s-st.primitives",
+          "title": {
+            "fr": "Fonctions primitives"
+          },
+          "domain": "analysis",
+          "manual": "man-4st"
+        },
+        {
+          "id": "4s-st.fonction-logarithme",
+          "title": {
+            "fr": "Fonctions logarithmes"
+          },
+          "domain": "analysis",
+          "manual": "man-4st"
+        },
+        {
+          "id": "4s-st.fonction-exponentielle",
+          "title": {
+            "fr": "Fonctions exponentielles"
+          },
+          "domain": "analysis",
+          "manual": "man-4st",
+          "skills": [
+            "exp-rules",
+            "exp-limits",
+            "chain-rule-exp"
+          ]
+        },
+        {
+          "id": "4s-st.integrales",
+          "title": {
+            "fr": "Calcul intégral"
+          },
+          "domain": "analysis",
+          "manual": "man-4st"
+        },
+        {
+          "id": "4s-st.suites-reelles",
+          "title": {
+            "fr": "Suites réelles"
+          },
+          "domain": "sequences",
+          "manual": "man-4st"
+        },
+        {
+          "id": "4s-st.nombres-complexes",
+          "title": {
+            "fr": "Nombres complexes"
+          },
+          "domain": "complex",
+          "manual": "man-4st"
+        },
+        {
+          "id": "4s-st.equations-a-coefficients-complexes",
+          "title": {
+            "fr": "Équations à coefficients complexes"
+          },
+          "domain": "complex",
+          "manual": "man-4st"
+        },
+        {
+          "id": "4s-st.droites-et-plans-dans-l-espace",
+          "title": {
+            "fr": "Droites et plans dans l'espace"
+          },
+          "domain": "space",
+          "manual": "man-4st"
+        },
+        {
+          "id": "4s-st.produit-scalaire-vectoriel-mixte",
+          "title": {
+            "fr": "Produit scalaire, produit vectoriel et produit mixte dans l'espace"
+          },
+          "domain": "space",
+          "manual": "man-4st"
+        },
+        {
+          "id": "4s-st.probabilites-ensemble-fini",
+          "title": {
+            "fr": "Probabilité sur un ensemble fini"
+          },
+          "domain": "probability",
+          "manual": "man-4st",
+          "skills": [
+            "conditional-probability",
+            "total-probability",
+            "reverse-conditional",
+            "probability-tree"
+          ]
+        },
+        {
+          "id": "4s-st.variables-aleatoires",
+          "title": {
+            "fr": "Variables aléatoires réelles"
+          },
+          "domain": "probability",
+          "manual": "man-4st",
+          "skills": [
+            "random-variable-values",
+            "random-variable-law",
+            "law-sum-one",
+            "expectation",
+            "variance",
+            "binomial-law",
+            "binomial-mean"
+          ]
+        },
+        {
+          "id": "4s-st.statistiques",
+          "title": {
+            "fr": "Statistiques"
+          },
+          "domain": "statistics",
+          "manual": "man-4st"
+        }
+      ]
+    },
+    {
+      "id": "4s-si",
+      "year": "4s",
+      "sections": [
+        "sciences-informatique"
+      ],
+      "programme": "prog-3-4",
+      "chapters": [
+        {
+          "id": "4s-si.suites-reelles",
+          "title": {
+            "fr": "Suites réelles"
+          },
+          "domain": "sequences",
+          "manual": "man-4si"
+        },
+        {
+          "id": "4s-si.limites-de-fonctions",
+          "title": {
+            "fr": "Limites de fonctions"
+          },
+          "domain": "analysis",
+          "manual": "man-4si"
+        },
+        {
+          "id": "4s-si.continuite",
+          "title": {
+            "fr": "Continuité"
+          },
+          "domain": "analysis",
+          "manual": "man-4si"
+        },
+        {
+          "id": "4s-si.derivation-primitives",
+          "title": {
+            "fr": "Dérivation - primitives"
+          },
+          "domain": "analysis",
+          "manual": "man-4si"
+        },
+        {
+          "id": "4s-si.etude-de-fonctions",
+          "title": {
+            "fr": "Étude de fonctions"
+          },
+          "domain": "analysis",
+          "manual": "man-4si"
+        },
+        {
+          "id": "4s-si.fonction-logarithme",
+          "title": {
+            "fr": "Logarithme népérien"
+          },
+          "domain": "analysis",
+          "manual": "man-4si"
+        },
+        {
+          "id": "4s-si.fonction-exponentielle",
+          "title": {
+            "fr": "Fonctions exponentielles"
+          },
+          "domain": "analysis",
+          "manual": "man-4si",
+          "skills": [
+            "exp-rules",
+            "exp-limits",
+            "chain-rule-exp"
+          ]
+        },
+        {
+          "id": "4s-si.integrales",
+          "title": {
+            "fr": "Calcul intégral"
+          },
+          "domain": "analysis",
+          "manual": "man-4si"
+        },
+        {
+          "id": "4s-si.arithmetique",
+          "title": {
+            "fr": "Arithmétique"
+          },
+          "domain": "arithmetic",
+          "manual": "man-4si",
+          "topics": [
+            "Congruences",
+            "Théorème de Bézout",
+            "Équations ax + by = c"
+          ]
+        },
+        {
+          "id": "4s-si.nombres-complexes",
+          "title": {
+            "fr": "Nombres complexes"
+          },
+          "domain": "complex",
+          "manual": "man-4si"
+        },
+        {
+          "id": "4s-si.systemes-lineaires",
+          "title": {
+            "fr": "Systèmes d'équations linéaires"
+          },
+          "domain": "algebra",
+          "manual": "man-4si",
+          "topics": [
+            "Matrices et opérations",
+            "Déterminant et inverse d'une matrice",
+            "Systèmes linéaires",
+            "Matrice associée à un graphe"
+          ]
+        },
+        {
+          "id": "4s-si.statistiques",
+          "title": {
+            "fr": "Séries statistiques à deux caractères"
+          },
+          "domain": "statistics",
+          "manual": "man-4si"
+        },
+        {
+          "id": "4s-si.probabilites",
+          "title": {
+            "fr": "Probabilités"
+          },
+          "domain": "probability",
+          "manual": "man-4si",
+          "topics": [
+            "Probabilité conditionnelle",
+            "Probabilités totales",
+            "Graphe probabiliste"
+          ],
+          "skills": [
+            "conditional-probability",
+            "total-probability",
+            "reverse-conditional",
+            "probability-tree"
+          ]
+        },
+        {
+          "id": "4s-si.variables-aleatoires",
+          "title": {
+            "fr": "Variables aléatoires"
+          },
+          "domain": "probability",
+          "manual": "man-4si",
+          "topics": [
+            "Loi, espérance, variance",
+            "Loi binomiale",
+            "Lois continues"
+          ],
+          "skills": [
+            "random-variable-values",
+            "random-variable-law",
+            "law-sum-one",
+            "expectation",
+            "variance",
+            "binomial-law",
+            "binomial-mean"
+          ]
+        }
+      ]
+    }
+  ]
+}

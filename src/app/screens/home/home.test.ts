@@ -26,7 +26,7 @@ const input = (over: Partial<HomeInput> = {}): HomeInput => ({
   activity: [],
   activeDays: [],
   warmupSeen: () => false,
-  section: null,
+  forClass: null,
   now: NOW,
   ...over,
 });
@@ -44,7 +44,7 @@ describe('the exam session of an exercise', () => {
 });
 
 describe('the «كمّل» card', () => {
-  it('with nothing started: one exercise of his section, its warm-up first', () => {
+  it('with nothing started: the first exercise of his class, its warm-up first', () => {
     const d = homeData(input());
     expect(d.hero).toEqual({
       kind: 'start',
@@ -54,12 +54,45 @@ describe('the «كمّل» card', () => {
     });
     expect(d.stats).toBeNull();
     const sc = homeData(
-      input({ section: 'sciences-experimentales', warmupSeen: () => true }),
+      input({
+        forClass: new Set(['bac2022c-sc-ex2', 'bac2022p-sc-ex2']),
+        warmupSeen: () => true,
+      }),
     );
     expect(sc.hero).toMatchObject({
       exerciseId: 'bac2022c-sc-ex2',
       warmup: false,
     });
+  });
+
+  it('a class with no exercise yet: «قريبا», never a bac exercise; his own started one still resumes', () => {
+    expect(homeData(input({ forClass: new Set() })).hero).toEqual({
+      kind: 'soon',
+    });
+    expect(
+      homeData(
+        input({
+          forClass: new Set(),
+          activity: [{ exerciseId: 'bac2022c-ex4', questionId: 'A2', at: NOW }],
+        }),
+      ).hero,
+    ).toMatchObject({
+      kind: 'resume',
+      exerciseId: 'bac2022c-ex4',
+      partId: 'A2',
+    });
+  });
+
+  it('every exercise of his class done: everything done, even with others left', () => {
+    const ex2 = CATALOG.find(e => e.id === 'bac2022c-ex2')!;
+    const parts = ex2.result.ok
+      ? ex2.result.loaded.exercise.parts.map(p => partKey('bac2022c-ex2', p.id))
+      : [];
+    expect(
+      homeData(
+        input({ forClass: new Set(['bac2022c-ex2']), done: new Set(parts) }),
+      ).hero,
+    ).toEqual({ kind: 'allDone' });
   });
 
   it('resumes the most recent unfinished exercise, at the question he was on', () => {

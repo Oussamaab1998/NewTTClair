@@ -1,0 +1,130 @@
+{
+  "contentVersion": "onboarding-0.1.0",
+  "reviewed": false,
+  "note": "Onboarding examples (owner-approved mockup v2, 2026-11-17): for each chapter list, one analysis question shown as a map and one probability or statistics question written line by line. Real bac exercises are labelled with their session; the others are our own and say «Exemple». Every number is checked by src/content/onboardingExamples.test.ts with the engine. Derja not reviewed by a teacher.",
+  "analysis": {
+    "a-1s": {
+      "source": "Exemple · 1ère année",
+      "statement": "f est une fonction affine telle que f(1) = 5 et f(3) = 9. Déterminer f(x).",
+      "have": [{ "ar": "دالة " }, { "fr": "affine" }, { "ar": "، ونعرفو قيمتها في زوز نقاط." }],
+      "goal": [{ "ar": "نلقاو العبارة متاعها." }],
+      "goalMath": "f(x) = ax + b",
+      "road": [{ "ar": "نلقاو " }, { "fr": "a" }, { "ar": " من الفرق بين القيم، ومن بعد " }, { "fr": "b" }, { "ar": "." }]
+    },
+    "a-2s": {
+      "source": "Exemple · 2ème année",
+      "statement": "Soit f(x) = x² − 4x + 3 et (P) sa courbe. Déterminer le sommet de (P).",
+      "have": [{ "ar": "دالة من الدرجة الثانية، والمنحنى متاعها " }, { "fr": "parabole" }, { "ar": "." }],
+      "goal": [{ "ar": "النقطة اللي يدور فيها المنحنى." }],
+      "goalMath": "S( ? ; ? )",
+      "road": [{ "ar": "نكتبوها في " }, { "fr": "forme canonique" }, { "ar": "، والنقطة هاذي تبان وحدها." }]
+    },
+    "a-3s": {
+      "source": "Exemple · 3ème année",
+      "statement": "Soit f(x) = x³ − 3x + 1. Dresser le tableau de variation de f.",
+      "have": [{ "ar": "دالة " }, { "fr": "polynôme" }, { "ar": " معرّفة على كل الأعداد." }],
+      "goal": [{ "ar": "نعمرو الجدول متاع " }, { "fr": "variation" }, { "ar": "." }],
+      "goalMath": "f ′(x) = ?",
+      "road": [{ "ar": "نحسبو المشتقة، نقراو الإشارة متاعها، ومن بعد نعمرو الجدول." }]
+    },
+    "a-bm": {
+      "source": "Bac 2022 · Session de contrôle · Mathématiques · Exercice 4",
+      "exercise": "bac2022c-ex4",
+      "statement": "Soit f(x) = eˣ / (1 + e²ˣ). Montrer que f(x) tend vers 0 quand x tend vers +∞.",
+      "have": [{ "ar": "دالة فيها " }, { "fr": "exponentielle" }, { "ar": "، والفوق والتحت يكبرو الزوز." }],
+      "goal": [{ "ar": "نورّيو إنّ الـ " }, { "fr": "limite" }, { "ar": " تساوي صفر." }],
+      "goalMath": "lim f(x) = 0   (x → +∞)",
+      "road": [{ "ar": "نبدّلو الكتيبة: نقسمو الفوق والتحت على أكبر حاجة." }]
+    },
+    "a-bs": {
+      "source": "Exemple · Bac",
+      "statement": "Soit f(x) = (x + 1)e⁻ˣ. Calculer la limite de f en +∞.",
+      "have": [{ "ar": "جداء: حاجة تكبر في حاجة تصغر." }],
+      "goal": [{ "ar": "الـ " }, { "fr": "limite" }, { "ar": " متاعها في اللانهاية." }],
+      "goalMath": "lim f(x)   (x → +∞)",
+      "road": [{ "ar": "نفرّقو الجداء على زوز، ونستعملو " }, { "fr": "limite" }, { "ar": " معروفة من الدرس." }]
+    }
+  },
+  "practice": {
+    "p-1s": {
+      "source": "Exemple · 1ère année",
+      "statement": "Notes de cinq élèves : 12, 8, 15, 10, 14. Déterminer la médiane.",
+      "given": "n = 5",
+      "wrong": "Me = 15",
+      "hint": [{ "ar": "قبل ما تاخو اللي في الوسط، رتّب النوتات." }],
+      "question": "ama 15 hiya eli fel wost ?",
+      "reply": [{ "ar": "إيه في الوسط، أما قبل الترتيب. رتّب وعاود شوف." }],
+      "fixed": "8 < 10 < 12 < 14 < 15  ⇒  Me = 12",
+      "skill": "Médiane"
+    },
+    "p-2s": {
+      "source": "Exemple · 2ème année",
+      "statement": "Combien de nombres de trois chiffres distincts peut-on former avec 1, 2, 3, 4, 5 ?",
+      "given": "1er chiffre : 5 choix",
+      "wrong": "N = 5 × 5 × 5 = 125",
+      "hint": [{ "ar": "الأرقام لازم يكونو مختلفين: كل خانة تنقص اختيار." }],
+      "question": "3lech mouch 5 fi kol case ?",
+      "reply": [{ "ar": "خاطر الرقم اللي حطّيتو في الخانة الأولى ما تنجمش تعاودو." }],
+      "fixed": "N = 5 × 4 × 3 = 60",
+      "skill": "Dénombrement"
+    },
+    "p-3s": {
+      "source": "Exemple · 3ème année",
+      "statement": "Une urne contient 3 boules rouges et 2 boules blanches. On tire simultanément 2 boules. Calculer la probabilité d'avoir deux boules de même couleur.",
+      "given": "card(Ω) = C₅² = 10",
+      "wrong": "p = 3/10",
+      "hint": [{ "ar": "نفس اللون ينجم يكون أحمر ولا أبيض." }],
+      "question": "ena 7sebt les rouges barka",
+      "reply": [{ "ar": "باهي، أما زوز كور بيض زادة عندهم نفس اللون. زيدهم." }],
+      "fixed": "p = (3 + 1)/10 = 2/5",
+      "skill": "Probabilités"
+    },
+    "p-bm": {
+      "source": "Bac 2022 · Session de contrôle · Mathématiques · Exercice 2",
+      "exercise": "bac2022c-ex2",
+      "statement": "Une urne contient cinq boules numérotées −1, 0, 0, 1, 2. On tire simultanément deux boules. A : « Les deux boules tirées sont de même numéro. »",
+      "given": "card(Ω) = C₅² = 10",
+      "wrong": "p(A) = 2/10",
+      "hint": [{ "ar": "عاود عدّ الحالات اللي تنفع." }],
+      "question": "ama fama zouz kour fihom 0 ?",
+      "reply": [{ "ar": "إيه فما زوز، أما كي تجبدهم مع بعضهم يعملو تيراج واحد برك." }],
+      "fixed": "p(A) = 1/10",
+      "skill": "Dénombrement"
+    },
+    "p-bse": {
+      "source": "D'après Bac 2022 · Session principale · Sciences expérimentales · Exercice 2",
+      "exercise": "bac2022p-sc-ex2",
+      "statement": "Dans l'arbre de probabilité, p(A) = 2/3 et p(F/A) = 1/4. Calculer p(A ∩ F).",
+      "given": "p(A) = 2/3 ;  p(F/A) = 1/4",
+      "wrong": "p(A ∩ F) = 1/4",
+      "hint": [{ "ar": "على طريق في الشجرة، نضربو الفروع الكل." }],
+      "question": "ama 1/4 maktouba 3al branche ?",
+      "reply": [{ "ar": "إيه، أما هاذاكا الاحتمال بعد ما نكونو في الفرع الأول. الطريق الكامل فيه زوز فروع." }],
+      "fixed": "p(A ∩ F) = 2/3 × 1/4 = 1/6",
+      "skill": "Probabilité conditionnelle"
+    },
+    "p-bt": {
+      "source": "Exemple · Bac",
+      "statement": "On lance un dé équilibré : on gagne 3 D si on obtient 6, sinon on perd 1 D. X est le gain. Calculer E(X).",
+      "given": "X ∈ { 3 ; −1 }",
+      "wrong": "E(X) = (3 − 1)/2 = 1",
+      "hint": [{ "ar": "كل قيمة تتضرب في الاحتمال متاعها." }],
+      "question": "ama moyenne mta3 3 w -1 ?",
+      "reply": [{ "ar": "لا، القيم موش عندهم نفس الحظ: الخسارة تصير أكثر برشا من الربح." }],
+      "fixed": "E(X) = 3 × 1/6 − 1 × 5/6 = −1/3",
+      "skill": "Espérance"
+    }
+  },
+  "tracks": {
+    "1s": { "analysis": ["a-1s", "1s.fonctions-affines"], "practice": ["p-1s", "1s.exploitation-de-l-information"] },
+    "2s-sc": { "analysis": ["a-2s", "2s-sc.fonctions-de-reference"], "practice": ["p-2s", "2s-sc.arithmetique"] },
+    "3s-m": { "analysis": ["a-3s", "3s-m.etude-de-fonctions"], "practice": ["p-3s", "3s-m.probabilites"] },
+    "3s-se": { "analysis": ["a-3s", "3s-se.etude-de-fonctions"], "practice": ["p-3s", "3s-se.probabilites"] },
+    "3s-st": { "analysis": ["a-3s", "3s-st.etude-de-fonctions"], "practice": ["p-3s", "3s-st.probabilites"] },
+    "3s-si": { "analysis": ["a-3s", "3s-si.etude-fonctions-polynomes"], "practice": ["p-3s", "3s-si.probabilites"] },
+    "4s-m": { "analysis": ["a-bm", "4s-m.fonction-exponentielle"], "practice": ["p-bm", "4s-m.probabilites"] },
+    "4s-se": { "analysis": ["a-bs", "4s-se.fonction-exponentielle"], "practice": ["p-bse", "4s-se.probabilites-ensemble-fini"] },
+    "4s-st": { "analysis": ["a-bs", "4s-st.fonction-exponentielle"], "practice": ["p-bt", "4s-st.variables-aleatoires"] },
+    "4s-si": { "analysis": ["a-bs", "4s-si.fonction-exponentielle"], "practice": ["p-bt", "4s-si.variables-aleatoires"] }
+  }
+}

@@ -1040,10 +1040,6 @@
   "home": {
     "hello": "Bonjour",
     "welcome": "Bienvenue",
-    "bac": {
-      "mathematiques": "Bac Mathématiques",
-      "sciences-experimentales": "Bac Sciences expérimentales"
-    },
     "resumeLabel": "Reprends où tu t'es arrêté",
     "startLabel": "On te propose de commencer par",
     "warmupNote": "Avant l'exercice, quelques petites questions pour savoir par où commencer avec toi.",
@@ -1052,6 +1048,8 @@
     "allDoneTitle": "Tu as fini tous les exercices",
     "allDoneText": "De nouveaux exercices arrivent bientôt. Tu peux refaire celui que tu veux.",
     "seeAll": "Voir les exercices",
+    "soonNote": "On y travaille. Ils apparaîtront ici dès qu'ils seront prêts.",
+    "seeBac": "Voir les exercices du bac",
     "paper": "La feuille",
     "examLine": "{{session}} · {{section}} · Exercice {{n}}",
     "examQuestion": "Question {{q}}",
@@ -1099,5 +1097,81 @@
         "sub": "Nombres complexes"
       }
     }
+  },
+  "chapters": {
+    "title": "Chapitres",
+    "change": "Changer",
+    "changeA11y": "Changer de classe",
+    "inProgramme": "chapitres au programme",
+    "withExercises": "avec des exercices",
+    "startNow": "Pour commencer",
+    "wholeProgramme": "Tout le programme",
+    "all": "Tous",
+    "soon": "Bientôt",
+    "questionsA11y": "{{n}} questions",
+    "emptyTitle": "Les exercices de ta classe arrivent",
+    "emptyBody": "Tout le programme est ici ; chaque chapitre s'ouvre quand ses exercices sont prêts.",
+    "exercises": "Exercices",
+    "partial": "Seulement les questions de ce chapitre",
+    "soonBody": "Les exercices de ce chapitre ne sont pas encore prêts.",
+    "start": "Commencer",
+    "resumeFrom": "Continuer à",
+    "again": "Refaire",
+    "classTitle": "Tu es en quelle classe ?",
+    "classLead": "Pour te montrer exactement les chapitres de ton programme.",
+    "classSection": "Et ta section ?",
+    "classNext": "Continuer",
+    "domain": {
+      "analysis": "Analyse",
+      "sequences": "Suites",
+      "probability": "Probabilités",
+      "counting": "Dénombrement",
+      "statistics": "Statistiques",
+      "geometry": "Géométrie",
+      "trigonometry": "Trigonométrie",
+      "space": "Géométrie dans l'espace",
+      "complex": "Nombres complexes",
+      "arithmetic": "Arithmétique",
+      "algebra": "Algèbre",
+      "numbers": "Calcul numérique",
+      "logic": "Logique"
+    },
+    "yearShort": {
+      "1s": "1ère année",
+      "2s": "2ème",
+      "3s": "3ème",
+      "4s": "Bac"
+    },
+    "examLine": "Bac {{year}} · {{session}} · {{section}}",
+    "session": {
+      "principale": "Session principale",
+      "controle": "Session de contrôle"
+    },
+    "points": "{{n}} pts",
+    "progress": "{{done}}/{{total}}"
+  },
+  "onboarding": {
+    "brandA": "TTe",
+    "brandB": "Clair",
+    "tutorName": "TTeClair",
+    "tagline": "Les maths, pas à pas, expliquées en derja.",
+    "classLead": "Pour te montrer des exemples de ton programme, exactement.",
+    "pickFirst": "Choisis ta classe et ta section pour continuer.",
+    "fromYourProgramme": "De ton programme",
+    "mapTitle": "T'explique la question avant que tu la résolves",
+    "linesTitle": "Lit ce que tu écris, ligne par ligne",
+    "inDerja": "Expliqué en derja",
+    "have": "On a",
+    "goal": "On cherche",
+    "road": "Le chemin",
+    "stepByStep": "Pas à pas",
+    "hint": "Indice",
+    "okLine": "ligne juste",
+    "wrongLine": "ligne avec une erreur",
+    "remembered": "Noté : on y reviendra dans un autre exercice.",
+    "page": "Page {{n}} sur {{total}}",
+    "next": "Continuer",
+    "start": "Commencer",
+    "skip": "Passer"
   }
 }

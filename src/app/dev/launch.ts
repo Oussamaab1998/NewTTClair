@@ -88,6 +88,14 @@ const stringArg = (name: string): string | null => {
   return typeof v === 'string' && v.length > 0 ? v : null;
 };
 export const devTabAtLaunch = () => stringArg('devTab');
+/**
+ * `-devOnboarding on|off`: the onboarding even when it was done (on), or never
+ * (off: screenshot passes of the other screens on a fresh install).
+ */
+export const devOnboardingAtLaunch = (): 'on' | 'off' | null => {
+  const v = stringArg('devOnboarding');
+  return v === 'on' || v === 'off' ? v : null;
+};
 /** `-devLesson old`: the scripted lesson instead of the AI tutor (comparison, screenshots). */
 export const devOldLessonAtLaunch = () => String(arg('devLesson')) === 'old';
 /** `-devTutorMode hybrid|ai|old`: known names only; anything else is ignored. */

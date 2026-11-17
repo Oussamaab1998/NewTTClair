@@ -5,7 +5,9 @@
  *
  * - The hero: «كمّل وين وقفت» on the most recent unfinished exercise (at the
  *   question he was on, else the first one not done); with nothing started,
- *   «نقترحو تبدا بـ» one exercise (his section's first); everything done:
+ *   «نقترحو تبدا بـ» the first exercise of his class; his class has none
+ *   yet (1ère, a section with no paper yet): «التمارين متاع قسمك في الطريق»
+ *   (owner, 2026-11-17: never push a bac exercise on him); everything done:
  *   «كمّلت التمارين الكل».
  * - Effort counts only (questions finished, exercises started, days this
  *   week): never a level or a weakness (D8).
@@ -68,7 +70,9 @@ export type HomeHero =
       /** Its warm-up comes first (he has not done it). */
       warmup: boolean;
     }
-  | { kind: 'allDone' };
+  | { kind: 'allDone' }
+  /** His class has no exercise yet. */
+  | { kind: 'soon' };
 
 export interface HomeStats {
   questionsDone: number;
@@ -102,8 +106,11 @@ export interface HomeInput {
   /** Days he practised (any time), as local-midnight timestamps or any time in the day. */
   activeDays: readonly number[];
   warmupSeen: (exerciseId: string) => boolean;
-  /** His bac section, when known: the first suggestion is from it. */
-  section: string | null;
+  /**
+   * The exercises of his class (from the curriculum map): the suggestion is
+   * one of them. Null: any exercise.
+   */
+  forClass: ReadonlySet<string> | null;
   now: number;
 }
 
@@ -166,10 +173,13 @@ export function homeData(input: HomeInput): HomeData {
         total: partsOf(resume.id).length,
       };
     }
-    const fresh = exercises.filter(x => !started.includes(x));
-    const pick =
-      fresh.find(x => x.section === (input.section ?? 'mathematiques')) ??
-      fresh[0];
+    const mine = exercises.filter(
+      x => input.forClass === null || input.forClass.has(x.id),
+    );
+    if (mine.length === 0) {
+      return { kind: 'soon' };
+    }
+    const pick = mine.find(x => !started.includes(x));
     if (pick) {
       return {
         kind: 'start',

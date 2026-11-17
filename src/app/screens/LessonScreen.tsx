@@ -30,6 +30,10 @@ import {
   partLabel,
   type Opened,
 } from '../exercises';
+import { ChaptersFlow } from './chapters/ChaptersFlow';
+import { loadStudentClass, saveStudentClass } from './chapters/studentClass';
+import { OnboardingScreen } from './onboarding/OnboardingScreen';
+import { isOnboarded, markOnboarded } from './onboarding/onboardingState';
 import { ExercisePicker } from './ExercisePicker';
 import {
   HomeScreen,
@@ -223,6 +227,13 @@ export function LessonScreen({
   // The home's card that opened the exercise list (null: the home itself).
   const [list, setList] = useState<HomeList | null>(null);
   const listPicker = useHomeListPicker();
+  // The chapter open in the chapter picker (a lesson started there comes back to it).
+  const [chapter, setChapter] = useState<string | null>(null);
+  // The onboarding, once per install, before the home (`-devOnboarding on|off`).
+  const [onboarded, setOnboarded] = useState(() => {
+    const dev = devOnly?.devOnboardingAtLaunch();
+    return !props.home || dev === 'off' || (dev !== 'on' && isOnboarded(appStore()));
+  });
   const result = CATALOG.find(e => e.id === opened?.exerciseId)?.result;
   const paperEntry = CATALOG.find(e => e.id === paperFor)?.result;
   if ((!opened || !result?.ok) && paperEntry?.ok) {
@@ -241,6 +252,19 @@ export function LessonScreen({
     );
   }
   if (!opened || !result?.ok) {
+    if (props.home && !onboarded) {
+      return (
+        <OnboardingScreen
+          initial={loadStudentClass(appStore())}
+          onDone={cls => {
+            const kv = appStore();
+            saveStudentClass(kv, cls);
+            markOnboarded(kv, Date.now());
+            setOnboarded(true);
+          }}
+        />
+      );
+    }
     if (props.home && list === null) {
       // Mounted again after each lesson: what it shows is read fresh then.
       return (
@@ -251,6 +275,23 @@ export function LessonScreen({
           eventStore={eventStore}
           doneRecord={doneRecord}
           {...(props.clock && { now: () => props.clock!.now() })}
+        />
+      );
+    }
+    if (props.home && list?.kind === 'domain') {
+      // A domain card opens the student's chapters, that domain's filter on.
+      return (
+        <ChaptersFlow
+          domain={list.domain}
+          onOpen={setOpened}
+          onBack={() => {
+            setList(null);
+            setChapter(null);
+          }}
+          chapterId={chapter}
+          onChapter={setChapter}
+          eventStore={eventStore}
+          doneRecord={doneRecord}
         />
       );
     }

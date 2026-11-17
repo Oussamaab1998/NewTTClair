@@ -242,6 +242,8 @@ export const font = {
     fontSize: 26,
     lineHeight: 34,
   },
+  /** The TTeClair wordmark on the onboarding's first screen. */
+  wordmark: { fontFamily: family.ui.extraBold, fontSize: 36, lineHeight: 46 },
   header: { fontFamily: family.ui.bold, fontSize: 21, lineHeight: 30 },
   body: { fontFamily: family.ui.regular, fontSize: 16.5, lineHeight: 30 },
   small: { fontFamily: family.ui.regular, fontSize: 13.5, lineHeight: 22 },

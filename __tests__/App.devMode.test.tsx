@@ -4,10 +4,12 @@ import { act, render, screen } from '@testing-library/react-native';
 import App from '../App';
 import { devToolsEnabled, setDevTools } from '../src/app/devFlags';
 
-// `-devMode on` at launch (debug builds): dev mode for that run.
+// `-devMode on` at launch (debug builds): dev mode for that run. And
+// `-devOnboarding off`, so a fresh install starts on the home here.
 jest.mock('../src/app/dev/launch', () => ({
   ...jest.requireActual('../src/app/dev/launch'),
   devModeAtLaunch: () => true,
+  devOnboardingAtLaunch: () => 'off',
 }));
 
 afterEach(() => act(() => setDevTools(false)));
