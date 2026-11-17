@@ -180,7 +180,9 @@ export const border = {
  * name: by family name, `font.style.italic` and `font.weight.bold` select its
  * real italic and bold instances; its PostScript names do not resolve.
  * A name that does not resolve falls back to the system font (no stack in RN).
- * Android is deferred: there fontFamily is the file name.
+ * Android: fontFamily is the file name, so copies sit in
+ * android/app/src/main/assets/fonts (Tajawal-*.ttf, «STIX Two Text.ttf» and
+ * «STIX Two Text_italic.ttf»; bold STIX is synthesized there). docs/ANDROID_APK.md.
  */
 const family = {
   ui: {
