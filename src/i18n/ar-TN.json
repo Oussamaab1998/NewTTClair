@@ -1036,5 +1036,68 @@
     "unreadable": "ما نجّمناش نقراو السطر: ثبّت فيه وعاود.",
     "doneTitle": "باهي!",
     "start": "نبداو التمرين"
+  },
+  "home": {
+    "hello": "عسلامة",
+    "welcome": "مرحبا بيك",
+    "bac": {
+      "mathematiques": "Bac Mathématiques",
+      "sciences-experimentales": "Bac Sciences expérimentales"
+    },
+    "resumeLabel": "كمّل وين وقفت",
+    "startLabel": "نقترحو تبدا بـ",
+    "warmupNote": "قبل التمرين، شوية أسئلة صغار باش نعرفو منين نبداو معاك.",
+    "resume": "كمّل",
+    "start": "نبداو",
+    "allDoneTitle": "كمّلت التمارين الكل",
+    "allDoneText": "تمارين جدد جايين قريب. تنجّم تعاود أي تمرين تحبّو.",
+    "seeAll": "شوف التمارين",
+    "paper": "الورقة",
+    "examLine": "{{session}} · {{section}} · Exercice {{n}}",
+    "examQuestion": "Question {{q}}",
+    "session": {
+      "principale": "Principale {{year}}",
+      "controle": "Contrôle {{year}}"
+    },
+    "sessionLong": {
+      "principale": "Session principale",
+      "controle": "Session de contrôle"
+    },
+    "sessionCaps": "BAC · {{year}}",
+    "section": {
+      "mathematiques": "Maths",
+      "sciences-experimentales": "Sc. exp."
+    },
+    "count": "{{done}} / {{total}}",
+    "percent": "{{p}}%",
+    "progressA11y": "كمّلت {{done}} من {{total}}",
+    "stats": {
+      "questions": "أسئلة كمّلتهم",
+      "exercises": "تمارين بديتهم",
+      "days": "أيام هالجمعة"
+    },
+    "domainsTitle": "الفصول",
+    "sessionsTitle": "مواضيع الباك",
+    "soon": "قريبا",
+    "exerciseOne": "1 exercice",
+    "exercisesMany": "{{count}} exercices",
+    "domain": {
+      "probability": {
+        "name": "Probabilités",
+        "sub": "الاحتمالات"
+      },
+      "analysis": {
+        "name": "Analyse",
+        "sub": "الدوال"
+      },
+      "sequences": {
+        "name": "Suites",
+        "sub": "المتتاليات"
+      },
+      "complex": {
+        "name": "Complexes",
+        "sub": "الأعداد المركّبة"
+      }
+    }
   }
 }

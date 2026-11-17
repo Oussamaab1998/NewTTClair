@@ -17,8 +17,16 @@ afterEach(() => act(() => setDevTools(false)));
 
 test('hides the dev tools until a long press on the lesson title', async () => {
   await render(<App />);
-  // Normal start: the exercise picker.
+  // Normal start: the home; a domain opens its exercises, back returns home.
+  expect(screen.getByTestId('home-screen')).toBeOnTheScreen();
+  await fireEvent.press(screen.getByTestId('home-domain-probability'));
   expect(screen.getByTestId('exercise-picker')).toBeOnTheScreen();
+  expect(screen.getByTestId('picker-subtitle')).toHaveTextContent(
+    'Probabilités',
+  );
+  await fireEvent.press(screen.getByTestId('picker-back'));
+  expect(screen.getByTestId('home-screen')).toBeOnTheScreen();
+  await fireEvent.press(screen.getByTestId('home-domain-probability'));
   await fireEvent.press(screen.getByTestId('open-2a'));
   expect(screen.getByTestId('lesson-screen')).toBeOnTheScreen();
   expect(screen.queryByTestId('tab-demo')).toBeNull();

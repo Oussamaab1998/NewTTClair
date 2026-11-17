@@ -104,6 +104,7 @@ import { appDoneRecord } from '../../appDoneRecord';
 import { partKey, type DoneRecord } from '../../../state/doneParts';
 import { appStore } from '../../../storage/appStore';
 import type { KeyValueStore } from '../../../storage/kv';
+import { noteActiveDay } from '../home/activeDays';
 import { aiPartDone } from '../tutor/done';
 import type { ThreadComponent } from '../tutor/useTutorSession';
 
@@ -351,6 +352,7 @@ export function useHybridSession(o: {
     (prev: ConductorState, next: ConductorState) => {
       const now = Date.now();
       saveRecord(store, recordFrom(ctx, next, extras.current, now));
+      noteActiveDay(store, now);
       if (!next.done) {
         saveResume(store, ctx, next, extras.current);
         return;

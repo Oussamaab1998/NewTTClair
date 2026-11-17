@@ -18,6 +18,7 @@ import type { Rich, Warmup } from '../../../../content/schema';
 import type { KeyValueStore } from '../../../../storage/kv';
 import { appStore } from '../../../../storage/appStore';
 import type { WarmupAct } from '../../../../warmup/warmup';
+import { noteActiveDay } from '../../home/activeDays';
 import { WarmupScreen } from './WarmupScreen';
 
 export interface WarmupGateProps {
@@ -53,6 +54,7 @@ export function WarmupGate(p: WarmupGateProps) {
         const now = Date.now();
         const profile = loadProfile(store) ?? emptyProfile(now);
         saveProfile(store, applyWarmup(profile, p.exerciseId, answers, now));
+        noteActiveDay(store, now);
         setSeen(true);
       }}
     />

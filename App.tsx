@@ -73,7 +73,7 @@ function Root() {
       <View
         style={[styles.screen, shown !== 'bidi' && { paddingTop: insets.top }]}
       >
-        {shown === 'lesson' && <LessonScreen />}
+        {shown === 'lesson' && <LessonScreen home />}
         {shown === 'demo' && <LessonUiDemoScreen />}
         {shown === 'proba' && <ProbabilityDemoScreen />}
         {shown === 'analyse' && <AnalysisDemoScreen />}

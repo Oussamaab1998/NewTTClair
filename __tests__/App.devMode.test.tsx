@@ -16,5 +16,5 @@ test('-devMode on shows the dev tabs from the start', async () => {
   await render(<App />);
   expect(devToolsEnabled()).toBe(true);
   expect(screen.getByTestId('tab-demo')).toBeOnTheScreen();
-  expect(screen.getByTestId('exercise-picker')).toBeOnTheScreen();
+  expect(screen.getByTestId('home-screen')).toBeOnTheScreen();
 });

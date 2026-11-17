@@ -73,7 +73,7 @@ export function createDoneRecord(kv: KeyValueStore) {
 export type DoneRecord = ReturnType<typeof createDoneRecord>;
 
 /** Each exercise's latest `exercise_reset` time. */
-function latestResets(events: readonly Event[]): Map<string, number> {
+export function latestResets(events: readonly Event[]): Map<string, number> {
   const resets = new Map<string, number>();
   for (const e of events) {
     if (e.t === 'exercise_reset') {

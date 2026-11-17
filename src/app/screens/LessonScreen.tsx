@@ -31,6 +31,11 @@ import {
   type Opened,
 } from '../exercises';
 import { ExercisePicker } from './ExercisePicker';
+import {
+  HomeScreen,
+  useHomeListPicker,
+  type HomeList,
+} from './home/HomeScreen';
 import { hasTutorNotes } from '../../ai/packs/notes';
 import type { MessagesTransport } from '../../ai/transport/messagesApi';
 import { TutorLessonScreen } from './tutor/TutorLessonScreen';
@@ -157,9 +162,15 @@ interface LessonScreenProps {
    * choice in debug builds, else 'hybrid'.
    */
   tutorMode?: TutorMode;
+  /**
+   * The home screen first (App: on). A home card opens the exercise list
+   * (all of it, a domain, a session), whose back button returns home. Off
+   * (tests, the default): the exercise list is the first screen.
+   */
+  home?: boolean;
 }
 
-/** The exercise picker, then a part played from JSON. */
+/** The home (when on), the exercise picker, then a part played from JSON. */
 export function LessonScreen({
   initialPart = launchPart(),
   ...props
@@ -209,6 +220,9 @@ export function LessonScreen({
   const [paperFor, setPaperFor] = useState<string | null>(
     () => devOnly?.devPaperScreenAtLaunch() ?? null,
   );
+  // The home's card that opened the exercise list (null: the home itself).
+  const [list, setList] = useState<HomeList | null>(null);
+  const listPicker = useHomeListPicker();
   const result = CATALOG.find(e => e.id === opened?.exerciseId)?.result;
   const paperEntry = CATALOG.find(e => e.id === paperFor)?.result;
   if ((!opened || !result?.ok) && paperEntry?.ok) {
@@ -227,6 +241,19 @@ export function LessonScreen({
     );
   }
   if (!opened || !result?.ok) {
+    if (props.home && list === null) {
+      // Mounted again after each lesson: what it shows is read fresh then.
+      return (
+        <HomeScreen
+          onOpen={setOpened}
+          onPaper={setPaperFor}
+          onList={setList}
+          eventStore={eventStore}
+          doneRecord={doneRecord}
+          {...(props.clock && { now: () => props.clock!.now() })}
+        />
+      );
+    }
     // Mounted again after each lesson: done parts are read fresh then.
     return (
       <ExercisePicker
@@ -234,6 +261,11 @@ export function LessonScreen({
         onPaper={setPaperFor}
         eventStore={eventStore}
         doneRecord={doneRecord}
+        {...(props.home &&
+          list !== null && {
+            onBack: () => setList(null),
+            ...listPicker(list),
+          })}
       />
     );
   }

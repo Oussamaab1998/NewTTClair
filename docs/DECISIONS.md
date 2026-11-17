@@ -610,3 +610,20 @@ Phases 2 to 4 of the same plan, built in one run on the owner's word ("just fini
   - **Content changes.**
     - Each question has `topic`: a short French term, required, checked by a test.
     - The exercise's `intro` is now optional, because the explanation is the screen's own i18n text. The four exercises' old intro line was removed: it repeated the explanation.
+
+## The home screen, D85 (2026-11-17)
+- **D85. A home screen comes first** (owner chose design A, "continue first", improved in the Cahier look from a mockup he approved).
+  - **The top part, on squared paper:**
+    - «عسلامة» (or «مرحبا بيك» before anything is started) and the bac section in French.
+    - The ink card «كمّل وين وقفت»: the most recent unfinished exercise, at the question he was on (else the first one not done). It shows the subject tag, the exam line in French, a segmented progress bar, «كمّل» and the exam-sheet button.
+    - With nothing started, the card is «نقترحو تبدا بـ» with the first exercise of his section, plus the warm-up note if he hasn't done its warm-up.
+    - With everything done, the card is «كمّلت التمارين الكل».
+  - **Effort counts only:** questions finished, exercises started, and days this week (from Monday). Never a level or a weakness (D8).
+  - **The domains:** probability, analysis, sequences and complex, using the curriculum map's `domain` ids. Each card has its exercise count and a progress ring. The empty domains are «قريبا».
+  - **The exam sessions:** taken from the exercise ids (`bac2022p`, `bac2022c`).
+  - **Navigation:** a domain or session card opens today's exercise list, filtered to it, with a back button and a subtitle. The home is on in App (`<LessonScreen home />`); tests keep the list first by default.
+  - **Data:** everything comes from what the app already keeps: done parts, events (after the latest reset), the board's question records, the warm-ups, and a new day log (`home.activeDays.v1`, noted by each board act and each warm-up).
+  - **Not done yet:**
+    - no profile button (there is no profile screen yet);
+    - no onboarding gate (the onboarding session will add it in App.tsx when the owner approves onboarding);
+    - an exercise's domain still comes from its `subject`, not from the curriculum map.

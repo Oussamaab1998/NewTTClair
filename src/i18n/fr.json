@@ -1036,5 +1036,68 @@
     "unreadable": "Ligne illisible : vérifie-la et réessaie.",
     "doneTitle": "Très bien !",
     "start": "Commencer l'exercice"
+  },
+  "home": {
+    "hello": "Bonjour",
+    "welcome": "Bienvenue",
+    "bac": {
+      "mathematiques": "Bac Mathématiques",
+      "sciences-experimentales": "Bac Sciences expérimentales"
+    },
+    "resumeLabel": "Reprends où tu t'es arrêté",
+    "startLabel": "On te propose de commencer par",
+    "warmupNote": "Avant l'exercice, quelques petites questions pour savoir par où commencer avec toi.",
+    "resume": "Reprendre",
+    "start": "Commencer",
+    "allDoneTitle": "Tu as fini tous les exercices",
+    "allDoneText": "De nouveaux exercices arrivent bientôt. Tu peux refaire celui que tu veux.",
+    "seeAll": "Voir les exercices",
+    "paper": "La feuille",
+    "examLine": "{{session}} · {{section}} · Exercice {{n}}",
+    "examQuestion": "Question {{q}}",
+    "session": {
+      "principale": "Principale {{year}}",
+      "controle": "Contrôle {{year}}"
+    },
+    "sessionLong": {
+      "principale": "Session principale",
+      "controle": "Session de contrôle"
+    },
+    "sessionCaps": "BAC · {{year}}",
+    "section": {
+      "mathematiques": "Maths",
+      "sciences-experimentales": "Sc. exp."
+    },
+    "count": "{{done}} / {{total}}",
+    "percent": "{{p}}%",
+    "progressA11y": "{{done}} sur {{total}} terminées",
+    "stats": {
+      "questions": "Questions terminées",
+      "exercises": "Exercices commencés",
+      "days": "Jours cette semaine"
+    },
+    "domainsTitle": "Chapitres",
+    "sessionsTitle": "Sujets du bac",
+    "soon": "Bientôt",
+    "exerciseOne": "1 exercice",
+    "exercisesMany": "{{count}} exercices",
+    "domain": {
+      "probability": {
+        "name": "Probabilités",
+        "sub": "Dénombrement, lois"
+      },
+      "analysis": {
+        "name": "Analyse",
+        "sub": "Fonctions, limites, dérivées"
+      },
+      "sequences": {
+        "name": "Suites",
+        "sub": "Suites numériques"
+      },
+      "complex": {
+        "name": "Complexes",
+        "sub": "Nombres complexes"
+      }
+    }
   }
 }

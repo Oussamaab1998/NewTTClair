@@ -44,6 +44,8 @@ export const palette = {
   /** Disabled primary fill: white on it is 4.59:1 (WCAG AA for text). */
   inkDisabled: '#6b7590',
   inkScrim: 'rgba(27,42,87,0.4)',
+  /** The empty segments of a progress bar on an ink card (ink with 22 % white). */
+  inkTrack: '#4a5579',
   pen: '#2f5bea',
   penTint: '#f4f8ff',
   highlighter: '#ffe680',
@@ -59,6 +61,8 @@ export const palette = {
   amber500: '#e0b800',
   amber900: '#5a4500',
   teal700: '#1e7a7a',
+  /** The probability subject's tint (home icon square; teal700 on it 4.9:1). */
+  teal50: '#e3f1f1',
 
   series1: '#1f5fbf',
   series2: '#b35900',

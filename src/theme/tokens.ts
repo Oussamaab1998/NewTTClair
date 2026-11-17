@@ -72,6 +72,8 @@ export const color = {
     noteBorder: p.red200,
     noteText: p.red900,
   },
+  /** On an ink card (the home's «كمّل» card): secondary text (9.8:1) and empty progress segments. */
+  onInk: { muted: p.paperBorder, track: p.inkTrack },
   /** Draft tag, unreadable-line warning, teacher-note card. */
   draft: { bg: p.amber50, border: p.amber500, text: p.amber900 },
   /** Deep-dive sheet: tinted fill, dashed pen edge. */
@@ -86,6 +88,8 @@ export const color = {
   },
   /** Subject tag on picker cards. */
   subject: { analysis: p.pen, probability: p.teal700 },
+  /** Behind a subject's icon (home domain cards). */
+  subjectTint: { analysis: p.penTint, probability: p.teal50 },
   /** Behind the sheet and menus. */
   scrim: p.inkScrim,
 } as const;
@@ -151,6 +155,8 @@ export const radius = {
   tag: 8,
   /** Top corners of the bottom sheet. */
   sheetTop: 20,
+  /** The home's «كمّل» card. */
+  hero: 22,
 } as const;
 
 export const border = {
@@ -311,6 +317,10 @@ export const size = {
   eventPanelMaxHeight: 220,
   /** Header progress bar (DESIGN.md §3). */
   progressBar: 6,
+  /** Home: a domain card's icon square, its progress ring and the ring's stroke. */
+  homeIcon: 42,
+  homeRing: 44,
+  homeRingStroke: 5,
   /** The warm-up's explanation screen: the circle around its target icon. */
   warmupBadge: 52,
   /** The warm-up's explanation screen: the dot before each line. */

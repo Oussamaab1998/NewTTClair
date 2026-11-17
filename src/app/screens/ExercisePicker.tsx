@@ -37,6 +37,7 @@ const devOnly: typeof DevOnly | null = __DEV__
   : null;
 
 const DONE_MARK = '✓';
+const BACK_MARK = '→';
 
 interface ExercisePickerProps {
   onOpen: (opened: Opened) => void;
@@ -51,6 +52,9 @@ interface ExercisePickerProps {
   doneRecord?: Pick<DoneRecord, 'all' | 'clearExercise'>;
   /** Where the hybrid lesson keeps its question records (cleared on reset). */
   progressStore?: KeyValueStore;
+  /** Opened from the home: its back button, and what the list holds (a domain, a session). */
+  onBack?: () => void;
+  subtitle?: string;
 }
 
 /**
@@ -67,6 +71,8 @@ export function ExercisePicker({
   eventStore,
   doneRecord,
   progressStore,
+  onBack,
+  subtitle,
 }: ExercisePickerProps) {
   const { t } = useTranslation();
   const readDone = () => doneParts(eventStore?.load() ?? [], doneRecord);
@@ -90,6 +96,18 @@ export function ExercisePicker({
         contentContainerStyle={styles.list}
         testID="exercise-picker"
       >
+        {onBack && (
+          <Pressable
+            style={styles.back}
+            accessibilityRole="button"
+            accessibilityLabel={t('hybrid.back')}
+            testID="picker-back"
+            onPress={onBack}
+            hitSlop={theme.space.sm}
+          >
+            <Text style={styles.backMark}>{BACK_MARK}</Text>
+          </Pressable>
+        )}
         <Pressable
           disabled={!devRevealAvailable()}
           delayLongPress={DEV_REVEAL_MS}
@@ -97,6 +115,11 @@ export function ExercisePicker({
           testID="picker-title"
         >
           <Text style={styles.heading}>{t('picker.title')}</Text>
+          {subtitle !== undefined && (
+            <Text style={styles.subtitle} testID="picker-subtitle">
+              {subtitle}
+            </Text>
+          )}
         </Pressable>
         {catalog.map(e => (
           <ExerciseCard
@@ -319,6 +342,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.layout.gutter,
     paddingVertical: theme.space.lg,
     gap: theme.space.lg,
+  },
+  back: {
+    alignSelf: theme.reading.startAlign,
+    minWidth: theme.size.touch,
+    minHeight: theme.size.touch,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: theme.radius.button,
+    borderWidth: theme.border.medium,
+    borderColor: theme.color.border,
+    backgroundColor: theme.color.card,
+  },
+  backMark: { ...theme.font.header, color: theme.color.ink },
+  subtitle: {
+    fontFamily: theme.font.family.math.family,
+    fontSize: theme.font.size.callout,
+    lineHeight: theme.font.lineHeight.body,
+    color: theme.color.inkMuted,
+    textAlign: 'right',
+    writingDirection: 'ltr',
   },
   heading: {
     ...theme.font.screenTitle,
