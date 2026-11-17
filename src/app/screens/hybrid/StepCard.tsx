@@ -338,6 +338,8 @@ export interface StepCardProps {
   figure?: LiveFigure | null;
   /** Numbers a figure gives (its printed branches): tiles beside the statement's. */
   givens?: readonly string[];
+  /** The letter a plan card's lines are written with (x, n), or null. */
+  lettersOf?: (cardKey: string | null) => 'x' | 'n' | null;
   /**
    * Bring something that just appeared into view: `at` gives its top,
    * relative to the card, once it is laid out (undefined: not measured).
@@ -678,6 +680,7 @@ function FrameInput(p: InputProps) {
     disabled: p.waiting,
     busy: p.lineBusy,
     ...(p.givens && { givens: p.givens }),
+    letters: p.lettersOf?.(key) ?? null,
   });
   // The inputs that are not the worksheet are dimmed as one (the worksheet dims its own controls).
   const dim = p.waiting && styles.off;

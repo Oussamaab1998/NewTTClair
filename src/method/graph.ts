@@ -22,6 +22,7 @@ import {
   type Fraction,
 } from '../engine/rational';
 import { sameRat } from '../engine/rationalFormat';
+import type { ExprSpec } from './exprLine';
 
 export type Order = 'unordered' | 'ordered';
 /** A plan-card key of a template (the urn templates have total, fav, ratio). */
@@ -63,6 +64,13 @@ export interface GraphNode {
   reduced?: boolean;
   /** How the exam writes what the node is (LaTeX: `p(\\overline{A} \\cap F)`). */
   label?: string;
+  /**
+   * A step written with a letter (f(−x) down to f(x), a derivative, a formula
+   * in n): his lines are judged by `judgeExprLine` (src/method/exprLine.ts),
+   * never by value. `value` is then not a value of the question (it is 0)
+   * and every reader of values skips the node.
+   */
+  expr?: ExprSpec;
 }
 
 export interface UrnSpec {
@@ -102,7 +110,7 @@ export interface Graph {
    */
   traps?: (node: GraphNode) => RawMutation[];
   /** The kind of question, when it is not an urn (the AI pack, the small cases). */
-  domain?: 'tree';
+  domain?: 'tree' | 'analysis';
   /** Numbers the statement gives that are not in its text (the branches printed on a figure). */
   givens?: readonly Fraction[];
 }

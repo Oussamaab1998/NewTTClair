@@ -33,7 +33,21 @@ import { buildTiles } from '../../../lesson/worksheet/tiles';
 import { Worksheet } from '../../../lesson/worksheet/Worksheet';
 
 /** Keys n, k, ! and C(n, k) on the steps that build a counting formula. */
-const COUNTING_KEYS = new Set(['count', 'law']);
+const FORMULA_KEYS = new Set(['count', 'law']);
+/**
+ * Keys ! and C(n, k), no letters, on the steps that count draws: the exam
+ * copy says C_{10}^{3} (fix list B5).
+ */
+const NUMBER_COUNT_KEYS = new Set(['total', 'fav']);
+
+const countingFor = (key: string | null): boolean | 'numbers' =>
+  key === null
+    ? false
+    : FORMULA_KEYS.has(key)
+    ? true
+    : NUMBER_COUNT_KEYS.has(key)
+    ? 'numbers'
+    : false;
 
 export interface LineEntryProps {
   active: boolean;
@@ -49,6 +63,8 @@ export interface LineEntryProps {
   busy?: boolean;
   /** Numbers the exercise's figure gives ("2/3"): tiles before the statement's; keep the array stable. */
   givens?: readonly string[];
+  /** A step written with a letter: the keys of x (e, powers) or of n (powers, C). */
+  letters?: 'x' | 'n' | null;
   testID?: string;
 }
 
@@ -115,7 +131,8 @@ export function LineEntry(p: LineEntryProps) {
       lines={marked.lines}
       tiles={tiles}
       scaffold={scaffold}
-      counting={p.step.key !== null && COUNTING_KEYS.has(p.step.key)}
+      counting={countingFor(p.step.key)}
+      {...(p.letters && { letters: p.letters })}
       readonly={!p.active}
       disabled={p.disabled ?? false}
       busy={p.busy ?? false}

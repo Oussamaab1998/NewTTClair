@@ -35,6 +35,8 @@ import { hasTutorNotes } from '../../ai/packs/notes';
 import type { MessagesTransport } from '../../ai/transport/messagesApi';
 import { TutorLessonScreen } from './tutor/TutorLessonScreen';
 import { LiveHybridLessonScreen } from './hybrid/LiveHybridLessonScreen';
+import { WarmupGate } from './hybrid/warmup/WarmupGate';
+import type { Rich } from '../../content/schema';
 import { hasConductorFrames } from './hybrid/useHybridSession';
 import { tutorMode, type TutorMode } from '../../config/tutorMode';
 import { aiPartDone } from './tutor/done';
@@ -257,15 +259,29 @@ export function LessonScreen({
     entry?.raw !== undefined &&
     hasConductorFrames(result.loaded, entry.raw, opened.partId)
   ) {
+    // The exercise's warm-up, once, before the whole exercise (owner, 2026-11-17).
+    const warmActs = devOnly?.devWarmupActsAtLaunch();
     return (
-      <LiveHybridLessonScreen
-        key={`${opened.exerciseId}/${opened.partId}`}
-        loaded={result.loaded}
-        raw={entry.raw}
-        questionId={opened.partId}
+      <WarmupGate
+        key={`warmup:${opened.exerciseId}`}
+        exerciseId={opened.exerciseId}
+        warmup={result.loaded.exercise.warmup}
+        title={result.loaded.exercise.title as Rich}
         onBack={() => setOpened(null)}
-        onNext={partId => setOpened({ exerciseId: opened.exerciseId, partId })}
-      />
+        skip={devOnly?.devWarmupAtLaunch() === 'off'}
+        {...(warmActs && { acts: warmActs })}
+      >
+        <LiveHybridLessonScreen
+          key={`${opened.exerciseId}/${opened.partId}`}
+          loaded={result.loaded}
+          raw={entry.raw}
+          questionId={opened.partId}
+          onBack={() => setOpened(null)}
+          onNext={partId =>
+            setOpened({ exerciseId: opened.exerciseId, partId })
+          }
+        />
+      </WarmupGate>
     );
   }
   if (

@@ -98,20 +98,47 @@ interface Scanned {
   used: boolean;
 }
 
-function scan(input: string, max: number): Scanned {
+/**
+ * How one piece of notation is written out: `kind` is C (choose), A
+ * (arrangements) or ! (factorial, `a` = n, `b` = 0); `value` is the engine's,
+ * already checked against the limits. The default writes the value.
+ */
+export type CountingRender = (
+  kind: 'C' | 'A' | '!',
+  a: number,
+  b: number,
+  value: number,
+) => string;
+
+const asValue: CountingRender = (_k, _a, _b, value) => String(value);
+
+function scan(
+  input: string,
+  max: number,
+  render: CountingRender = asValue,
+): Scanned {
   let out = '';
   let used = false;
   /** The last thing written was a computed literal (so a digit or "(" after it needs a "*"). */
   let afterLiteral = false;
 
-  const pushLiteral = (n: number): void => {
-    if (/[0-9)]\s*$/.test(out)) {
+  // A written-out term after a number, a ")" or (when terms are held as
+  // letters) a letter is a product: "2C(5,2)" -> "2*10".
+  const before = render === asValue ? /[0-9)]\s*$/ : /[0-9)A-Za-z]\s*$/;
+  const pushText = (text: string): void => {
+    if (before.test(out)) {
       out += '*';
     }
-    out += String(n);
+    out += text;
     afterLiteral = true;
     used = true;
   };
+  const pushTerm = (
+    kind: 'C' | 'A' | '!',
+    a: number,
+    b: number,
+    value: number,
+  ): void => pushText(render(kind, a, b, value));
   const pushRaw = (c: string): void => {
     if (afterLiteral && c.trim() !== '') {
       if (isDigit(c) || c === '(') {
@@ -152,9 +179,9 @@ function scan(input: string, max: number): Scanned {
         if (parts.length !== 2) {
           throw new Refused('bad_args', at);
         }
-        pushLiteral(
-          apply(integerArg(parts[0]!, at, max), integerArg(parts[1]!, at, max)),
-        );
+        const a = integerArg(parts[0]!, at, max);
+        const b = integerArg(parts[1]!, at, max);
+        pushTerm(ch, a, b, apply(a, b));
         i = close + 1;
         continue;
       }
@@ -219,7 +246,7 @@ function scan(input: string, max: number): Scanned {
         if (a > max || b > max) {
           throw new Refused('too_large', at);
         }
-        pushLiteral(apply(a, b));
+        pushTerm(ch, a, b, apply(a, b));
         i = j;
         continue;
       }
@@ -248,7 +275,7 @@ function scan(input: string, max: number): Scanned {
         if (n > 18) {
           throw new Refused('too_large', i);
         }
-        pushLiteral(factorial(n));
+        pushTerm('!', n, 0, factorial(n));
         i = j + 1;
         continue;
       }
@@ -263,7 +290,7 @@ function scan(input: string, max: number): Scanned {
       const close = matching(input, i);
       if (close > 0 && input[close + 1] === '!') {
         const n = integerArg(input.slice(i + 1, close), i, 18);
-        pushLiteral(factorial(n));
+        pushTerm('!', n, 0, factorial(n));
         i = close + 2;
         continue;
       }
@@ -285,6 +312,53 @@ export function normalizeCounting(
 ): NormalizeResult {
   try {
     const r = scan(input, opts.maxArg ?? MAX_ARG);
+    return { ok: true, text: r.used ? r.text : input, usedNotation: r.used };
+  } catch (e) {
+    if (e instanceof Refused) {
+      return { ok: false, reason: e.reason, index: e.index };
+    }
+    throw e;
+  }
+}
+
+/**
+ * The board's reading of a written line: each C(a,b), A(a,b) and n! becomes
+ * the product a student writes for it, `((10*9*8)/(3*2*1))`, so the line keeps
+ * its structure (the slip matcher compares the factors) and its value comes
+ * from plain exact arithmetic. Limits and refusals are those of
+ * `normalizeCounting`.
+ */
+export function expandCounting(
+  input: string,
+  opts: { maxArg?: number } = {},
+): NormalizeResult {
+  return rewriteCounting(input, expandTerm, opts);
+}
+
+const downFrom = (from: number, len: number): string =>
+  Array.from({ length: len }, (_, i) => String(from - i)).join('*');
+
+const expandTerm: CountingRender = (kind, a, b, value) => {
+  if (kind === '!') {
+    return a <= 1 ? '1' : `(${downFrom(a, a)})`;
+  }
+  if (b === 0 || value === 0) {
+    return String(value);
+  }
+  if (kind === 'A') {
+    return b === 1 ? String(a) : `(${downFrom(a, b)})`;
+  }
+  return b === 1 ? String(a) : `((${downFrom(a, b)})/(${downFrom(b, b)}))`;
+};
+
+/** The notation written out by `render` (the same scan as `normalizeCounting`). */
+export function rewriteCounting(
+  input: string,
+  render: CountingRender,
+  opts: { maxArg?: number } = {},
+): NormalizeResult {
+  try {
+    const r = scan(input, opts.maxArg ?? MAX_ARG, render);
     return { ok: true, text: r.used ? r.text : input, usedNotation: r.used };
   } catch (e) {
     if (e instanceof Refused) {

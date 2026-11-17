@@ -18,6 +18,15 @@ import { DeepDiveStart, StudentBubble, VariantStart } from './Bubbles';
 import { LongPressMenu } from './LongPressMenu';
 import { NumericKeypad } from './NumericKeypad';
 
+// The old lesson's screens are tested on the frozen ex2 0.5.0 (questions 1.b
+// and 2.a): ex2 1.0.0 moved to the hybrid board (docs/EX2_EX4_UPGRADE_PROGRESS.md).
+jest.mock('../../content/exercises/bac2022c-ex2.json', () =>
+  jest.requireActual('../../content/fixtures/ex2.v050.json'),
+);
+jest.mock('../../content/exercises/bac2022c-ex2.misconceptions.json', () =>
+  jest.requireActual('../../content/fixtures/ex2Misconceptions.v050.json'),
+);
+
 const flat = (el: { props: { style?: unknown } }) =>
   StyleSheet.flatten(el.props.style as never) as Record<string, unknown>;
 

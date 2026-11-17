@@ -4,8 +4,8 @@ import { Share } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import '../../i18n';
-import ex2 from '../../content/exercises/bac2022c-ex2.json';
-import ex2Misconceptions from '../../content/exercises/bac2022c-ex2.misconceptions.json';
+import ex2 from '../../content/fixtures/ex2.v050.json';
+import ex2Misconceptions from '../../content/fixtures/ex2Misconceptions.v050.json';
 import { loadExercise } from '../../content/loader';
 import { buildContent, startLesson } from '../../lesson/session/lesson';
 import { stepSync } from '../../lesson/session/orchestrate';
@@ -22,6 +22,15 @@ import { LocalQueue } from '../../telemetry/reports';
 import { readLog } from '../../../tools/replay/lib';
 import { setDevTools } from '../devFlags';
 import { LessonScreen } from './LessonScreen';
+
+// The old lesson's screens are tested on the frozen ex2 0.5.0 (questions 1.b
+// and 2.a): ex2 1.0.0 moved to the hybrid board (docs/EX2_EX4_UPGRADE_PROGRESS.md).
+jest.mock('../../content/exercises/bac2022c-ex2.json', () =>
+  jest.requireActual('../../content/fixtures/ex2.v050.json'),
+);
+jest.mock('../../content/exercises/bac2022c-ex2.misconceptions.json', () =>
+  jest.requireActual('../../content/fixtures/ex2Misconceptions.v050.json'),
+);
 
 /** An earlier session on 1.b: two wrong answers on s3 (the deep dive was shown). */
 function earlierSession() {

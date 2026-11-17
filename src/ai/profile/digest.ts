@@ -8,6 +8,7 @@
 import { SKILLS } from '../../content/skills';
 import type { QuestionNotes } from '../packs/notes';
 import type { StudentProfile } from './profile';
+import { warmupLines } from '../../warmup/warmup';
 
 const MAX_CHARS = 2500;
 
@@ -33,6 +34,8 @@ export function prerequisiteClosure(ids: readonly string[]): string[] {
 export function profileDigest(
   p: StudentProfile | null,
   notes: QuestionNotes | null,
+  /** The exercise of the question: its warm-up comes first (it is the freshest evidence). */
+  exerciseId?: string,
 ): string {
   if (!p) {
     return 'new student, no history yet.';
@@ -46,6 +49,14 @@ export function profileDigest(
       p.sessions.length
     } questions so far.`,
   );
+  const warm = exerciseId ? p.warmups?.[exerciseId] : undefined;
+  if (warm) {
+    lines.push(
+      `Warm-up before this exercise (his answers, engine-checked; take them into account, never quote them as a test):\n${warmupLines(
+        warm.answers,
+      ).join('\n')}`,
+    );
+  }
   const relevant = prerequisiteClosure([
     ...(notes?.skills ?? []),
     ...(notes?.prerequisites ?? []),

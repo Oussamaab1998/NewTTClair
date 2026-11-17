@@ -12,8 +12,8 @@
  * left unanswered; reveal; s7: 3/5, then the repair (accepted), then 3/10;
  * s8: 7/10.
  */
-import ex2 from '../../../content/exercises/bac2022c-ex2.json';
-import ex2Misconceptions from '../../../content/exercises/bac2022c-ex2.misconceptions.json';
+import ex2 from '../../../content/fixtures/ex2.v050.json';
+import ex2Misconceptions from '../../../content/fixtures/ex2Misconceptions.v050.json';
 import { nextRightAction } from '../../../app/dev/answerAll';
 import { loadExercise, type LoadedExercise } from '../../../content/loader';
 import { stepKey } from '../../../content/loader';

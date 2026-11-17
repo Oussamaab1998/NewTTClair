@@ -36,8 +36,8 @@ describe('spokenMath: formulas get a readable label, never raw LaTeX', () => {
         }
       }
     };
-    walk(require('../../content/exercises/bac2022c-ex2.json'));
-    walk(require('../../content/exercises/bac2022c-ex4.json'));
+    walk(require('../../content/fixtures/ex2.v050.json'));
+    walk(require('../../content/fixtures/ex4.v010.json'));
     expect(all.length).toBeGreaterThan(20);
     const leaks = all.filter(l => /[\\{}^_]/.test(spokenMath(l)));
     expect(leaks).toEqual([]);

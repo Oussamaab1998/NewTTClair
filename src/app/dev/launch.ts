@@ -64,6 +64,7 @@ import { appStore } from '../../storage/appStore';
 import { createKvEventStore } from '../../telemetry/eventStore';
 import type { Event } from '../../telemetry/events';
 import { scenarioLog } from './scenario';
+import type { WarmupAct } from '../../warmup/warmup';
 
 const arg = (name: string): unknown => {
   try {
@@ -157,6 +158,42 @@ export const devWidthAtLaunch = (): number | null => {
   return Number.isFinite(v) && v >= 280 && v <= 600 ? v : null;
 };
 export const devResetAtLaunch = () => stringArg('devReset');
+/** `-devWarmup off`: the exercise opens without its warm-up (screenshots of the board). */
+export const devWarmupAtLaunch = (): 'off' | null =>
+  stringArg('devWarmup') === 'off' ? 'off' : null;
+/**
+ * `-devWarmupActs "line:C(4,2)=6,dontKnow,pick:k_one,skip"`: acts played on
+ * the warm-up at once (screenshots; this shell cannot tap the simulator).
+ */
+export const devWarmupActsAtLaunch = (): WarmupAct[] | null => {
+  const v = stringArg('devWarmupActs');
+  if (!v) {
+    return null;
+  }
+  const acts: WarmupAct[] = [];
+  // Split on commas outside brackets (C(4,2) keeps its comma).
+  let depth = 0;
+  let cur = '';
+  const parts: string[] = [];
+  for (const ch of v) {
+    if (ch === '(') depth++;
+    if (ch === ')') depth--;
+    if (ch === ',' && depth === 0) {
+      parts.push(cur);
+      cur = '';
+    } else {
+      cur += ch;
+    }
+  }
+  parts.push(cur);
+  for (const part of parts.map(x => x.trim()).filter(Boolean)) {
+    if (part === 'dontKnow') acts.push({ kind: 'dont_know' });
+    else if (part === 'skip') acts.push({ kind: 'skip' });
+    else if (part.startsWith('line:')) acts.push({ kind: 'line', raw: part.slice(5) });
+    else if (part.startsWith('pick:')) acts.push({ kind: 'pick', cardId: part.slice(5) });
+  }
+  return acts.length > 0 ? acts : null;
+};
 /** `-devMarkDone <exerciseId>/<questionId>`: mark a question done (testing the next one). */
 export const devMarkDoneAtLaunch = () => stringArg('devMarkDone');
 /** `-devPaper flat|grid|ruled`: known names only; anything else is ignored. */

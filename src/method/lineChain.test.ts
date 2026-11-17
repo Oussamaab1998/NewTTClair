@@ -180,3 +180,50 @@ describe('a lone fraction is a value, a whole quotient is a computation waiting 
     }
   });
 });
+
+describe('the counting keys: C(n,k), A(n,k) and n! are read (fix list B5)', () => {
+  it('C(10,3) = 120 is an equal chain, as the worksheet writes it', () => {
+    for (const raw of ['C(10,3)=120', 'C((10),(3))=120', 'C(10,3) = 10*9*8/(3*2*1) = 120']) {
+      const r = evalChain(raw);
+      expect(r).toMatchObject({ kind: 'chain', equal: true });
+      expect(value(r)).toBe('120');
+    }
+  });
+
+  it('a wrong result after the notation is a mismatch, a lone C(10,3) is unfinished', () => {
+    expect(evalChain('C(10,3)=100')).toMatchObject({
+      kind: 'chain',
+      equal: false,
+      mismatchAt: 0,
+    });
+    expect(evalChain('C(10,3)').kind).toBe('unfinished');
+  });
+
+  it('a favourable count, a factorial quotient and a probability', () => {
+    expect(value(evalChain('C(4,1)*C(6,2)=60'))).toBe('60');
+    expect(value(evalChain('5!/(3!*2!)=10'))).toBe('10');
+    expect(value(evalChain('C(4,1)*C(6,2)/C(10,3)=1/2'))).toBe('1/2');
+  });
+
+  it('notation it cannot read stays unreadable, never thrown', () => {
+    expect(evalChain('C62=15')).toMatchObject({ kind: 'unreadable', reason: 'syntax' });
+    expect(evalChain('C(5)=5')).toMatchObject({ kind: 'unreadable', reason: 'syntax' });
+    expect(evalChain('C(70,2)=1')).toMatchObject({
+      kind: 'unreadable',
+      reason: 'not_a_number',
+    });
+    expect(evalChain('n!=1')).toMatchObject({ kind: 'unreadable' });
+  });
+
+  it('his line shows the notation, never its value', () => {
+    expect(lineLatex('C(10,3)=120')).toBe('C_{10}^{3} = 120');
+    expect(lineLatex('C((10),(3))=120')).toBe('C_{10}^{3} = 120');
+    const fav = lineLatex('C(4,1)*C(6,2)/C(10,3)');
+    expect(fav).toContain('C_{4}^{1}');
+    expect(fav).toContain('C_{6}^{2}');
+    expect(fav).toContain('C_{10}^{3}');
+    expect(fav).toMatch(/\\frac/);
+    expect(fav).not.toMatch(/120|60|15/);
+    expect(lineLatex('5!/(3!*2!)=10')).toMatch(/5!.*3!.*2!/);
+  });
+});

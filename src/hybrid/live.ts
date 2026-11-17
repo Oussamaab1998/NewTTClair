@@ -53,7 +53,7 @@ export function liveAi(o: {
   const inner = createMover({
     transport: o.transport ?? createMessagesTransport({ apiKey: o.apiKey }),
     allowance,
-    profileDigest: profileDigest(loadProfile(o.store), o.notes),
+    profileDigest: profileDigest(loadProfile(o.store), o.notes, o.exerciseId),
   });
   const mover: Mover = async (ctx, req, signal) => {
     const tier = routeCall(req.out, allowance);

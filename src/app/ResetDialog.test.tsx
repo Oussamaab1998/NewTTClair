@@ -11,6 +11,15 @@ import { createKvEventStore, type EventStore } from '../telemetry/eventStore';
 import { fixedClock } from '../telemetry/log';
 import { LessonScreen } from './screens/LessonScreen';
 
+// The old lesson's screens are tested on the frozen ex2 0.5.0 (questions 1.b
+// and 2.a): ex2 1.0.0 moved to the hybrid board (docs/EX2_EX4_UPGRADE_PROGRESS.md).
+jest.mock('../content/exercises/bac2022c-ex2.json', () =>
+  jest.requireActual('../content/fixtures/ex2.v050.json'),
+);
+jest.mock('../content/exercises/bac2022c-ex2.misconceptions.json', () =>
+  jest.requireActual('../content/fixtures/ex2Misconceptions.v050.json'),
+);
+
 let store: EventStore;
 let record: DoneRecord;
 /** The app at the picker; ex2's 1.b done in an earlier session (ts 1). */

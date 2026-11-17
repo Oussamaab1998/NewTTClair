@@ -27,6 +27,7 @@ import {
   sub,
   type Fraction,
 } from './rational';
+import { runEngineCall } from './calls';
 
 const URN: Ball[] = [
   { id: 'a', value: -1 },
@@ -299,5 +300,27 @@ describe('coloured balls (red / black urns)', () => {
         1,
       ),
     ).toThrow(/its own value/);
+  });
+});
+
+describe('engine calls for the moments of X (exercise 2, question 2.b)', () => {
+  const ctx = {
+    experiment: {
+      urn: [
+        { id: 'a', value: -1 },
+        { id: 'b', value: 0 },
+        { id: 'c', value: 0 },
+        { id: 'd', value: 1 },
+        { id: 'e', value: 2 },
+      ],
+      draw: 'simultaneous' as const,
+      k: 2,
+    },
+  };
+  it('E(X) = -1/10, E(X²) = 9/10 and V(X) = 89/100 (the correction prints 8,9: a typo)', () => {
+    const call = (fn: string) => runEngineCall({ fn, args: { valueFn: 'product' } }, ctx);
+    expect(call('expectation')).toEqual({ ok: true, value: [-1, 10] });
+    expect(call('secondMoment')).toEqual({ ok: true, value: [9, 10] });
+    expect(call('variance')).toEqual({ ok: true, value: [89, 100] });
   });
 });

@@ -4,6 +4,15 @@ import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import App from '../App';
 import { setDevTools } from '../src/app/devFlags';
 
+// The old lesson's screens are tested on the frozen ex4 0.1.0 (question A1):
+// ex4 1.0.0 moved Partie A to the hybrid board (docs/EX2_EX4_UPGRADE_PROGRESS.md).
+jest.mock('../src/content/exercises/bac2022c-ex4.json', () =>
+  jest.requireActual('../src/content/fixtures/ex4.v010.json'),
+);
+jest.mock('../src/content/exercises/bac2022c-ex4.misconceptions.json', () =>
+  jest.requireActual('../src/content/fixtures/ex4Misconceptions.v010.json'),
+);
+
 afterEach(() => act(() => setDevTools(false)));
 
 test('hides the dev tools until a long press on the lesson title', async () => {

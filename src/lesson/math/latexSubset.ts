@@ -69,6 +69,8 @@ const SYMBOLS: Record<string, string> = {
   lambda: 'λ',
   theta: 'θ',
   zeta: 'ζ',
+  // The sample space, as the exam copy writes card(Ω).
+  Omega: 'Ω',
   cdot: '·',
   times: '×',
   div: '÷',

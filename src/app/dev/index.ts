@@ -35,6 +35,8 @@ export {
   aiEveryMistakeAtLaunch,
   devLlmAtLaunch,
   devMoverAtLaunch,
+  devWarmupAtLaunch,
+  devWarmupActsAtLaunch,
   slowMover,
   runDevBench,
 } from './launch';

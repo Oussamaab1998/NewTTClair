@@ -7962,5 +7962,186 @@
         }
       }
     }
-  ]
+  ],
+  "warmup": {
+    "start": [
+      "w_draws",
+      "w_product",
+      "w_ratio",
+      "w_binom"
+    ],
+    "questions": [
+      {
+        "id": "w_draws",
+        "skill": "combinations-count",
+        "topic": "dénombrement",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "صندوق فيه خمسة كور. نجبدو ثلاثة مع بعض: قدّاش من تيراج ممكن؟"
+            }
+          ]
+        },
+        "input": {
+          "kind": "line",
+          "answer": "C(5,3)",
+          "wrong": [
+            {
+              "expr": "5*4*3",
+              "means": "counted ordered draws"
+            },
+            {
+              "expr": "5*3",
+              "means": "multiplied the balls by the balls drawn"
+            }
+          ],
+          "keys": "counting"
+        },
+        "down": "w_list"
+      },
+      {
+        "id": "w_list",
+        "skill": "listing-systematically",
+        "topic": "lister les cas",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "ثلاثة كور مكتوب عليهم أ، ب، ج. نجبدو زوز مع بعض: قدّاش من زوز مختلف؟"
+            }
+          ]
+        },
+        "input": {
+          "kind": "line",
+          "answer": "3",
+          "wrong": [
+            {
+              "expr": "6",
+              "means": "counted each pair twice (ordered)"
+            },
+            {
+              "expr": "9",
+              "means": "paired a ball with itself"
+            }
+          ]
+        }
+      },
+      {
+        "id": "w_product",
+        "skill": "multiplication-principle",
+        "topic": "principe multiplicatif",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "عندنا ثلاثة مريولات وزوز سراول. قدّاش من لبسة مختلفة ننجّمو نعملو؟"
+            }
+          ]
+        },
+        "input": {
+          "kind": "line",
+          "answer": "3*2",
+          "wrong": [
+            {
+              "expr": "3+2",
+              "means": "added instead of multiplying"
+            }
+          ]
+        }
+      },
+      {
+        "id": "w_ratio",
+        "skill": "probability-by-counting",
+        "topic": "équiprobabilité",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "صندوق فيه زوز كور حمر وثلاثة كحل. نجبدو كورة وحدة: شنوّة احتمال إنّها حمراء؟"
+            }
+          ]
+        },
+        "input": {
+          "kind": "line",
+          "answer": "2/5",
+          "wrong": [
+            {
+              "expr": "2/3",
+              "means": "divided the reds by the blacks"
+            },
+            {
+              "expr": "1/2",
+              "means": "two colours taken as one half"
+            }
+          ]
+        }
+      },
+      {
+        "id": "w_binom",
+        "skill": "binomial-law",
+        "topic": "loi binomiale",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "نرميو قطعة نقود ثلاثة مرّات. شنوّة الصحيح على المرّات هاذوما؟"
+            }
+          ]
+        },
+        "input": {
+          "kind": "pick",
+          "cards": [
+            {
+              "id": "k_indep",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "كل مرّة نفس الاحتمال، وما يأثّروش على بعضهم."
+                  }
+                ]
+              },
+              "truth": "true"
+            },
+            {
+              "id": "k_dep",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "كل مرّة تأثّر على اللي بعدها."
+                  }
+                ]
+              },
+              "truth": "false",
+              "means": "thinks repeated independent trials depend on each other"
+            },
+            {
+              "id": "k_sum",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "الاحتمالات يتزادو كل مرّة."
+                  }
+                ]
+              },
+              "truth": "false",
+              "means": "adds probabilities of successive trials"
+            }
+          ]
+        }
+      }
+    ],
+    "done": {
+      "clean": {
+        "ar": [
+          {
+            "ar": "الحاجات اللي يحتاجها التمرين واضحة عندك. نبداو."
+          }
+        ]
+      },
+      "gaps": {
+        "ar": [
+          {
+            "ar": "عرفنا وين نبداو. الحاجات اللي ما كانتش واضحة نراجعوها مع بعض كي نوصلولها في التمرين."
+          }
+        ]
+      }
+    },
+    "reviewed": false
+  }
 }

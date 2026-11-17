@@ -2,8 +2,8 @@
  * Exercise 4 A1 through the reducer and the rules planner (like the app):
  * the lines step, misconception feedback once, jumped_to_goal, reveal.
  */
-import ex4 from '../../content/exercises/bac2022c-ex4.json';
-import ex4Misconceptions from '../../content/exercises/bac2022c-ex4.misconceptions.json';
+import ex4 from '../../content/fixtures/ex4.v010.json';
+import ex4Misconceptions from '../../content/fixtures/ex4Misconceptions.v010.json';
 import { loadExercise, type LoadedExercise } from '../../content/loader';
 import { createRulesPlanner, type RulesPlanner } from '../../planner/rules';
 import type { Decision } from '../../planner/schema';

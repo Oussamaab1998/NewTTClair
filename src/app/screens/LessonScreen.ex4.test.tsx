@@ -21,6 +21,15 @@ import { EventSchema } from '../../telemetry/events';
 import { fixedClock, type EventLog } from '../../telemetry/log';
 import { LessonScreen } from './LessonScreen';
 
+// The old lesson's screens are tested on the frozen ex4 0.1.0 (question A1):
+// ex4 1.0.0 moved Partie A to the hybrid board (docs/EX2_EX4_UPGRADE_PROGRESS.md).
+jest.mock('../../content/exercises/bac2022c-ex4.json', () =>
+  jest.requireActual('../../content/fixtures/ex4.v010.json'),
+);
+jest.mock('../../content/exercises/bac2022c-ex4.misconceptions.json', () =>
+  jest.requireActual('../../content/fixtures/ex4Misconceptions.v010.json'),
+);
+
 let log: EventLog;
 
 async function renderA1() {

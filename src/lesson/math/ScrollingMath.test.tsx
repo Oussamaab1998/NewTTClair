@@ -11,6 +11,15 @@ import type { Rich } from '../../content/schema';
 import { RichView } from '../feed/RichView';
 import { ScrollingMath } from './ScrollingMath';
 
+// The old lesson's screens are tested on the frozen ex2 0.5.0 (questions 1.b
+// and 2.a): ex2 1.0.0 moved to the hybrid board (docs/EX2_EX4_UPGRADE_PROGRESS.md).
+jest.mock('../../content/exercises/bac2022c-ex2.json', () =>
+  jest.requireActual('../../content/fixtures/ex2.v050.json'),
+);
+jest.mock('../../content/exercises/bac2022c-ex2.misconceptions.json', () =>
+  jest.requireActual('../../content/fixtures/ex2Misconceptions.v050.json'),
+);
+
 // 2.a's sum prompt: the formula wider than a phone card (D5).
 const ex2 = CATALOG.find(e => e.id === 'bac2022c-ex2')?.result;
 const sumStep = (ex2?.ok ? ex2.loaded.exercise.parts : [])

@@ -182,8 +182,70 @@ export function givenNumbers(
   ];
 }
 
-function nodeLine(n: GraphNode): string {
-  const meaning = NODE_MEANING[n.id] ?? `${n.role} (${n.unit})`;
+/**
+ * What each node of the numbered-ball templates counts (model-facing;
+ * src/method/templatesLaw.ts): balls carry numbers, not colours.
+ */
+export const NUM_NODE_MEANING: Readonly<Record<string, string>> = {
+  ord: 'ordered draws of the k balls (n*(n-1)*... with k factors)',
+  orderings: 'orderings of k balls (k!)',
+  total: 'all draws of k balls together, card(Ω)',
+  fav: 'favourable draws of the event',
+  none: 'draws of the opposite event (no ball carries the number)',
+  p_none: 'probability of the opposite event: its draws / all draws',
+  result: 'the probability asked',
+  sum: 'the probabilities of the law added: 1',
+  mean: 'E(X): each value times its probability, added',
+  square: 'E(X²): each value squared times its probability, added',
+  var: 'V(X) = E(X²) − E(X)²',
+};
+
+/** A node's meaning for the model: numbered balls have their own table. */
+export function nodeMeaning(g: Graph, n: GraphNode): string {
+  if (g.template?.startsWith('num_')) {
+    const m = NUM_NODE_MEANING[n.id];
+    if (m) {
+      return m;
+    }
+    if (n.label?.startsWith('p(X')) {
+      return `${n.label}: draws giving this value / all draws`;
+    }
+  }
+  return NODE_MEANING[n.id] ?? `${n.role} (${n.unit})`;
+}
+
+/**
+ * The urn line of a pack: red and black balls as before; balls that carry
+ * numbers and no colour are listed by their numbers.
+ */
+export function urnLine(e: Experiment, style: 'exercise' | 'question'): string {
+  const numbered = e.urn.every(b => b.color === undefined);
+  if (numbered) {
+    const values = e.urn.map(b => b.value).join(', ');
+    return style === 'exercise'
+      ? `Urn: ${e.urn.length} balls carrying the numbers ${values} (no colours), ${e.k} drawn, draw: ${e.draw}. "main" lists and engine_call "exercise" use these balls.`
+      : `Urn: ${e.urn.length} balls numbered ${values}, ${e.k} drawn, draw ${e.draw}.`;
+  }
+  const reds = e.urn.filter(b => b.color === 'red').length;
+  const blacks = e.urn.length - reds;
+  return style === 'exercise'
+    ? `Urn: ${reds} red (R1..R${reds}), ${blacks} black (N1..N${blacks}), ${e.k} drawn, draw: ${e.draw}. "main" lists and engine_call "exercise" use these balls.`
+    : `Urn: ${reds} red, ${blacks} black, ${e.k} drawn, draw ${e.draw}.`;
+}
+
+/** A step written with a letter, for the model: where his lines start and end. */
+export function exprNodeLine(n: GraphNode): string {
+  const e = n.expr!;
+  return `- ${n.id}: lines in ${e.variable}, from ${e.ref} (the question's quantity) to ${
+    e.goals.length > 0 ? e.goals.join(' or ') : 'any equal formula'
+  }. Plan card: ${n.planCard}. Each line must equal the one before it.`;
+}
+
+function nodeLine(n: GraphNode, g: Graph): string {
+  if (n.expr) {
+    return exprNodeLine(n);
+  }
+  const meaning = nodeMeaning(g, n);
   const forms = n.forms.slice(0, 3).join('  |  ');
   return `- ${n.id} = ${plain(n.value)}: ${meaning}. Plan card: ${n.planCard}${
     n.main ? '' : ' (supporting step)'
@@ -193,7 +255,7 @@ function nodeLine(n: GraphNode): string {
 function graphSection(rt: GraphRuntime): string[] {
   const lines = [
     `Private solution graph "main" (never show a value he has not earned):`,
-    ...rt.graph.nodes.map(nodeLine),
+    ...rt.graph.nodes.map(n => nodeLine(n, rt.graph)),
   ];
   const byNode = new Map<string, string[]>();
   for (const c of rt.table.kept) {
@@ -278,11 +340,7 @@ export function buildExercisePack(
   const experiment =
     'experiment' in ex && ex.experiment ? (ex.experiment as Experiment) : null;
   if (experiment) {
-    const reds = experiment.urn.filter(b => b.color === 'red').length;
-    const blacks = experiment.urn.length - reds;
-    sections.push(
-      `Urn: ${reds} red (R1..R${reds}), ${blacks} black (N1..N${blacks}), ${experiment.k} drawn, draw: ${experiment.draw}. "main" lists and engine_call "exercise" use these balls.`,
-    );
+    sections.push(urnLine(experiment, 'exercise'));
   }
   const paperQuestions = ex.paper?.parts.flatMap(p => p.questions) ?? [];
   for (const part of ex.parts) {

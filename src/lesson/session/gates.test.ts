@@ -3,10 +3,10 @@
  * before the student answers. Asked steps are question cards (the reducer
  * stops there); a visual component that asks something must be a gate.
  */
-import ex2 from '../../content/exercises/bac2022c-ex2.json';
-import ex2Misconceptions from '../../content/exercises/bac2022c-ex2.misconceptions.json';
-import ex4 from '../../content/exercises/bac2022c-ex4.json';
-import ex4Misconceptions from '../../content/exercises/bac2022c-ex4.misconceptions.json';
+import ex2 from '../../content/fixtures/ex2.v050.json';
+import ex2Misconceptions from '../../content/fixtures/ex2Misconceptions.v050.json';
+import ex4 from '../../content/fixtures/ex4.v010.json';
+import ex4Misconceptions from '../../content/fixtures/ex4Misconceptions.v010.json';
 import { loadExercise } from '../../content/loader';
 import { componentKind, isGate } from '../../components/registry';
 

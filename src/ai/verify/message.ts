@@ -296,7 +296,7 @@ export function forbiddenValues(
   const { earned, written, attempts } = evidence(c);
   const given = givenSet(c);
   return main.graph.nodes
-    .filter(n => !earned.has(n.id))
+    .filter(n => !n.expr && !earned.has(n.id))
     .filter(n => !isSmall(n.value))
     .filter(n => !given.has(plain(n.value)))
     .filter(n => !written.some(w => sameRat(w, n.value)))
@@ -357,7 +357,7 @@ function hiddenRoads(
   }
   const { earned, attempts } = evidence(c);
   return main.graph.nodes
-    .filter(n => n.role !== 'support' && !earned.has(n.id))
+    .filter(n => !n.expr && n.role !== 'support' && !earned.has(n.id))
     .filter(n => attempts(n.id) < revealAfter)
     .map(node => ({ node, roads: node.forms.flatMap(roadsIn) }));
 }

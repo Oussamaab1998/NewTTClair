@@ -24,7 +24,7 @@ import {
   emptyProfile,
   levelOf as levelOfRecord,
   loadProfile,
-  NODE_SKILL,
+  nodeSkill,
   type SkillLevel,
   saveProfile,
 } from '../../../ai/profile/profile';
@@ -162,6 +162,8 @@ export interface HybridView {
   figure: LiveFigure | null;
   /** Numbers the figure gives (its printed branches), for the worksheet's tiles. */
   givens: readonly string[];
+  /** The letter a plan card's lines are written with (x, n), or null. */
+  lettersOf: (cardKey: string | null) => 'x' | 'n' | null;
   steps: BoardStep[];
   strip: Strip;
   /** Exchanges on the step now (the reply that moved him here first). */
@@ -293,7 +295,7 @@ export function useHybridSession(o: {
   const [profileAtStart] = useState(() => loadProfile(store));
   const levelOf = useCallback(
     (node: string | null): SkillLevel => {
-      const skill = node === null ? undefined : NODE_SKILL[node];
+      const skill = node === null ? undefined : nodeSkill(node);
       const rec = skill ? profileAtStart?.skills[skill] : undefined;
       return rec ? levelOfRecord(rec) : 'unknown';
     },
@@ -604,6 +606,16 @@ export function useHybridSession(o: {
     return [...new Set([...printed, ...earlier])];
   }, [ctx, carriedKey]);
 
+  const lettersOf = useCallback(
+    (cardKey: string | null) =>
+      cardKey === null
+        ? null
+        : ctx.pack.main?.graph.nodes.find(
+            n => n.planCard === cardKey && n.main && n.expr,
+          )?.expr?.variable ?? null,
+    [ctx],
+  );
+
   const sheets = useMemo(
     () => ({
       exercise: () => {
@@ -654,6 +666,7 @@ export function useHybridSession(o: {
     frame,
     figure,
     givens,
+    lettersOf,
     steps,
     strip,
     card,

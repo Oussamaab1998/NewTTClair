@@ -6,6 +6,15 @@ import { createRulesPlanner } from '../../planner/rules';
 import { EventLog, fixedClock } from '../../telemetry/log';
 import { nextRightAction } from './answerAll';
 
+// The old lesson's screens are tested on the frozen ex4 0.1.0 (question A1):
+// ex4 1.0.0 moved Partie A to the hybrid board (docs/EX2_EX4_UPGRADE_PROGRESS.md).
+jest.mock('../../content/exercises/bac2022c-ex4.json', () =>
+  jest.requireActual('../../content/fixtures/ex4.v010.json'),
+);
+jest.mock('../../content/exercises/bac2022c-ex4.misconceptions.json', () =>
+  jest.requireActual('../../content/fixtures/ex4Misconceptions.v010.json'),
+);
+
 it.each(['A1', '1b', '2a'])(
   '-devActions answerAll plays %s to a counting part_done',
   part => {

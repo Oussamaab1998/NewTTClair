@@ -74,8 +74,17 @@ export interface WorksheetProps {
    * than one number is always in parentheses (no readback needed).
    */
   onSubmit: (raw: string, info: SubmitInfo) => void;
-  /** Keys for counting formulas: n, k, ! and C(n, k). */
-  counting?: boolean;
+  /**
+   * Counting keys: `true` for formulas (n, k, ! and C(n, k)); `'numbers'` for
+   * a count written with numbers only (! and C(n, k): a line with letters
+   * cannot be read there).
+   */
+  counting?: boolean | 'numbers';
+  /**
+   * A step written with a letter: x (with e and powers: f(−x), a
+   * derivative) or n (with powers and C(n, k): a formula in n).
+   */
+  letters?: 'x' | 'n';
   /** Replay or a finished question: the page only. */
   readonly?: boolean;
   /**
@@ -98,6 +107,9 @@ const ROWS: readonly (readonly PadKey[])[] = [
   ['0', ',', '='],
 ];
 const COUNTING_ROW: readonly PadKey[] = ['n', 'k', '!', 'choose'];
+const NUMBER_COUNTING_ROW: readonly PadKey[] = ['!', 'choose'];
+const X_ROW: readonly PadKey[] = ['x', 'e', 'pow'];
+const N_ROW: readonly PadKey[] = ['n', 'pow', 'choose'];
 const TOOLS: readonly PadKey[] = ['back', 'left', 'right'];
 
 /** Spoken names of the keys that are not digits (i18n worksheet.key.*). */
@@ -117,6 +129,9 @@ const A11Y = {
   k: 'k',
   '!': 'factorial',
   choose: 'choose',
+  x: 'x',
+  e: 'e',
+  pow: 'power',
 } as const;
 const a11yName = (k: PadKey) =>
   k in A11Y ? A11Y[k as keyof typeof A11Y] : null;
@@ -144,6 +159,7 @@ export function Worksheet({
   scaffold,
   onSubmit,
   counting = false,
+  letters,
   readonly = false,
   disabled = false,
   busy = false,
@@ -270,6 +286,7 @@ export function Worksheet({
           />
           <Pad
             counting={counting}
+            {...(letters && { letters })}
             onKey={onKey}
             disabled={disabled}
             testID={testID}
@@ -478,17 +495,28 @@ const Tiles = memo(function TilesImpl({
 
 const Pad = memo(function PadImpl({
   counting,
+  letters,
   onKey,
   disabled,
   testID,
 }: {
-  counting: boolean;
+  counting: boolean | 'numbers';
+  letters?: 'x' | 'n';
   onKey: (k: Key) => void;
   disabled: boolean;
   testID: string;
 }) {
   const { t } = useTranslation();
-  const rows = counting ? [...ROWS, COUNTING_ROW] : ROWS;
+  const rows =
+    letters === 'x'
+      ? [...ROWS, X_ROW]
+      : letters === 'n'
+      ? [...ROWS, N_ROW]
+      : counting === 'numbers'
+      ? [...ROWS, NUMBER_COUNTING_ROW]
+      : counting
+      ? [...ROWS, COUNTING_ROW]
+      : ROWS;
   return (
     <View style={styles.pad}>
       {rows.map((row, r) => (

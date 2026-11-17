@@ -85,7 +85,7 @@ export function allowedMoves(
   return ALLOWED_MOVES[reason].filter(
     m =>
       (tier === 'light' || m !== 'escalate') &&
-      (domain !== 'tree' || m !== 'component'),
+      ((domain !== 'tree' && domain !== 'analysis') || m !== 'component'),
   );
 }
 
@@ -186,18 +186,26 @@ const TreeMoveSchema = z.strictObject({
     ),
 });
 
+const ANALYSIS_DESCRIPTION =
+  'Your one move on this function question: what the student reads now (one short message, one thing to do that fits the step he is on). No component and no case. Call it exactly once. A refused move comes back once with the reasons.';
+
 const TREE_DESCRIPTION =
   'Your one move on this probability tree question: what the student reads now (one short message, one thing to do that fits the step he is on) and, for a case move, the prepared small case he works on. Call it exactly once. A refused move comes back once with the reasons.';
 
 export function moveToolDefinition(
   domain?: QuestionDomain | null,
 ): ToolDefinition {
-  const tree = domain === 'tree';
+  const tree = domain === 'tree' || domain === 'analysis';
   const schema = zodToJsonSchema(tree ? TreeMoveSchema : TutorMoveSchema);
   delete schema.$schema;
   return {
     name: MOVE_TOOL,
-    description: tree ? TREE_DESCRIPTION : DESCRIPTION,
+    description:
+      domain === 'analysis'
+        ? ANALYSIS_DESCRIPTION
+        : tree
+        ? TREE_DESCRIPTION
+        : DESCRIPTION,
     input_schema: schema,
   };
 }
@@ -291,7 +299,7 @@ export function checkMove(input: unknown, env: MoveEnv): MoveCheck {
     };
   }
   // A tree question: the lesson draws the tree, and its cases are prepared.
-  const tree = env.pack.domain === 'tree';
+  const tree = env.pack.domain === 'tree' || env.pack.domain === 'analysis';
   if (m.message.length === 0) {
     reasons.push('the message is empty: write what he reads');
   }

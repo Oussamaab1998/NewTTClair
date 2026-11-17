@@ -1,0 +1,323 @@
+[
+ {
+  "id": "mut.odd_for_even",
+  "skillId": "function-parity",
+  "category": "math",
+  "description": "A line equal to the other parity's form: −f(x) for an even f (or f(x) for an odd one).",
+  "signature": "f(−x) written as −eˣ/(1+e²ˣ)",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "السطر هذا يساوي الدالة ولا عكسها؟"
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "الطريقة صحيحة لين بدّلت العلامة. الأُسّي موجب ولا سالب؟"
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-analysis-0.1.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.exp_negative_sign",
+  "skillId": "exp-rules",
+  "category": "math",
+  "description": "e^{-x} taken as −e^{x}: a negative exponent read as a negative number.",
+  "signature": "e^{-x}/(1 − e^{2x})",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "الأُس السالب يخلّي العدد سالب؟"
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "الأُس السالب يعني مقلوب، موش عدد سالب: الأُسّي ديما موجب."
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-analysis-0.1.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.exponent_rules_gap",
+  "skillId": "exp-rules",
+  "category": "math",
+  "description": "The exponents of a product added wrongly (e^{-x}·e^{2x} written e^{-2x}).",
+  "signature": "e^{-2x} in the numerator after multiplying by e^{2x}",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "كي نضربو زوز أُسّيين، شنوّة يصير للأُسّين؟"
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "الضرب صحيح، أما الأُسّين يتزادو. جرّب بأعداد صغار."
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-analysis-0.1.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.multiplies_one_part",
+  "skillId": "exp-rules",
+  "category": "math",
+  "description": "Only the numerator (or only the denominator) multiplied: the fraction changed.",
+  "signature": "eˣ/(1 + e^{-2x})",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "ضربت الفوق برك؟ الكسر يقعد كيف كيف كان نضربو الفوق والتحت."
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "الضرب في الفوق صحيح. أما باش الكسر يقعد نفسو، نضربو التحت بنفس العدد."
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-analysis-0.1.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.value_at_0_vs_limit",
+  "skillId": "limit-at-infinity",
+  "category": "math",
+  "description": "The value at x = 0 given for the limit at +∞.",
+  "signature": "1/(1+1) for the limit",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "هذي قيمة الدالة في الصفر، ولا وين تمشي كي المتغيّر يكبر برشا؟"
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "الحساب صحيح، أما هذا في الصفر. الـ "
+    },
+    {
+     "fr": "limite"
+    },
+    {
+     "ar": " تحكي على المتغيّر كي يكبر برشا: شنوّة يولّي الأُسّي بأُس سالب؟"
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-analysis-0.1.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.cancel_leaves_zero",
+  "skillId": "exp-rules",
+  "category": "math",
+  "description": "After cancelling, the numerator becomes 0 instead of 1.",
+  "signature": "0/(e^{-x}+e^{x})",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "كي نقسمو عدد على روحو، شنوّة يقعد؟"
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "التبسيط فكرة باهية، أما عدد على روحو يعطي واحد، موش صفر."
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-analysis-0.1.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.chain_rule_exp_factor",
+  "skillId": "chain-rule-exp",
+  "category": "math",
+  "description": "The factor of the exponent forgotten when deriving e^{2x}.",
+  "signature": "e^{2x} for (e^{2x})′",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "الأُس فيه عدد: يبان في الـ "
+    },
+    {
+     "fr": "dérivée"
+    },
+    {
+     "ar": " ولا لا؟"
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "الأُسّي يقعد كيما هو، أما العدد اللي في الأُس يخرج قدّامو."
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-analysis-0.1.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.derivative_keeps_x",
+  "skillId": "chain-rule-exp",
+  "category": "math",
+  "description": "The derivative of e^{u} written with the variable in front.",
+  "signature": "2x·e^{2x}",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "قدّاش تساوي الـ "
+    },
+    {
+     "fr": "dérivée"
+    },
+    {
+     "ar": " متاع الأُس وحدو؟"
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "الأُسّي يقعد كيما هو، وقدّامو الـ "
+    },
+    {
+     "fr": "dérivée"
+    },
+    {
+     "ar": " متاع الأُس، موش الأُس نفسو."
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-analysis-0.1.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.quotient_sign",
+  "skillId": "quotient-rule",
+  "category": "math",
+  "description": "The two terms of the quotient rule added instead of subtracted.",
+  "signature": "(u′v + uv′)/v²",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "في قاعدة القسمة، بين الحدّين نزيدو ولا نطرحو؟"
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "الحدّين صحاح، أما في قاعدة القسمة نطرحو الثاني من الأوّل."
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-analysis-0.1.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.den_not_squared",
+  "skillId": "quotient-rule",
+  "category": "math",
+  "description": "The denominator of the quotient rule not squared.",
+  "signature": "(1 − e^{2x})eˣ/(1 + e^{2x})",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "التحت في قاعدة القسمة: كيما هو ولا مربّع؟"
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "الفوق صحيح. أما التحت في قاعدة القسمة يتربّع."
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-analysis-0.1.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.exp_zero_is_zero",
+  "skillId": "exp-rules",
+  "category": "math",
+  "description": "e^0 taken as 0 when computing f(0).",
+  "signature": "0/(1+0) for f(0)",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "الأُسّي في الصفر قدّاش يساوي؟"
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "التعويض بالصفر صحيح، أما الأُسّي في الصفر يساوي واحد، موش صفر."
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-analysis-0.1.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ }
+]

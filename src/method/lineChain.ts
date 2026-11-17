@@ -3,8 +3,11 @@
  * (docs/METHOD_LESSON_PLAN.md section 8.1). Every side goes through the safe
  * parser (no `eval`, no letters, no powers: the pad has no such keys) and is
  * evaluated EXACTLY (rationals; a value past the safe integers is "not a
- * number", never a float). Nothing here grades a line: it only says what the
- * line is and whether its sides agree.
+ * number", never a float). The counting keys' notation, C(n,k) (the worksheet
+ * writes `C((10),(3))`), A(n,k) and n!, is read as the product a student
+ * writes for it (`expandCounting`), so `C(10,3) = 120` keeps the factors of
+ * `10*9*8/(3*2*1)` (fix list B5). Nothing here grades a line: it only says
+ * what the line is and whether its sides agree.
  */
 import {
   evaluateExact,
@@ -12,6 +15,11 @@ import {
   toLatex,
   type Node,
 } from '../engine/expression';
+import {
+  expandCounting,
+  rewriteCounting,
+} from '../engine/expression/counting';
+import { splitLabels } from './exprLine';
 import type { Fraction } from '../engine/rational';
 import { sameRat } from '../engine/rationalFormat';
 
@@ -54,26 +62,45 @@ const isPlainNumber = (n: Node): boolean =>
  * `1/128`) is a result in fraction form, not a computation waiting for its
  * "=": it is read as a value. `720/6` (a whole quotient) stays unfinished.
  */
+/** `a/b` of two written numbers, or its opposite (`-1/10`, an expectation). */
+const isWrittenFraction = (n: Node): boolean => {
+  const inner = n.type === 'unary' && n.op === '-' ? n.arg : n;
+  if (inner.type !== 'binary' || inner.op !== '/') {
+    return false;
+  }
+  const left =
+    inner.left.type === 'unary' && inner.left.op === '-'
+      ? inner.left.arg
+      : inner.left;
+  return left.type === 'num' && inner.right.type === 'num';
+};
+
 const isFractionResult = (s: Side): boolean =>
-  s.ast.type === 'binary' &&
-  s.ast.op === '/' &&
-  s.ast.left.type === 'num' &&
-  s.ast.right.type === 'num' &&
-  s.value[1] !== 1;
+  isWrittenFraction(s.ast) && s.value[1] !== 1;
 
 /**
  * A side that is only a value, with no calculation in it: a number, a signed
- * number, or `a/b` of two written numbers (`1/4`, `3/12`).
+ * number, or `a/b` of two written numbers (`1/4`, `3/12`, `-1/10`).
  */
 export const isLiteralValue = (n: Node): boolean =>
-  isPlainNumber(n) ||
-  (n.type === 'binary' &&
-    n.op === '/' &&
-    n.left.type === 'num' &&
-    n.right.type === 'num');
+  isPlainNumber(n) || isWrittenFraction(n);
+
+/** C(…), A(…) or a "!": the counting keys' notation. */
+const COUNTING = /[CA]\s*\(|!/;
 
 function parseSide(raw: string, index: number): Side | ChainResult {
-  const p = parseExpression(raw, { variables: [], constants: [] });
+  let text = raw;
+  if (COUNTING.test(raw)) {
+    const n = expandCounting(raw);
+    if (!n.ok) {
+      return unreadable(
+        n.reason === 'too_large' ? 'not_a_number' : 'syntax',
+        index,
+      );
+    }
+    text = n.text;
+  }
+  const p = parseExpression(text, { variables: [], constants: [] });
   if (!p.ok) {
     return unreadable(
       p.error.code === 'too_long' ? 'too_long' : 'syntax',
@@ -154,13 +181,62 @@ export function mismatchLine(raw: string, mismatchAt: number): string {
     .join('');
 }
 
+/** Letters the parser reads as variables while a C( ), an A( ) or a "!" is held aside. */
+const HELD = ['Q', 'U', 'V', 'W', 'Y', 'Z', 'B', 'D', 'F', 'G', 'H', 'J'];
+
+/** The Tunisian writing: C_{n}^{p}, A_{n}^{p}, n!. */
+const countingTex = (kind: 'C' | 'A' | '!', a: number, b: number): string =>
+  kind === '!' ? `${a}!` : `${kind}_{${a}}^{${b}}`;
+
+/** One side as LaTeX; its counting notation stays notation (never its value). */
+function sideLatex(part: string): string {
+  const plain = parseExpression(part, { variables: [], constants: [] });
+  if (plain.ok) {
+    return toLatex(plain.ast);
+  }
+  // A line with a letter (f(−x), a formula in n): x, n and e are read.
+  if (/[xne]/.test(part) && !/[CA]\s*\(/.test(part)) {
+    const lettered = parseExpression(part, { variables: ['x', 'n'] });
+    if (lettered.ok) {
+      return toLatex(lettered.ast);
+    }
+  }
+  if (!COUNTING.test(part)) {
+    return part.trim();
+  }
+  const held = new Map<string, string>();
+  const r = rewriteCounting(part, (kind, a, b) => {
+    const name = HELD[held.size];
+    if (name === undefined) {
+      throw new Error('too many counting terms');
+    }
+    held.set(name, countingTex(kind, a, b));
+    return name;
+  });
+  if (!r.ok) {
+    return part.trim();
+  }
+  const p = parseExpression(r.text, {
+    variables: [...held.keys(), 'n', 'x'],
+    constants: [],
+  });
+  if (!p.ok) {
+    return part.trim();
+  }
+  return toLatex(p.ast).replace(/[A-Z]/g, c => held.get(c) ?? c);
+}
+
 /** LaTeX of what he typed, side by side with "=": his own writing, never recomputed. */
 export function lineLatex(raw: string): string {
-  return raw
-    .split('=')
+  // A leading label keeps its own "=" (`P(Y=1) = ...`).
+  const { labels, body } = splitLabels(raw);
+  return [...labels, ...body.split('=')]
     .map(part => {
-      const p = parseExpression(part, { variables: [], constants: [] });
-      return p.ok ? toLatex(p.ast) : part.trim();
+      try {
+        return sideLatex(part);
+      } catch {
+        return part.trim();
+      }
     })
     .join(' = ');
 }

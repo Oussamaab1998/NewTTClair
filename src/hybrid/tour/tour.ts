@@ -12,6 +12,8 @@ import { credit } from '../../ai/session/state';
 import { stepKey, type ResolvedAnswer } from '../../content/loader';
 import type { MethodFrameStep, Rich } from '../../content/schema';
 import { stepOrderFor } from '../../method/route';
+import ex2 from '../../content/trips.bac2022c-ex2.json';
+import ex4 from '../../content/trips.bac2022c-ex4.json';
 import tree from '../../content/trips.bac2022p-sc-ex2.json';
 import scEx2 from '../../content/trips.sc-ex2.json';
 import type { QuestionCtx } from '../conductor/conductor';
@@ -25,7 +27,7 @@ import {
 } from './schema';
 
 /** One trips file per exercise (an invalid file is dropped here; `TRIP_FILE_ISSUES` names it and a test keeps it empty). */
-const SOURCES: readonly unknown[] = [scEx2, tree];
+const SOURCES: readonly unknown[] = [scEx2, tree, ex2, ex4];
 export const TRIP_FILE_ISSUES: string[] = [];
 const FILES = SOURCES.flatMap(f => {
   const r = TripFileSchema.safeParse(f);

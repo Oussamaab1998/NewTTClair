@@ -94,6 +94,12 @@ export function methodRevealRich(
     answer.frame === 'lines'
   ) {
     const main = answer.graph.nodes.find(n => n.planCard === f.key && n.main);
+    // A step written with a letter: its goal's form.
+    const goal = main?.expr?.goals[0] ?? main?.expr?.ref;
+    if (goal !== undefined) {
+      const g = parseExpression(goal, { variables: ['x', 'n'] });
+      return { math: g.ok ? toLatex(g.ast) : goal };
+    }
     const form = main?.forms[0];
     if (main && form) {
       const parsed = parseExpression(form, { variables: [] });

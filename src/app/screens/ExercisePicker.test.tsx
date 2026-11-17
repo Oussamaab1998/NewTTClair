@@ -21,6 +21,23 @@ import type { Event } from '../../telemetry/events';
 import { createKvEventStore } from '../../telemetry/eventStore';
 import { LessonScreen } from './LessonScreen';
 
+// The old lesson's screens are tested on the frozen ex2 0.5.0 (questions 1.b
+// and 2.a): ex2 1.0.0 moved to the hybrid board (docs/EX2_EX4_UPGRADE_PROGRESS.md).
+jest.mock('../../content/exercises/bac2022c-ex2.json', () =>
+  jest.requireActual('../../content/fixtures/ex2.v050.json'),
+);
+jest.mock('../../content/exercises/bac2022c-ex2.misconceptions.json', () =>
+  jest.requireActual('../../content/fixtures/ex2Misconceptions.v050.json'),
+);
+// The old lesson's screens are tested on the frozen ex4 0.1.0 (question A1):
+// ex4 1.0.0 moved Partie A to the hybrid board (docs/EX2_EX4_UPGRADE_PROGRESS.md).
+jest.mock('../../content/exercises/bac2022c-ex4.json', () =>
+  jest.requireActual('../../content/fixtures/ex4.v010.json'),
+);
+jest.mock('../../content/exercises/bac2022c-ex4.misconceptions.json', () =>
+  jest.requireActual('../../content/fixtures/ex4Misconceptions.v010.json'),
+);
+
 afterEach(() => act(() => setDevTools(false)));
 
 let log: EventLog;

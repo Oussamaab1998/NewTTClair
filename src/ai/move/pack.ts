@@ -19,7 +19,13 @@ import type { Graph, GraphNode } from '../../method/graph';
 import { treeLabel } from '../../method/templatesTree';
 import { propsOf } from '../../planner/llm/catalog';
 import { plain, type GraphRuntime } from '../checks/lines';
-import { richText, type QuestionDomain } from '../packs/build';
+import {
+  exprNodeLine,
+  nodeMeaning,
+  richText,
+  urnLine,
+  type QuestionDomain,
+} from '../packs/build';
 import type { QuestionNotes } from '../packs/notes';
 import { newSession, type CaseSpec } from '../session/state';
 import { COMPUTE } from '../tools/compute';
@@ -126,8 +132,13 @@ export const caseLabel = (spec: CaseSpec): string =>
         spec.k > 1 ? ' together' : ''
       }, exactly ${spec.j} red wanted`;
 
-function nodeLine(n: GraphNode): string {
-  const meaning = NODE_MEANING[n.id] ?? `${n.role} (${n.unit})`;
+function nodeLine(n: GraphNode, g: Graph): string {
+  if (n.expr) {
+    return exprNodeLine(n);
+  }
+  const meaning = g.template?.startsWith('num_')
+    ? nodeMeaning(g, n)
+    : NODE_MEANING[n.id] ?? `${n.role} (${n.unit})`;
   return `- ${n.id} = ${plain(n.value)}: ${meaning}; card ${n.planCard}${
     n.main ? '' : ' (supporting)'
   }; forms ${n.forms.slice(0, 2).join(' | ')}`;
@@ -303,12 +314,7 @@ function build(ctx: QuestionCtx): MovePack {
     `Statement (exam French): ${richText(ex.statement as Rich)}`,
   ];
   if (experiment) {
-    const reds = experiment.urn.filter(b => b.color === 'red').length;
-    out.push(
-      `Urn: ${reds} red, ${experiment.urn.length - reds} black, ${
-        experiment.k
-      } drawn, draw ${experiment.draw}.`,
-    );
+    out.push(urnLine(experiment, 'question'));
   }
   out.push(`Question (exam French): ${q.wording}`);
   const target = [...ctx.frames.values()].find(f => f.target)?.target;
@@ -338,9 +344,10 @@ function build(ctx: QuestionCtx): MovePack {
   if (q.main && tree) {
     out.push(...treeGraphLines(q.main));
   } else if (q.main) {
+    const g = q.main.graph;
     out.push(
       'Private solution graph "main" (a value he has not earned is refused in your messages):',
-      ...q.main.graph.nodes.map(nodeLine),
+      ...g.nodes.map(n => nodeLine(n, g)),
       'Known slips (id, an example line = its engine value):',
       ...slipLines(q.main),
     );

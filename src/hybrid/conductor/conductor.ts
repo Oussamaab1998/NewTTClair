@@ -24,6 +24,7 @@ import {
 } from '../../ai/checks/autoCheck';
 import { judgeLine } from '../../ai/tools/compute';
 import { mathSegments } from '../../ai/checks/freeText';
+import type { GraphVerdict } from '../../ai/checks/lines';
 import { preparedFor, preparedForCard } from '../../ai/move/prepared';
 import type { QuestionPack } from '../../ai/packs/build';
 import {
@@ -42,8 +43,16 @@ import {
 } from '../../content/loader';
 import type { MethodFrameStep, Rich, Step } from '../../content/schema';
 import { buildContent, type LessonContent } from '../../lesson/session/lesson';
-import { evaluateLine, type LineEvaluation } from '../../method/frame';
-import { evalChain, isLiteralValue } from '../../method/lineChain';
+import {
+  evaluateLine,
+  type LineEvaluation,
+  type LineOutcome,
+} from '../../method/frame';
+import {
+  evalChain,
+  isLiteralValue,
+  lineLatex,
+} from '../../method/lineChain';
 import { recap } from '../../method/narration';
 import {
   replyForCards,
@@ -689,6 +698,40 @@ function joinedLine(s: ConductorState, node: string, raw: string): string {
   return joined.length <= LINE_MAX ? joined : raw;
 }
 
+/** His lines on a step written with a letter that the board accepted (a step on the way, or its end), oldest first. */
+function exprLinesOf(s: ConductorState, node: string): string[] {
+  return s.session.lines
+    .filter(
+      l =>
+        l.graph === 'main' &&
+        (l.match?.verdict === 'support' || l.match?.verdict === 'credit') &&
+        l.match.node === node,
+    )
+    .map(l => l.raw);
+}
+
+/** The board's verdict on a line with a letter, in the shared session's words. */
+function exprMatch(o: LineOutcome, node: string): GraphVerdict {
+  switch (o.kind) {
+    case 'credit':
+      return {
+        verdict: 'credit',
+        node,
+        derivation: 'exact',
+        unsimplified: false,
+        completes: o.completes,
+      };
+    case 'support':
+      return { verdict: 'support', node, derivation: 'exact' };
+    case 'repeat':
+      return { verdict: 'repeat', node };
+    case 'mutation':
+      return { verdict: 'slip', slip: o.id, node, strength: o.strength };
+    default:
+      return { verdict: 'no_match' };
+  }
+}
+
 function onLine(
   ctx: QuestionCtx,
   s: ConductorState,
@@ -709,6 +752,11 @@ function onLine(
   let raw = a.raw.slice(0, LINE_MAX);
   const credited = new Set(s.session.credited.main ?? []);
   const worked = workedSet(s.session, 'main');
+  // A step written with a letter: his accepted lines on it, oldest first.
+  const exprMain = answer.graph.nodes.find(
+    n => n.planCard === f.key && n.main && n.expr,
+  );
+  const accepted = exprMain ? exprLinesOf(s, exprMain.id) : [];
   let ev = evaluateLine({
     raw,
     graph: answer.graph,
@@ -717,6 +765,7 @@ function onLine(
     credited,
     extra: answer.extra,
     worked,
+    accepted,
   });
   // An ambiguous division ("720/3*2*1"): he says how he meant it first.
   if (ev.readback && !a.readback) {
@@ -786,13 +835,18 @@ function onLine(
   // but only the conductor credits: the recorder's own credit is undone
   // (an unsimplified 60/120 is not the result yet).
   const before = [...(s.session.credited.main ?? [])];
-  recordLine(
+  const recorded = recordLine(
     rt,
     raw,
     main ? { kind: 'node', graph: 'main', node: main.id } : null,
   );
   s.session.credited.main = before;
-  const reply = replyForLine(ev.outcome, {
+  if (exprMain) {
+    // The recorder reads numbers only: the board's verdict is the line's.
+    recorded.line.graph = 'main';
+    recorded.line.match = exprMatch(ev.outcome, exprMain.id);
+  }
+  const replied = replyForLine(ev.outcome, {
     raw,
     misconceptions: ctx.loaded.misconceptions,
     shown: p.shown,
@@ -808,6 +862,20 @@ function onLine(
         raw,
       ),
   });
+  // A line written with a letter is shown as math (his own writing, drawn).
+  const reply = exprMain
+    ? {
+        ...replied,
+        parts: replied.parts.map((x): ReplyPart =>
+          x.kind === 'student' && x.content.kind === 'typed'
+            ? {
+                kind: 'student',
+                content: { kind: 'rich', rich: { math: lineLatex(raw) } },
+              }
+            : x,
+        ),
+      }
+    : replied;
   const v = reply.verdict;
   if (v.kind === 'unreadable') {
     return out('unreadable', reply.parts);
@@ -823,8 +891,11 @@ function onLine(
       // two lines together are his line of the node.
       const proof =
         answer.graph.nodes.find(n => n.id === v.node)?.proof === true;
-      s.nodeLines[v.node] =
-        proof && worked.has(v.node) ? joinedLine(s, v.node, raw) : raw;
+      s.nodeLines[v.node] = exprMain
+        ? [...accepted, raw].join('\n')
+        : proof && worked.has(v.node)
+        ? joinedLine(s, v.node, raw)
+        : raw;
     }
     if (v.completes) {
       advance(s);

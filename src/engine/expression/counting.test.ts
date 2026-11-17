@@ -2,6 +2,7 @@ import { parseNumeric } from '../format';
 import { equals, type Fraction } from '../rational';
 import {
   checkTypedCount,
+  expandCounting,
   normalizeCounting,
   parseCountingAnswer,
   substituteSymbols,
@@ -202,5 +203,56 @@ describe('a step that asks the student to COMPUTE a count: notation is not a pas
     });
     expect(checkTypedCount('60/120', half, { aboutNotation: false })).toEqual({ kind: 'correct', value: [1, 2] });
     expect(checkTypedCount('0,5', half, { aboutNotation: false })).toEqual({ kind: 'correct', value: [1, 2] });
+  });
+});
+
+describe('expandCounting: the board reads the notation as the product a student writes (B5)', () => {
+  const text = (raw: string): string => {
+    const r = expandCounting(raw);
+    if (!r.ok) {
+      throw new Error(r.reason);
+    }
+    return r.text;
+  };
+
+  it('C(10,3) is 10*9*8 over 3*2*1, written with its brackets', () => {
+    expect(text('C(10,3)')).toBe('((10*9*8)/(3*2*1))');
+    expect(text('C((10),(3))')).toBe('((10*9*8)/(3*2*1))');
+    expect(text('C(10,3)=120')).toBe('((10*9*8)/(3*2*1))=120');
+  });
+
+  it('a product of two choices, a factorial and arrangements', () => {
+    expect(text('C(4,1)*C(6,2)')).toBe('4*((6*5)/(2*1))');
+    expect(text('5!')).toBe('(5*4*3*2*1)');
+    expect(text('A(10,3)')).toBe('(10*9*8)');
+  });
+
+  it('the small cases need no product: C(n,0), C(n,1), 0! and 1!', () => {
+    expect(text('C(5,0)')).toBe('1');
+    expect(text('C(5,1)')).toBe('5');
+    expect(text('0!+1!')).toBe('1+1');
+  });
+
+  it('a number or a bracket before the notation is a product', () => {
+    expect(text('2C(5,2)')).toBe('2*((5*4)/(2*1))');
+    expect(text('C(5,2)(3)')).toBe('((5*4)/(2*1))*(3)');
+  });
+
+  it('a line without notation is left as it is', () => {
+    expect(expandCounting('10*9*8/(3*2*1)')).toEqual({
+      ok: true,
+      text: '10*9*8/(3*2*1)',
+      usedNotation: false,
+    });
+  });
+
+  it('refuses what normalizeCounting refuses, with the same reason', () => {
+    for (const raw of ['C62', 'C(70,2)', 'C(5)', '20!']) {
+      const a = expandCounting(raw);
+      const b = normalizeCounting(raw);
+      expect(a.ok).toBe(false);
+      expect(b.ok).toBe(false);
+      expect(!a.ok && !b.ok && a.reason === b.reason).toBe(true);
+    }
   });
 });

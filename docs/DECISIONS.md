@@ -521,3 +521,92 @@ Second exercise on the hybrid lesson (Bac 2022, session principale, Sciences exp
 - **D62. Part ids `t1`..`t4`, blocks `mt1`..`mt4`.** A test requires part ids to be unique across exercises and `1`, `2` are taken. No `experiment` (urn only): the tree templates take the statement's three numbers as arguments, so each question opens alone; earlier results are reused through the trip.
 - **D63. A figure in content** (`figure` on the exercise and on a similar question: a registry component drawn read-only, plus which branches each plan card marks) and **`math` write-up lines** (stacked fractions; blanks written `\his{node}`).
 - **D64. On a tree question the AI shows no component and invents no case** (prepared examples only), has its own prompt block (`src/ai/move/promptTree.ts`) and reads a fraction as one value in the verifier. The urn prompt, tools and packs are byte-identical.
+
+## ex2 on the hybrid board, D65 to D75 (2026-11-17)
+Phase 1 of the approved plan `/Users/oussama/.claude/plans/zesty-sniffing-bentley.md`. The owner chose the scope: all of ex2 (1.a to 3.b) and ex4 Part A, plus a real reader for lines with x. Build log: `docs/EX2_EX4_UPGRADE_PROGRESS.md`. D65 and D66 record that plan. D67 to D75 are choices made during the build, for the owner to confirm or reverse. All Arabic is `reviewed: false`.
+
+- **D65. ex2 1.0.0 is four method questions: 1.a, 1.b, 2.a, 2.b.** Question 3 is still "soon".
+  - The statement now uses the exam's wording and defines both A and B (the old one defined only B).
+  - The old 1.b and 2.a, with their deep dives and variants, are parked in `docs/EX2_PARKED.json`.
+  - A complete frozen copy of 0.5.0 is in `src/content/fixtures/`. The old-lesson tests use it, with their assertions unchanged.
+- **D66. Fix list B5: the board reads `C(n,k)`, `A(n,k)` and `n!` as the products a student writes for them.**
+  - His line still shows the notation (C_{n}^{p}).
+  - The urn's `total` and `fav` cards get the keys ! and C, without n and k, because the board cannot read letters.
+- **D67. Numbered balls come in the template arguments (`balls`, `k`), not through `GraphCtx`** (the plan said `GraphCtx`). This needs no loader change. It also means a similar question brings its own urn.
+- **D68. A card can hold several main nodes and closes with the last one.**
+  - It is the general rule, not a flag: every card in today's content has exactly one main node.
+  - One slip found on several equal nodes of one card counts as one slip.
+  - 2.a's "other values" card uses this: three lines of 1/10.
+- **D69. A negative fraction written alone (`-1/10`) is a value**, as `1/10` is.
+- **D70. Where a bare value is not credited (`proof`).**
+  - **It applies to:**
+    - the total of 1.a, because 5 × 2 lands on 10;
+    - the opposite count of 1.b, because 3 balls give 3 draws;
+    - the result of 1.b, which is a « Montrer que »;
+    - the sum of the law;
+    - E(X), E(X²) and V(X).
+  - **It does not apply to:** p(B̄) and the law's values, because « draws over draws » is itself the calculation.
+- **D71. 2.a reuses p(B) for p(X = 0), but the trip does not skip that step.**
+  - The link {X = 0} = B is the point of the step, and the pick `p_zero` makes him say why.
+  - The total of 1.b is skipped when he found it in 1.a (as for the urn).
+- **D72. No prepared small examples for ex2 yet.**
+  - The authored case file accepts trees only.
+  - A numbered-ball case panel would look different from today's, so it needs a mockup first.
+  - The second «ما نعرفش» goes to the deep AI tier, as on the urn exercise.
+- **D73. AI side.**
+  - The urn prompt and tools are kept (no new domain).
+  - The pack prints the balls by their numbers (coloured urns keep their exact line), with ex2's node meanings and skills.
+  - Notes: `TUTOR_NOTES['bac2022c-ex2']`, hybrid only, no components.
+  - Not yet tried with a live model: a paid check (at most $1) waits for the owner.
+- **D74. Ω added to the native math renderer** for card(Ω).
+- **D75. Skills `expectation` and `variance` (skills-0.3.0), and engine calls `expectation`, `secondMoment`, `variance`.** The official correction prints V(X) = « 8,9 »; the engine gives 89/100, and the tests pin it.
+
+## Lines with a letter, ex2 question 3 and ex4 Partie A, D76 to D82 (2026-11-17)
+Phases 2 to 4 of the same plan, built in one run on the owner's word ("just finish the two exercises"); the stops were skipped and the defaults below were taken. All Arabic is `reviewed: false`.
+- **D76. The board reads lines written with x or n** (`src/method/exprLine.ts`).
+  - A step's node carries an `expr` spec: the quantity asked (`ref`), the goal forms, and the known wrong lines.
+  - Each side of his line must equal the side before it, and the first must equal his last accepted line (or `ref`). x is compared by numeric samples; n exactly at n = 2 to 12.
+  - A wrong line says where it differs: above or below the fraction bar, elsewhere, or missing brackets. These are new neutral notes in Arabic and French.
+  - Such nodes have no value: the number matcher, the AI's value guard and the AI packs skip them.
+  - The keypad gets one more row: x, e, power on x steps; n, power, C on formula steps. **This was added without a mockup**: it is the existing pad with a row, like the counting row.
+- **D77. ex2 question 3 is `c3a` / `c3b`** (`3a` and `3b` belong to the urn exercise), templates `num_repeat_law` and `num_repeat_mean`.
+  - p is 1.b's result, reused.
+  - The bound is a number line (`5/(7/10) = 50/7`): the board reads no "≥".
+  - The smallest n has "rounds down" (7) as a named slip.
+- **D78. ex4 Partie A is five method questions (A1, A2, A3a, A3b, A4)** on `src/method/templatesFunction.ts`.
+  - The function is an argument, and the engine checks every argument when the graph is built: the parity claim, the rewritten forms, the limit, the derivative, the top value.
+  - New question domain `analysis`: its own AI prompt (`src/ai/move/promptAnalysis.ts`), no component and no case moves. The urn and tree prompts are byte-identical.
+- **D79. The variation table and the curve are picks plus one number line** (f(0) = 1/2), not a new graded table input or drawing. The plan's graded `VariationTableBuilder` needs a mockup first (it is a new input), so the default was the existing picks. A4 ends with the read-only `FunctionPlot` as a picture step.
+- **D80. The limit is a number line** (`0/(0+1) = 0`) after the rewrite, not `lim` notation. The value at 0 (`1/(1+1)`) is a named slip.
+- **D81. The old ex4 A1 is parked.**
+  - The old content (0.1.0) is in `docs/EX4_PARKED.json`, with a frozen copy in `src/content/fixtures/ex4.v010.json`.
+  - The old-lesson tests and the replay tools import that copy now; only the paths changed.
+  - Parties B and C stay "soon".
+- **D82. Skills `binomial-law` and `binomial-mean`** were added to the map. The engine gained a `smallestN` call.
+
+## The warm-up before an exercise, D83 (2026-11-17)
+- **D83. Each exercise has its own warm-up** (owner). It is asked once, before the whole exercise, never before each question, and stored as `warmup` in the exercise's JSON. The guide and the current questions are in `docs/WARMUP.md`.
+  - **What he sees:**
+    - 3 to 5 small questions on what the exercise needs, each a calculation line or a pick;
+    - a miss brings an easier question on the older skill under it;
+    - «ما نعرفش» counts as an answer, and he can skip the rest;
+    - nothing is marked right or wrong;
+    - the end shows one general sentence (everything known, or "we'll review it together when we get there").
+  - **Where his answers go:**
+    - his profile, as evidence on each skill (`applyWarmup`), which drives the worksheet's scaffolds;
+    - the tutor, at the top of the profile digest in every AI call for that exercise.
+  - «ابدا من جديد» forgets it.
+  - Debug launch options: `-devWarmup off` skips it; `-devWarmupActs "line:…,dontKnow,pick:…,skip"` plays answers.
+  - **Not done yet:** the lesson does not change its own steps from the warm-up (repair cards before a step, hint depth). Today the tutor and the scaffolds use it.
+- **D84. The warm-up explains itself first, and every question names what it checks** (owner, 2026-11-17, from a mockup he approved).
+  - **The explanation screen.** Before the first question, «قبل ما نبداو» says we want to know his level on what this exercise needs. Four short lines follow:
+    - small questions, one by one;
+    - not an exam, no mark;
+    - «ما نعرفش» helps too;
+    - his answers guide him in the exercise.
+  - **The chips.** Under «باش نثبّتو في:» come the French topics of the main questions, then «نبداو التسخين».
+  - **Skipping from the explanation.** «نفوتو للتمرين» there goes straight to the exercise, with every question recorded as skipped and no closing sentence.
+  - **The new header.** It shows the pen-coloured «تسخين قبل التمرين», the exercise title, and a segmented progress bar with "1 / 4". Above each question, «هالسؤال يثبّت في» plus that question's topic chip.
+  - **Content changes.**
+    - Each question has `topic`: a short French term, required, checked by a test.
+    - The exercise's `intro` is now optional, because the explanation is the screen's own i18n text. The four exercises' old intro line was removed: it repeated the explanation.

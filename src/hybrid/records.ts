@@ -29,6 +29,11 @@ import {
 } from './board';
 import type { QuestionCtx } from './conductor/conductor';
 import type { ConductorState } from './conductor/types';
+import {
+  forgetWarmup,
+  loadProfile,
+  saveProfile,
+} from '../ai/profile/profile';
 
 export interface QuestionRecord {
   v: 1;
@@ -346,5 +351,10 @@ export function clearExerciseProgress(
     store.remove(recordKey(exerciseId, q));
     store.remove(resumeKey(exerciseId, q));
     store.remove(`ai.carried.v1.${exerciseId}.${q}`);
+  }
+  // Started from scratch: its warm-up is asked again.
+  const profile = loadProfile(store);
+  if (profile) {
+    saveProfile(store, forgetWarmup(profile, exerciseId));
   }
 }

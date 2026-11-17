@@ -1,2639 +1,6067 @@
 {
-  "id": "bac2022c-ex4",
-  "contentVersion": "ex4-0.1.0",
-  "reviewed": false,
-  "title": {
-    "fr": "Exercice 4 : étude d'une fonction",
-    "ar": [
-      {
-        "ar": "تمرين دراسة الدالة"
-      }
-    ]
-  },
-  "number": 4,
-  "subject": "analysis",
-  "section": "mathematiques",
-  "statement": {
-    "fr": "Soit f la fonction définie sur ℝ par f(x) = eˣ / (1 + e²ˣ). On note (ζ) sa courbe représentative dans un repère orthonormé (O, i⃗, j⃗).",
-    "math": "f(x)=\\frac{e^{x}}{1+e^{2x}}"
-  },
-  "paper": {
-    "source": "Examen du baccalauréat · Session de contrôle 2022 · Mathématiques",
-    "points": 7,
-    "parts": [
-      {
-        "heading": {
-          "fr": "Partie A"
-        },
-        "questions": [
-          {
-            "id": "A1",
-            "label": "1",
-            "wording": [
-              {
-                "fr": "Montrer que f est paire."
-              }
-            ],
-            "status": "available"
-          },
-          {
-            "id": "A2",
-            "label": "2",
-            "wording": [
-              {
-                "fr": "Montrer que",
-                "math": "\\lim_{x\\to+\\infty} f(x) = 0"
-              },
-              {
-                "fr": "Interpréter."
-              }
-            ],
-            "status": "soon"
-          },
-          {
-            "id": "A3",
-            "label": "3",
-            "subs": [
-              {
-                "label": "a",
-                "wording": [
-                  {
-                    "fr": "Montrer que, pour tout réel x,",
-                    "math": "f'(x)=\\frac{(1-e^{2x})e^{x}}{(1+e^{2x})^{2}}"
-                  }
-                ]
-              },
-              {
-                "label": "b",
-                "wording": [
-                  {
-                    "fr": "Dresser le tableau de variation de f."
-                  }
-                ]
-              }
-            ],
-            "status": "soon"
-          },
-          {
-            "id": "A4",
-            "label": "4",
-            "wording": [
-              {
-                "fr": "Tracer (ζ)."
-              }
-            ],
-            "status": "soon"
-          }
-        ]
-      },
-      {
-        "heading": {
-          "fr": "Partie B"
-        },
-        "intro": [
-          {
-            "fr": "Soit F la fonction définie sur ]0, +∞[ par",
-            "math": "F(x)=\\int_{0}^{\\ln x} f(t)\\,dt"
-          }
-        ],
-        "questions": [
-          {
-            "id": "B1",
-            "label": "1",
-            "wording": [
-              {
-                "fr": "Montrer que F est dérivable sur ]0, +∞[ et calculer F'(x) pour tout x > 0."
-              }
-            ],
-            "status": "soon"
-          },
-          {
-            "id": "B2",
-            "label": "2",
-            "subs": [
-              {
-                "label": "a",
-                "wording": [
-                  {
-                    "fr": "Montrer que la fonction g définie par g(x) = tan x est une bijection de ]0, π/2[ sur ]0, +∞[. On note g⁻¹ la fonction réciproque de g."
-                  }
-                ]
-              },
-              {
-                "label": "b",
-                "wording": [
-                  {
-                    "fr": "Déterminer g⁻¹(1) et lim g⁻¹(x) quand x → +∞."
-                  }
-                ]
-              },
-              {
-                "label": "c",
-                "wording": [
-                  {
-                    "fr": "Montrer que g⁻¹ est dérivable sur ]0, +∞[ et que (g⁻¹)'(x) = 1 / (1 + x²), pour tout x > 0."
-                  }
-                ]
-              }
-            ],
-            "status": "soon"
-          },
-          {
-            "id": "B3",
-            "label": "3",
-            "wording": [
-              {
-                "fr": "Montrer que F(x) = g⁻¹(x) − π/4, pour tout x > 0."
-              }
-            ],
-            "status": "soon"
-          },
-          {
-            "id": "B4",
-            "label": "4",
-            "wording": [
-              {
-                "fr": "Soit λ > 0. On désigne par A(λ) l'aire de la partie du plan limitée par la courbe (ζ), l'axe des abscisses et les droites d'équations x = −λ et x = λ."
-              }
-            ],
-            "subs": [
-              {
-                "label": "a",
-                "wording": [
-                  {
-                    "fr": "Montrer que",
-                    "math": "A(\\lambda) = 2F(e^{\\lambda})"
-                  }
-                ]
-              },
-              {
-                "label": "b",
-                "wording": [
-                  {
-                    "fr": "Déterminer lim A(λ) quand λ → +∞."
-                  }
-                ]
-              }
-            ],
-            "status": "soon"
-          }
-        ]
-      },
-      {
-        "heading": {
-          "fr": "Partie C"
-        },
-        "intro": [
-          {
-            "fr": "Pour tout n ∈ ℕ*, on pose",
-            "math": "I_{n} = \\int_{0}^{1} t^{n} F(e^{t})\\,dt"
-          }
-        ],
-        "questions": [
-          {
-            "id": "C1",
-            "label": "1",
-            "subs": [
-              {
-                "label": "a",
-                "wording": [
-                  {
-                    "fr": "Montrer que pour tout réel t ≥ 0,",
-                    "math": "0 \\le F(e^{t}) \\le \\frac{\\pi}{4}"
-                  }
-                ]
-              },
-              {
-                "label": "b",
-                "wording": [
-                  {
-                    "fr": "En déduire",
-                    "math": "\\lim I_{n}"
-                  }
-                ]
-              }
-            ],
-            "status": "soon"
-          },
-          {
-            "id": "C2",
-            "label": "2",
-            "subs": [
-              {
-                "label": "a",
-                "wording": [
-                  {
-                    "fr": "À l'aide d'une intégration par parties, montrer que",
-                    "math": "I_{n} = \\frac{F(e)}{n+1} - \\frac{1}{n+1} \\times \\int_{0}^{1} t^{n+1} f(t)\\,dt"
-                  }
-                ]
-              },
-              {
-                "label": "b",
-                "wording": [
-                  {
-                    "fr": "En déduire que",
-                    "math": "\\lim n I_{n} = g^{-1}(e) - \\frac{\\pi}{4}"
-                  }
-                ]
-              }
-            ],
-            "status": "soon"
-          }
-        ]
-      }
-    ]
-  },
-  "results": [
-    {
-      "id": "f_even",
-      "statement": {
-        "fr": "f est paire"
-      }
-    }
-  ],
-  "deepDives": [
-    {
-      "id": "exp_product",
-      "blockId": "dd-a1-exp",
-      "trust": {
-        "reviewed": false,
-        "contentVersion": "ex4-0.1.0",
-        "source": "authored",
-        "status": "ok"
-      },
-      "blocks": [
-        {
-          "type": "tutor_text",
-          "blockId": "dd-a1-exp-1",
-          "trust": {
-            "reviewed": false,
-            "contentVersion": "ex4-0.1.0",
-            "source": "authored",
-            "status": "ok"
-          },
-          "text": {
-            "ar": [
-              {
-                "ar": "كي نضربو "
-              },
-              {
-                "fr": "puissances"
-              },
-              {
-                "ar": " متاع "
-              },
-              {
-                "fr": "e"
-              },
-              {
-                "ar": "، نجمعو الأسس:"
-              }
-            ]
-          }
-        },
-        {
-          "type": "math",
-          "blockId": "dd-a1-exp-2",
-          "trust": {
-            "reviewed": false,
-            "contentVersion": "ex4-0.1.0",
-            "source": "authored",
-            "status": "ok"
-          },
-          "latex": "e^{a} \\times e^{b} = e^{a+b}"
-        },
-        {
-          "type": "component",
-          "blockId": "dd-a1-exp-c",
-          "trust": {
-            "reviewed": false,
-            "contentVersion": "ex4-0.1.0",
-            "source": "authored",
-            "status": "ok"
-          },
-          "spec": {
-            "component": "NumericTwin",
-            "props": {
-              "symbol": "u",
-              "template": "e^(-u)*e^(2u)",
-              "compare": "e^u",
-              "values": [
-                1,
-                2,
-                3
-              ],
-              "label": {
-                "ar": [
-                  {
-                    "ar": "جرّب بأعداد: الزوز يعطيو نفس القيمة؟"
-                  }
-                ]
-              }
-            }
-          }
-        }
-      ],
-      "mini": {
-        "id": "mini",
-        "blockId": "dd-a1-exp-mini",
-        "trust": {
-          "reviewed": false,
-          "contentVersion": "ex4-0.1.0",
-          "source": "authored",
-          "status": "ok"
-        },
-        "skills": [
-          "exp-rules"
-        ],
-        "kind": "choice",
-        "prompt": {
-          "ar": [
-            {
-              "ar": "قدّاش يعطي الجداء هذا؟"
-            }
-          ],
-          "math": "e^{-x} \\times e^{2x}"
-        },
-        "options": [
-          {
-            "id": "ex",
-            "label": {
-              "math": "e^{x}"
-            }
-          },
-          {
-            "id": "e2x2",
-            "label": {
-              "math": "e^{-2x^{2}}"
-            },
-            "misconceptionId": "exponent_rules_gap"
-          },
-          {
-            "id": "em2x",
-            "label": {
-              "math": "e^{-2x}"
-            },
-            "misconceptionId": "exponent_rules_gap"
-          }
-        ],
-        "answer": {
-          "type": "option",
-          "id": "ex"
-        },
-        "hints": [
-          {
-            "ar": [
-              {
-                "ar": "اجمع الأسس:"
-              }
-            ],
-            "math": "-x + 2x"
-          }
-        ]
-      }
-    },
-    {
-      "id": "parity_meaning",
-      "blockId": "dd-a1-par",
-      "trust": {
-        "reviewed": false,
-        "contentVersion": "ex4-0.1.0",
-        "source": "authored",
-        "status": "ok"
-      },
-      "blocks": [
-        {
-          "type": "tutor_text",
-          "blockId": "dd-a1-par-1",
-          "trust": {
-            "reviewed": false,
-            "contentVersion": "ex4-0.1.0",
-            "source": "authored",
-            "status": "ok"
-          },
-          "text": {
-            "ar": [
-              {
-                "ar": "دالة "
-              },
-              {
-                "fr": "paire"
-              },
-              {
-                "ar": ": كي تطوي الرسم على المحور العمودي، النصين يجيو فوق بعضهم."
-              }
-            ]
-          }
-        },
-        {
-          "type": "component",
-          "blockId": "dd-a1-par-c",
-          "trust": {
-            "reviewed": false,
-            "contentVersion": "ex4-0.1.0",
-            "source": "authored",
-            "status": "ok"
-          },
-          "spec": {
-            "component": "FoldSymmetry",
-            "props": {
-              "fn": "f_ex4",
-              "compareFn": "sigmoid_demo"
-            }
-          }
-        }
-      ],
-      "mini": {
-        "id": "mini",
-        "blockId": "dd-a1-par-mini",
-        "trust": {
-          "reviewed": false,
-          "contentVersion": "ex4-0.1.0",
-          "source": "authored",
-          "status": "ok"
-        },
-        "skills": [
-          "function-parity"
-        ],
-        "kind": "choice",
-        "prompt": {
-          "ar": [
-            {
-              "ar": "دالة منحناها متناظر بالنسبة للمحور العمودي، هي:"
-            }
-          ]
-        },
-        "options": [
-          {
-            "id": "paire",
-            "label": {
-              "fr": "paire"
-            }
-          },
-          {
-            "id": "impaire",
-            "label": {
-              "fr": "impaire"
-            },
-            "misconceptionId": "parity_odd_even_confusion"
-          }
-        ],
-        "answer": {
-          "type": "option",
-          "id": "paire"
-        },
-        "hints": [
-          {
-            "ar": [
-              {
-                "ar": "فكّر في "
-              },
-              {
-                "fr": "x²"
-              },
-              {
-                "ar": ": نفس القيمة في "
-              },
-              {
-                "fr": "2"
-              },
-              {
-                "ar": " و "
-              },
-              {
-                "fr": "−2"
-              },
-              {
-                "ar": "."
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "id": "domain_symmetric",
-      "blockId": "dd-a1-dom",
-      "trust": {
-        "reviewed": false,
-        "contentVersion": "ex4-0.1.0",
-        "source": "authored",
-        "status": "ok"
-      },
-      "blocks": [
-        {
-          "type": "tutor_text",
-          "blockId": "dd-a1-dom-1",
-          "trust": {
-            "reviewed": false,
-            "contentVersion": "ex4-0.1.0",
-            "source": "authored",
-            "status": "ok"
-          },
-          "text": {
-            "ar": [
-              {
-                "ar": "مجموعة متناظرة حول الصفر معناها: كل عدد فيها، المقابل متاعو زادة فيها. الأعداد السالبة ما تمنعش، المهمّ يجيو بالزوز."
-              }
-            ]
-          }
-        },
-        {
-          "type": "math",
-          "blockId": "dd-a1-dom-2",
-          "trust": {
-            "reviewed": false,
-            "contentVersion": "ex4-0.1.0",
-            "source": "authored",
-            "status": "ok"
-          },
-          "latex": "x \\in D \\Rightarrow -x \\in D"
-        }
-      ],
-      "mini": {
-        "id": "mini",
-        "blockId": "dd-a1-dom-mini",
-        "trust": {
-          "reviewed": false,
-          "contentVersion": "ex4-0.1.0",
-          "source": "authored",
-          "status": "ok"
-        },
-        "skills": [
-          "domain-symmetric"
-        ],
-        "kind": "choice",
-        "prompt": {
-          "ar": [
-            {
-              "ar": "المجال هذا متناظر حول الصفر؟"
-            }
-          ],
-          "math": "D = [-2\\,;\\,5]"
-        },
-        "options": [
-          {
-            "id": "no",
-            "label": {
-              "ar": [
-                {
-                  "ar": "لا: فيه "
-                },
-                {
-                  "fr": "5"
-                },
-                {
-                  "ar": " أما موش فيه "
-                },
-                {
-                  "fr": "−5"
-                },
-                {
-                  "ar": "."
-                }
-              ]
-            }
-          },
-          {
-            "id": "yes",
-            "label": {
-              "ar": [
-                {
-                  "ar": "إيه: فيها أعداد سالبة وموجبة."
-                }
-              ]
-            },
-            "misconceptionId": "domain_symmetry_meaning"
-          }
-        ],
-        "answer": {
-          "type": "option",
-          "id": "no"
-        },
-        "hints": [
-          {
-            "ar": [
-              {
-                "ar": "خوذ "
-              },
-              {
-                "fr": "x = 5"
-              },
-              {
-                "ar": ": هو في "
-              },
-              {
-                "fr": "D"
-              },
-              {
-                "ar": "؟ والمقابل متاعو؟"
-              }
-            ]
-          },
-          {
-            "ar": [
-              {
-                "ar": "المقابل متاع "
-              },
-              {
-                "fr": "5"
-              },
-              {
-                "ar": " هو "
-              },
-              {
-                "fr": "−5"
-              },
-              {
-                "ar": "، و "
-              },
-              {
-                "fr": "−5"
-              },
-              {
-                "ar": " موش في "
-              },
-              {
-                "fr": "D"
-              },
-              {
-                "ar": "."
-              }
-            ]
-          }
-        ]
-      }
-    }
-  ],
-  "parts": [
-    {
-      "id": "A1",
-      "goal": {
-        "fr": "Montrer que f est paire."
-      },
-      "expected": "f_even",
-      "uses": [],
-      "methodId": "parity",
-      "groups": [
-        {
-          "id": "domain",
-          "steps": [
-            {
-              "id": "s1",
-              "blockId": "a1-s1",
-              "trust": {
-                "reviewed": false,
-                "contentVersion": "ex4-0.1.0",
-                "source": "authored",
-                "status": "ok"
-              },
-              "skills": [
-                "function-parity"
-              ],
-              "kind": "text",
-              "text": {
-                "ar": [
-                  {
-                    "ar": "دالة "
-                  },
-                  {
-                    "fr": "paire"
-                  },
-                  {
-                    "ar": " معناها زوز حاجات: الـ "
-                  },
-                  {
-                    "fr": "domaine"
-                  },
-                  {
-                    "ar": " متاعها متناظر حول الصفر، والصورة متاع "
-                  },
-                  {
-                    "fr": "−x"
-                  },
-                  {
-                    "ar": " هي نفس الصورة متاع "
-                  },
-                  {
-                    "fr": "x"
-                  },
-                  {
-                    "ar": "."
-                  }
-                ]
-              },
-              "asks": {
-                "explain": [
-                  {
-                    "ar": [
-                      {
-                        "ar": "كي تطوي الرسم على المحور العمودي، النص الأيسر يجي فوق النص الأيمن بالضبط."
-                      }
-                    ]
-                  }
-                ],
-                "example": [
-                  {
-                    "ar": [
-                      {
-                        "ar": "مثال معروف: المربّع."
-                      }
-                    ],
-                    "math": "(-x)^{2} = x^{2}"
-                  }
-                ]
-              }
-            },
-            {
-              "id": "s2",
-              "blockId": "a1-s2",
-              "trust": {
-                "reviewed": false,
-                "contentVersion": "ex4-0.1.0",
-                "source": "authored",
-                "status": "ok"
-              },
-              "skills": [
-                "domain-symmetric"
-              ],
-              "kind": "math",
-              "latex": "x \\in \\mathbb{R} \\Rightarrow -x \\in \\mathbb{R}"
-            },
-            {
-              "id": "s3",
-              "blockId": "a1-s3",
-              "trust": {
-                "reviewed": false,
-                "contentVersion": "ex4-0.1.0",
-                "source": "authored",
-                "status": "ok"
-              },
-              "skills": [
-                "domain-symmetric",
-                "writing-domain-check"
-              ],
-              "kind": "choice",
-              "prompt": {
-                "ar": [
-                  {
-                    "ar": "أوّل حاجة: الـ "
-                  },
-                  {
-                    "fr": "domaine"
-                  },
-                  {
-                    "ar": " متاع "
-                  },
-                  {
-                    "fr": "f"
-                  },
-                  {
-                    "ar": " متناظر؟"
-                  }
-                ]
-              },
-              "options": [
-                {
-                  "id": "yes",
-                  "label": {
-                    "ar": [
-                      {
-                        "ar": "إيه: كل عدد حقيقي، المقابل متاعو زادة عدد حقيقي."
-                      }
-                    ]
-                  }
-                },
-                {
-                  "id": "no_negative",
-                  "label": {
-                    "ar": [
-                      {
-                        "ar": "لا: خاطر فيه أعداد سالبة."
-                      }
-                    ]
-                  },
-                  "misconceptionId": "domain_symmetry_meaning"
-                },
-                {
-                  "id": "not_needed",
-                  "label": {
-                    "ar": [
-                      {
-                        "ar": "موش لازم نثبّتو فيه."
-                      }
-                    ]
-                  },
-                  "misconceptionId": "domain_check_skipped"
-                }
-              ],
-              "answer": {
-                "type": "option",
-                "id": "yes"
-              },
-              "hints": [
-                {
-                  "ar": [
-                    {
-                      "ar": "متناظر حول الصفر معناها: كل ما "
-                    },
-                    {
-                      "fr": "x"
-                    },
-                    {
-                      "ar": " فيه، "
-                    },
-                    {
-                      "fr": "−x"
-                    },
-                    {
-                      "ar": " زادة فيه."
-                    }
-                  ]
-                },
-                {
-                  "ar": [
-                    {
-                      "ar": "الـ "
-                    },
-                    {
-                      "fr": "domaine"
-                    },
-                    {
-                      "ar": " هنا هو الأعداد الحقيقية الكل."
-                    }
-                  ],
-                  "math": "D_f = \\mathbb{R}"
-                }
-              ],
-              "solutionPhrases": {
-                "fr": [
-                  "−x est aussi un réel",
-                  "est bien symétrique"
-                ],
-                "ar": [
-                  "المقابل متاعو زادة",
-                  "زادة عدد حقيقي"
-                ]
-              },
-              "deepDiveId": "domain_symmetric"
-            }
-          ]
-        },
-        {
-          "id": "picture",
-          "steps": [
-            {
-              "id": "s4",
-              "blockId": "a1-s4",
-              "trust": {
-                "reviewed": false,
-                "contentVersion": "ex4-0.1.0",
-                "source": "authored",
-                "status": "ok"
-              },
-              "skills": [
-                "function-parity"
-              ],
-              "kind": "component",
-              "component": {
-                "component": "PredictReveal",
-                "props": {
-                  "prompt": {
-                    "ar": [
-                      {
-                        "ar": "قبل ما نحسبو: كي نبدّلو "
-                      },
-                      {
-                        "fr": "x"
-                      },
-                      {
-                        "ar": " بـ "
-                      },
-                      {
-                        "fr": "−x"
-                      },
-                      {
-                        "ar": "، الصورة شنوّة يصيرلها؟"
-                      }
-                    ]
-                  },
-                  "options": [
-                    {
-                      "id": "same",
-                      "label": {
-                        "math": "f(-x) = f(x)"
-                      }
-                    },
-                    {
-                      "id": "opposite",
-                      "label": {
-                        "math": "f(-x) = -f(x)"
-                      }
-                    },
-                    {
-                      "id": "none",
-                      "label": {
-                        "ar": [
-                          {
-                            "ar": "ما فمّا حتى علاقة"
-                          }
-                        ]
-                      }
-                    }
-                  ],
-                  "reveal": {
-                    "component": "PointOnCurve",
-                    "props": {
-                      "fn": "f_ex4",
-                      "compareFn": "sigmoid_demo"
-                    }
-                  },
-                  "insight": {
-                    "ar": [
-                      {
-                        "ar": "في الرسم النقطتين عندهم نفس الارتفاع. أما الرسم موش برهان: نحسبو "
-                      },
-                      {
-                        "fr": "f(−x)"
-                      },
-                      {
-                        "ar": " باش نثبّتو."
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          ]
-        },
-        {
-          "id": "compute",
-          "steps": [
-            {
-              "id": "s5",
-              "blockId": "a1-s5",
-              "trust": {
-                "reviewed": false,
-                "contentVersion": "ex4-0.1.0",
-                "source": "authored",
-                "status": "ok"
-              },
-              "skills": [
-                "function-parity"
-              ],
-              "kind": "text",
-              "text": {
-                "ar": [
-                  {
-                    "ar": "نبدّلو كل "
-                  },
-                  {
-                    "fr": "x"
-                  },
-                  {
-                    "ar": " بـ "
-                  },
-                  {
-                    "fr": "(−x)"
-                  },
-                  {
-                    "ar": " في العبارة متاع "
-                  },
-                  {
-                    "fr": "f"
-                  },
-                  {
-                    "ar": ":"
-                  }
-                ]
-              }
-            },
-            {
-              "id": "s6",
-              "blockId": "a1-s6",
-              "trust": {
-                "reviewed": false,
-                "contentVersion": "ex4-0.1.0",
-                "source": "authored",
-                "status": "ok"
-              },
-              "skills": [
-                "function-parity"
-              ],
-              "kind": "math",
-              "latex": "f(-x) = \\frac{e^{-x}}{1+e^{2(-x)}} = \\frac{e^{-x}}{1+e^{-2x}}"
-            },
-            {
-              "id": "s7",
-              "blockId": "a1-s7",
-              "trust": {
-                "reviewed": false,
-                "contentVersion": "ex4-0.1.0",
-                "source": "authored",
-                "status": "ok"
-              },
-              "skills": [
-                "function-parity"
-              ],
-              "kind": "text",
-              "text": {
-                "ar": [
-                  {
-                    "ar": "حطّ الهدف قدّامك وسأل روحك: شنوّة المختلف؟ هوني الأسس سالبين، والهدف فيه أسس موجبين."
-                  }
-                ]
-              }
-            },
-            {
-              "id": "s8",
-              "blockId": "a1-s8",
-              "trust": {
-                "reviewed": false,
-                "contentVersion": "ex4-0.1.0",
-                "source": "authored",
-                "status": "ok"
-              },
-              "skills": [
-                "function-parity",
-                "exp-rules",
-                "writing-parentheses"
-              ],
-              "kind": "lines",
-              "prompt": {
-                "ar": [
-                  {
-                    "ar": "بسّط "
-                  },
-                  {
-                    "fr": "f(−x)"
-                  },
-                  {
-                    "ar": " سطر بسطر حتى توصل للعبارة متاع "
-                  },
-                  {
-                    "fr": "f(x)"
-                  },
-                  {
-                    "ar": "."
-                  }
-                ]
-              },
-              "hints": [
-                {
-                  "ar": [
-                    {
-                      "ar": "قارن مع الهدف: نحبّو الأسس يوليو موجبين. بأشنوّة نضربو الـ "
-                    },
-                    {
-                      "fr": "numérateur"
-                    },
-                    {
-                      "ar": " والـ "
-                    },
-                    {
-                      "fr": "dénominateur"
-                    },
-                    {
-                      "ar": "؟"
-                    }
-                  ]
-                },
-                {
-                  "ar": [
-                    {
-                      "ar": "اضرب الـ "
-                    },
-                    {
-                      "fr": "numérateur"
-                    },
-                    {
-                      "ar": " والـ "
-                    },
-                    {
-                      "fr": "dénominateur"
-                    },
-                    {
-                      "ar": " في نفس العدد:"
-                    }
-                  ],
-                  "math": "e^{2x}"
-                },
-                {
-                  "ar": [
-                    {
-                      "ar": "القاعدة اللي تلزمك:"
-                    }
-                  ],
-                  "math": "e^{a} \\times e^{b} = e^{a+b}"
-                }
-              ],
-              "solutionPhrases": {
-                "fr": [
-                  "e puissance x sur un plus e puissance deux x",
-                  "e puissance x sur 1 plus e puissance 2x"
-                ],
-                "ar": [
-                  "على واحد زائد",
-                  "على واحد زايد"
-                ]
-              },
-              "variables": [
-                "x"
-              ],
-              "goal": "(e^x)/(1+e^(2x))",
-              "goalIs": {
-                "fn": "f_ex4",
-                "transform": "id"
-              },
-              "start": "(e^(-x))/(1+e^(-2x))",
-              "startIs": {
-                "fn": "f_ex4",
-                "transform": "neg"
-              },
-              "lhs": "f(-x)",
-              "goalLatex": "f(x)=\\frac{e^{x}}{1+e^{2x}}",
-              "knownWrong": [
-                {
-                  "expr": "(e^(-2x))/(e^(2x)+1)",
-                  "misconceptionId": "exponent_rules_gap",
-                  "meant": "(e^x)/(e^(2x)+1)"
-                },
-                {
-                  "expr": "(e^x)/2",
-                  "misconceptionId": "distribution_partial",
-                  "meant": "(e^x)/(e^(2x)+1)"
-                }
-              ],
-              "keys": [
-                "x",
-                "e",
-                "frac",
-                "pow",
-                "group",
-                "+",
-                "-",
-                "*",
-                "1",
-                "2"
-              ],
-              "deepDiveId": "exp_product"
-            }
-          ]
-        },
-        {
-          "id": "conclude",
-          "steps": [
-            {
-              "id": "s9",
-              "blockId": "a1-s9",
-              "trust": {
-                "reviewed": false,
-                "contentVersion": "ex4-0.1.0",
-                "source": "authored",
-                "status": "ok"
-              },
-              "skills": [
-                "function-parity",
-                "writing-conclusion"
-              ],
-              "kind": "choice",
-              "prompt": {
-                "ar": [
-                  {
-                    "ar": "وصلنا لـ "
-                  },
-                  {
-                    "fr": "f(−x) = f(x)"
-                  },
-                  {
-                    "ar": " لكل "
-                  },
-                  {
-                    "fr": "x"
-                  },
-                  {
-                    "ar": " في "
-                  },
-                  {
-                    "fr": "ℝ"
-                  },
-                  {
-                    "ar": ". شنوّة نستنتجو؟"
-                  }
-                ]
-              },
-              "options": [
-                {
-                  "id": "paire",
-                  "parity": "even",
-                  "label": {
-                    "fr": "f est paire"
-                  }
-                },
-                {
-                  "id": "impaire",
-                  "parity": "odd",
-                  "label": {
-                    "fr": "f est impaire"
-                  },
-                  "misconceptionId": "parity_odd_even_confusion"
-                },
-                {
-                  "id": "nothing",
-                  "label": {
-                    "fr": "on ne peut rien conclure"
-                  },
-                  "misconceptionId": "conclusion_missing"
-                }
-              ],
-              "answer": {
-                "type": "parity",
-                "fn": "f_ex4"
-              },
-              "hints": [
-                {
-                  "ar": [
-                    {
-                      "ar": "دالة "
-                    },
-                    {
-                      "fr": "paire"
-                    },
-                    {
-                      "ar": ": "
-                    },
-                    {
-                      "fr": "f(−x) = f(x)"
-                    },
-                    {
-                      "ar": ". دالة "
-                    },
-                    {
-                      "fr": "impaire"
-                    },
-                    {
-                      "ar": ": "
-                    },
-                    {
-                      "fr": "f(−x) = −f(x)"
-                    },
-                    {
-                      "ar": "."
-                    }
-                  ]
-                }
-              ],
-              "solutionPhrases": {
-                "fr": [
-                  "est paire",
-                  "fonction paire"
-                ],
-                "ar": [
-                  "دالة زوجية",
-                  "زوجية"
-                ]
-              },
-              "deepDiveId": "parity_meaning"
-            },
-            {
-              "id": "s10",
-              "blockId": "a1-s10",
-              "trust": {
-                "reviewed": false,
-                "contentVersion": "ex4-0.1.0",
-                "source": "authored",
-                "status": "ok"
-              },
-              "skills": [
-                "function-parity"
-              ],
-              "kind": "text",
-              "text": {
-                "ar": [
-                  {
-                    "ar": "المعنى في الرسم: المنحنى "
-                  },
-                  {
-                    "fr": "(ζ)"
-                  },
-                  {
-                    "ar": " متناظر بالنسبة للمحور العمودي."
-                  }
-                ]
-              }
-            }
-          ]
-        }
-      ],
-      "writeup": {
-        "elements": [
-          "domain_symmetric",
-          "f_minus_x",
-          "simplify",
-          "conclusion"
-        ],
-        "modelFr": [
-          "L'ensemble de définition ℝ est symétrique par rapport à 0 : pour tout réel x, −x ∈ ℝ.",
-          "Pour tout réel x : f(−x) = e⁻ˣ / (1 + e⁻²ˣ).",
-          "En multipliant le numérateur et le dénominateur par e²ˣ : f(−x) = (e⁻ˣ · e²ˣ) / ((1 + e⁻²ˣ) · e²ˣ) = eˣ / (e²ˣ + 1) = f(x).",
-          "Donc f est paire."
-        ]
-      },
-      "askChips": [
-        {
-          "id": "why_e2x",
-          "label": {
-            "ar": [
-              {
-                "ar": "علاش نضربو في هذا؟"
-              }
-            ],
-            "math": "e^{2x}"
-          },
-          "answer": [
-            {
-              "ar": [
-                {
-                  "ar": "باش الأسس السالبين يوليو موجبين، كيف الهدف:"
-                }
-              ]
-            },
-            {
-              "math": "e^{-x} \\times e^{2x} = e^{x}"
-            }
-          ]
-        },
-        {
-          "id": "what_paire",
-          "label": {
-            "ar": [
-              {
-                "ar": "شنوّة معناها "
-              },
-              {
-                "fr": "paire"
-              },
-              {
-                "ar": "؟"
-              }
-            ]
-          },
-          "answer": [
-            {
-              "ar": [
-                {
-                  "ar": "الصورة متاع "
-                },
-                {
-                  "fr": "−x"
-                },
-                {
-                  "ar": " هي نفس الصورة متاع "
-                },
-                {
-                  "fr": "x"
-                },
-                {
-                  "ar": ":"
-                }
-              ]
-            },
-            {
-              "math": "f(-x) = f(x)"
-            }
-          ]
-        },
-        {
-          "id": "why_domain",
-          "label": {
-            "ar": [
-              {
-                "ar": "علاش نثبّتو في الـ "
-              },
-              {
-                "fr": "domaine"
-              },
-              {
-                "ar": "؟"
-              }
-            ]
-          },
-          "answer": [
-            {
-              "ar": [
-                {
-                  "ar": "كان الـ "
-                },
-                {
-                  "fr": "domaine"
-                },
-                {
-                  "ar": " موش متناظر، "
-                },
-                {
-                  "fr": "f(−x)"
-                },
-                {
-                  "ar": " ما يكونش معرّف لكل "
-                },
-                {
-                  "fr": "x"
-                },
-                {
-                  "ar": "، وما نجموش نقارنو."
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    }
-  ],
-  "variants": [
-    {
-      "id": "alt-A1-s8-twin",
-      "blockId": "var-alt-A1-s8-twin",
-      "trust": {
-        "reviewed": false,
-        "contentVersion": "ex4-0.1.0",
-        "source": "authored",
-        "status": "ok"
-      },
-      "kind": "alternative",
-      "forSteps": [
-        "A1/s8"
-      ],
-      "representation": "NumericTwin",
-      "intro": [
-        {
-          "type": "tutor_text",
-          "blockId": "var-alt-A1-s8-twin-t",
-          "trust": {
-            "reviewed": false,
-            "contentVersion": "ex4-0.1.0",
-            "source": "authored",
-            "status": "ok"
-          },
-          "text": {
-            "ar": [
-              {
-                "ar": "سمّي "
-              },
-              {
-                "fr": "u = eˣ"
-              },
-              {
-                "ar": ". إذن "
-              },
-              {
-                "fr": "e⁻ˣ = 1/u"
-              },
-              {
-                "ar": " و "
-              },
-              {
-                "fr": "e⁻²ˣ = 1/u²"
-              },
-              {
-                "ar": "."
-              }
-            ]
-          }
-        },
-        {
-          "type": "component",
-          "blockId": "var-alt-A1-s8-twin-c",
-          "trust": {
-            "reviewed": false,
-            "contentVersion": "ex4-0.1.0",
-            "source": "authored",
-            "status": "ok"
-          },
-          "spec": {
-            "component": "NumericTwin",
-            "props": {
-              "symbol": "u",
-              "template": "(1/u)/(1+1/u^2)",
-              "compare": "u/(1+u^2)",
-              "values": [
-                1,
-                2,
-                5
-              ]
-            }
-          }
-        }
-      ],
-      "step": {
-        "id": "alt-A1-s8-twin-s",
-        "blockId": "var-alt-A1-s8-twin-s",
-        "trust": {
-          "reviewed": false,
-          "contentVersion": "ex4-0.1.0",
-          "source": "authored",
-          "status": "ok"
-        },
-        "skills": [
-          "exp-rules"
-        ],
-        "kind": "choice",
-        "prompt": {
-          "ar": [
-            {
-              "ar": "بـ "
-            },
-            {
-              "fr": "u"
-            },
-            {
-              "ar": "، العبارة هذي تولّي:"
-            }
-          ],
-          "math": "\\frac{1/u}{1+1/u^{2}}"
-        },
-        "options": [
-          {
-            "id": "good",
-            "label": {
-              "math": "\\frac{u}{1+u^{2}}"
-            }
-          },
-          {
-            "id": "bad1",
-            "label": {
-              "math": "\\frac{1}{u+u^{2}}"
-            },
-            "misconceptionId": "complex_fraction_gap"
-          },
-          {
-            "id": "bad2",
-            "label": {
-              "math": "\\frac{u^{2}}{1+u}"
-            },
-            "misconceptionId": "complex_fraction_gap"
-          }
-        ],
-        "answer": {
-          "type": "option",
-          "id": "good"
-        },
-        "hints": [
-          {
-            "ar": [
-              {
-                "ar": "اضرب الفوق واللوطة في "
-              },
-              {
-                "fr": "u²"
-              },
-              {
-                "ar": "."
-              }
-            ]
-          }
-        ]
-      },
-      "addresses": [
-        "why"
-      ]
-    },
-    {
-      "id": "alt-A1-s8-steps",
-      "blockId": "var-alt-A1-s8-steps",
-      "trust": {
-        "reviewed": false,
-        "contentVersion": "ex4-0.1.0",
-        "source": "authored",
-        "status": "ok"
-      },
-      "kind": "alternative",
-      "forSteps": [
-        "A1/s8"
-      ],
-      "representation": "worked_example",
-      "intro": [
-        {
-          "type": "component",
-          "blockId": "var-alt-A1-s8-steps-c",
-          "trust": {
-            "reviewed": false,
-            "contentVersion": "ex4-0.1.0",
-            "source": "authored",
-            "status": "ok"
-          },
-          "spec": {
-            "component": "StepThrough",
-            "props": {
-              "steps": [
-                {
-                  "text": {
-                    "ar": [
-                      {
-                        "ar": "مثال آخر، أسهل:"
-                      }
-                    ]
-                  },
-                  "math": "k(x) = e^{x} + e^{-x}"
-                },
-                {
-                  "math": "k(-x) = e^{-x} + e^{x}",
-                  "why": {
-                    "ar": [
-                      {
-                        "ar": "بدّلنا كل "
-                      },
-                      {
-                        "fr": "x"
-                      },
-                      {
-                        "ar": " بـ "
-                      },
-                      {
-                        "fr": "−x"
-                      },
-                      {
-                        "ar": "."
-                      }
-                    ]
-                  }
-                },
-                {
-                  "math": "k(-x) = e^{x} + e^{-x} = k(x)",
-                  "why": {
-                    "ar": [
-                      {
-                        "ar": "في الجمع، الترتيب ما يهمّش."
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-          }
-        }
-      ],
-      "step": {
-        "id": "alt-A1-s8-steps-s",
-        "blockId": "var-alt-A1-s8-steps-s",
-        "trust": {
-          "reviewed": false,
-          "contentVersion": "ex4-0.1.0",
-          "source": "authored",
-          "status": "ok"
-        },
-        "skills": [
-          "function-parity",
-          "exp-rules"
-        ],
-        "kind": "choice",
-        "prompt": {
-          "ar": [
-            {
-              "ar": "باش نوصلو من "
-            },
-            {
-              "fr": "f(−x)"
-            },
-            {
-              "ar": " لـ "
-            },
-            {
-              "fr": "f(x)"
-            },
-            {
-              "ar": "، شنوّة نعملو؟"
-            }
-          ]
-        },
-        "options": [
-          {
-            "id": "multiply",
-            "label": {
-              "ar": [
-                {
-                  "ar": "نضربو الـ "
-                },
-                {
-                  "fr": "numérateur"
-                },
-                {
-                  "ar": " والـ "
-                },
-                {
-                  "fr": "dénominateur"
-                },
-                {
-                  "ar": " في "
-                },
-                {
-                  "fr": "e²ˣ"
-                },
-                {
-                  "ar": "."
-                }
-              ]
-            }
-          },
-          {
-            "id": "add",
-            "label": {
-              "ar": [
-                {
-                  "ar": "نزيدو "
-                },
-                {
-                  "fr": "e²ˣ"
-                },
-                {
-                  "ar": " للـ "
-                },
-                {
-                  "fr": "numérateur"
-                },
-                {
-                  "ar": " وبرّة."
-                }
-              ]
-            },
-            "misconceptionId": "domain_vs_target_confusion"
-          },
-          {
-            "id": "again",
-            "label": {
-              "ar": [
-                {
-                  "ar": "نبدّلو "
-                },
-                {
-                  "fr": "x"
-                },
-                {
-                  "ar": " بـ "
-                },
-                {
-                  "fr": "−x"
-                },
-                {
-                  "ar": " مرّة أخرى."
-                }
-              ]
-            },
-            "misconceptionId": "domain_vs_target_confusion"
-          }
-        ],
-        "answer": {
-          "type": "option",
-          "id": "multiply"
-        },
-        "hints": [
-          {
-            "ar": [
-              {
-                "ar": "الهدف فيه أسس موجبين: أنهو عدد نضربو فيه باش "
-              },
-              {
-                "fr": "e⁻ˣ"
-              },
-              {
-                "ar": " يولّي "
-              },
-              {
-                "fr": "eˣ"
-              },
-              {
-                "ar": "؟"
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "id": "alt-A1-s9-fold",
-      "blockId": "var-alt-A1-s9-fold",
-      "trust": {
-        "reviewed": false,
-        "contentVersion": "ex4-0.1.0",
-        "source": "authored",
-        "status": "ok"
-      },
-      "kind": "alternative",
-      "forSteps": [
-        "A1/s9"
-      ],
-      "representation": "FoldSymmetry",
-      "intro": [
-        {
-          "type": "component",
-          "blockId": "var-alt-A1-s9-fold-c",
-          "trust": {
-            "reviewed": false,
-            "contentVersion": "ex4-0.1.0",
-            "source": "authored",
-            "status": "ok"
-          },
-          "spec": {
-            "component": "FoldSymmetry",
-            "props": {
-              "fn": "f_ex4",
-              "compareFn": "sigmoid_demo"
-            }
-          }
-        }
-      ],
-      "step": {
-        "id": "alt-A1-s9-fold-s",
-        "blockId": "var-alt-A1-s9-fold-s",
-        "trust": {
-          "reviewed": false,
-          "contentVersion": "ex4-0.1.0",
-          "source": "authored",
-          "status": "ok"
-        },
-        "skills": [
-          "function-parity"
-        ],
-        "kind": "choice",
-        "prompt": {
-          "ar": [
-            {
-              "ar": "كي طويت، النص الأيسر جا فوق النص الأيمن. شنوّة نقولو على "
-            },
-            {
-              "fr": "f"
-            },
-            {
-              "ar": "؟"
-            }
-          ]
-        },
-        "options": [
-          {
-            "id": "paire",
-            "parity": "even",
-            "label": {
-              "fr": "f est paire"
-            }
-          },
-          {
-            "id": "impaire",
-            "parity": "odd",
-            "label": {
-              "fr": "f est impaire"
-            },
-            "misconceptionId": "parity_odd_even_confusion"
-          }
-        ],
-        "answer": {
-          "type": "parity",
-          "fn": "f_ex4"
-        },
-        "hints": [
-          {
-            "ar": [
-              {
-                "ar": "متناظر بالنسبة للمحور العمودي: "
-              },
-              {
-                "fr": "f(−x) = f(x)"
-              },
-              {
-                "ar": "."
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "id": "tr-A1-g",
-      "blockId": "var-tr-A1-g",
-      "trust": {
-        "reviewed": false,
-        "contentVersion": "ex4-0.1.0",
-        "source": "authored",
-        "status": "ok"
-      },
-      "kind": "transfer",
-      "forSteps": [
-        "A1/s8"
-      ],
-      "representation": "text",
-      "intro": [],
-      "step": {
-        "id": "tr-A1-g-s",
-        "blockId": "var-tr-A1-g-s",
-        "trust": {
-          "reviewed": false,
-          "contentVersion": "ex4-0.1.0",
-          "source": "authored",
-          "status": "ok"
-        },
-        "skills": [
-          "function-parity",
-          "exp-rules"
-        ],
-        "kind": "lines",
-        "prompt": {
-          "ar": [
-            {
-              "ar": "بدّلنا الدالة: بيّن اللي "
-            },
-            {
-              "fr": "g(−x) = g(x)"
-            },
-            {
-              "ar": "."
-            }
-          ],
-          "math": "g(x) = \\frac{e^{2x}}{1+e^{4x}}"
-        },
-        "hints": [
-          {
-            "ar": [
-              {
-                "ar": "نفس الطريقة: اضرب الـ "
-              },
-              {
-                "fr": "numérateur"
-              },
-              {
-                "ar": " والـ "
-              },
-              {
-                "fr": "dénominateur"
-              },
-              {
-                "ar": " في:"
-              }
-            ],
-            "math": "e^{4x}"
-          }
-        ],
-        "solutionPhrases": {
-          "fr": [
-            "e puissance deux x sur un plus e puissance quatre x"
-          ],
-          "ar": [
-            "على واحد زائد",
-            "على واحد زايد"
-          ]
-        },
-        "variables": [
-          "x"
-        ],
-        "goal": "(e^(2x))/(1+e^(4x))",
-        "goalIs": {
-          "fn": "g_ex4_transfer",
-          "transform": "id"
-        },
-        "start": "(e^(-2x))/(1+e^(-4x))",
-        "startIs": {
-          "fn": "g_ex4_transfer",
-          "transform": "neg"
-        },
-        "lhs": "g(-x)",
-        "goalLatex": "g(x)=\\frac{e^{2x}}{1+e^{4x}}",
-        "keys": [
-          "x",
-          "e",
-          "frac",
-          "pow",
-          "group",
-          "+",
-          "-",
-          "*",
-          "1",
-          "2",
-          "4"
-        ]
-      }
-    },
-    {
-      "id": "sim-A1-exp-1",
-      "blockId": "var-sim-A1-exp-1",
-      "trust": {
-        "reviewed": false,
-        "contentVersion": "ex4-0.1.0",
-        "source": "authored",
-        "status": "ok"
-      },
-      "kind": "simpler",
-      "forSteps": [
-        "A1/s8"
-      ],
-      "representation": "text",
-      "intro": [],
-      "step": {
-        "id": "sim-A1-exp-1-s",
-        "blockId": "var-sim-A1-exp-1-s",
-        "trust": {
-          "reviewed": false,
-          "contentVersion": "ex4-0.1.0",
-          "source": "authored",
-          "status": "ok"
-        },
-        "skills": [
-          "exp-rules"
-        ],
-        "kind": "lines",
-        "prompt": {
-          "ar": [
-            {
-              "ar": "أسهل: بسّط الجداء هذا."
-            }
-          ]
-        },
-        "hints": [
-          {
-            "ar": [
-              {
-                "ar": "اجمع الأسس:"
-              }
-            ],
-            "math": "-x + 2x"
-          }
-        ],
-        "variables": [
-          "x"
-        ],
-        "goal": "e^x",
-        "goalIs": {
-          "fn": "f_ex4_num",
-          "transform": "id"
-        },
-        "start": "e^(-x)*e^(2x)",
-        "startIs": {
-          "fn": "f_ex4_num",
-          "transform": "id"
-        },
-        "goalLatex": "e^{x}",
-        "knownWrong": [
-          {
-            "expr": "e^(-2x^2)",
-            "misconceptionId": "exponent_rules_gap",
-            "meant": "e^x"
-          }
-        ],
-        "keys": [
-          "x",
-          "e",
-          "pow",
-          "-",
-          "*",
-          "2"
-        ]
-      },
-      "round": 1
-    },
-    {
-      "id": "sim-A1-den-2",
-      "blockId": "var-sim-A1-den-2",
-      "trust": {
-        "reviewed": false,
-        "contentVersion": "ex4-0.1.0",
-        "source": "authored",
-        "status": "ok"
-      },
-      "kind": "simpler",
-      "forSteps": [
-        "A1/s8"
-      ],
-      "representation": "text",
-      "intro": [],
-      "step": {
-        "id": "sim-A1-den-2-s",
-        "blockId": "var-sim-A1-den-2-s",
-        "trust": {
-          "reviewed": false,
-          "contentVersion": "ex4-0.1.0",
-          "source": "authored",
-          "status": "ok"
-        },
-        "skills": [
-          "exp-rules"
-        ],
-        "kind": "lines",
-        "prompt": {
-          "ar": [
-            {
-              "ar": "أسهل: انشر الجداء هذا."
-            }
-          ]
-        },
-        "hints": [
-          {
-            "ar": [
-              {
-                "ar": "اضرب "
-              },
-              {
-                "fr": "e²ˣ"
-              },
-              {
-                "ar": " في الزوز: في "
-              },
-              {
-                "fr": "1"
-              },
-              {
-                "ar": " وفي "
-              },
-              {
-                "fr": "e⁻²ˣ"
-              },
-              {
-                "ar": "."
-              }
-            ]
-          }
-        ],
-        "variables": [
-          "x"
-        ],
-        "goal": "e^(2x)+1",
-        "goalIs": {
-          "fn": "f_ex4_den",
-          "transform": "id"
-        },
-        "start": "(1+e^(-2x))*e^(2x)",
-        "startIs": {
-          "fn": "f_ex4_den",
-          "transform": "id"
-        },
-        "goalLatex": "e^{2x}+1",
-        "knownWrong": [
-          {
-            "expr": "2",
-            "misconceptionId": "distribution_partial",
-            "meant": "e^(2x)+1"
-          }
-        ],
-        "keys": [
-          "x",
-          "e",
-          "pow",
-          "group",
-          "+",
-          "-",
-          "*",
-          "1",
-          "2"
-        ]
-      },
-      "round": 2
-    },
-    {
-      "id": "pre-exp-neg",
-      "blockId": "var-pre-exp-neg",
-      "trust": {
-        "reviewed": false,
-        "contentVersion": "ex4-0.1.0",
-        "source": "authored",
-        "status": "ok"
-      },
-      "kind": "prerequisite",
-      "forSteps": [],
-      "representation": "text",
-      "intro": [],
-      "step": {
-        "id": "pre-exp-neg-s",
-        "blockId": "var-pre-exp-neg-s",
-        "trust": {
-          "reviewed": false,
-          "contentVersion": "ex4-0.1.0",
-          "source": "authored",
-          "status": "ok"
-        },
-        "skills": [
-          "exp-rules"
-        ],
-        "kind": "choice",
-        "prompt": {
-          "ar": [
-            {
-              "ar": "شنوّة تساوي العبارة هذي؟"
-            }
-          ],
-          "math": "e^{-x}"
-        },
-        "options": [
-          {
-            "id": "inv",
-            "label": {
-              "math": "\\frac{1}{e^{x}}"
-            }
-          },
-          {
-            "id": "neg",
-            "label": {
-              "math": "-e^{x}"
-            },
-            "misconceptionId": "exp_negative_sign"
-          }
-        ],
-        "answer": {
-          "type": "option",
-          "id": "inv"
-        },
-        "hints": [
-          {
-            "ar": [
-              {
-                "ar": "الأس السالب يعطي مقلوب:"
-              }
-            ],
-            "math": "e^{-a} = \\frac{1}{e^{a}}"
-          }
-        ]
-      }
-    },
-    {
-      "id": "pre-domain-sym",
-      "blockId": "var-pre-domain-sym",
-      "trust": {
-        "reviewed": false,
-        "contentVersion": "ex4-0.1.0",
-        "source": "authored",
-        "status": "ok"
-      },
-      "kind": "prerequisite",
-      "forSteps": [],
-      "representation": "text",
-      "intro": [],
-      "step": {
-        "id": "pre-domain-sym-s",
-        "blockId": "var-pre-domain-sym-s",
-        "trust": {
-          "reviewed": false,
-          "contentVersion": "ex4-0.1.0",
-          "source": "authored",
-          "status": "ok"
-        },
-        "skills": [
-          "domain-symmetric"
-        ],
-        "kind": "choice",
-        "prompt": {
-          "ar": [
-            {
-              "ar": "أنهي مجموعة متناظرة حول الصفر؟"
-            }
-          ]
-        },
-        "options": [
-          {
-            "id": "r",
-            "label": {
-              "math": "\\mathbb{R}"
-            }
-          },
-          {
-            "id": "pos",
-            "label": {
-              "math": "[0 ; +\\infty["
-            },
-            "misconceptionId": "domain_symmetry_meaning"
-          },
-          {
-            "id": "other",
-            "label": {
-              "math": "]-1 ; 2]"
-            },
-            "misconceptionId": "domain_symmetry_meaning"
-          }
-        ],
-        "answer": {
-          "type": "option",
-          "id": "r"
-        },
-        "hints": [
-          {
-            "ar": [
-              {
-                "ar": "مجموعة متناظرة: كل عدد فيها، المقابل متاعو زادة فيها."
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "id": "pre-parity",
-      "blockId": "var-pre-parity",
-      "trust": {
-        "reviewed": false,
-        "contentVersion": "ex4-0.1.0",
-        "source": "authored",
-        "status": "ok"
-      },
-      "kind": "prerequisite",
-      "forSteps": [],
-      "representation": "text",
-      "intro": [],
-      "step": {
-        "id": "pre-parity-s",
-        "blockId": "var-pre-parity-s",
-        "trust": {
-          "reviewed": false,
-          "contentVersion": "ex4-0.1.0",
-          "source": "authored",
-          "status": "ok"
-        },
-        "skills": [
-          "function-parity"
-        ],
-        "kind": "choice",
-        "prompt": {
-          "ar": [
-            {
-              "ar": "الدالة هذي "
-            },
-            {
-              "fr": "paire"
-            },
-            {
-              "ar": "؟"
-            }
-          ],
-          "math": "h(x) = x^{2}"
-        },
-        "options": [
-          {
-            "id": "yes",
-            "label": {
-              "ar": [
-                {
-                  "ar": "إيه"
-                }
-              ]
-            }
-          },
-          {
-            "id": "no",
-            "label": {
-              "ar": [
-                {
-                  "ar": "لا"
-                }
-              ]
-            },
-            "misconceptionId": "parity_odd_even_confusion"
-          }
-        ],
-        "answer": {
-          "type": "option",
-          "id": "yes"
-        },
-        "hints": [
-          {
-            "ar": [
-              {
-                "ar": "احسب:"
-              }
-            ],
-            "math": "(-x)^{2}"
-          }
-        ]
-      }
-    },
-    {
-      "id": "alt-A1-s3-values",
-      "blockId": "var-alt-A1-s3-values",
-      "trust": {
-        "reviewed": false,
-        "contentVersion": "ex4-0.1.0",
-        "source": "authored",
-        "status": "ok"
-      },
-      "kind": "alternative",
-      "forSteps": [
-        "A1/s3"
-      ],
-      "representation": "NumericTwin",
-      "intro": [
-        {
-          "type": "tutor_text",
-          "blockId": "var-alt-A1-s3-values-t",
-          "trust": {
-            "reviewed": false,
-            "contentVersion": "ex4-0.1.0",
-            "source": "authored",
-            "status": "ok"
-          },
-          "text": {
-            "ar": [
-              {
-                "ar": "جرّب أعداد سالبة في "
-              },
-              {
-                "fr": "f"
-              },
-              {
-                "ar": ": كل عدد عندو صورة؟"
-              }
-            ]
-          }
-        },
-        {
-          "type": "component",
-          "blockId": "var-alt-A1-s3-values-c",
-          "trust": {
-            "reviewed": false,
-            "contentVersion": "ex4-0.1.0",
-            "source": "authored",
-            "status": "ok"
-          },
-          "spec": {
-            "component": "NumericTwin",
-            "props": {
-              "symbol": "t",
-              "template": "e^t/(1+e^(2t))",
-              "values": [
-                -3,
-                -1,
-                1,
-                3
-              ]
-            }
-          }
-        }
-      ],
-      "step": {
-        "id": "alt-A1-s3-values-s",
-        "blockId": "var-alt-A1-s3-values-s",
-        "trust": {
-          "reviewed": false,
-          "contentVersion": "ex4-0.1.0",
-          "source": "authored",
-          "status": "ok"
-        },
-        "skills": [
-          "domain-symmetric"
-        ],
-        "kind": "choice",
-        "prompt": {
-          "ar": [
-            {
-              "ar": "لقيت صورة لـ "
-            },
-            {
-              "fr": "−3"
-            },
-            {
-              "ar": " و لـ "
-            },
-            {
-              "fr": "3"
-            },
-            {
-              "ar": ". الـ "
-            },
-            {
-              "fr": "domaine"
-            },
-            {
-              "ar": " متاع "
-            },
-            {
-              "fr": "f"
-            },
-            {
-              "ar": " متناظر؟"
-            }
-          ]
-        },
-        "options": [
-          {
-            "id": "yes",
-            "label": {
-              "ar": [
-                {
-                  "ar": "إيه: كل عدد عندو صورة، والمقابل متاعو زادة."
-                }
-              ]
-            }
-          },
-          {
-            "id": "no_negative",
-            "label": {
-              "ar": [
-                {
-                  "ar": "لا: خاطر فيه أعداد سالبة."
-                }
-              ]
-            },
-            "misconceptionId": "domain_symmetry_meaning"
-          }
-        ],
-        "answer": {
-          "type": "option",
-          "id": "yes"
-        },
-        "hints": [
-          {
-            "ar": [
-              {
-                "ar": "العبارة متاع "
-              },
-              {
-                "fr": "f"
-              },
-              {
-                "ar": " تتحسب لكل عدد حقيقي: المقام ديما موجب."
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "id": "sim-A1-s3-int-1",
-      "blockId": "var-sim-A1-s3-int-1",
-      "trust": {
-        "reviewed": false,
-        "contentVersion": "ex4-0.1.0",
-        "source": "authored",
-        "status": "ok"
-      },
-      "kind": "simpler",
-      "forSteps": [
-        "A1/s3"
-      ],
-      "representation": "text",
-      "intro": [],
-      "step": {
-        "id": "sim-A1-s3-int-1-s",
-        "blockId": "var-sim-A1-s3-int-1-s",
-        "trust": {
-          "reviewed": false,
-          "contentVersion": "ex4-0.1.0",
-          "source": "authored",
-          "status": "ok"
-        },
-        "skills": [
-          "domain-symmetric"
-        ],
-        "kind": "choice",
-        "prompt": {
-          "ar": [
-            {
-              "ar": "أسهل: المجال هذا متناظر حول الصفر؟"
-            }
-          ],
-          "math": "[-3\\,;\\,3]"
-        },
-        "options": [
-          {
-            "id": "yes",
-            "label": {
-              "ar": [
-                {
-                  "ar": "إيه: كل عدد فيه، المقابل متاعو زادة فيه."
-                }
-              ]
-            }
-          },
-          {
-            "id": "no_negative",
-            "label": {
-              "ar": [
-                {
-                  "ar": "لا: خاطر فيه أعداد سالبة."
-                }
-              ]
-            },
-            "misconceptionId": "domain_symmetry_meaning"
-          }
-        ],
-        "answer": {
-          "type": "option",
-          "id": "yes"
-        },
-        "hints": [
-          {
-            "ar": [
-              {
-                "ar": "خوذ "
-              },
-              {
-                "fr": "2"
-              },
-              {
-                "ar": ": هو في المجال؟ و "
-              },
-              {
-                "fr": "−2"
-              },
-              {
-                "ar": "؟"
-              }
-            ]
-          }
-        ]
-      },
-      "round": 1
-    }
+ "id": "bac2022c-ex4",
+ "contentVersion": "ex4-1.0.0",
+ "reviewed": false,
+ "title": {
+  "fr": "Exercice 4 : étude d'une fonction",
+  "ar": [
+   {
+    "ar": "تمرين دراسة الدالة"
+   }
   ]
+ },
+ "number": 4,
+ "subject": "analysis",
+ "section": "mathematiques",
+ "statement": {
+  "fr": "Soit f la fonction définie sur ℝ par f(x) = eˣ / (1 + e²ˣ). On note (ζ) sa courbe représentative dans un repère orthonormé (O, i⃗, j⃗).",
+  "math": "f(x)=\\frac{e^{x}}{1+e^{2x}}"
+ },
+ "paper": {
+  "source": "Examen du baccalauréat · Session de contrôle 2022 · Mathématiques",
+  "points": 7,
+  "parts": [
+   {
+    "heading": {
+     "fr": "Partie A"
+    },
+    "questions": [
+     {
+      "id": "A1",
+      "label": "1",
+      "status": "available",
+      "wording": [
+       {
+        "fr": "Montrer que f est paire."
+       }
+      ]
+     },
+     {
+      "id": "A2",
+      "label": "2",
+      "status": "available",
+      "wording": [
+       {
+        "fr": "Montrer que",
+        "math": "\\lim_{x\\to+\\infty} f(x) = 0"
+       },
+       {
+        "fr": "Interpréter."
+       }
+      ]
+     },
+     {
+      "id": "A3a",
+      "label": "3.a",
+      "status": "available",
+      "wording": [
+       {
+        "fr": "Montrer que, pour tout réel x,",
+        "math": "f'(x)=\\frac{(1-e^{2x})e^{x}}{(1+e^{2x})^{2}}"
+       }
+      ]
+     },
+     {
+      "id": "A3b",
+      "label": "3.b",
+      "status": "available",
+      "wording": [
+       {
+        "fr": "Dresser le tableau de variation de f."
+       }
+      ]
+     },
+     {
+      "id": "A4",
+      "label": "4",
+      "status": "available",
+      "wording": [
+       {
+        "fr": "Tracer (ζ)."
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "heading": {
+     "fr": "Partie B"
+    },
+    "intro": [
+     {
+      "fr": "Soit F la fonction définie sur ]0, +∞[ par",
+      "math": "F(x)=\\int_{0}^{\\ln x} f(t)\\,dt"
+     }
+    ],
+    "questions": [
+     {
+      "id": "B1",
+      "label": "1",
+      "wording": [
+       {
+        "fr": "Montrer que F est dérivable sur ]0, +∞[ et calculer F'(x) pour tout x > 0."
+       }
+      ],
+      "status": "soon"
+     },
+     {
+      "id": "B2",
+      "label": "2",
+      "subs": [
+       {
+        "label": "a",
+        "wording": [
+         {
+          "fr": "Montrer que la fonction g définie par g(x) = tan x est une bijection de ]0, π/2[ sur ]0, +∞[. On note g⁻¹ la fonction réciproque de g."
+         }
+        ]
+       },
+       {
+        "label": "b",
+        "wording": [
+         {
+          "fr": "Déterminer g⁻¹(1) et lim g⁻¹(x) quand x → +∞."
+         }
+        ]
+       },
+       {
+        "label": "c",
+        "wording": [
+         {
+          "fr": "Montrer que g⁻¹ est dérivable sur ]0, +∞[ et que (g⁻¹)'(x) = 1 / (1 + x²), pour tout x > 0."
+         }
+        ]
+       }
+      ],
+      "status": "soon"
+     },
+     {
+      "id": "B3",
+      "label": "3",
+      "wording": [
+       {
+        "fr": "Montrer que F(x) = g⁻¹(x) − π/4, pour tout x > 0."
+       }
+      ],
+      "status": "soon"
+     },
+     {
+      "id": "B4",
+      "label": "4",
+      "wording": [
+       {
+        "fr": "Soit λ > 0. On désigne par A(λ) l'aire de la partie du plan limitée par la courbe (ζ), l'axe des abscisses et les droites d'équations x = −λ et x = λ."
+       }
+      ],
+      "subs": [
+       {
+        "label": "a",
+        "wording": [
+         {
+          "fr": "Montrer que",
+          "math": "A(\\lambda) = 2F(e^{\\lambda})"
+         }
+        ]
+       },
+       {
+        "label": "b",
+        "wording": [
+         {
+          "fr": "Déterminer lim A(λ) quand λ → +∞."
+         }
+        ]
+       }
+      ],
+      "status": "soon"
+     }
+    ]
+   },
+   {
+    "heading": {
+     "fr": "Partie C"
+    },
+    "intro": [
+     {
+      "fr": "Pour tout n ∈ ℕ*, on pose",
+      "math": "I_{n} = \\int_{0}^{1} t^{n} F(e^{t})\\,dt"
+     }
+    ],
+    "questions": [
+     {
+      "id": "C1",
+      "label": "1",
+      "subs": [
+       {
+        "label": "a",
+        "wording": [
+         {
+          "fr": "Montrer que pour tout réel t ≥ 0,",
+          "math": "0 \\le F(e^{t}) \\le \\frac{\\pi}{4}"
+         }
+        ]
+       },
+       {
+        "label": "b",
+        "wording": [
+         {
+          "fr": "En déduire",
+          "math": "\\lim I_{n}"
+         }
+        ]
+       }
+      ],
+      "status": "soon"
+     },
+     {
+      "id": "C2",
+      "label": "2",
+      "subs": [
+       {
+        "label": "a",
+        "wording": [
+         {
+          "fr": "À l'aide d'une intégration par parties, montrer que",
+          "math": "I_{n} = \\frac{F(e)}{n+1} - \\frac{1}{n+1} \\times \\int_{0}^{1} t^{n+1} f(t)\\,dt"
+         }
+        ]
+       },
+       {
+        "label": "b",
+        "wording": [
+         {
+          "fr": "En déduire que",
+          "math": "\\lim n I_{n} = g^{-1}(e) - \\frac{\\pi}{4}"
+         }
+        ]
+       }
+      ],
+      "status": "soon"
+     }
+    ]
+   }
+  ]
+ },
+ "values": {
+  "f0": {
+   "fn": "fnAt",
+   "args": {
+    "fn": "f_ex4",
+    "x": 0
+   }
+  }
+ },
+ "results": [
+  {
+   "id": "f_even",
+   "statement": {
+    "fr": "f est paire"
+   }
+  },
+  {
+   "id": "lim_0",
+   "statement": {
+    "math": "\\lim_{x \\to +\\infty} f(x) = 0"
+   }
+  },
+  {
+   "id": "f_prime",
+   "statement": {
+    "math": "f'(x) = \\frac{(1-e^{2x})e^{x}}{(1+e^{2x})^{2}}"
+   }
+  },
+  {
+   "id": "var_table",
+   "statement": {
+    "fr": "Tableau de variation de f"
+   }
+  },
+  {
+   "id": "curve",
+   "statement": {
+    "fr": "Courbe (ζ)"
+   }
+  }
+ ],
+ "parts": [
+  {
+   "id": "A1",
+   "goal": {
+    "fr": "Montrer que f est paire"
+   },
+   "expected": "f_even",
+   "uses": [],
+   "groups": [
+    {
+     "id": "g1",
+     "steps": [
+      {
+       "id": "s1",
+       "blockId": "qex4-A1-s1",
+       "trust": {
+        "reviewed": false,
+        "contentVersion": "ex4-1.0.0",
+        "source": "authored",
+        "status": "ok"
+       },
+       "skills": [
+        "function-parity"
+       ],
+       "kind": "text",
+       "text": {
+        "ar": [
+         {
+          "ar": "نحبّو نورّيو إنّ الدالة "
+         },
+         {
+          "fr": "paire"
+         },
+         {
+          "ar": ": كي نبدّلو المتغيّر بعكسو، القيمة ما تتبدّلش."
+         }
+        ],
+        "math": "f(-x) = f(x)"
+       }
+      },
+      {
+       "trust": {
+        "reviewed": false,
+        "contentVersion": "ex4-1.0.0",
+        "source": "authored",
+        "status": "ok"
+       },
+       "kind": "method",
+       "extras": [],
+       "id": "mA1",
+       "blockId": "qex4-A1-m",
+       "skills": [
+        "domain-symmetric",
+        "function-parity",
+        "exp-rules"
+       ],
+       "opening": {
+        "route": [
+         {
+          "ar": [
+           {
+            "ar": "نبداو بخطة: نرتّبو الخطوات قبل ما نحسبو."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "نتأكدو من المجموعة اللي فيها الدالة معرّفة."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "نعوّضو المتغيّر بعكسو ونبسّطو سطر بسطر."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "نكتبو الخلاصة في الورقة."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "وبعدها نحلّو سؤالين شبيهين وحدنا."
+           }
+          ]
+         }
+        ],
+        "help": {
+         "ar": [
+          {
+           "ar": "كان ما تعرفش، اضغط على «ما نعرفش» ونمشيو بخطوة أصغر."
+          }
+         ]
+        }
+       },
+       "plan": {
+        "short": {
+         "ar": [
+          {
+           "ar": "الخطة"
+          }
+         ]
+        },
+        "header": {
+         "now": {
+          "ar": [
+           {
+            "ar": "نرتّبو الخطوات"
+           }
+          ]
+         },
+         "why": {
+          "ar": [
+           {
+            "ar": "الإثبات عندو ترتيب"
+           }
+          ]
+         },
+         "next": {
+          "ar": [
+           {
+            "ar": "نقراو السؤال"
+           }
+          ]
+         }
+        },
+        "prompt": {
+         "ar": [
+          {
+           "ar": "رتّب الخطوات: شنوّة نعمل الأوّل، وشنوّة بعد؟"
+          }
+         ]
+        },
+        "hints": [
+         {
+          "ar": [
+           {
+            "ar": "قبل ما نحسبو، يلزم نتأكدو من حاجة على المجموعة."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "الخلاصة تجي في الآخر، بعد الحساب."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "ابدا بالمجموعة، ومن بعد الحساب، وفي الآخر الخلاصة."
+           }
+          ]
+         }
+        ],
+        "cards": [
+         {
+          "id": "c_domain",
+          "key": "domain",
+          "short": {
+           "ar": [
+            {
+             "ar": "المجموعة"
+            }
+           ]
+          },
+          "text": {
+           "ar": [
+            {
+             "ar": "نتأكدو إنّ المجموعة متناظرة"
+            }
+           ]
+          },
+          "header": {
+           "now": {
+            "ar": [
+             {
+              "ar": "المجموعة"
+             }
+            ]
+           },
+           "why": {
+            "ar": [
+             {
+              "ar": "عكس كل عدد لازم يكون فيها زادة"
+             }
+            ]
+           },
+           "next": {
+            "ar": [
+             {
+              "ar": "الحساب"
+             }
+            ]
+           }
+          },
+          "needs": [],
+          "prompt": {
+           "ar": [
+            {
+             "ar": "اختار الجملة الصحيحة."
+            }
+           ]
+          },
+          "hints": [
+           {
+            "ar": [
+             {
+              "ar": "كي ناخذو عدد من المجموعة، عكسو موجود فيها؟"
+             }
+            ]
+           },
+           {
+            "ar": [
+             {
+              "ar": "الدالة معرّفة على الأعداد الحقيقية الكل."
+             }
+            ]
+           }
+          ]
+         },
+         {
+          "id": "c_rewrite",
+          "key": "rewrite",
+          "short": {
+           "ar": [
+            {
+             "ar": "الحساب"
+            }
+           ]
+          },
+          "text": {
+           "ar": [
+            {
+             "ar": "نعوّضو ونبسّطو"
+            }
+           ]
+          },
+          "header": {
+           "now": {
+            "ar": [
+             {
+              "ar": "الحساب"
+             }
+            ]
+           },
+           "why": {
+            "ar": [
+             {
+              "ar": "نوصلو من الدالة في العكس للدالة نفسها"
+             }
+            ]
+           },
+           "next": {
+            "ar": [
+             {
+              "ar": "الخلاصة"
+             }
+            ]
+           }
+          },
+          "needs": [
+           "c_domain"
+          ],
+          "prompt": {
+           "ar": [
+            {
+             "ar": "عوّض المتغيّر بعكسو، ومن بعد بسّط سطر بسطر حتى توصل للدالة."
+            }
+           ]
+          },
+          "hints": [
+           {
+            "ar": [
+             {
+              "ar": "اكتب الدالة في عكس المتغيّر: وين يجي العكس؟"
+             }
+            ]
+           },
+           {
+            "ar": [
+             {
+              "ar": "الأُس السالب يعني مقلوب: نضربو الفوق والتحت بنفس الأُسّي باش نتخلّصو منو."
+             }
+            ]
+           },
+           {
+            "ar": [
+             {
+              "ar": "القاعدة:"
+             }
+            ],
+            "math": "e^{a} \\times e^{b} = e^{a+b}"
+           }
+          ]
+         },
+         {
+          "id": "c_conclude",
+          "key": "conclude",
+          "short": {
+           "ar": [
+            {
+             "ar": "الخلاصة"
+            }
+           ]
+          },
+          "text": {
+           "ar": [
+            {
+             "ar": "نكتبو الخلاصة"
+            }
+           ]
+          },
+          "header": {
+           "now": {
+            "ar": [
+             {
+              "ar": "الخلاصة"
+             }
+            ]
+           },
+           "why": {
+            "ar": [
+             {
+              "ar": "الحساب يعطي القيمة نفسها"
+             }
+            ]
+           },
+           "next": {
+            "ar": [
+             {
+              "ar": "نكتبو في الورقة"
+             }
+            ]
+           }
+          },
+          "needs": [
+           "c_rewrite"
+          ],
+          "prompt": {
+           "ar": [
+            {
+             "ar": "اختار الخلاصة."
+            }
+           ]
+          },
+          "hints": [
+           {
+            "ar": [
+             {
+              "ar": "قارن السطر الأخراني متاعك بالدالة."
+             }
+            ]
+           },
+           {
+            "ar": [
+             {
+              "ar": "كي القيمة ما تتبدّلش، الدالة "
+             },
+             {
+              "fr": "paire"
+             },
+             {
+              "ar": "."
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       },
+       "builtFrames": [
+        "c_rewrite"
+       ],
+       "read": {
+        "short": {
+         "ar": [
+          {
+           "ar": "القراءة"
+          }
+         ]
+        },
+        "header": {
+         "now": {
+          "ar": [
+           {
+            "ar": "نقراو السؤال"
+           }
+          ]
+         },
+         "why": {
+          "ar": [
+           {
+            "ar": "الكلمة تقول شنوّة نورّيو"
+           }
+          ]
+         },
+         "next": {
+          "ar": [
+           {
+            "ar": "المجموعة"
+           }
+          ]
+         }
+        },
+        "prompt": {
+         "ar": [
+          {
+           "ar": "شوف السؤال: شنوّة الكلمة اللي تقول شنوّة نورّيو؟"
+          }
+         ]
+        },
+        "hints": [
+         {
+          "ar": [
+           {
+            "ar": "السؤال يطلب صفة متاع الدالة."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "الكلمة الأخرانية في السؤال."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "اضغط على "
+           },
+           {
+            "fr": "paire"
+           }
+          ]
+         }
+        ],
+        "targets": [
+         {
+          "token": "paire",
+          "effect": {
+           "show": "even"
+          }
+         }
+        ],
+        "notOrderWord": {
+         "ar": [
+          {
+           "ar": "الكلمة هاذي موش هي الصفة اللي نورّيوها."
+          }
+         ]
+        },
+        "sentence": "Montrer que f est paire."
+       },
+       "paper": {
+        "short": {
+         "ar": [
+          {
+           "ar": "الورقة"
+          }
+         ]
+        },
+        "header": {
+         "now": {
+          "ar": [
+           {
+            "ar": "نكتبو الجواب في الورقة"
+           }
+          ]
+         },
+         "why": {
+          "ar": [
+           {
+            "ar": "الامتحان يطلب الكتابة بالتفصيل"
+           }
+          ]
+         },
+         "next": {
+          "ar": [
+           {
+            "ar": "نحلّو سؤال شبيه"
+           }
+          ]
+         }
+        }
+       },
+       "graph": {
+        "template": "fn_parity",
+        "args": {
+         "expr": "e^x/(1+e^(2x))",
+         "parity": "even",
+         "goals": [
+          "e^x/(e^(2x)+1)"
+         ],
+         "knownWrong": [
+          {
+           "expr": "e^(-x)/(1-e^(2x))",
+           "id": "exp_negative_sign"
+          },
+          {
+           "expr": "e^(-2x)/(e^(2x)+1)",
+           "id": "exponent_rules_gap"
+          },
+          {
+           "expr": "e^x/(1+e^(-2x))",
+           "id": "multiplies_one_part"
+          }
+         ]
+        }
+       },
+       "target": {
+        "math": "f(-x) = f(x)"
+       },
+       "picks": [
+        {
+         "id": "c_domain",
+         "after": "c_domain",
+         "short": {
+          "ar": [
+           {
+            "ar": "المجموعة"
+           }
+          ]
+         },
+         "header": {
+          "now": {
+           "ar": [
+            {
+             "ar": "المجموعة"
+            }
+           ]
+          },
+          "why": {
+           "ar": [
+            {
+             "ar": "عكس كل عدد لازم يكون فيها زادة"
+            }
+           ]
+          },
+          "next": {
+           "ar": [
+            {
+             "ar": "الحساب"
+            }
+           ]
+          }
+         },
+         "prompt": {
+          "ar": [
+           {
+            "ar": "المجموعة اللي فيها الدالة معرّفة متناظرة؟ اختار الجملة الصحيحة."
+           }
+          ]
+         },
+         "hints": [
+          {
+           "ar": [
+            {
+             "ar": "كي ناخذو عدد من المجموعة، عكسو موجود فيها؟"
+            }
+           ]
+          },
+          {
+           "ar": [
+            {
+             "ar": "الدالة معرّفة على الأعداد الحقيقية الكل."
+            }
+           ]
+          }
+         ],
+         "evaluator": "pick",
+         "args": {},
+         "cards": [
+          {
+           "id": "k_sym",
+           "text": {
+            "ar": [
+             {
+              "ar": "إيه: عكس كل عدد حقيقي زادة عدد حقيقي."
+             }
+            ],
+            "math": "x \\in \\mathbb{R} \\Rightarrow -x \\in \\mathbb{R}"
+           },
+           "truth": "true"
+          },
+          {
+           "id": "k_negative",
+           "text": {
+            "ar": [
+             {
+              "ar": "لا: فيها أعداد سالبة."
+             }
+            ]
+           },
+           "truth": "false",
+           "misconceptionId": "domain_symmetry_meaning",
+           "feedback": {
+            "ar": [
+             {
+              "ar": "متناظرة معناها عكس كل عدد فيها. الأعداد السالبة ما تمنعش، المهمّ يجيو بالزوز."
+             }
+            ]
+           }
+          },
+          {
+           "id": "k_skip",
+           "text": {
+            "ar": [
+             {
+              "ar": "ما يلزمش نتأكدو، نبداو بالحساب طول."
+             }
+            ]
+           },
+           "truth": "false",
+           "misconceptionId": "domain_check_skipped",
+           "feedback": {
+            "ar": [
+             {
+              "ar": "الإثبات يبدا بالمجموعة: كان عكس عدد موش فيها، الحساب ما يتعملش."
+             }
+            ]
+           }
+          }
+         ]
+        },
+        {
+         "id": "c_conclude",
+         "after": "c_conclude",
+         "short": {
+          "ar": [
+           {
+            "ar": "الخلاصة"
+           }
+          ]
+         },
+         "header": {
+          "now": {
+           "ar": [
+            {
+             "ar": "الخلاصة"
+            }
+           ]
+          },
+          "why": {
+           "ar": [
+            {
+             "ar": "الحساب يعطي القيمة نفسها"
+            }
+           ]
+          },
+          "next": {
+           "ar": [
+            {
+             "ar": "نكتبو في الورقة"
+            }
+           ]
+          }
+         },
+         "prompt": {
+          "ar": [
+           {
+            "ar": "شنوّة الخلاصة؟ اختار الجملة الصحيحة."
+           }
+          ]
+         },
+         "hints": [
+          {
+           "ar": [
+            {
+             "ar": "قارن السطر الأخراني متاعك بالدالة."
+            }
+           ]
+          },
+          {
+           "ar": [
+            {
+             "ar": "كي القيمة ما تتبدّلش، الدالة "
+            },
+            {
+             "fr": "paire"
+            },
+            {
+             "ar": "."
+            }
+           ]
+          }
+         ],
+         "evaluator": "pick",
+         "args": {},
+         "cards": [
+          {
+           "id": "k_even",
+           "text": {
+            "ar": [
+             {
+              "ar": "المجموعة متناظرة والقيمة ما تتبدّلش: الدالة "
+             },
+             {
+              "fr": "paire"
+             },
+             {
+              "ar": "."
+             }
+            ]
+           },
+           "truth": "true"
+          },
+          {
+           "id": "k_odd",
+           "text": {
+            "ar": [
+             {
+              "ar": "الدالة "
+             },
+             {
+              "fr": "impaire"
+             },
+             {
+              "ar": "."
+             }
+            ]
+           },
+           "truth": "false",
+           "misconceptionId": "parity_odd_even_confusion",
+           "feedback": {
+            "ar": [
+             {
+              "ar": "هذي كي الدالة في العكس تعطي عكس الدالة. شوف السطر الأخراني متاعك."
+             }
+            ]
+           }
+          },
+          {
+           "id": "k_one_point",
+           "text": {
+            "ar": [
+             {
+              "ar": "تكفي نقطة وحدة باش نقولو."
+             }
+            ]
+           },
+           "truth": "false",
+           "feedback": {
+            "ar": [
+             {
+              "ar": "الإثبات لازم يصحّ في الأعداد الكل، موش في نقطة وحدة."
+             }
+            ]
+           }
+          }
+         ]
+        }
+       ],
+       "recipe": {
+        "short": {
+         "ar": [
+          {
+           "ar": "الوصفة"
+          }
+         ]
+        },
+        "header": {
+         "now": {
+          "ar": [
+           {
+            "ar": "نكتبو الوصفة متاعنا"
+           }
+          ]
+         },
+         "why": {
+          "ar": [
+           {
+            "ar": "الوصفة تعاونّا في الأسئلة الشبيهة"
+           }
+          ]
+         },
+         "next": {
+          "ar": [
+           {
+            "ar": "نكتبو في الورقة"
+           }
+          ]
+         }
+        },
+        "prompt": {
+         "ar": [
+          {
+           "ar": "اختار من ثلاثة لخمسة جمل ورتّبهم: هذي وصفتك لهذا النوع من الأسئلة."
+          }
+         ]
+        },
+        "hints": [],
+        "pool": [
+         {
+          "id": "r_domain",
+          "kind": "step",
+          "text": {
+           "ar": [
+            {
+             "ar": "نتأكدو إنّ المجموعة متناظرة."
+            }
+           ]
+          }
+         },
+         {
+          "id": "r_sub",
+          "kind": "step",
+          "text": {
+           "ar": [
+            {
+             "ar": "نعوّضو المتغيّر بعكسو."
+            }
+           ]
+          }
+         },
+         {
+          "id": "r_simplify",
+          "kind": "step",
+          "text": {
+           "ar": [
+            {
+             "ar": "نبسّطو حتى نوصلو للدالة ولا لعكسها."
+            }
+           ]
+          }
+         },
+         {
+          "id": "r_conclude",
+          "kind": "step",
+          "text": {
+           "ar": [
+            {
+             "ar": "نكتبو الخلاصة."
+            }
+           ]
+          }
+         },
+         {
+          "id": "r_check",
+          "kind": "check",
+          "text": {
+           "ar": [
+            {
+             "ar": "نجرّبو بعدد صغير: الدالة فيه وفي عكسو."
+            }
+           ]
+          }
+         },
+         {
+          "id": "r_d1",
+          "kind": "distractor",
+          "text": {
+           "ar": [
+            {
+             "ar": "نجرّبو في نقطة وحدة ونوقفو."
+            }
+           ]
+          }
+         },
+         {
+          "id": "r_d2",
+          "kind": "distractor",
+          "text": {
+           "ar": [
+            {
+             "ar": "الأُس السالب يخلّي العدد سالب."
+            }
+           ]
+          }
+         }
+        ],
+        "clean": [
+         "r_domain",
+         "r_sub",
+         "r_simplify",
+         "r_conclude",
+         "r_check"
+        ]
+       },
+       "methodCard": {
+        "type": {
+         "ar": [
+          {
+           "ar": "زوجية دالة ( "
+          },
+          {
+           "fr": "parité"
+          },
+          {
+           "ar": " )"
+          }
+         ]
+        },
+        "steps": [
+         {
+          "ar": [
+           {
+            "ar": "المجموعة متناظرة."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "نحسبو الدالة في العكس ونبسّطو."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "نقارنو بالدالة ولا بعكسها."
+           }
+          ]
+         }
+        ],
+        "checks": [
+         {
+          "ar": [
+           {
+            "ar": "الأُسّي ديما موجب."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "الخلاصة تتكتب في الآخر."
+           }
+          ]
+         }
+        ]
+       },
+       "similar": [
+        {
+         "id": "same",
+         "kind": "same_structure",
+         "statement": {
+          "fr": "Soit g la fonction définie sur ℝ par g(x) = e²ˣ/(1 + e⁴ˣ). Montrer que g est paire."
+         },
+         "graph": {
+          "template": "fn_parity",
+          "args": {
+           "expr": "e^(2x)/(1+e^(4x))",
+           "parity": "even"
+          }
+         },
+         "allow": []
+        },
+        {
+         "id": "twist",
+         "kind": "twist",
+         "statement": {
+          "fr": "Soit h la fonction définie sur ℝ par h(x) = (eˣ − e⁻ˣ)/(eˣ + e⁻ˣ). Montrer que h est impaire."
+         },
+         "graph": {
+          "template": "fn_parity",
+          "args": {
+           "expr": "(e^x-e^(-x))/(e^x+e^(-x))",
+           "parity": "odd"
+          }
+         },
+         "allow": []
+        }
+       ],
+       "findings": [
+        {
+         "id": "f_parity",
+         "title": {
+          "ar": [
+           {
+            "ar": "الزوجية"
+           }
+          ]
+         },
+         "nodes": [
+          "parity_line"
+         ],
+         "reasons": {
+          "parity_line": {
+           "ar": [
+            {
+             "ar": "الدالة في العكس، بعد التبسيط، هي الدالة نفسها."
+            }
+           ]
+          }
+         },
+         "rule": {
+          "text": {
+           "ar": [
+            {
+             "ar": "المجموعة متناظرة والدالة في العكس تساوي الدالة: الدالة "
+            },
+            {
+             "fr": "paire"
+            },
+            {
+             "ar": "."
+            }
+           ]
+          },
+          "condition": {
+           "ar": [
+            {
+             "ar": "كي المجموعة متناظرة."
+            }
+           ]
+          }
+         },
+         "bridge": true,
+         "viaCard": "c_conclude"
+        }
+       ],
+       "skeleton": [
+        {
+         "id": "k1",
+         "fr": "Pour tout réel x, −x ∈ ℝ."
+        },
+        {
+         "id": "k2",
+         "fr": "Pour tout réel x :",
+         "math": "f(-x) = \\his{parity_line} = f(x)"
+        },
+        {
+         "id": "k3",
+         "fr": "Donc f est paire."
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "writeup": {
+    "elements": [
+     "domain_symmetric",
+     "compute",
+     "conclusion"
+    ],
+    "modelFr": [
+     "Pour tout réel x, −x ∈ ℝ.",
+     "f(−x) = e^(−x)/(1 + e^(−2x)) ; en multipliant le numérateur et le dénominateur par e^(2x), f(−x) = eˣ/(e^(2x) + 1) = f(x).",
+     "Donc f est paire."
+    ]
+   }
+  },
+  {
+   "id": "A2",
+   "goal": {
+    "fr": "Montrer que",
+    "math": "\\lim_{x \\to +\\infty} f(x) = 0"
+   },
+   "expected": "lim_0",
+   "uses": [],
+   "groups": [
+    {
+     "id": "g1",
+     "steps": [
+      {
+       "id": "s1",
+       "blockId": "qex4-A2-s1",
+       "trust": {
+        "reviewed": false,
+        "contentVersion": "ex4-1.0.0",
+        "source": "authored",
+        "status": "ok"
+       },
+       "skills": [
+        "exp-limits"
+       ],
+       "kind": "text",
+       "text": {
+        "ar": [
+         {
+          "ar": "كي المتغيّر يكبر برشا، الفوق والتحت يكبرو الزوز: لازم نبدّلو الكتيبة قبل ما نقراو الـ "
+         },
+         {
+          "fr": "limite"
+         },
+         {
+          "ar": "."
+         }
+        ],
+        "math": "\\lim_{x \\to +\\infty} f(x) = 0"
+       }
+      },
+      {
+       "trust": {
+        "reviewed": false,
+        "contentVersion": "ex4-1.0.0",
+        "source": "authored",
+        "status": "ok"
+       },
+       "kind": "method",
+       "extras": [],
+       "id": "mA2",
+       "blockId": "qex4-A2-m",
+       "skills": [
+        "exp-limits",
+        "forme-indeterminee",
+        "limit-at-infinity",
+        "asymptote-interpretation"
+       ],
+       "opening": {
+        "route": [
+         {
+          "ar": [
+           {
+            "ar": "نبداو بخطة: نرتّبو الخطوات قبل ما نحسبو."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "نبدّلو كتيبة الدالة سطر بسطر."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "نقراو الـ "
+           },
+           {
+            "fr": "limite"
+           },
+           {
+            "ar": " من الكتيبة الجديدة."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "نكتبو المعنى على المنحنى في الورقة."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "وبعدها نحلّو سؤالين شبيهين وحدنا."
+           }
+          ]
+         }
+        ],
+        "help": {
+         "ar": [
+          {
+           "ar": "كان ما تعرفش، اضغط على «ما نعرفش» ونمشيو بخطوة أصغر."
+          }
+         ]
+        }
+       },
+       "plan": {
+        "short": {
+         "ar": [
+          {
+           "ar": "الخطة"
+          }
+         ]
+        },
+        "header": {
+         "now": {
+          "ar": [
+           {
+            "ar": "نرتّبو الخطوات"
+           }
+          ]
+         },
+         "why": {
+          "ar": [
+           {
+            "ar": "الكتيبة الأولى ما تتقراش"
+           }
+          ]
+         },
+         "next": {
+          "ar": [
+           {
+            "ar": "نقراو السؤال"
+           }
+          ]
+         }
+        },
+        "prompt": {
+         "ar": [
+          {
+           "ar": "رتّب الخطوات: شنوّة نعمل الأوّل، وشنوّة بعد؟"
+          }
+         ]
+        },
+        "hints": [
+         {
+          "ar": [
+           {
+            "ar": "الفوق والتحت يكبرو الزوز: نجّمو نقراو النتيجة دغري؟"
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "الكتيبة الجديدة هي اللي تخلّينا نقراو."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "ابدا بالكتيبة، ومن بعد النتيجة، وفي الآخر المعنى."
+           }
+          ]
+         }
+        ],
+        "cards": [
+         {
+          "id": "c_rewrite",
+          "key": "rewrite",
+          "short": {
+           "ar": [
+            {
+             "ar": "الكتيبة"
+            }
+           ]
+          },
+          "text": {
+           "ar": [
+            {
+             "ar": "نبدّلو كتيبة الدالة"
+            }
+           ]
+          },
+          "header": {
+           "now": {
+            "ar": [
+             {
+              "ar": "كتيبة جديدة"
+             }
+            ]
+           },
+           "why": {
+            "ar": [
+             {
+              "ar": "الكتيبة الأولى تعطي شكل غامض"
+             }
+            ]
+           },
+           "next": {
+            "ar": [
+             {
+              "ar": "النتيجة"
+             }
+            ]
+           }
+          },
+          "needs": [],
+          "prompt": {
+           "ar": [
+            {
+             "ar": "اكتب الدالة بكتيبة أخرى، سطر بسطر، باش تنجّم تقرا وين تمشي."
+            }
+           ]
+          },
+          "hints": [
+           {
+            "ar": [
+             {
+              "ar": "الفوق والتحت يكبرو الزوز: شنوّة الأُسّي اللي يكبر أكثر؟"
+             }
+            ]
+           },
+           {
+            "ar": [
+             {
+              "ar": "نقسمو الفوق والتحت بالأُسّي اللي يكبر أكثر."
+             }
+            ]
+           },
+           {
+            "ar": [
+             {
+              "ar": "القاعدة:"
+             }
+            ],
+            "math": "\\frac{e^{a}}{e^{b}} = e^{a-b}"
+           }
+          ]
+         },
+         {
+          "id": "c_limit",
+          "key": "limit",
+          "short": {
+           "ar": [
+            {
+             "ar": "النتيجة"
+            }
+           ]
+          },
+          "text": {
+           "ar": [
+            {
+             "ar": "نقراو وين تمشي الدالة"
+            }
+           ]
+          },
+          "header": {
+           "now": {
+            "ar": [
+             {
+              "ar": "النتيجة"
+             }
+            ]
+           },
+           "why": {
+            "ar": [
+             {
+              "ar": "كل أُسّي بأُس سالب يمشي للصفر"
+             }
+            ]
+           },
+           "next": {
+            "ar": [
+             {
+              "ar": "المعنى"
+             }
+            ]
+           }
+          },
+          "needs": [
+           "c_rewrite"
+          ],
+          "prompt": {
+           "ar": [
+            {
+             "ar": "عوّض كل أُسّي بالقيمة اللي يمشيلها، واكتب الحساب."
+            }
+           ]
+          },
+          "hints": [
+           {
+            "ar": [
+             {
+              "ar": "الأُسّي بأُس سالب، كي المتغيّر يكبر برشا، وين يمشي؟"
+             }
+            ]
+           },
+           {
+            "ar": [
+             {
+              "ar": "يمشي للصفر: عوّضو بالصفر في الكتيبة الجديدة."
+             }
+            ]
+           },
+           {
+            "ar": [
+             {
+              "ar": "القاعدة:"
+             }
+            ],
+            "math": "\\lim_{x \\to +\\infty} e^{-x} = 0"
+           }
+          ]
+         },
+         {
+          "id": "c_interpret",
+          "key": "interpret",
+          "short": {
+           "ar": [
+            {
+             "ar": "المعنى"
+            }
+           ]
+          },
+          "text": {
+           "ar": [
+            {
+             "ar": "نقولو شنوّة تعني على المنحنى"
+            }
+           ]
+          },
+          "header": {
+           "now": {
+            "ar": [
+             {
+              "ar": "المعنى"
+             }
+            ]
+           },
+           "why": {
+            "ar": [
+             {
+              "ar": "النتيجة تعطي خطّ يقرب ليه المنحنى"
+             }
+            ]
+           },
+           "next": {
+            "ar": [
+             {
+              "ar": "نكتبو في الورقة"
+             }
+            ]
+           }
+          },
+          "needs": [
+           "c_limit"
+          ],
+          "prompt": {
+           "ar": [
+            {
+             "ar": "اختار المعنى على المنحنى."
+            }
+           ]
+          },
+          "hints": [
+           {
+            "ar": [
+             {
+              "ar": "المنحنى يقرب لشنوّة كي المتغيّر يكبر برشا؟"
+             }
+            ]
+           },
+           {
+            "ar": [
+             {
+              "ar": "الخطّ هذا اسمو "
+             },
+             {
+              "fr": "asymptote"
+             },
+             {
+              "ar": "."
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       },
+       "builtFrames": [
+        "c_rewrite",
+        "c_limit"
+       ],
+       "read": {
+        "short": {
+         "ar": [
+          {
+           "ar": "القراءة"
+          }
+         ]
+        },
+        "header": {
+         "now": {
+          "ar": [
+           {
+            "ar": "نقراو السؤال"
+           }
+          ]
+         },
+         "why": {
+          "ar": [
+           {
+            "ar": "السؤال يطلب حاجتين"
+           }
+          ]
+         },
+         "next": {
+          "ar": [
+           {
+            "ar": "الكتيبة"
+           }
+          ]
+         }
+        },
+        "prompt": {
+         "ar": [
+          {
+           "ar": "شوف السؤال: شنوّة الكلمة اللي تطلب المعنى على المنحنى؟"
+          }
+         ]
+        },
+        "hints": [
+         {
+          "ar": [
+           {
+            "ar": "السؤال يطلب حاجتين: النتيجة ومعناها."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "الكلمة الأخرانية."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "اضغط على "
+           },
+           {
+            "fr": "Interpréter"
+           }
+          ]
+         }
+        ],
+        "targets": [
+         {
+          "token": "Interpréter",
+          "effect": {
+           "interpret": true
+          }
+         }
+        ],
+        "notOrderWord": {
+         "ar": [
+          {
+           "ar": "الكلمة هاذي ما تطلبش المعنى."
+          }
+         ]
+        },
+        "sentence": "Montrer que la limite de f en +∞ est 0. Interpréter."
+       },
+       "paper": {
+        "short": {
+         "ar": [
+          {
+           "ar": "الورقة"
+          }
+         ]
+        },
+        "header": {
+         "now": {
+          "ar": [
+           {
+            "ar": "نكتبو الجواب في الورقة"
+           }
+          ]
+         },
+         "why": {
+          "ar": [
+           {
+            "ar": "الامتحان يطلب الكتابة بالتفصيل"
+           }
+          ]
+         },
+         "next": {
+          "ar": [
+           {
+            "ar": "نحلّو سؤال شبيه"
+           }
+          ]
+         }
+        }
+       },
+       "graph": {
+        "template": "fn_limit",
+        "args": {
+         "expr": "e^x/(1+e^(2x))",
+         "goals": [
+          "e^(-x)/(e^(-2x)+1)",
+          "e^(-x)/(1+e^(-2x))"
+         ],
+         "limit": [
+          0,
+          1
+         ],
+         "limitForms": [
+          "0/(0+1)",
+          "0/(1+0)",
+          "0/1"
+         ],
+         "knownWrong": [
+          {
+           "expr": "0",
+           "id": "cancel_leaves_zero"
+          },
+          {
+           "expr": "e^x/(e^(-2x)+1)",
+           "id": "multiplies_one_part"
+          }
+         ],
+         "limitSlips": [
+          {
+           "expr": "1/(1+1)",
+           "id": "value_at_0_vs_limit"
+          }
+         ]
+        }
+       },
+       "target": {
+        "math": "\\lim_{x \\to +\\infty} f(x) = 0"
+       },
+       "picks": [
+        {
+         "id": "c_interpret",
+         "after": "c_interpret",
+         "short": {
+          "ar": [
+           {
+            "ar": "المعنى"
+           }
+          ]
+         },
+         "header": {
+          "now": {
+           "ar": [
+            {
+             "ar": "المعنى"
+            }
+           ]
+          },
+          "why": {
+           "ar": [
+            {
+             "ar": "النتيجة تعطي خطّ يقرب ليه المنحنى"
+            }
+           ]
+          },
+          "next": {
+           "ar": [
+            {
+             "ar": "نكتبو في الورقة"
+            }
+           ]
+          }
+         },
+         "prompt": {
+          "ar": [
+           {
+            "ar": "شنوّة المعنى على المنحنى؟ اختار الجملة الصحيحة."
+           }
+          ]
+         },
+         "hints": [
+          {
+           "ar": [
+            {
+             "ar": "المنحنى يقرب لشنوّة كي المتغيّر يكبر برشا؟"
+            }
+           ]
+          },
+          {
+           "ar": [
+            {
+             "ar": "الخطّ هذا اسمو "
+            },
+            {
+             "fr": "asymptote"
+            },
+            {
+             "ar": "."
+            }
+           ]
+          }
+         ],
+         "evaluator": "pick",
+         "args": {},
+         "cards": [
+          {
+           "id": "k_horizontal",
+           "text": {
+            "ar": [
+             {
+              "ar": "المنحنى يقرب لمحور الفواصل: الخطّ هذا "
+             },
+             {
+              "fr": "asymptote"
+             },
+             {
+              "ar": "."
+             }
+            ],
+            "math": "y = 0"
+           },
+           "truth": "true"
+          },
+          {
+           "id": "k_vertical",
+           "text": {
+            "ar": [
+             {
+              "ar": "المنحنى يقرب للخطّ العمودي هذا."
+             }
+            ],
+            "math": "x = 0"
+           },
+           "truth": "false",
+           "misconceptionId": "interpretation_misplaced",
+           "feedback": {
+            "ar": [
+             {
+              "ar": "المتغيّر يكبر برشا، موش يقرب للصفر: الخطّ أفقي ولا عمودي؟"
+             }
+            ]
+           }
+          },
+          {
+           "id": "k_cuts",
+           "text": {
+            "ar": [
+             {
+              "ar": "المنحنى يقصّ محور الفواصل."
+             }
+            ]
+           },
+           "truth": "false",
+           "feedback": {
+            "ar": [
+             {
+              "ar": "الدالة ديما موجبة: المنحنى يقرب لمحور الفواصل وما يوصلّوش."
+             }
+            ]
+           }
+          }
+         ]
+        }
+       ],
+       "recipe": {
+        "short": {
+         "ar": [
+          {
+           "ar": "الوصفة"
+          }
+         ]
+        },
+        "header": {
+         "now": {
+          "ar": [
+           {
+            "ar": "نكتبو الوصفة متاعنا"
+           }
+          ]
+         },
+         "why": {
+          "ar": [
+           {
+            "ar": "الوصفة تعاونّا في الأسئلة الشبيهة"
+           }
+          ]
+         },
+         "next": {
+          "ar": [
+           {
+            "ar": "نكتبو في الورقة"
+           }
+          ]
+         }
+        },
+        "prompt": {
+         "ar": [
+          {
+           "ar": "اختار من ثلاثة لخمسة جمل ورتّبهم: هذي وصفتك لهذا النوع من الأسئلة."
+          }
+         ]
+        },
+        "hints": [],
+        "pool": [
+         {
+          "id": "r_form",
+          "kind": "step",
+          "text": {
+           "ar": [
+            {
+             "ar": "نشوفو كان الكتيبة الأولى تعطي شكل غامض."
+            }
+           ]
+          }
+         },
+         {
+          "id": "r_divide",
+          "kind": "step",
+          "text": {
+           "ar": [
+            {
+             "ar": "نقسمو الفوق والتحت بالأُسّي اللي يكبر أكثر."
+            }
+           ]
+          }
+         },
+         {
+          "id": "r_read",
+          "kind": "step",
+          "text": {
+           "ar": [
+            {
+             "ar": "نعوّضو كل أُسّي بأُس سالب بالصفر."
+            }
+           ]
+          }
+         },
+         {
+          "id": "r_interpret",
+          "kind": "step",
+          "text": {
+           "ar": [
+            {
+             "ar": "نكتبو المعنى: "
+            },
+            {
+             "fr": "asymptote"
+            },
+            {
+             "ar": " أفقي."
+            }
+           ]
+          }
+         },
+         {
+          "id": "r_check",
+          "kind": "check",
+          "text": {
+           "ar": [
+            {
+             "ar": "نجرّبو بعدد كبير: القيمة صغيرة برشا؟"
+            }
+           ]
+          }
+         },
+         {
+          "id": "r_d1",
+          "kind": "distractor",
+          "text": {
+           "ar": [
+            {
+             "ar": "نعوّضو المتغيّر بالصفر."
+            }
+           ]
+          }
+         },
+         {
+          "id": "r_d2",
+          "kind": "distractor",
+          "text": {
+           "ar": [
+            {
+             "ar": "الأُسّي بأُس سالب يكبر بلا حدّ."
+            }
+           ]
+          }
+         }
+        ],
+        "clean": [
+         "r_form",
+         "r_divide",
+         "r_read",
+         "r_interpret",
+         "r_check"
+        ]
+       },
+       "methodCard": {
+        "type": {
+         "ar": [
+          {
+           "ar": "نهاية في ما لا نهاية ( "
+          },
+          {
+           "fr": "limite"
+          },
+          {
+           "ar": " )"
+          }
+         ]
+        },
+        "steps": [
+         {
+          "ar": [
+           {
+            "ar": "نشوفو الشكل."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "نقسمو بالأُسّي اللي يكبر أكثر."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "نعوّضو ونقراو."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "نكتبو المعنى على المنحنى."
+           }
+          ]
+         }
+        ],
+        "checks": [
+         {
+          "ar": [
+           {
+            "ar": "الأُسّي بأُس سالب يمشي للصفر."
+           }
+          ]
+         }
+        ]
+       },
+       "similar": [
+        {
+         "id": "same",
+         "kind": "same_structure",
+         "statement": {
+          "fr": "Soit g la fonction définie sur ℝ par g(x) = e²ˣ/(1 + e⁴ˣ). Montrer que la limite de g en +∞ est 0. Interpréter."
+         },
+         "graph": {
+          "template": "fn_limit",
+          "args": {
+           "expr": "e^(2x)/(1+e^(4x))",
+           "goals": [
+            "e^(-2x)/(e^(-4x)+1)",
+            "e^(-2x)/(1+e^(-4x))"
+           ],
+           "limit": [
+            0,
+            1
+           ],
+           "limitForms": [
+            "0/(0+1)",
+            "0/(1+0)",
+            "0/1"
+           ]
+          }
+         },
+         "allow": []
+        },
+        {
+         "id": "twist",
+         "kind": "twist",
+         "statement": {
+          "fr": "Soit h la fonction définie sur ℝ par h(x) = e²ˣ/(1 + e²ˣ). Déterminer la limite de h en +∞. Interpréter."
+         },
+         "graph": {
+          "template": "fn_limit",
+          "args": {
+           "expr": "e^(2x)/(1+e^(2x))",
+           "goals": [
+            "1/(e^(-2x)+1)",
+            "1/(1+e^(-2x))"
+           ],
+           "limit": [
+            1,
+            1
+           ],
+           "limitForms": [
+            "1/(0+1)",
+            "1/(1+0)",
+            "1/1"
+           ]
+          }
+         },
+         "allow": []
+        }
+       ],
+       "findings": [
+        {
+         "id": "f_form",
+         "title": {
+          "ar": [
+           {
+            "ar": "الكتيبة الجديدة"
+           }
+          ]
+         },
+         "nodes": [
+          "limit_form"
+         ],
+         "reasons": {
+          "limit_form": {
+           "ar": [
+            {
+             "ar": "قسمنا الفوق والتحت بالأُسّي اللي يكبر أكثر."
+            }
+           ]
+          }
+         },
+         "rule": {
+          "text": {
+           "ar": [
+            {
+             "ar": "كي الفوق والتحت يكبرو الزوز، نقسمو بالأُسّي اللي يكبر أكثر."
+            }
+           ]
+          },
+          "condition": {
+           "ar": [
+            {
+             "ar": "كي يطلع شكل غامض."
+            }
+           ]
+          }
+         },
+         "bridge": true
+        },
+        {
+         "id": "f_limit",
+         "title": {
+          "ar": [
+           {
+            "ar": "النتيجة ومعناها"
+           }
+          ]
+         },
+         "nodes": [
+          "limit"
+         ],
+         "reasons": {
+          "limit": {
+           "ar": [
+            {
+             "ar": "كل أُسّي بأُس سالب يمشي للصفر."
+            }
+           ]
+          }
+         },
+         "rule": {
+          "text": {
+           "ar": [
+            {
+             "ar": "نتيجة ثابتة في ما لا نهاية تعطي "
+            },
+            {
+             "fr": "asymptote"
+            },
+            {
+             "ar": " أفقي."
+            }
+           ]
+          },
+          "condition": {
+           "ar": [
+            {
+             "ar": "كي المتغيّر يكبر برشا."
+            }
+           ]
+          }
+         },
+         "bridge": false,
+         "viaCard": "c_interpret"
+        }
+       ],
+       "skeleton": [
+        {
+         "id": "k1",
+         "fr": "Pour tout réel x, en divisant le numérateur et le dénominateur par e^(2x) :",
+         "math": "f(x) = \\his{limit_form}"
+        },
+        {
+         "id": "k2",
+         "fr": "Or e^(−x) → 0 et e^(−2x) → 0 quand x → +∞, donc la limite de f en +∞ est {limit}."
+        },
+        {
+         "id": "k3",
+         "fr": "La droite d'équation y = 0 est une asymptote horizontale à (ζ) au voisinage de +∞."
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "writeup": {
+    "elements": [
+     "rewrite",
+     "limit",
+     "interpretation"
+    ],
+    "modelFr": [
+     "Pour tout réel x, f(x) = e^(−x)/(e^(−2x) + 1) (on divise le numérateur et le dénominateur par e^(2x)).",
+     "Quand x → +∞, e^(−x) → 0 et e^(−2x) → 0, donc f(x) → 0/(0 + 1) = 0.",
+     "Interprétation : la droite y = 0 est une asymptote horizontale à (ζ) au voisinage de +∞."
+    ]
+   }
+  },
+  {
+   "id": "A3a",
+   "goal": {
+    "fr": "Montrer que",
+    "math": "f'(x) = \\frac{(1-e^{2x})e^{x}}{(1+e^{2x})^{2}}"
+   },
+   "expected": "f_prime",
+   "uses": [],
+   "groups": [
+    {
+     "id": "g1",
+     "steps": [
+      {
+       "id": "s1",
+       "blockId": "qex4-A3a-s1",
+       "trust": {
+        "reviewed": false,
+        "contentVersion": "ex4-1.0.0",
+        "source": "authored",
+        "status": "ok"
+       },
+       "skills": [
+        "quotient-rule"
+       ],
+       "kind": "text",
+       "text": {
+        "ar": [
+         {
+          "ar": "النتيجة مكتوبة في السؤال: نورّيو كيفاش نوصلولها."
+         }
+        ],
+        "math": "f'(x) = \\frac{(1-e^{2x})e^{x}}{(1+e^{2x})^{2}}"
+       }
+      },
+      {
+       "trust": {
+        "reviewed": false,
+        "contentVersion": "ex4-1.0.0",
+        "source": "authored",
+        "status": "ok"
+       },
+       "kind": "method",
+       "extras": [],
+       "id": "mA3a",
+       "blockId": "qex4-A3a-m",
+       "skills": [
+        "quotient-rule",
+        "chain-rule-exp",
+        "derivative-meaning"
+       ],
+       "opening": {
+        "route": [
+         {
+          "ar": [
+           {
+            "ar": "نبداو بخطة: نرتّبو الخطوات قبل ما نحسبو."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "نختارو القاعدة متاع الـ "
+           },
+           {
+            "fr": "dérivée"
+           },
+           {
+            "ar": "."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "نحسبو الحاجات الصغار، ومن بعد الحساب الكامل سطر بسطر."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "نوصلو للكتيبة اللي في النص، ونكتبوها في الورقة."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "وبعدها نحلّو سؤالين شبيهين وحدنا."
+           }
+          ]
+         }
+        ],
+        "help": {
+         "ar": [
+          {
+           "ar": "كان ما تعرفش، اضغط على «ما نعرفش» ونمشيو بخطوة أصغر."
+          }
+         ]
+        }
+       },
+       "plan": {
+        "short": {
+         "ar": [
+          {
+           "ar": "الخطة"
+          }
+         ]
+        },
+        "header": {
+         "now": {
+          "ar": [
+           {
+            "ar": "نرتّبو الخطوات"
+           }
+          ]
+         },
+         "why": {
+          "ar": [
+           {
+            "ar": "القاعدة قبل الحساب"
+           }
+          ]
+         },
+         "next": {
+          "ar": [
+           {
+            "ar": "نقراو السؤال"
+           }
+          ]
+         }
+        },
+        "prompt": {
+         "ar": [
+          {
+           "ar": "رتّب الخطوات: شنوّة نعمل الأوّل، وشنوّة بعد؟"
+          }
+         ]
+        },
+        "hints": [
+         {
+          "ar": [
+           {
+            "ar": "الدالة كسر: شنوّة القاعدة متاعو؟"
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "القاعدة تحتاج حساب صغير قبل."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "ابدا بالقاعدة، ومن بعد التحت، وفي الآخر الحساب الكامل."
+           }
+          ]
+         }
+        ],
+        "cards": [
+         {
+          "id": "c_rule",
+          "key": "rule",
+          "short": {
+           "ar": [
+            {
+             "ar": "القاعدة"
+            }
+           ]
+          },
+          "text": {
+           "ar": [
+            {
+             "ar": "نختارو القاعدة"
+            }
+           ]
+          },
+          "header": {
+           "now": {
+            "ar": [
+             {
+              "ar": "القاعدة"
+             }
+            ]
+           },
+           "why": {
+            "ar": [
+             {
+              "ar": "الدالة كسر"
+             }
+            ]
+           },
+           "next": {
+            "ar": [
+             {
+              "ar": "الحساب الصغير"
+             }
+            ]
+           }
+          },
+          "needs": [],
+          "prompt": {
+           "ar": [
+            {
+             "ar": "اختار القاعدة."
+            }
+           ]
+          },
+          "hints": [
+           {
+            "ar": [
+             {
+              "ar": "الدالة فوق وتحت: شنوّة نوعها؟"
+             }
+            ]
+           },
+           {
+            "ar": [
+             {
+              "ar": "قاعدة الكسر فيها طرح، والتحت يتربّع."
+             }
+            ]
+           }
+          ]
+         },
+         {
+          "id": "c_inner",
+          "key": "inner",
+          "short": {
+           "ar": [
+            {
+             "ar": "التحت"
+            }
+           ]
+          },
+          "text": {
+           "ar": [
+            {
+             "ar": "نحسبو الـ "
+            },
+            {
+             "fr": "dérivée"
+            },
+            {
+             "ar": " متاع التحت"
+            }
+           ]
+          },
+          "header": {
+           "now": {
+            "ar": [
+             {
+              "ar": "الحساب الصغير"
+             }
+            ]
+           },
+           "why": {
+            "ar": [
+             {
+              "ar": "القاعدة تحتاجو"
+             }
+            ]
+           },
+           "next": {
+            "ar": [
+             {
+              "ar": "الحساب الكامل"
+             }
+            ]
+           }
+          },
+          "needs": [
+           "c_rule"
+          ],
+          "prompt": {
+           "ar": [
+            {
+             "ar": "اكتب الـ "
+            },
+            {
+             "fr": "dérivée"
+            },
+            {
+             "ar": " متاع التحت."
+            }
+           ]
+          },
+          "hints": [
+           {
+            "ar": [
+             {
+              "ar": "التحت فيه واحد زائد أُسّي: الواحد شنوّة يعطي؟"
+             }
+            ]
+           },
+           {
+            "ar": [
+             {
+              "ar": "الأُسّي يقعد كيما هو، وقدّامو العدد اللي في الأُس."
+             }
+            ]
+           },
+           {
+            "ar": [
+             {
+              "ar": "القاعدة:"
+             }
+            ],
+            "math": "(e^{ax})' = a\\,e^{ax}"
+           }
+          ]
+         },
+         {
+          "id": "c_derive",
+          "key": "derive",
+          "short": {
+           "ar": [
+            {
+             "ar": "الحساب"
+            }
+           ]
+          },
+          "text": {
+           "ar": [
+            {
+             "ar": "نطبّقو القاعدة ونبسّطو"
+            }
+           ]
+          },
+          "header": {
+           "now": {
+            "ar": [
+             {
+              "ar": "الحساب الكامل"
+             }
+            ]
+           },
+           "why": {
+            "ar": [
+             {
+              "ar": "نوصلو للكتيبة اللي في النص"
+             }
+            ]
+           },
+           "next": {
+            "ar": [
+             {
+              "ar": "نكتبو في الورقة"
+             }
+            ]
+           }
+          },
+          "needs": [
+           "c_inner"
+          ],
+          "prompt": {
+           "ar": [
+            {
+             "ar": "طبّق القاعدة ومن بعد بسّط سطر بسطر حتى توصل للكتيبة اللي في النص."
+            }
+           ]
+          },
+          "hints": [
+           {
+            "ar": [
+             {
+              "ar": "اكتب القاعدة بالفوق والتحت متاعك."
+             }
+            ]
+           },
+           {
+            "ar": [
+             {
+              "ar": "الفوق فيه حدّين: خرّج الأُسّي اللي يتعاود فيهم."
+             }
+            ]
+           },
+           {
+            "ar": [
+             {
+              "ar": "القاعدة:"
+             }
+            ],
+            "math": "\\left(\\frac{u}{v}\\right)' = \\frac{u'v - uv'}{v^{2}}"
+           }
+          ]
+         }
+        ]
+       },
+       "builtFrames": [
+        "c_inner",
+        "c_derive"
+       ],
+       "read": {
+        "short": {
+         "ar": [
+          {
+           "ar": "القراءة"
+          }
+         ]
+        },
+        "header": {
+         "now": {
+          "ar": [
+           {
+            "ar": "نقراو السؤال"
+           }
+          ]
+         },
+         "why": {
+          "ar": [
+           {
+            "ar": "النتيجة مكتوبة في السؤال"
+           }
+          ]
+         },
+         "next": {
+          "ar": [
+           {
+            "ar": "القاعدة"
+           }
+          ]
+         }
+        },
+        "prompt": {
+         "ar": [
+          {
+           "ar": "شوف السؤال: شنوّة الكلمة اللي تقول إنّ النتيجة معطية؟"
+          }
+         ]
+        },
+        "hints": [
+         {
+          "ar": [
+           {
+            "ar": "السؤال فيه النتيجة."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "الكلمة الأولى."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "اضغط على "
+           },
+           {
+            "fr": "Montrer"
+           }
+          ]
+         }
+        ],
+        "targets": [
+         {
+          "token": "Montrer",
+          "effect": {
+           "given": true
+          }
+         }
+        ],
+        "notOrderWord": {
+         "ar": [
+          {
+           "ar": "الكلمة هاذي ما تقولش إنّ النتيجة معطية."
+          }
+         ]
+        },
+        "sentence": "Montrer que, pour tout réel x, f'(x) = (1 − e²ˣ)eˣ/(1 + e²ˣ)²."
+       },
+       "paper": {
+        "short": {
+         "ar": [
+          {
+           "ar": "الورقة"
+          }
+         ]
+        },
+        "header": {
+         "now": {
+          "ar": [
+           {
+            "ar": "نكتبو الجواب في الورقة"
+           }
+          ]
+         },
+         "why": {
+          "ar": [
+           {
+            "ar": "الامتحان يطلب الكتابة بالتفصيل"
+           }
+          ]
+         },
+         "next": {
+          "ar": [
+           {
+            "ar": "نحلّو سؤال شبيه"
+           }
+          ]
+         }
+        }
+       },
+       "graph": {
+        "template": "fn_derivative",
+        "args": {
+         "expr": "e^x/(1+e^(2x))",
+         "target": "(1-e^(2x))e^x/(1+e^(2x))^2",
+         "goals": [
+          "e^x(1-e^(2x))/(1+e^(2x))^2"
+         ],
+         "inner": "2e^(2x)",
+         "innerOf": "1+e^(2x)",
+         "innerWrong": [
+          {
+           "expr": "e^(2x)",
+           "id": "chain_rule_exp_factor"
+          },
+          {
+           "expr": "2x*e^(2x)",
+           "id": "derivative_keeps_x"
+          }
+         ],
+         "knownWrong": [
+          {
+           "expr": "e^x/(1+e^(2x))^2",
+           "id": "chain_rule_exp_factor"
+          },
+          {
+           "expr": "(e^x+3e^(3x))/(1+e^(2x))^2",
+           "id": "quotient_sign"
+          },
+          {
+           "expr": "(1-e^(2x))e^x/(1+e^(2x))",
+           "id": "den_not_squared"
+          }
+         ]
+        }
+       },
+       "target": {
+        "math": "f'(x) = \\frac{(1-e^{2x})e^{x}}{(1+e^{2x})^{2}}"
+       },
+       "picks": [
+        {
+         "id": "c_rule",
+         "after": "c_rule",
+         "short": {
+          "ar": [
+           {
+            "ar": "القاعدة"
+           }
+          ]
+         },
+         "header": {
+          "now": {
+           "ar": [
+            {
+             "ar": "القاعدة"
+            }
+           ]
+          },
+          "why": {
+           "ar": [
+            {
+             "ar": "الدالة كسر"
+            }
+           ]
+          },
+          "next": {
+           "ar": [
+            {
+             "ar": "الحساب الصغير"
+            }
+           ]
+          }
+         },
+         "prompt": {
+          "ar": [
+           {
+            "ar": "شنوّة قاعدة الكسر؟ اختار الصحيحة."
+           }
+          ]
+         },
+         "hints": [
+          {
+           "ar": [
+            {
+             "ar": "قاعدة الكسر فيها طرح."
+            }
+           ]
+          },
+          {
+           "ar": [
+            {
+             "ar": "التحت يتربّع."
+            }
+           ]
+          }
+         ],
+         "evaluator": "pick",
+         "args": {},
+         "cards": [
+          {
+           "id": "k_quotient",
+           "text": {
+            "ar": [
+             {
+              "ar": "القاعدة هاذي:"
+             }
+            ],
+            "math": "\\left(\\frac{u}{v}\\right)' = \\frac{u'v - uv'}{v^{2}}"
+           },
+           "truth": "true"
+          },
+          {
+           "id": "k_plus",
+           "text": {
+            "ar": [
+             {
+              "ar": "القاعدة هاذي:"
+             }
+            ],
+            "math": "\\left(\\frac{u}{v}\\right)' = \\frac{u'v + uv'}{v^{2}}"
+           },
+           "truth": "false",
+           "misconceptionId": "mut.quotient_sign",
+           "feedback": {
+            "ar": [
+             {
+              "ar": "في قاعدة الكسر نطرحو، موش نزيدو."
+             }
+            ]
+           }
+          },
+          {
+           "id": "k_split",
+           "text": {
+            "ar": [
+             {
+              "ar": "القاعدة هاذي:"
+             }
+            ],
+            "math": "\\left(\\frac{u}{v}\\right)' = \\frac{u'}{v'}"
+           },
+           "truth": "false",
+           "feedback": {
+            "ar": [
+             {
+              "ar": "قاعدة الكسر موش كسر متاع زوز حسابات: التحت يتربّع."
+             }
+            ]
+           }
+          }
+         ]
+        }
+       ],
+       "recipe": {
+        "short": {
+         "ar": [
+          {
+           "ar": "الوصفة"
+          }
+         ]
+        },
+        "header": {
+         "now": {
+          "ar": [
+           {
+            "ar": "نكتبو الوصفة متاعنا"
+           }
+          ]
+         },
+         "why": {
+          "ar": [
+           {
+            "ar": "الوصفة تعاونّا في الأسئلة الشبيهة"
+           }
+          ]
+         },
+         "next": {
+          "ar": [
+           {
+            "ar": "نكتبو في الورقة"
+           }
+          ]
+         }
+        },
+        "prompt": {
+         "ar": [
+          {
+           "ar": "اختار من ثلاثة لخمسة جمل ورتّبهم: هذي وصفتك لهذا النوع من الأسئلة."
+          }
+         ]
+        },
+        "hints": [],
+        "pool": [
+         {
+          "id": "r_rule",
+          "kind": "step",
+          "text": {
+           "ar": [
+            {
+             "ar": "نختارو القاعدة حسب شكل الدالة."
+            }
+           ]
+          }
+         },
+         {
+          "id": "r_parts",
+          "kind": "step",
+          "text": {
+           "ar": [
+            {
+             "ar": "نحسبو الفوق والتحت، ومن بعد "
+            },
+            {
+             "fr": "dérivées"
+            },
+            {
+             "ar": " متاعهم."
+            }
+           ]
+          }
+         },
+         {
+          "id": "r_apply",
+          "kind": "step",
+          "text": {
+           "ar": [
+            {
+             "ar": "نطبّقو القاعدة."
+            }
+           ]
+          }
+         },
+         {
+          "id": "r_factor",
+          "kind": "step",
+          "text": {
+           "ar": [
+            {
+             "ar": "نخرّجو الحاجة المشتركة ونبسّطو."
+            }
+           ]
+          }
+         },
+         {
+          "id": "r_target",
+          "kind": "check",
+          "text": {
+           "ar": [
+            {
+             "ar": "نثبّتو إنّ الكتيبة هي اللي في النص."
+            }
+           ]
+          }
+         },
+         {
+          "id": "r_d1",
+          "kind": "distractor",
+          "text": {
+           "ar": [
+            {
+             "ar": "التحت يقعد كيما هو."
+            }
+           ]
+          }
+         },
+         {
+          "id": "r_d2",
+          "kind": "distractor",
+          "text": {
+           "ar": [
+            {
+             "ar": "بين الحدّين نزيدو."
+            }
+           ]
+          }
+         }
+        ],
+        "clean": [
+         "r_rule",
+         "r_parts",
+         "r_apply",
+         "r_factor",
+         "r_target"
+        ]
+       },
+       "methodCard": {
+        "type": {
+         "ar": [
+          {
+           "ar": "مشتقّة كسر ( "
+          },
+          {
+           "fr": "dérivée"
+          },
+          {
+           "ar": " )"
+          }
+         ]
+        },
+        "steps": [
+         {
+          "ar": [
+           {
+            "ar": "نختارو القاعدة."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "نحسبو الحسابات الصغار."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "نطبّقو ونبسّطو."
+           }
+          ]
+         }
+        ],
+        "checks": [
+         {
+          "ar": [
+           {
+            "ar": "التحت يتربّع."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "بين الحدّين نطرحو."
+           }
+          ]
+         }
+        ]
+       },
+       "similar": [
+        {
+         "id": "same",
+         "kind": "same_structure",
+         "statement": {
+          "fr": "Soit g la fonction définie sur ℝ par g(x) = e²ˣ/(1 + e⁴ˣ). Montrer que, pour tout réel x, g'(x) = 2(1 − e⁴ˣ)e²ˣ/(1 + e⁴ˣ)²."
+         },
+         "graph": {
+          "template": "fn_derivative",
+          "args": {
+           "expr": "e^(2x)/(1+e^(4x))",
+           "target": "2(1-e^(4x))e^(2x)/(1+e^(4x))^2",
+           "inner": "4e^(4x)",
+           "innerOf": "1+e^(4x)"
+          }
+         },
+         "allow": []
+        },
+        {
+         "id": "twist",
+         "kind": "twist",
+         "statement": {
+          "fr": "Soit h la fonction définie sur ℝ par h(x) = eˣ/(1 + eˣ). Calculer h'(x)."
+         },
+         "graph": {
+          "template": "fn_derivative",
+          "args": {
+           "expr": "e^x/(1+e^x)",
+           "target": "e^x/(1+e^x)^2",
+           "inner": "e^x",
+           "innerOf": "1+e^x"
+          }
+         },
+         "allow": []
+        }
+       ],
+       "findings": [
+        {
+         "id": "f_inner",
+         "title": {
+          "ar": [
+           {
+            "ar": "الحساب الصغير"
+           }
+          ]
+         },
+         "nodes": [
+          "inner_d"
+         ],
+         "reasons": {
+          "inner_d": {
+           "ar": [
+            {
+             "ar": "الأُسّي يقعد، وقدّامو العدد اللي في الأُس."
+            }
+           ]
+          }
+         },
+         "rule": {
+          "text": {
+           "ar": [
+            {
+             "ar": "الأُسّي يقعد كيما هو، وقدّامو العدد اللي في الأُس."
+            }
+           ]
+          },
+          "condition": {
+           "ar": [
+            {
+             "ar": "كي الأُس فيه عدد ضرب المتغيّر."
+            }
+           ]
+          }
+         },
+         "bridge": true
+        },
+        {
+         "id": "f_derive",
+         "title": {
+          "ar": [
+           {
+            "ar": "الحساب الكامل"
+           }
+          ]
+         },
+         "nodes": [
+          "deriv"
+         ],
+         "reasons": {
+          "deriv": {
+           "ar": [
+            {
+             "ar": "قاعدة الكسر، ومن بعد خرّجنا الأُسّي المشترك."
+            }
+           ]
+          }
+         },
+         "rule": {
+          "text": {
+           "ar": [
+            {
+             "ar": "قاعدة الكسر فيها طرح، والتحت يتربّع."
+            }
+           ]
+          },
+          "condition": {
+           "ar": [
+            {
+             "ar": "كي الدالة كسر."
+            }
+           ]
+          }
+         },
+         "bridge": false,
+         "viaCard": "c_rule"
+        }
+       ],
+       "skeleton": [
+        {
+         "id": "k1",
+         "fr": "f = u/v avec u(x) = eˣ et v(x) = 1 + e^(2x) ; u'(x) = eˣ et :",
+         "math": "v'(x) = \\his{inner_d}"
+        },
+        {
+         "id": "k2",
+         "fr": "Donc, pour tout réel x :",
+         "math": "f'(x) = \\his{deriv}"
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "writeup": {
+    "elements": [
+     "rule",
+     "parts",
+     "compute"
+    ],
+    "modelFr": [
+     "f est dérivable sur ℝ comme quotient de fonctions dérivables dont le dénominateur ne s'annule pas.",
+     "Avec u(x) = eˣ et v(x) = 1 + e^(2x) : u'(x) = eˣ et v'(x) = 2e^(2x).",
+     "f'(x) = (eˣ(1 + e^(2x)) − eˣ × 2e^(2x))/(1 + e^(2x))² = (1 − e^(2x))eˣ/(1 + e^(2x))²."
+    ]
+   }
+  },
+  {
+   "id": "A3b",
+   "goal": {
+    "fr": "Tableau de variation de f"
+   },
+   "expected": "var_table",
+   "uses": [
+    "f_prime",
+    "lim_0",
+    "f_even"
+   ],
+   "groups": [
+    {
+     "id": "g1",
+     "steps": [
+      {
+       "id": "s1",
+       "blockId": "qex4-A3b-s1",
+       "trust": {
+        "reviewed": false,
+        "contentVersion": "ex4-1.0.0",
+        "source": "authored",
+        "status": "ok"
+       },
+       "skills": [
+        "variation-table"
+       ],
+       "kind": "text",
+       "text": {
+        "ar": [
+         {
+          "ar": "من الـ "
+         },
+         {
+          "fr": "dérivée"
+         },
+         {
+          "ar": " نعرفو وين الدالة تطلع ووين تهبط، ونكتبو الجدول."
+         }
+        ]
+       }
+      },
+      {
+       "trust": {
+        "reviewed": false,
+        "contentVersion": "ex4-1.0.0",
+        "source": "authored",
+        "status": "ok"
+       },
+       "kind": "method",
+       "extras": [],
+       "id": "mA3b",
+       "blockId": "qex4-A3b-m",
+       "skills": [
+        "variation-table",
+        "sign-of-product",
+        "exp-rules"
+       ],
+       "opening": {
+        "route": [
+         {
+          "ar": [
+           {
+            "ar": "نبداو بخطة: نرتّبو الخطوات قبل ما نحسبو."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "نقراو علامة الحساب اللي لقيناه."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "نحسبو القيمة في النقطة العليا، ونقراو الأطراف."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "نختارو الجدول الصحيح ونكتبوه في الورقة."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "وبعدها نحلّو سؤالين شبيهين وحدنا."
+           }
+          ]
+         }
+        ],
+        "help": {
+         "ar": [
+          {
+           "ar": "كان ما تعرفش، اضغط على «ما نعرفش» ونمشيو بخطوة أصغر."
+          }
+         ]
+        }
+       },
+       "plan": {
+        "short": {
+         "ar": [
+          {
+           "ar": "الخطة"
+          }
+         ]
+        },
+        "header": {
+         "now": {
+          "ar": [
+           {
+            "ar": "نرتّبو الخطوات"
+           }
+          ]
+         },
+         "why": {
+          "ar": [
+           {
+            "ar": "الجدول يحتاج العلامة والقيم"
+           }
+          ]
+         },
+         "next": {
+          "ar": [
+           {
+            "ar": "نقراو السؤال"
+           }
+          ]
+         }
+        },
+        "prompt": {
+         "ar": [
+          {
+           "ar": "رتّب الخطوات: شنوّة نعمل الأوّل، وشنوّة بعد؟"
+          }
+         ]
+        },
+        "hints": [
+         {
+          "ar": [
+           {
+            "ar": "الجدول يحتاج العلامة والقيم: شنوّة قبل؟"
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "العلامة تقول وين الدالة تطلع."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "ابدا بالعلامة، وخلّي الجدول للآخر."
+           }
+          ]
+         }
+        ],
+        "cards": [
+         {
+          "id": "c_sign",
+          "key": "sign",
+          "short": {
+           "ar": [
+            {
+             "ar": "العلامة"
+            }
+           ]
+          },
+          "text": {
+           "ar": [
+            {
+             "ar": "نقراو العلامة"
+            }
+           ]
+          },
+          "header": {
+           "now": {
+            "ar": [
+             {
+              "ar": "العلامة"
+             }
+            ]
+           },
+           "why": {
+            "ar": [
+             {
+              "ar": "العلامة تقول وين الدالة تطلع"
+             }
+            ]
+           },
+           "next": {
+            "ar": [
+             {
+              "ar": "القيمة العليا"
+             }
+            ]
+           }
+          },
+          "needs": [],
+          "prompt": {
+           "ar": [
+            {
+             "ar": "اختار الجملة الصحيحة."
+            }
+           ]
+          },
+          "hints": [
+           {
+            "ar": [
+             {
+              "ar": "الأُسّي ديما موجب، والتحت مربّع: شنوّة اللي يقرّر العلامة؟"
+             }
+            ]
+           },
+           {
+            "ar": [
+             {
+              "ar": "العلامة هي علامة الفوق: واحد ناقص أُسّي."
+             }
+            ]
+           }
+          ]
+         },
+         {
+          "id": "c_top",
+          "key": "top",
+          "short": {
+           "ar": [
+            {
+             "ar": "القيمة العليا"
+            }
+           ]
+          },
+          "text": {
+           "ar": [
+            {
+             "ar": "نحسبو الدالة وين العلامة تتبدّل"
+            }
+           ]
+          },
+          "header": {
+           "now": {
+            "ar": [
+             {
+              "ar": "القيمة العليا"
+             }
+            ]
+           },
+           "why": {
+            "ar": [
+             {
+              "ar": "الدالة تبدّل اتجاهها في النقطة هذي"
+             }
+            ]
+           },
+           "next": {
+            "ar": [
+             {
+              "ar": "الأطراف"
+             }
+            ]
+           }
+          },
+          "needs": [
+           "c_sign"
+          ],
+          "prompt": {
+           "ar": [
+            {
+             "ar": "اكتب الحساب متاع الدالة في الصفر."
+            }
+           ]
+          },
+          "hints": [
+           {
+            "ar": [
+             {
+              "ar": "الأُسّي في الصفر قدّاش يساوي؟"
+             }
+            ]
+           },
+           {
+            "ar": [
+             {
+              "ar": "عوّض في الفوق وفي التحت."
+             }
+            ]
+           },
+           {
+            "ar": [
+             {
+              "ar": "القاعدة:"
+             }
+            ],
+            "math": "e^{0} = 1"
+           }
+          ]
+         },
+         {
+          "id": "c_ends",
+          "key": "ends",
+          "short": {
+           "ar": [
+            {
+             "ar": "الأطراف"
+            }
+           ]
+          },
+          "text": {
+           "ar": [
+            {
+             "ar": "نقراو الدالة في الأطراف"
+            }
+           ]
+          },
+          "header": {
+           "now": {
+            "ar": [
+             {
+              "ar": "الأطراف"
+             }
+            ]
+           },
+           "why": {
+            "ar": [
+             {
+              "ar": "الجدول يكمّل بالأطراف"
+             }
+            ]
+           },
+           "next": {
+            "ar": [
+             {
+              "ar": "الجدول"
+             }
+            ]
+           }
+          },
+          "needs": [],
+          "prompt": {
+           "ar": [
+            {
+             "ar": "اختار الجملة الصحيحة."
+            }
+           ]
+          },
+          "hints": [
+           {
+            "ar": [
+             {
+              "ar": "واحد من الطرفين لقيناه في السؤال الثاني."
+             }
+            ]
+           },
+           {
+            "ar": [
+             {
+              "ar": "الدالة "
+             },
+             {
+              "fr": "paire"
+             },
+             {
+              "ar": ": الطرف الآخر كيفو."
+             }
+            ]
+           }
+          ]
+         },
+         {
+          "id": "c_table",
+          "key": "table",
+          "short": {
+           "ar": [
+            {
+             "ar": "الجدول"
+            }
+           ]
+          },
+          "text": {
+           "ar": [
+            {
+             "ar": "نختارو الجدول"
+            }
+           ]
+          },
+          "header": {
+           "now": {
+            "ar": [
+             {
+              "ar": "الجدول"
+             }
+            ]
+           },
+           "why": {
+            "ar": [
+             {
+              "ar": "العلامة والقيم مع بعضهم"
+             }
+            ]
+           },
+           "next": {
+            "ar": [
+             {
+              "ar": "نكتبو في الورقة"
+             }
+            ]
+           }
+          },
+          "needs": [
+           "c_sign",
+           "c_top",
+           "c_ends"
+          ],
+          "prompt": {
+           "ar": [
+            {
+             "ar": "اختار الجدول الصحيح."
+            }
+           ]
+          },
+          "hints": [
+           {
+            "ar": [
+             {
+              "ar": "العلامة موجبة: الدالة تطلع."
+             }
+            ]
+           },
+           {
+            "ar": [
+             {
+              "ar": "القيمة العليا في الوسط، والأطراف صفر."
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       },
+       "builtFrames": [
+        "c_top"
+       ],
+       "read": {
+        "short": {
+         "ar": [
+          {
+           "ar": "القراءة"
+          }
+         ]
+        },
+        "header": {
+         "now": {
+          "ar": [
+           {
+            "ar": "نقراو السؤال"
+           }
+          ]
+         },
+         "why": {
+          "ar": [
+           {
+            "ar": "السؤال يطلب جدول"
+           }
+          ]
+         },
+         "next": {
+          "ar": [
+           {
+            "ar": "العلامة"
+           }
+          ]
+         }
+        },
+        "prompt": {
+         "ar": [
+          {
+           "ar": "شوف السؤال: شنوّة الكلمة اللي تقول شنوّة نكتبو؟"
+          }
+         ]
+        },
+        "hints": [
+         {
+          "ar": [
+           {
+            "ar": "السؤال يطلب جدول."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "الجدول متاع شنوّة؟"
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "اضغط على "
+           },
+           {
+            "fr": "variation"
+           }
+          ]
+         }
+        ],
+        "targets": [
+         {
+          "token": "variation",
+          "effect": {
+           "table": true
+          }
+         }
+        ],
+        "notOrderWord": {
+         "ar": [
+          {
+           "ar": "الكلمة هاذي ما تقولش شنوّة نكتبو."
+          }
+         ]
+        },
+        "sentence": "Dresser le tableau de variation de f."
+       },
+       "paper": {
+        "short": {
+         "ar": [
+          {
+           "ar": "الورقة"
+          }
+         ]
+        },
+        "header": {
+         "now": {
+          "ar": [
+           {
+            "ar": "نكتبو الجواب في الورقة"
+           }
+          ]
+         },
+         "why": {
+          "ar": [
+           {
+            "ar": "الامتحان يطلب الكتابة بالتفصيل"
+           }
+          ]
+         },
+         "next": {
+          "ar": [
+           {
+            "ar": "نحلّو سؤال شبيه"
+           }
+          ]
+         }
+        }
+       },
+       "graph": {
+        "template": "fn_variation",
+        "args": {
+         "expr": "e^x/(1+e^(2x))",
+         "at": 0,
+         "top": [
+          1,
+          2
+         ],
+         "topForms": [
+          "1/(1+1)",
+          "1/2"
+         ],
+         "topSlips": [
+          {
+           "expr": "0/(1+0)",
+           "id": "exp_zero_is_zero"
+          }
+         ]
+        }
+       },
+       "picks": [
+        {
+         "id": "c_sign",
+         "after": "c_sign",
+         "short": {
+          "ar": [
+           {
+            "ar": "العلامة"
+           }
+          ]
+         },
+         "header": {
+          "now": {
+           "ar": [
+            {
+             "ar": "العلامة"
+            }
+           ]
+          },
+          "why": {
+           "ar": [
+            {
+             "ar": "العلامة تقول وين الدالة تطلع"
+            }
+           ]
+          },
+          "next": {
+           "ar": [
+            {
+             "ar": "القيمة العليا"
+            }
+           ]
+          }
+         },
+         "prompt": {
+          "ar": [
+           {
+            "ar": "شنوّة علامة الـ "
+           },
+           {
+            "fr": "dérivée"
+           },
+           {
+            "ar": "؟ اختار الجملة الصحيحة."
+           }
+          ]
+         },
+         "hints": [
+          {
+           "ar": [
+            {
+             "ar": "الأُسّي ديما موجب، والتحت مربّع: شنوّة اللي يقرّر العلامة؟"
+            }
+           ]
+          },
+          {
+           "ar": [
+            {
+             "ar": "جرّب بعدد سالب وبعدد موجب."
+            }
+           ]
+          }
+         ],
+         "evaluator": "pick",
+         "args": {},
+         "cards": [
+          {
+           "id": "k_sign",
+           "text": {
+            "ar": [
+             {
+              "ar": "موجبة قبل الصفر وسالبة بعدو: العلامة هي علامة الفوق."
+             }
+            ],
+            "math": "1 - e^{2x}"
+           },
+           "truth": "true"
+          },
+          {
+           "id": "k_reverse",
+           "text": {
+            "ar": [
+             {
+              "ar": "سالبة قبل الصفر وموجبة بعدو."
+             }
+            ]
+           },
+           "truth": "false",
+           "misconceptionId": "sign_arrow_mismatch",
+           "feedback": {
+            "ar": [
+             {
+              "ar": "جرّب بعدد سالب: الأُسّي متاعو أصغر من واحد ولا أكبر؟"
+             }
+            ]
+           }
+          },
+          {
+           "id": "k_always",
+           "text": {
+            "ar": [
+             {
+              "ar": "ديما موجبة خاطر الأُسّي موجب."
+             }
+            ]
+           },
+           "truth": "false",
+           "feedback": {
+            "ar": [
+             {
+              "ar": "الأُسّي موجب والتحت موجب، أما الفوق فيه طرح: جرّب بعدد موجب."
+             }
+            ]
+           }
+          }
+         ]
+        },
+        {
+         "id": "c_ends",
+         "after": "c_ends",
+         "short": {
+          "ar": [
+           {
+            "ar": "الأطراف"
+           }
+          ]
+         },
+         "header": {
+          "now": {
+           "ar": [
+            {
+             "ar": "الأطراف"
+            }
+           ]
+          },
+          "why": {
+           "ar": [
+            {
+             "ar": "الجدول يكمّل بالأطراف"
+            }
+           ]
+          },
+          "next": {
+           "ar": [
+            {
+             "ar": "الجدول"
+            }
+           ]
+          }
+         },
+         "prompt": {
+          "ar": [
+           {
+            "ar": "وين تمشي الدالة في الأطراف؟ اختار الصحيحة."
+           }
+          ]
+         },
+         "hints": [
+          {
+           "ar": [
+            {
+             "ar": "واحد من الطرفين لقيناه في السؤال الثاني."
+            }
+           ]
+          },
+          {
+           "ar": [
+            {
+             "ar": "الدالة "
+            },
+            {
+             "fr": "paire"
+            },
+            {
+             "ar": ": الطرف الآخر كيفو."
+            }
+           ]
+          }
+         ],
+         "evaluator": "pick",
+         "args": {},
+         "cards": [
+          {
+           "id": "k_zero",
+           "text": {
+            "ar": [
+             {
+              "ar": "للصفر في الطرفين: الدالة "
+             },
+             {
+              "fr": "paire"
+             },
+             {
+              "ar": " والطرف الأوّل لقيناه."
+             }
+            ]
+           },
+           "truth": "true"
+          },
+          {
+           "id": "k_inf",
+           "text": {
+            "ar": [
+             {
+              "ar": "للصفر في طرف، وتكبر بلا حدّ في الطرف الآخر."
+             }
+            ]
+           },
+           "truth": "false",
+           "misconceptionId": "exp_neg_limit_wrong",
+           "feedback": {
+            "ar": [
+             {
+              "ar": "الدالة "
+             },
+             {
+              "fr": "paire"
+             },
+             {
+              "ar": ": الطرفين كيف كيف."
+             }
+            ]
+           }
+          },
+          {
+           "id": "k_one",
+           "text": {
+            "ar": [
+             {
+              "ar": "للواحد في الطرفين."
+             }
+            ]
+           },
+           "truth": "false",
+           "feedback": {
+            "ar": [
+             {
+              "ar": "الفوق يتقسم على أُسّي يكبر أكثر منو: شوف السؤال الثاني."
+             }
+            ]
+           }
+          }
+         ]
+        },
+        {
+         "id": "c_table",
+         "after": "c_table",
+         "short": {
+          "ar": [
+           {
+            "ar": "الجدول"
+           }
+          ]
+         },
+         "header": {
+          "now": {
+           "ar": [
+            {
+             "ar": "الجدول"
+            }
+           ]
+          },
+          "why": {
+           "ar": [
+            {
+             "ar": "العلامة والقيم مع بعضهم"
+            }
+           ]
+          },
+          "next": {
+           "ar": [
+            {
+             "ar": "نكتبو في الورقة"
+            }
+           ]
+          }
+         },
+         "prompt": {
+          "ar": [
+           {
+            "ar": "شنوّة الجدول الصحيح؟"
+           }
+          ]
+         },
+         "hints": [
+          {
+           "ar": [
+            {
+             "ar": "العلامة موجبة: الدالة تطلع."
+            }
+           ]
+          },
+          {
+           "ar": [
+            {
+             "ar": "القيمة العليا في الوسط، والأطراف صفر."
+            }
+           ]
+          }
+         ],
+         "evaluator": "pick",
+         "args": {},
+         "cards": [
+          {
+           "id": "k_table",
+           "text": {
+            "ar": [
+             {
+              "ar": "تطلع لين الصفر، توصل للقيمة العليا، ومن بعد تهبط، والأطراف صفر."
+             }
+            ],
+            "math": "f(0) = \\frac{1}{2}"
+           },
+           "truth": "true"
+          },
+          {
+           "id": "k_reversed",
+           "text": {
+            "ar": [
+             {
+              "ar": "تهبط لين الصفر، ومن بعد تطلع."
+             }
+            ]
+           },
+           "truth": "false",
+           "misconceptionId": "sign_arrow_mismatch",
+           "feedback": {
+            "ar": [
+             {
+              "ar": "العلامة قبل الصفر موجبة: الدالة تطلع ولا تهبط؟"
+             }
+            ]
+           }
+          },
+          {
+           "id": "k_monotone",
+           "text": {
+            "ar": [
+             {
+              "ar": "تطلع ديما، وما فيهاش قيمة عليا."
+             }
+            ]
+           },
+           "truth": "false",
+           "misconceptionId": "extremum_without_sign_change",
+           "feedback": {
+            "ar": [
+             {
+              "ar": "العلامة تتبدّل في الصفر: الاتجاه يتبدّل زادة."
+             }
+            ]
+           }
+          }
+         ]
+        }
+       ],
+       "recipe": {
+        "short": {
+         "ar": [
+          {
+           "ar": "الوصفة"
+          }
+         ]
+        },
+        "header": {
+         "now": {
+          "ar": [
+           {
+            "ar": "نكتبو الوصفة متاعنا"
+           }
+          ]
+         },
+         "why": {
+          "ar": [
+           {
+            "ar": "الوصفة تعاونّا في الأسئلة الشبيهة"
+           }
+          ]
+         },
+         "next": {
+          "ar": [
+           {
+            "ar": "نكتبو في الورقة"
+           }
+          ]
+         }
+        },
+        "prompt": {
+         "ar": [
+          {
+           "ar": "اختار من ثلاثة لخمسة جمل ورتّبهم: هذي وصفتك لهذا النوع من الأسئلة."
+          }
+         ]
+        },
+        "hints": [],
+        "pool": [
+         {
+          "id": "r_sign",
+          "kind": "step",
+          "text": {
+           "ar": [
+            {
+             "ar": "نقراو علامة الـ "
+            },
+            {
+             "fr": "dérivée"
+            },
+            {
+             "ar": "."
+            }
+           ]
+          }
+         },
+         {
+          "id": "r_top",
+          "kind": "step",
+          "text": {
+           "ar": [
+            {
+             "ar": "نحسبو القيمة وين العلامة تتبدّل."
+            }
+           ]
+          }
+         },
+         {
+          "id": "r_ends",
+          "kind": "step",
+          "text": {
+           "ar": [
+            {
+             "ar": "نكتبو الأطراف من النتائج اللي قبل."
+            }
+           ]
+          }
+         },
+         {
+          "id": "r_table",
+          "kind": "step",
+          "text": {
+           "ar": [
+            {
+             "ar": "نكتبو الجدول: العلامة، الأسهم، القيم."
+            }
+           ]
+          }
+         },
+         {
+          "id": "r_check",
+          "kind": "check",
+          "text": {
+           "ar": [
+            {
+             "ar": "السهم يطلع وين العلامة موجبة."
+            }
+           ]
+          }
+         },
+         {
+          "id": "r_d1",
+          "kind": "distractor",
+          "text": {
+           "ar": [
+            {
+             "ar": "السهم يهبط وين العلامة موجبة."
+            }
+           ]
+          }
+         },
+         {
+          "id": "r_d2",
+          "kind": "distractor",
+          "text": {
+           "ar": [
+            {
+             "ar": "الأُسّي في الصفر يساوي صفر."
+            }
+           ]
+          }
+         }
+        ],
+        "clean": [
+         "r_sign",
+         "r_top",
+         "r_ends",
+         "r_table",
+         "r_check"
+        ]
+       },
+       "methodCard": {
+        "type": {
+         "ar": [
+          {
+           "ar": "جدول التغيّرات ( "
+          },
+          {
+           "fr": "tableau de variation"
+          },
+          {
+           "ar": " )"
+          }
+         ]
+        },
+        "steps": [
+         {
+          "ar": [
+           {
+            "ar": "العلامة."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "القيم وين العلامة تتبدّل."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "الأطراف."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "الأسهم."
+           }
+          ]
+         }
+        ],
+        "checks": [
+         {
+          "ar": [
+           {
+            "ar": "العلامة الموجبة يقابلها سهم طالع."
+           }
+          ]
+         }
+        ]
+       },
+       "similar": [
+        {
+         "id": "same",
+         "kind": "same_structure",
+         "statement": {
+          "fr": "Soit g la fonction définie sur ℝ par g(x) = e²ˣ/(1 + e⁴ˣ). On admet que g'(x) = 2(1 − e⁴ˣ)e²ˣ/(1 + e⁴ˣ)² et que la limite de g en +∞ est 0. Dresser le tableau de variation de g."
+         },
+         "graph": {
+          "template": "fn_variation",
+          "args": {
+           "expr": "e^(2x)/(1+e^(4x))",
+           "at": 0,
+           "top": [
+            1,
+            2
+           ],
+           "topForms": [
+            "1/(1+1)",
+            "1/2"
+           ]
+          }
+         },
+         "allow": []
+        },
+        {
+         "id": "twist",
+         "kind": "twist",
+         "statement": {
+          "fr": "Soit k la fonction définie sur ℝ par k(x) = 2eˣ/(1 + e²ˣ). On admet que k est paire, que k'(x) a le signe de 1 − e²ˣ et que la limite de k en +∞ est 0. Dresser le tableau de variation de k."
+         },
+         "graph": {
+          "template": "fn_variation",
+          "args": {
+           "expr": "2e^x/(1+e^(2x))",
+           "at": 0,
+           "top": [
+            1,
+            1
+           ],
+           "topForms": [
+            "2/(1+1)",
+            "1"
+           ]
+          }
+         },
+         "allow": []
+        }
+       ],
+       "findings": [
+        {
+         "id": "f_top",
+         "title": {
+          "ar": [
+           {
+            "ar": "القيمة العليا"
+           }
+          ]
+         },
+         "nodes": [
+          "top"
+         ],
+         "reasons": {
+          "top": {
+           "ar": [
+            {
+             "ar": "الدالة في الصفر."
+            }
+           ]
+          }
+         },
+         "rule": {
+          "text": {
+           "ar": [
+            {
+             "ar": "وين العلامة تتبدّل من موجبة لسالبة، الدالة توصل لأكبر قيمة."
+            }
+           ]
+          },
+          "condition": {
+           "ar": [
+            {
+             "ar": "كي العلامة تتبدّل."
+            }
+           ]
+          }
+         },
+         "bridge": false,
+         "viaCard": "c_table"
+        }
+       ],
+       "skeleton": [
+        {
+         "id": "k1",
+         "fr": "Pour tout réel x, eˣ > 0 et (1 + e^(2x))² > 0, donc f'(x) a le signe de 1 − e^(2x) : positif sur ]−∞ ; 0], négatif sur [0 ; +∞[."
+        },
+        {
+         "id": "k2",
+         "fr": "f(0) = {top} ; la limite de f est 0 en +∞ et, f étant paire, en −∞."
+        },
+        {
+         "id": "k3",
+         "fr": "f est croissante sur ]−∞ ; 0] et décroissante sur [0 ; +∞[ ; son maximum est f(0) = {top}."
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "writeup": {
+    "elements": [
+     "sign",
+     "values",
+     "table"
+    ],
+    "modelFr": [
+     "f'(x) a le signe de 1 − e^(2x), car eˣ > 0 et (1 + e^(2x))² > 0 ; 1 − e^(2x) ≥ 0 équivaut à x ≤ 0.",
+     "f(0) = \\val{f0} ; la limite de f est 0 en +∞ et, f étant paire, en −∞.",
+     "f est croissante sur ]−∞ ; 0], décroissante sur [0 ; +∞[, de maximum f(0) = \\val{f0}."
+    ]
+   }
+  },
+  {
+   "id": "A4",
+   "goal": {
+    "fr": "Tracer (ζ)"
+   },
+   "expected": "curve",
+   "uses": [
+    "f_even",
+    "lim_0",
+    "var_table"
+   ],
+   "groups": [
+    {
+     "id": "g1",
+     "steps": [
+      {
+       "id": "s1",
+       "blockId": "qex4-A4-s1",
+       "trust": {
+        "reviewed": false,
+        "contentVersion": "ex4-1.0.0",
+        "source": "authored",
+        "status": "ok"
+       },
+       "skills": [
+        "asymptote-interpretation"
+       ],
+       "kind": "text",
+       "text": {
+        "ar": [
+         {
+          "ar": "نرسمو المنحنى من اللي لقيناه: التناظر، الخطّ اللي يقربلو، والنقطة العليا."
+         }
+        ]
+       }
+      },
+      {
+       "trust": {
+        "reviewed": false,
+        "contentVersion": "ex4-1.0.0",
+        "source": "authored",
+        "status": "ok"
+       },
+       "kind": "method",
+       "extras": [
+        {
+         "id": "x_plot",
+         "after": "c_top",
+         "short": {
+          "ar": [
+           {
+            "ar": "المنحنى"
+           }
+          ]
+         },
+         "header": {
+          "now": {
+           "ar": [
+            {
+             "ar": "المنحنى"
+            }
+           ]
+          },
+          "why": {
+           "ar": [
+            {
+             "ar": "نشوفو اللي لقيناه الكل على الرسم"
+            }
+           ]
+          },
+          "next": {
+           "ar": [
+            {
+             "ar": "نكتبو الوصفة"
+            }
+           ]
+          }
+         },
+         "prompt": {
+          "ar": [
+           {
+            "ar": "شوف المنحنى: التناظر، الخطّ اللي يقربلو، والنقطة العليا."
+           }
+          ]
+         },
+         "stages": [
+          {
+           "type": "component",
+           "component": {
+            "component": "FunctionPlot",
+            "props": {
+             "fn": "f_ex4",
+             "domain": [
+              -4,
+              4
+             ],
+             "markers": [
+              {
+               "type": "point",
+               "at": 0,
+               "showValue": true
+              },
+              {
+               "type": "asymptote",
+               "at": 0
+              }
+             ]
+            }
+           }
+          }
+         ]
+        }
+       ],
+       "id": "mA4",
+       "blockId": "qex4-A4-m",
+       "skills": [
+        "variation-table",
+        "asymptote-interpretation",
+        "function-parity"
+       ],
+       "opening": {
+        "route": [
+         {
+          "ar": [
+           {
+            "ar": "نبداو بخطة: نرتّبو الخطوات قبل ما نحسبو."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "نشوفو شنوّة لقينا في الأسئلة اللي قبل."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "نختارو التناظر والخطّ اللي يقربلو المنحنى."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "نحطّو النقطة العليا، ونشوفو المنحنى."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "وبعدها نحلّو سؤالين شبيهين وحدنا."
+           }
+          ]
+         }
+        ],
+        "help": {
+         "ar": [
+          {
+           "ar": "كان ما تعرفش، اضغط على «ما نعرفش» ونمشيو بخطوة أصغر."
+          }
+         ]
+        }
+       },
+       "plan": {
+        "short": {
+         "ar": [
+          {
+           "ar": "الخطة"
+          }
+         ]
+        },
+        "header": {
+         "now": {
+          "ar": [
+           {
+            "ar": "نرتّبو الخطوات"
+           }
+          ]
+         },
+         "why": {
+          "ar": [
+           {
+            "ar": "الرسم يبدا بالحاجات الثابتة"
+           }
+          ]
+         },
+         "next": {
+          "ar": [
+           {
+            "ar": "نقراو السؤال"
+           }
+          ]
+         }
+        },
+        "prompt": {
+         "ar": [
+          {
+           "ar": "رتّب الخطوات: شنوّة نعمل الأوّل، وشنوّة بعد؟"
+          }
+         ]
+        },
+        "hints": [
+         {
+          "ar": [
+           {
+            "ar": "الرسم يبدا بالحاجات الثابتة."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "التناظر والخطّ قبل النقطة."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "ابدا بالتناظر."
+           }
+          ]
+         }
+        ],
+        "cards": [
+         {
+          "id": "c_sym",
+          "key": "symmetry",
+          "short": {
+           "ar": [
+            {
+             "ar": "التناظر"
+            }
+           ]
+          },
+          "text": {
+           "ar": [
+            {
+             "ar": "نختارو التناظر"
+            }
+           ]
+          },
+          "header": {
+           "now": {
+            "ar": [
+             {
+              "ar": "التناظر"
+             }
+            ]
+           },
+           "why": {
+            "ar": [
+             {
+              "ar": "الدالة متناظرة"
+             }
+            ]
+           },
+           "next": {
+            "ar": [
+             {
+              "ar": "الخطّ"
+             }
+            ]
+           }
+          },
+          "needs": [],
+          "prompt": {
+           "ar": [
+            {
+             "ar": "اختار الجملة الصحيحة."
+            }
+           ]
+          },
+          "hints": [
+           {
+            "ar": [
+             {
+              "ar": "الدالة "
+             },
+             {
+              "fr": "paire"
+             },
+             {
+              "ar": ": شنوّة يعني على المنحنى؟"
+             }
+            ]
+           },
+           {
+            "ar": [
+             {
+              "ar": "المنحنى متناظر بالنسبة لمحور التراتيب."
+             }
+            ]
+           }
+          ]
+         },
+         {
+          "id": "c_asym",
+          "key": "asymptote",
+          "short": {
+           "ar": [
+            {
+             "ar": "الخطّ"
+            }
+           ]
+          },
+          "text": {
+           "ar": [
+            {
+             "ar": "نختارو الخطّ اللي يقربلو المنحنى"
+            }
+           ]
+          },
+          "header": {
+           "now": {
+            "ar": [
+             {
+              "ar": "الخطّ"
+             }
+            ]
+           },
+           "why": {
+            "ar": [
+             {
+              "ar": "المنحنى يقرب لخطّ في الأطراف"
+             }
+            ]
+           },
+           "next": {
+            "ar": [
+             {
+              "ar": "النقطة العليا"
+             }
+            ]
+           }
+          },
+          "needs": [],
+          "prompt": {
+           "ar": [
+            {
+             "ar": "اختار الجملة الصحيحة."
+            }
+           ]
+          },
+          "hints": [
+           {
+            "ar": [
+             {
+              "ar": "في السؤال الثاني لقينا وين تمشي الدالة."
+             }
+            ]
+           },
+           {
+            "ar": [
+             {
+              "ar": "الطرفين كيف كيف."
+             }
+            ]
+           }
+          ]
+         },
+         {
+          "id": "c_top",
+          "key": "top",
+          "short": {
+           "ar": [
+            {
+             "ar": "النقطة العليا"
+            }
+           ]
+          },
+          "text": {
+           "ar": [
+            {
+             "ar": "نحطّو النقطة العليا"
+            }
+           ]
+          },
+          "header": {
+           "now": {
+            "ar": [
+             {
+              "ar": "النقطة العليا"
+             }
+            ]
+           },
+           "why": {
+            "ar": [
+             {
+              "ar": "الدالة توصل لأكبر قيمة"
+             }
+            ]
+           },
+           "next": {
+            "ar": [
+             {
+              "ar": "نشوفو المنحنى"
+             }
+            ]
+           }
+          },
+          "needs": [
+           "c_sym",
+           "c_asym"
+          ],
+          "prompt": {
+           "ar": [
+            {
+             "ar": "اكتب القيمة العليا متاع الدالة."
+            }
+           ]
+          },
+          "hints": [
+           {
+            "ar": [
+             {
+              "ar": "لقيناها في الجدول."
+             }
+            ]
+           },
+           {
+            "ar": [
+             {
+              "ar": "الدالة في الصفر."
+             }
+            ]
+           },
+           {
+            "ar": [
+             {
+              "ar": "القاعدة:"
+             }
+            ],
+            "math": "e^{0} = 1"
+           }
+          ]
+         }
+        ]
+       },
+       "builtFrames": [
+        "c_top"
+       ],
+       "read": {
+        "short": {
+         "ar": [
+          {
+           "ar": "القراءة"
+          }
+         ]
+        },
+        "header": {
+         "now": {
+          "ar": [
+           {
+            "ar": "نقراو السؤال"
+           }
+          ]
+         },
+         "why": {
+          "ar": [
+           {
+            "ar": "السؤال يطلب رسم"
+           }
+          ]
+         },
+         "next": {
+          "ar": [
+           {
+            "ar": "التناظر"
+           }
+          ]
+         }
+        },
+        "prompt": {
+         "ar": [
+          {
+           "ar": "شوف السؤال: شنوّة الكلمة اللي تقول شنوّة نعملو؟"
+          }
+         ]
+        },
+        "hints": [
+         {
+          "ar": [
+           {
+            "ar": "السؤال كلمة وحدة والحاجة اللي نرسموها."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "الكلمة الأولى."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "اضغط على "
+           },
+           {
+            "fr": "Tracer"
+           }
+          ]
+         }
+        ],
+        "targets": [
+         {
+          "token": "Tracer",
+          "effect": {
+           "draw": true
+          }
+         }
+        ],
+        "notOrderWord": {
+         "ar": [
+          {
+           "ar": "الكلمة هاذي ما تقولش شنوّة نعملو."
+          }
+         ]
+        },
+        "sentence": "Tracer (ζ)."
+       },
+       "paper": {
+        "short": {
+         "ar": [
+          {
+           "ar": "الورقة"
+          }
+         ]
+        },
+        "header": {
+         "now": {
+          "ar": [
+           {
+            "ar": "نكتبو الجواب في الورقة"
+           }
+          ]
+         },
+         "why": {
+          "ar": [
+           {
+            "ar": "الامتحان يطلب الكتابة بالتفصيل"
+           }
+          ]
+         },
+         "next": {
+          "ar": [
+           {
+            "ar": "نحلّو سؤال شبيه"
+           }
+          ]
+         }
+        }
+       },
+       "graph": {
+        "template": "fn_sketch",
+        "args": {
+         "expr": "e^x/(1+e^(2x))",
+         "at": 0,
+         "top": [
+          1,
+          2
+         ],
+         "topForms": [
+          "1/(1+1)",
+          "1/2"
+         ],
+         "topSlips": [
+          {
+           "expr": "0/(1+0)",
+           "id": "exp_zero_is_zero"
+          }
+         ]
+        }
+       },
+       "picks": [
+        {
+         "id": "c_sym",
+         "after": "c_sym",
+         "short": {
+          "ar": [
+           {
+            "ar": "التناظر"
+           }
+          ]
+         },
+         "header": {
+          "now": {
+           "ar": [
+            {
+             "ar": "التناظر"
+            }
+           ]
+          },
+          "why": {
+           "ar": [
+            {
+             "ar": "الدالة متناظرة"
+            }
+           ]
+          },
+          "next": {
+           "ar": [
+            {
+             "ar": "الخطّ"
+            }
+           ]
+          }
+         },
+         "prompt": {
+          "ar": [
+           {
+            "ar": "المنحنى متناظر بالنسبة لشنوّة؟ اختار الجملة الصحيحة."
+           }
+          ]
+         },
+         "hints": [
+          {
+           "ar": [
+            {
+             "ar": "الدالة "
+            },
+            {
+             "fr": "paire"
+            },
+            {
+             "ar": ": شنوّة يعني على المنحنى؟"
+            }
+           ]
+          },
+          {
+           "ar": [
+            {
+             "ar": "المنحنى متناظر بالنسبة لمحور التراتيب."
+            }
+           ]
+          }
+         ],
+         "evaluator": "pick",
+         "args": {},
+         "cards": [
+          {
+           "id": "k_axis",
+           "text": {
+            "ar": [
+             {
+              "ar": "المنحنى متناظر بالنسبة لمحور التراتيب."
+             }
+            ]
+           },
+           "truth": "true"
+          },
+          {
+           "id": "k_origin",
+           "text": {
+            "ar": [
+             {
+              "ar": "المنحنى متناظر بالنسبة للأصل."
+             }
+            ]
+           },
+           "truth": "false",
+           "misconceptionId": "parity_odd_even_confusion",
+           "feedback": {
+            "ar": [
+             {
+              "ar": "التناظر بالنسبة للأصل متاع دالة "
+             },
+             {
+              "fr": "impaire"
+             },
+             {
+              "ar": "."
+             }
+            ]
+           }
+          },
+          {
+           "id": "k_none",
+           "text": {
+            "ar": [
+             {
+              "ar": "المنحنى ما فيهوش تناظر."
+             }
+            ]
+           },
+           "truth": "false",
+           "feedback": {
+            "ar": [
+             {
+              "ar": "الدالة "
+             },
+             {
+              "fr": "paire"
+             },
+             {
+              "ar": ": المنحنى متناظر."
+             }
+            ]
+           }
+          }
+         ]
+        },
+        {
+         "id": "c_asym",
+         "after": "c_asym",
+         "short": {
+          "ar": [
+           {
+            "ar": "الخطّ"
+           }
+          ]
+         },
+         "header": {
+          "now": {
+           "ar": [
+            {
+             "ar": "الخطّ"
+            }
+           ]
+          },
+          "why": {
+           "ar": [
+            {
+             "ar": "المنحنى يقرب لخطّ في الأطراف"
+            }
+           ]
+          },
+          "next": {
+           "ar": [
+            {
+             "ar": "النقطة العليا"
+            }
+           ]
+          }
+         },
+         "prompt": {
+          "ar": [
+           {
+            "ar": "المنحنى يقرب لشنوّة في الأطراف؟ اختار الجملة الصحيحة."
+           }
+          ]
+         },
+         "hints": [
+          {
+           "ar": [
+            {
+             "ar": "في السؤال الثاني لقينا وين تمشي الدالة."
+            }
+           ]
+          },
+          {
+           "ar": [
+            {
+             "ar": "الطرفين كيف كيف."
+            }
+           ]
+          }
+         ],
+         "evaluator": "pick",
+         "args": {},
+         "cards": [
+          {
+           "id": "k_both",
+           "text": {
+            "ar": [
+             {
+              "ar": "محور الفواصل، في الطرفين."
+             }
+            ]
+           },
+           "truth": "true"
+          },
+          {
+           "id": "k_one_end",
+           "text": {
+            "ar": [
+             {
+              "ar": "محور الفواصل، في طرف واحد برك."
+             }
+            ]
+           },
+           "truth": "false",
+           "feedback": {
+            "ar": [
+             {
+              "ar": "الدالة متناظرة: اللي يصير في طرف يصير في الآخر."
+             }
+            ]
+           }
+          },
+          {
+           "id": "k_vertical",
+           "text": {
+            "ar": [
+             {
+              "ar": "محور التراتيب."
+             }
+            ]
+           },
+           "truth": "false",
+           "misconceptionId": "interpretation_misplaced",
+           "feedback": {
+            "ar": [
+             {
+              "ar": "المتغيّر يكبر برشا: المنحنى يقرب لخطّ أفقي ولا عمودي؟"
+             }
+            ]
+           }
+          }
+         ]
+        }
+       ],
+       "recipe": {
+        "short": {
+         "ar": [
+          {
+           "ar": "الوصفة"
+          }
+         ]
+        },
+        "header": {
+         "now": {
+          "ar": [
+           {
+            "ar": "نكتبو الوصفة متاعنا"
+           }
+          ]
+         },
+         "why": {
+          "ar": [
+           {
+            "ar": "الوصفة تعاونّا في الأسئلة الشبيهة"
+           }
+          ]
+         },
+         "next": {
+          "ar": [
+           {
+            "ar": "نكتبو في الورقة"
+           }
+          ]
+         }
+        },
+        "prompt": {
+         "ar": [
+          {
+           "ar": "اختار من ثلاثة لخمسة جمل ورتّبهم: هذي وصفتك لهذا النوع من الأسئلة."
+          }
+         ]
+        },
+        "hints": [],
+        "pool": [
+         {
+          "id": "r_sym",
+          "kind": "step",
+          "text": {
+           "ar": [
+            {
+             "ar": "نحطّو التناظر."
+            }
+           ]
+          }
+         },
+         {
+          "id": "r_asym",
+          "kind": "step",
+          "text": {
+           "ar": [
+            {
+             "ar": "نرسمو الخطّ اللي يقربلو المنحنى."
+            }
+           ]
+          }
+         },
+         {
+          "id": "r_top",
+          "kind": "step",
+          "text": {
+           "ar": [
+            {
+             "ar": "نحطّو النقطة العليا."
+            }
+           ]
+          }
+         },
+         {
+          "id": "r_curve",
+          "kind": "step",
+          "text": {
+           "ar": [
+            {
+             "ar": "نرسمو المنحنى حسب الجدول."
+            }
+           ]
+          }
+         },
+         {
+          "id": "r_check",
+          "kind": "check",
+          "text": {
+           "ar": [
+            {
+             "ar": "المنحنى ما يقصّش محور الفواصل: الدالة موجبة."
+            }
+           ]
+          }
+         },
+         {
+          "id": "r_d1",
+          "kind": "distractor",
+          "text": {
+           "ar": [
+            {
+             "ar": "نرسمو المنحنى من غير جدول."
+            }
+           ]
+          }
+         }
+        ],
+        "clean": [
+         "r_sym",
+         "r_asym",
+         "r_top",
+         "r_curve",
+         "r_check"
+        ]
+       },
+       "methodCard": {
+        "type": {
+         "ar": [
+          {
+           "ar": "رسم منحنى ( "
+          },
+          {
+           "fr": "courbe"
+          },
+          {
+           "ar": " )"
+          }
+         ]
+        },
+        "steps": [
+         {
+          "ar": [
+           {
+            "ar": "التناظر."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "الخطوط اللي يقربلها."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "النقاط المهمّة."
+           }
+          ]
+         },
+         {
+          "ar": [
+           {
+            "ar": "المنحنى حسب الجدول."
+           }
+          ]
+         }
+        ],
+        "checks": [
+         {
+          "ar": [
+           {
+            "ar": "المنحنى يحترم علامة الدالة."
+           }
+          ]
+         }
+        ]
+       },
+       "similar": [
+        {
+         "id": "same",
+         "kind": "same_structure",
+         "statement": {
+          "fr": "Soit g la fonction définie sur ℝ par g(x) = e²ˣ/(1 + e⁴ˣ). On admet que g est paire, que sa limite en +∞ est 0 et que son maximum est g(0). Tracer la courbe de g."
+         },
+         "graph": {
+          "template": "fn_sketch",
+          "args": {
+           "expr": "e^(2x)/(1+e^(4x))",
+           "at": 0,
+           "top": [
+            1,
+            2
+           ],
+           "topForms": [
+            "1/(1+1)",
+            "1/2"
+           ]
+          }
+         },
+         "allow": []
+        },
+        {
+         "id": "twist",
+         "kind": "twist",
+         "statement": {
+          "fr": "Soit k la fonction définie sur ℝ par k(x) = 2eˣ/(1 + e²ˣ). On admet que k est paire, que sa limite en +∞ est 0 et que son maximum est k(0). Tracer la courbe de k."
+         },
+         "graph": {
+          "template": "fn_sketch",
+          "args": {
+           "expr": "2e^x/(1+e^(2x))",
+           "at": 0,
+           "top": [
+            1,
+            1
+           ],
+           "topForms": [
+            "2/(1+1)",
+            "1"
+           ]
+          }
+         },
+         "allow": []
+        }
+       ],
+       "findings": [
+        {
+         "id": "f_curve",
+         "title": {
+          "ar": [
+           {
+            "ar": "المنحنى"
+           }
+          ]
+         },
+         "nodes": [
+          "top"
+         ],
+         "reasons": {
+          "top": {
+           "ar": [
+            {
+             "ar": "النقطة العليا: الدالة في الصفر."
+            }
+           ]
+          }
+         },
+         "rule": {
+          "text": {
+           "ar": [
+            {
+             "ar": "المنحنى يتبنى من التناظر والخطوط والنقاط المهمّة."
+            }
+           ]
+          },
+          "condition": {
+           "ar": [
+            {
+             "ar": "كي الجدول كامل."
+            }
+           ]
+          }
+         },
+         "bridge": false
+        }
+       ],
+       "skeleton": [
+        {
+         "id": "k1",
+         "fr": "(ζ) est symétrique par rapport à l'axe des ordonnées (f est paire)."
+        },
+        {
+         "id": "k2",
+         "fr": "L'axe des abscisses est asymptote à (ζ) au voisinage de −∞ et de +∞."
+        },
+        {
+         "id": "k3",
+         "fr": "Le point le plus haut de (ζ) a pour coordonnées (0 ; {top}), où la tangente est horizontale."
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "writeup": {
+    "elements": [
+     "symmetry",
+     "asymptote",
+     "top"
+    ],
+    "modelFr": [
+     "(ζ) est symétrique par rapport à l'axe des ordonnées car f est paire.",
+     "L'axe des abscisses est asymptote à (ζ) au voisinage de −∞ et de +∞.",
+     "(ζ) passe par le point (0 ; \\val{f0}), où la tangente est horizontale."
+    ]
+   }
+  }
+ ],
+ "deepDives": [],
+ "variants": [],
+ "warmup": {
+  "start": [
+   "w_parity",
+   "w_exp",
+   "w_limit",
+   "w_quot"
+  ],
+  "questions": [
+   {
+    "id": "w_parity",
+    "skill": "function-parity",
+    "topic": "parité",
+    "prompt": {
+     "ar": [
+      {
+       "ar": "الدالة هاذي:"
+      }
+     ],
+     "math": "g(x) = x^{2} + 1"
+    },
+    "input": {
+     "kind": "pick",
+     "cards": [
+      {
+       "id": "k_even",
+       "text": {
+        "ar": [
+         {
+          "fr": "paire"
+         }
+        ]
+       },
+       "truth": "true"
+      },
+      {
+       "id": "k_odd",
+       "text": {
+        "ar": [
+         {
+          "fr": "impaire"
+         }
+        ]
+       },
+       "truth": "false",
+       "means": "confuses even and odd"
+      },
+      {
+       "id": "k_none",
+       "text": {
+        "ar": [
+         {
+          "ar": "حتى وحدة منهم"
+         }
+        ]
+       },
+       "truth": "false",
+       "means": "does not recognise an even function"
+      }
+     ]
+    }
+   },
+   {
+    "id": "w_exp",
+    "skill": "exp-rules",
+    "topic": "exponentielle",
+    "prompt": {
+     "ar": [
+      {
+       "ar": "شنوّة يساوي الضرب هذا؟"
+      }
+     ],
+     "math": "e^{2} \\times e^{3}"
+    },
+    "input": {
+     "kind": "pick",
+     "cards": [
+      {
+       "id": "k_add",
+       "text": {
+        "math": "e^{5}"
+       },
+       "truth": "true"
+      },
+      {
+       "id": "k_mul",
+       "text": {
+        "math": "e^{6}"
+       },
+       "truth": "false",
+       "means": "multiplies the exponents of a product"
+      },
+      {
+       "id": "k_two",
+       "text": {
+        "math": "2e^{5}"
+       },
+       "truth": "false",
+       "means": "adds a factor 2"
+      }
+     ]
+    },
+    "down": "w_pow"
+   },
+   {
+    "id": "w_pow",
+    "skill": "powers-rules",
+    "topic": "puissances",
+    "prompt": {
+     "ar": [
+      {
+       "ar": "شنوّة يساوي الضرب هذا؟"
+      }
+     ],
+     "math": "2^{2} \\times 2^{3}"
+    },
+    "input": {
+     "kind": "pick",
+     "cards": [
+      {
+       "id": "k_add",
+       "text": {
+        "math": "2^{5}"
+       },
+       "truth": "true"
+      },
+      {
+       "id": "k_mul",
+       "text": {
+        "math": "2^{6}"
+       },
+       "truth": "false",
+       "means": "multiplies the exponents of a product"
+      },
+      {
+       "id": "k_base",
+       "text": {
+        "math": "4^{5}"
+       },
+       "truth": "false",
+       "means": "multiplies the bases"
+      }
+     ]
+    }
+   },
+   {
+    "id": "w_limit",
+    "skill": "exp-limits",
+    "topic": "limites",
+    "prompt": {
+     "ar": [
+      {
+       "ar": "كي المتغيّر يكبر برشا، وين يمشي العدد هذا؟"
+      }
+     ],
+     "math": "e^{-x}"
+    },
+    "input": {
+     "kind": "pick",
+     "cards": [
+      {
+       "id": "k_zero",
+       "text": {
+        "math": "0"
+       },
+       "truth": "true"
+      },
+      {
+       "id": "k_inf",
+       "text": {
+        "math": "+\\infty"
+       },
+       "truth": "false",
+       "means": "thinks e^{-x} grows without bound"
+      },
+      {
+       "id": "k_one",
+       "text": {
+        "math": "1"
+       },
+       "truth": "false",
+       "means": "thinks e^{-x} tends to 1"
+      }
+     ]
+    },
+    "down": "w_sign"
+   },
+   {
+    "id": "w_sign",
+    "skill": "exp-rules",
+    "topic": "signe de l'exponentielle",
+    "prompt": {
+     "ar": [
+      {
+       "ar": "شنوّة علامة العدد هذا؟"
+      }
+     ],
+     "math": "e^{-3}"
+    },
+    "input": {
+     "kind": "pick",
+     "cards": [
+      {
+       "id": "k_pos",
+       "text": {
+        "ar": [
+         {
+          "ar": "موجب"
+         }
+        ]
+       },
+       "truth": "true"
+      },
+      {
+       "id": "k_neg",
+       "text": {
+        "ar": [
+         {
+          "ar": "سالب"
+         }
+        ]
+       },
+       "truth": "false",
+       "means": "thinks a negative exponent gives a negative number"
+      },
+      {
+       "id": "k_zero",
+       "text": {
+        "ar": [
+         {
+          "ar": "صفر"
+         }
+        ]
+       },
+       "truth": "false",
+       "means": "thinks e to a negative power is 0"
+      }
+     ]
+    }
+   },
+   {
+    "id": "w_quot",
+    "skill": "quotient-rule",
+    "topic": "dérivée d'un quotient",
+    "prompt": {
+     "ar": [
+      {
+       "ar": "شنوّة قاعدة الكسر؟"
+      }
+     ],
+     "math": "\\left(\\frac{u}{v}\\right)'"
+    },
+    "input": {
+     "kind": "pick",
+     "cards": [
+      {
+       "id": "k_rule",
+       "text": {
+        "math": "\\frac{u'v - uv'}{v^{2}}"
+       },
+       "truth": "true"
+      },
+      {
+       "id": "k_plus",
+       "text": {
+        "math": "\\frac{u'v + uv'}{v^{2}}"
+       },
+       "truth": "false",
+       "means": "adds the two terms of the quotient rule"
+      },
+      {
+       "id": "k_apart",
+       "text": {
+        "math": "\\frac{u'}{v'}"
+       },
+       "truth": "false",
+       "means": "derives the top and the bottom apart"
+      }
+     ]
+    },
+    "down": "w_der"
+   },
+   {
+    "id": "w_der",
+    "skill": "derivative-meaning",
+    "topic": "dérivée",
+    "prompt": {
+     "ar": [
+      {
+       "ar": "شنوّة يساوي الحساب هذا؟"
+      }
+     ],
+     "math": "\\left(x^{2}\\right)'"
+    },
+    "input": {
+     "kind": "pick",
+     "cards": [
+      {
+       "id": "k_2x",
+       "text": {
+        "math": "2x"
+       },
+       "truth": "true"
+      },
+      {
+       "id": "k_x2",
+       "text": {
+        "math": "x^{2}"
+       },
+       "truth": "false",
+       "means": "does not know the derivative of a power"
+      },
+      {
+       "id": "k_2",
+       "text": {
+        "math": "2"
+       },
+       "truth": "false",
+       "means": "drops the variable"
+      }
+     ]
+    }
+   }
+  ],
+  "done": {
+   "clean": {
+    "ar": [
+     {
+      "ar": "الحاجات اللي يحتاجها التمرين واضحة عندك. نبداو."
+     }
+    ]
+   },
+   "gaps": {
+    "ar": [
+     {
+      "ar": "عرفنا وين نبداو. الحاجات اللي ما كانتش واضحة نراجعوها مع بعض كي نوصلولها في التمرين."
+     }
+    ]
+   }
+  },
+  "reviewed": false
+ }
 }

@@ -395,6 +395,7 @@ export function HybridLessonScreen(p: HybridLessonScreenProps) {
               levelOf={s.levelOf}
               figure={s.figure}
               givens={s.givens}
+              lettersOf={s.lettersOf}
               onReveal={reveal}
               onLayout={onCardLayout}
             />

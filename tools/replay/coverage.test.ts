@@ -1,5 +1,5 @@
-import ex2 from '../../src/content/exercises/bac2022c-ex2.json';
-import ex2Misconceptions from '../../src/content/exercises/bac2022c-ex2.misconceptions.json';
+import ex2 from '../../src/content/fixtures/ex2.v050.json';
+import ex2Misconceptions from '../../src/content/fixtures/ex2Misconceptions.v050.json';
 import { loadExercise } from '../../src/content/loader';
 import { playRealSession1b } from '../../src/lesson/session/fixtures/realSession1b';
 import { contentCoverage, formatCoverage, usageByStep } from './coverage';

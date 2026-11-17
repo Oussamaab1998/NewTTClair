@@ -1,5 +1,5 @@
-import ex2 from './exercises/bac2022c-ex2.json';
-import ex2Misconceptions from './exercises/bac2022c-ex2.misconceptions.json';
+import ex2 from './fixtures/ex2.v050.json';
+import ex2Misconceptions from './fixtures/ex2Misconceptions.v050.json';
 import { loadExercise, stepKey } from './loader';
 import { SKILLS, SkillMapSchema, makeSkills } from './skills';
 import skillsRaw from './skillMap.json';

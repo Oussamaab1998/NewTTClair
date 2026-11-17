@@ -1,5 +1,5 @@
-import ex2 from '../content/exercises/bac2022c-ex2.json';
-import ex2Misconceptions from '../content/exercises/bac2022c-ex2.misconceptions.json';
+import ex2 from '../content/fixtures/ex2.v050.json';
+import ex2Misconceptions from '../content/fixtures/ex2Misconceptions.v050.json';
 import { loadExercise, type LoadedExercise } from '../content/loader';
 import type { Event, EventDraft } from '../telemetry/events';
 import { EventLog, fixedClock } from '../telemetry/log';

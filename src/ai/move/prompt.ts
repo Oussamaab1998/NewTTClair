@@ -14,6 +14,7 @@ import { aiComponentNames } from '../prompt/catalogAi';
 import { bannedSentence } from '../prompt/lexicon';
 import { PRINCIPLES } from '../prompt/principles';
 import { treeMovePrompt } from './promptTree';
+import { analysisMovePrompt } from './promptAnalysis';
 
 export const MOVE_PROMPT_VERSION = 'm1';
 export const MOVE_PROMPT_MAX = 10_000;
@@ -119,5 +120,9 @@ export function movePrompt(): string {
 export function movePromptFor(
   domain: QuestionDomain | null | undefined,
 ): string {
-  return domain === 'tree' ? treeMovePrompt() : movePrompt();
+  return domain === 'tree'
+    ? treeMovePrompt()
+    : domain === 'analysis'
+    ? analysisMovePrompt()
+    : movePrompt();
 }

@@ -180,8 +180,8 @@ describe('the two pictures are main-path steps, before s4 and before s6', () => 
   });
 
   it('the older exercises keep their versions (D23)', () => {
-    const ex2 = require('../../content/exercises/bac2022c-ex2.json');
-    const ex4 = require('../../content/exercises/bac2022c-ex4.json');
+    const ex2 = require('../../content/fixtures/ex2.v050.json');
+    const ex4 = require('../../content/fixtures/ex4.v010.json');
     expect(ex2.contentVersion).toBe('ex2-0.5.0');
     expect(ex4.contentVersion).toBe('ex4-0.1.0');
   });

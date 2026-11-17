@@ -1,10 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import ex2 from './exercises/bac2022c-ex2.json';
-import ex2Misconceptions from './exercises/bac2022c-ex2.misconceptions.json';
-import ex4 from './exercises/bac2022c-ex4.json';
-import ex4Misconceptions from './exercises/bac2022c-ex4.misconceptions.json';
+import ex2 from './fixtures/ex2.v050.json';
+import ex2Misconceptions from './fixtures/ex2Misconceptions.v050.json';
+import ex4 from './fixtures/ex4.v010.json';
+import ex4Misconceptions from './fixtures/ex4Misconceptions.v010.json';
 import { loadExercise } from './loader';
 import { appPaperParts, appPaperQuestions } from './paper';
 import type { Exercise, Rich } from './schema';

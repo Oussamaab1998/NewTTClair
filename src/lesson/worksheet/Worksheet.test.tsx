@@ -209,6 +209,24 @@ describe('Worksheet', () => {
     expect(onSubmit).toHaveBeenCalledWith('C(10,3)=120', expect.anything());
   });
 
+  it("counting 'numbers': ! and C(n, k) without the letters (fix list B5)", async () => {
+    await render(
+      <Worksheet
+        step={TOTAL}
+        prompt={null}
+        lines={[]}
+        tiles={[]}
+        scaffold={null}
+        onSubmit={jest.fn()}
+        counting="numbers"
+      />,
+    );
+    expect(screen.getByTestId('worksheet-key-choose')).toBeOnTheScreen();
+    expect(screen.getByTestId('worksheet-key-!')).toBeOnTheScreen();
+    expect(screen.queryByTestId('worksheet-key-n')).toBeNull();
+    expect(screen.queryByTestId('worksheet-key-k')).toBeNull();
+  });
+
   it('readonly: the page only, no keys', async () => {
     const page = writeLine(emptyPage(), TOTAL, [{ k: 'sym', v: '7' }]).page;
     await render(

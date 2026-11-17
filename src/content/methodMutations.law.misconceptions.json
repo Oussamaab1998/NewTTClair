@@ -1,0 +1,620 @@
+[
+ {
+  "id": "mut.merges_identical_balls",
+  "skillId": "counting-pairs",
+  "category": "math",
+  "description": "The two balls carrying the same number are counted as one ball, so the total is counted on fewer balls.",
+  "signature": "C(4,2) = 6 for the draws of two balls among −1, 0, 0, 1, 2",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "حسبت الكورتين اللي عليهم صفر كورة وحدة؟ الصندوق فيه قدّاش من كورة؟"
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "طريقة العدّ صحيحة. أما الكورتين اللي عليهم صفر هوما زوز كور مختلفين: عاود العدّ على الكور الكل."
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-law-0.1.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.counts_balls_not_draws",
+  "skillId": "counting-pairs",
+  "category": "math",
+  "description": "The balls that make the event are counted instead of the draws (a draw is two balls together).",
+  "signature": "2 for the draws whose two numbers are equal; 3 for the draws with no ball 0",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "هذا عدد الكور ولا عدد التيراجات؟ التيراج فيه زوز كور مع بعض."
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "لقيت الكور الصحاح. أما المطلوب عدد التيراجات: كل تيراج زوز كور مع بعض."
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-law-0.1.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.ball_drawn_twice",
+  "skillId": "simultaneous-draw",
+  "category": "math",
+  "description": "Each number is paired with itself, as if one ball could be drawn twice.",
+  "signature": "4 draws with the same number (one per number on the balls)",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "الكورة الوحدة تنجّم تطلع مرتين في نفس التيراج؟"
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "فكرة نفس الرقم صحيحة. أما الكورة ما تتجبدش مرتين: شنوّة الرقم اللي مكتوب على زوز كور؟"
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-law-0.1.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.counts_balls_not_pairs",
+  "skillId": "probability-by-counting",
+  "category": "math",
+  "description": "The probability is computed over the balls instead of over the draws (the real session: 3 balls over 5 balls).",
+  "signature": "3/5 for p(not B); 2/5 for p(A); 1/5 for one value of X",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "قسمت على عدد الكور؟ الاحتمال هو التيراجات اللي تعجب على التيراجات الكل."
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "قسمت على عدد الكور. الكسر لازم يكون تيراجات على تيراجات: فوق وتحت نعدّو تيراجات."
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-law-0.1.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.misses_double_draw",
+  "skillId": "au-moins-un",
+  "category": "math",
+  "description": "Counting « au moins un » directly, the draw where both balls carry the number is forgotten.",
+  "signature": "6/10 for p(B): one ball 0 and one other, without the draw {0 ; 0}",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "عدّيت التيراجات اللي فيها صفر واحد برك؟ "
+    },
+    {
+     "fr": "au moins un"
+    },
+    {
+     "ar": " يضمّ زادة اللي فيه زوز."
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "التيراجات اللي فيها صفر واحد صحاح. أما "
+    },
+    {
+     "fr": "au moins un"
+    },
+    {
+     "ar": " يضمّ زادة التيراج اللي فيه الكورتين صفر."
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-law-0.1.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.complement_partial_event",
+  "skillId": "complement-event",
+  "category": "math",
+  "description": "The opposite of « au moins un » is taken as « exactly one », so the wrong count is subtracted from 1.",
+  "signature": "1 − 6/10 for p(B)",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "عكس "
+    },
+    {
+     "fr": "au moins un"
+    },
+    {
+     "ar": " هو "
+    },
+    {
+     "fr": "aucun"
+    },
+    {
+     "ar": ": هذا اللي طرحتو؟"
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "الطرح من الواحد صحيح. أما العكس هو التيراجات اللي ما فيهاش حتى صفر: شنوّة طرحت؟"
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-law-0.1.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.confuses_event_and_complement",
+  "skillId": "complement-event",
+  "category": "math",
+  "description": "For {X = 0} the probability of the opposite event (no ball 0) is given.",
+  "signature": "p(X = 0) = 3/10",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "هذا احتمال إنّو الجداء صفر، ولا احتمال العكس؟"
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "العدد هذا هو احتمال إنّو ما فماش حتى صفر. الجداء يولّي صفر وقتاش؟"
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-law-0.1.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.law_sum_not_one",
+  "skillId": "law-sum-one",
+  "category": "math",
+  "description": "A value of X is missing from the law, so the probabilities do not add up to 1.",
+  "signature": "1/10 + 1/10 + 7/10 = 9/10",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "المجموع ما عطاش واحد: نقصت قيمة؟"
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "الجمع صحيح، أما المجموع لازم يعطي واحد. شوف القيم الكل: وحدة ناقصة؟"
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-law-0.1.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.mean_of_values_unweighted",
+  "skillId": "expectation",
+  "category": "math",
+  "description": "E(X) is computed as the plain average of the values, as if they were equally likely.",
+  "signature": "(−2 − 1 + 0 + 2)/4",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "حسبت معدّل القيم كأنهم عندهم نفس الاحتمال؟"
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "القيم صحاح. أما كل قيمة تتضرب في الاحتمال متاعها: الصفر يطلع برشا أكثر من غيرو."
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-law-0.1.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.mean_drops_signs",
+  "skillId": "expectation",
+  "category": "math",
+  "description": "The negative values are taken as positive in E(X).",
+  "signature": "2·1/10 + 1·1/10 + 2·1/10",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "القيم السالبة، وين مشات العلامة متاعها؟"
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "الضرب في الاحتمالات صحيح. أما القيمة السالبة تقعد سالبة: شوف العلامة متاع كل قيمة."
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-law-0.1.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.square_of_mean",
+  "skillId": "variance",
+  "category": "math",
+  "description": "E(X)² is given for E(X²).",
+  "signature": "(−1/10)² for E(X²)",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "هذا مربّع المتوسّط، ولا متوسّط المربّعات؟"
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "المربّع في بلاصة أخرى: نربّعو كل قيمة قبل، ومن بعد نضربو في الاحتمال متاعها."
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-law-0.1.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.square_keeps_sign",
+  "skillId": "variance",
+  "category": "math",
+  "description": "The square of a negative value is written negative in E(X²).",
+  "signature": "−4·1/10 − 1·1/10 + 4·1/10",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "مربّع عدد سالب يطلع سالب؟"
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "الطريقة صحيحة. أما مربّع العدد السالب موجب: شوف القيم السالبة."
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-law-0.1.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.variance_forgets_square",
+  "skillId": "variance",
+  "category": "math",
+  "description": "V(X) = E(X²) − E(X): the mean is subtracted instead of its square.",
+  "signature": "9/10 − (−1/10)",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "طرحت المتوسّط ولا مربّعو؟"
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "بديت بالعدد الصحيح. أما نطرحو مربّع المتوسّط، موش المتوسّط."
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-law-0.1.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.variance_adds_square",
+  "skillId": "variance",
+  "category": "math",
+  "description": "The square of the mean is added instead of subtracted.",
+  "signature": "9/10 + 1/100",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "مربّع المتوسّط، زدتو ولا طرحتو؟"
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "مربّع المتوسّط صحيح. أما في القاعدة نطرحوه."
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-law-0.1.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.variance_reversed",
+  "skillId": "variance",
+  "category": "math",
+  "description": "E(X)² − E(X²): the two terms the other way round, a negative variance.",
+  "signature": "1/100 − 9/10",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "التبعثر ينجّم يطلع سالب؟"
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "العددين صحاح. أما الترتيب مقلوب: شنوّة نطرحو من شنوّة؟"
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-law-0.1.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.forgets_count",
+  "skillId": "binomial-law",
+  "category": "math",
+  "description": "One sequence's probability given for P(Y = k): the count of sequences is forgotten.",
+  "signature": "(7/10)·(3/10)^(n−1) for P(Y = 1)",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "هذا احتمال تسلسل واحد برك؟ النجاح ينجّم يجي في أي مرّة."
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "احتمال التسلسل الواحد صحيح. أما النجاح ينجّم يجي في أي مرّة من المرّات: قدّاش من تسلسل؟"
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-law-0.2.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.failures_power_n",
+  "skillId": "binomial-law",
+  "category": "math",
+  "description": "The failures raised to n instead of n − k.",
+  "signature": "n·(7/10)·(3/10)^n",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "قدّاش من مرّة ما نجحش؟"
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "النجاح والفشل في بلاصتهم. أما الفشل يجي في المرّات الكل ناقص مرّات النجاح: شنوّة الأُس؟"
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-law-0.2.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.swaps_success_failure",
+  "skillId": "binomial-law",
+  "category": "math",
+  "description": "The probability of success and of failure exchanged.",
+  "signature": "n·(3/10)·(7/10)^(n−1); n·3/10 for E(Y)",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "شنوّة احتمال النجاح في المرّة الوحدة؟"
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "الشكل صحيح، أما بدّلت احتمال النجاح باحتمال الفشل: شنوّة الحدث اللي نعدّوه؟"
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-law-0.2.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.p_of_complement",
+  "skillId": "complement-event",
+  "category": "math",
+  "description": "The probability of one trial taken from the opposite event (no ball 0).",
+  "signature": "p = 3/10",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "هذا احتمال الحدث ولا احتمال العكس؟"
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "هذا احتمال إنّو ما فماش حتى صفر. النجاح هو على الأقل صفر واحد: شنوّة احتمالو؟"
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-law-0.2.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.variance_for_mean",
+  "skillId": "binomial-mean",
+  "category": "math",
+  "description": "n·p·q, the variance, given for the mean E(Y) = n·p.",
+  "signature": "n·(7/10)·(3/10)",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "هذا المتوسّط ولا التبعثر؟"
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "هذا هو التبعثر. المتوسّط هو عدد المرّات ضرب احتمال النجاح."
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-law-0.2.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.solve_multiplies",
+  "skillId": "fractions-operations",
+  "category": "math",
+  "description": "n·p ≥ 5 solved by multiplying 5 by p instead of dividing.",
+  "signature": "5 × 7/10",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "باش نلقاو العدد، نضربو ولا نقسمو؟"
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "العددين صحاح. أما باش نفكّو العدد من الضرب، نقسمو."
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-law-0.2.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ },
+ {
+  "id": "mut.rounds_down",
+  "skillId": "binomial-mean",
+  "category": "math",
+  "description": "The whole number below the bound: its mean is under the target.",
+  "signature": "7 for n ≥ 50/7",
+  "feedback": {
+   "ar": [
+    {
+     "ar": "العدد هذا يعطي متوسّط يوصل للمطلوب؟"
+    }
+   ]
+  },
+  "feedbackConfirmed": {
+   "ar": [
+    {
+     "ar": "هذا العدد تحت الحدّ: المتوسّط متاعو ما يوصلش. نخذو أوّل عدد صحيح بعد الحدّ."
+    }
+   ]
+  },
+  "trust": {
+   "reviewed": false,
+   "contentVersion": "mut-law-0.2.0",
+   "source": "authored",
+   "status": "ok"
+  }
+ }
+]

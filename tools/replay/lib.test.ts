@@ -1,8 +1,8 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
-import ex2 from '../../src/content/exercises/bac2022c-ex2.json';
-import ex2Misconceptions from '../../src/content/exercises/bac2022c-ex2.misconceptions.json';
+import ex2 from '../../src/content/fixtures/ex2.v050.json';
+import ex2Misconceptions from '../../src/content/fixtures/ex2Misconceptions.v050.json';
 import { loadExercise } from '../../src/content/loader';
 import { EventSchema } from '../../src/telemetry/events';
 import {

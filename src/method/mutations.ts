@@ -425,7 +425,8 @@ export function matchLine(inp: MatchInput): Match {
   const order = graph.cards ?? URN_CARDS;
   const cur = order.indexOf(card);
   const idx = (n: GraphNode) => order.indexOf(n.planCard);
-  const equalNodes = graph.nodes.filter(n => sameRat(n.value, v));
+  // A step written with a letter has no value: a number never lands on it.
+  const equalNodes = graph.nodes.filter(n => !n.expr && sameRat(n.value, v));
 
   const bagMatches = (n: GraphNode): boolean =>
     n.forms.some(f => {
@@ -452,7 +453,17 @@ export function matchLine(inp: MatchInput): Match {
           unsimplified:
             (n.shape.kind === 'ratio' || n.reduced === true) &&
             writtenUnreduced(line),
-          completes: n.main,
+          // A card with several main nodes (the other values of a law)
+          // closes with the last of them.
+          completes:
+            n.main &&
+            graph.nodes.every(
+              x =>
+                x.id === n.id ||
+                !x.main ||
+                x.planCard !== n.planCard ||
+                credited.has(x.id),
+            ),
         };
   const pick = (nodes: GraphNode[]): GraphNode => {
     const rank = (n: GraphNode) =>
@@ -528,8 +539,15 @@ export function matchLine(inp: MatchInput): Match {
     strength: 'confirmed' | 'asked',
   ): Match => {
     const keys = new Set(cands.map(c => `${c.id}@${c.nodeId}`));
-    return keys.size === 1
-      ? { kind: 'mutation', candidate: cands[0]!, strength }
+    // One slip on several equal nodes of one card (the values of a law that
+    // share a probability) is one slip: the first node not credited yet.
+    const oneSlip =
+      new Set(cands.map(c => c.id)).size === 1 &&
+      new Set(cands.map(c => nodeOf(graph, c.nodeId).planCard)).size === 1;
+    const first =
+      cands.find(c => !credited.has(c.nodeId)) ?? cands[0]!;
+    return keys.size === 1 || oneSlip
+      ? { kind: 'mutation', candidate: keys.size === 1 ? cands[0]! : first, strength }
       : {
           kind: 'ambiguous',
           candidates: cands,

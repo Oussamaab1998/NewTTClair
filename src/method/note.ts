@@ -18,7 +18,13 @@ export type NeutralCode =
   /** The value alone: the statement gives it («Montrer que»), he writes the calculation. */
   | 'given_value'
   /** The value alone on a step whose road matters: he writes the calculation. */
-  | 'show_work';
+  | 'show_work'
+  /** A line with a letter that is not equal to the one before: above the fraction bar, below it, elsewhere. */
+  | 'expr_numerator'
+  | 'expr_denominator'
+  | 'expr_whole'
+  /** The fraction bar does not cover a whole sum: brackets. */
+  | 'expr_parentheses';
 
 export type MethodNote =
   /** After the plan is ordered: "‹card› comes after ‹cards›, because it uses their results". */

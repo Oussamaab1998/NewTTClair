@@ -1,7 +1,7 @@
 {
-  "contentVersion": "skills-0.2.0",
+  "contentVersion": "skills-0.3.0",
   "reviewed": false,
-  "note": "Minimal prerequisite map for Exercise 2 (bac2022c-ex2) and the Exercise 4 checkpoints in docs/exercises/EX4_ANALYSIS.md; combinations-count, multiplication-principle and probability-by-counting for the red / black urn (bac2022c-sc-ex2, docs/exercises/EX_URN_RN.md). Drafted by the dev team, not reviewed by a teacher. 0.2.0 (2026-10-29): school years (draft) and older-year prerequisites for the AI tutor; reviewed: false.",
+  "note": "Minimal prerequisite map for Exercise 2 (bac2022c-ex2) and the Exercise 4 checkpoints in docs/exercises/EX4_ANALYSIS.md; combinations-count, multiplication-principle and probability-by-counting for the red / black urn (bac2022c-sc-ex2, docs/exercises/EX_URN_RN.md). Drafted by the dev team, not reviewed by a teacher. 0.2.0 (2026-10-29): school years (draft) and older-year prerequisites for the AI tutor; reviewed: false. 0.3.0 (2026-11-17): expectation, variance, binomial-law and binomial-mean for bac2022c-ex2 2.b and 3; reviewed: false.",
   "skills": [
     {
       "id": "counting-principle",
@@ -247,6 +247,44 @@
       "requires": [
         "random-variable-law",
         "probability-sure-event"
+      ],
+      "year": "4s"
+    },
+    {
+      "id": "expectation",
+      "kind": "math",
+      "requires": [
+        "random-variable-law",
+        "fractions-operations",
+        "sign-of-product"
+      ],
+      "year": "4s"
+    },
+    {
+      "id": "variance",
+      "kind": "math",
+      "requires": [
+        "expectation",
+        "powers-rules"
+      ],
+      "year": "4s"
+    },
+    {
+      "id": "binomial-law",
+      "kind": "math",
+      "requires": [
+        "probability-by-counting",
+        "combinations-count",
+        "powers-rules"
+      ],
+      "year": "4s"
+    },
+    {
+      "id": "binomial-mean",
+      "kind": "math",
+      "requires": [
+        "binomial-law",
+        "expectation"
       ],
       "year": "4s"
     },

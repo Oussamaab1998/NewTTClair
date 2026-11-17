@@ -11,10 +11,14 @@ import {
   DrawSchema,
   enumerateOutcomes,
   EventSpecSchema,
+  expectation,
   law,
   matchingOutcomes,
   probability,
+  secondMoment,
+  smallestN,
   ValueFnSchema,
+  variance,
   type Outcome,
 } from './probability';
 import {
@@ -139,6 +143,37 @@ export const ENGINE_CALLS = {
       law(a.valueFn, outcomes(ctx)).reduce<Fraction>(
         (s, r) => add(s, r.p),
         [0, 1],
+      ),
+  }),
+  /** E(X) over the law of X. */
+  expectation: def({
+    args: z.strictObject({ valueFn: ValueFnSchema }),
+    run: (a, ctx) => expectation(law(a.valueFn, outcomes(ctx))).fraction,
+  }),
+  /** E(X²) over the law of X. */
+  secondMoment: def({
+    args: z.strictObject({ valueFn: ValueFnSchema }),
+    run: (a, ctx) => secondMoment(law(a.valueFn, outcomes(ctx))).fraction,
+  }),
+  /** V(X) = E(X²) − E(X)² over the law of X. */
+  variance: def({
+    args: z.strictObject({ valueFn: ValueFnSchema }),
+    run: (a, ctx) => variance(law(a.valueFn, outcomes(ctx))).fraction,
+  }),
+  /** The smallest whole n ≥ nMin with n·p ≥ target (the binomial mean reaching a target). */
+  smallestN: def({
+    args: z.strictObject({
+      p: FractionArg,
+      target: FractionArg,
+      nMin: z.number().int().min(1).optional(),
+    }),
+    run: a =>
+      frac(
+        smallestN({
+          p: frac(a.p[0], a.p[1]),
+          target: { type: 'E_at_least', value: frac(a.target[0], a.target[1]) },
+          ...(a.nMin !== undefined && { nMin: a.nMin }),
+        }),
       ),
   }),
   /** Product of integers (numeric twins: 0 × 2). */

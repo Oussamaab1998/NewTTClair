@@ -230,8 +230,8 @@ describe('the main path is exactly what 4a left (Phase 4b adds nothing to it)', 
     expect(ex.contentVersion).toBe('exsc2-0.3.0');
     expect(JSON.stringify(exSc2)).not.toContain('exsc2-0.2.0');
     expect(JSON.stringify(exSc2Misconceptions)).not.toContain('exsc2-0.2.0');
-    const ex2 = require('../../content/exercises/bac2022c-ex2.json');
-    const ex4 = require('../../content/exercises/bac2022c-ex4.json');
+    const ex2 = require('../../content/fixtures/ex2.v050.json');
+    const ex4 = require('../../content/fixtures/ex4.v010.json');
     expect([ex2.contentVersion, ex4.contentVersion]).toEqual([
       'ex2-0.5.0',
       'ex4-0.1.0',

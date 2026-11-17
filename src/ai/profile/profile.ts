@@ -17,6 +17,7 @@ import { z } from 'zod';
 
 import type { KeyValueStore } from '../../storage/kv';
 import type { SessionState } from '../session/state';
+import type { WarmupAnswer } from '../../warmup/warmup';
 
 export const SKILL_STATES = [
   'unknown',
@@ -80,6 +81,24 @@ export const ProfileSchema = z.object({
   componentRequests: z.array(
     z.object({ name: z.string(), studentDoes: z.string(), why: z.string() }),
   ),
+  /** The warm-up of each exercise he did (asked once, before the exercise). */
+  warmups: z
+    .record(
+      z.string(),
+      z.object({
+        at: z.number(),
+        answers: z.array(
+          z.object({
+            id: z.string(),
+            skill: z.string(),
+            verdict: z.enum(['right', 'wrong', 'dont_know', 'skipped']),
+            given: z.string().optional(),
+            means: z.string().optional(),
+          }),
+        ),
+      }),
+    )
+    .optional(),
 });
 export type StudentProfile = z.infer<typeof ProfileSchema>;
 
@@ -142,7 +161,34 @@ export const NODE_SKILL: Readonly<Record<string, string>> = {
   nf_given_na: 'complement-event',
   f_given_na: 'conditional-probability',
   na_given_nf: 'reverse-conditional',
+  // Numbered balls (src/method/templatesLaw.ts); a value of X (p_m2, p_0...)
+  // is found by `nodeSkill`.
+  p_none: 'complement-event',
+  sum: 'law-sum-one',
+  mean: 'expectation',
+  square: 'variance',
+  var: 'variance',
+  p_trial: 'binomial-law',
+  law_k: 'binomial-law',
+  mean_n: 'binomial-mean',
+  bound: 'fractions-operations',
+  smallest: 'binomial-mean',
+  // Function analysis (src/method/templatesFunction.ts).
+  parity_line: 'function-parity',
+  limit_form: 'forme-indeterminee',
+  limit: 'limit-at-infinity',
+  inner_d: 'chain-rule-exp',
+  deriv: 'quotient-rule',
+  top: 'variation-table',
 };
+
+/** The skill a node trains: the table above, or a value of X (`p_m2`, `p_0`). */
+export function nodeSkill(node: string): string | undefined {
+  return (
+    NODE_SKILL[node] ??
+    (/^p_m?\d+$/.test(node) ? 'random-variable-law' : undefined)
+  );
+}
 
 /** The skill a named slip points at. */
 export const SLIP_SKILL: Readonly<Record<string, string>> = {
@@ -191,6 +237,41 @@ export const SLIP_SKILL: Readonly<Record<string, string>> = {
   reverses_condition: 'reverse-conditional',
   condition_for_reverse: 'reverse-conditional',
   divides_by_other_total: 'reverse-conditional',
+  // Numbered balls (src/method/templatesLaw.ts, the ex2 slip library).
+  merges_identical_balls: 'counting-pairs',
+  counts_balls_not_draws: 'counting-pairs',
+  ball_drawn_twice: 'simultaneous-draw',
+  counts_balls_not_pairs: 'probability-by-counting',
+  forgot_one_minus: 'complement-event',
+  misses_double_draw: 'au-moins-un',
+  complement_partial_event: 'complement-event',
+  confuses_event_and_complement: 'complement-event',
+  law_sum_not_one: 'law-sum-one',
+  mean_of_values_unweighted: 'expectation',
+  mean_drops_signs: 'expectation',
+  square_of_mean: 'variance',
+  square_keeps_sign: 'variance',
+  variance_forgets_square: 'variance',
+  variance_adds_square: 'variance',
+  variance_reversed: 'variance',
+  forgets_count: 'binomial-law',
+  failures_power_n: 'binomial-law',
+  swaps_success_failure: 'binomial-law',
+  p_of_complement: 'complement-event',
+  variance_for_mean: 'binomial-mean',
+  solve_multiplies: 'fractions-operations',
+  rounds_down: 'binomial-mean',
+  odd_for_even: 'function-parity',
+  exp_negative_sign: 'exp-rules',
+  exponent_rules_gap: 'exp-rules',
+  multiplies_one_part: 'exp-rules',
+  value_at_0_vs_limit: 'limit-at-infinity',
+  cancel_leaves_zero: 'exp-rules',
+  chain_rule_exp_factor: 'chain-rule-exp',
+  derivative_keeps_x: 'chain-rule-exp',
+  quotient_sign: 'quotient-rule',
+  den_not_squared: 'quotient-rule',
+  exp_zero_is_zero: 'exp-rules',
 };
 
 const blankSkill = (): SkillRecord => ({
@@ -231,6 +312,61 @@ export interface FinishedQuestion {
 }
 
 /** Applies a finished (or stopped) question to the profile. Pure. */
+/**
+ * A warm-up he finished (or skipped) before an exercise: kept whole for the
+ * tutor, and counted as engine evidence on each skill (a right answer is a
+ * first try, a miss a slip `warmup`, «ما نعرفش» a don't-know). Pure.
+ */
+export function applyWarmup(
+  profile: StudentProfile,
+  exerciseId: string,
+  answers: readonly WarmupAnswer[],
+  now: number,
+): StudentProfile {
+  const p: StudentProfile = JSON.parse(JSON.stringify(profile));
+  p.warmups = {
+    ...(p.warmups ?? {}),
+    [exerciseId]: { at: now, answers: answers.map(a => ({ ...a })) },
+  };
+  for (const a of answers) {
+    if (a.verdict === 'skipped') {
+      continue;
+    }
+    const r = (p.skills[a.skill] ??= blankSkill());
+    r.lastSeenAt = now;
+    if (a.verdict === 'right') {
+      r.attempts += 1;
+      r.firstTry += 1;
+    } else if (a.verdict === 'wrong') {
+      r.attempts += 1;
+      r.slips.warmup = (r.slips.warmup ?? 0) + 1;
+    } else {
+      r.dontKnow += 1;
+    }
+    r.level = levelOf(r);
+  }
+  return p;
+}
+
+/** Has he seen this exercise's warm-up (done or skipped)? */
+export const warmupSeen = (
+  profile: StudentProfile | null,
+  exerciseId: string,
+): boolean => profile?.warmups?.[exerciseId] !== undefined;
+
+/** Forgets an exercise's warm-up (the exercise started from scratch). */
+export function forgetWarmup(
+  profile: StudentProfile,
+  exerciseId: string,
+): StudentProfile {
+  if (!profile.warmups?.[exerciseId]) {
+    return profile;
+  }
+  const p: StudentProfile = JSON.parse(JSON.stringify(profile));
+  delete p.warmups![exerciseId];
+  return p;
+}
+
 export function applySession(
   profile: StudentProfile,
   q: FinishedQuestion,
@@ -251,7 +387,7 @@ export function applySession(
       l.match && 'node' in l.match ? l.match.node : l.expected ?? null;
     const key = `${l.graph ?? '-'}:${node ?? '-'}`;
     if (l.match?.verdict === 'credit' && node) {
-      const sk = NODE_SKILL[node];
+      const sk = nodeSkill(node);
       if (sk && !firstAt.has(key)) {
         firstAt.set(key, true);
         const r = skill(sk);

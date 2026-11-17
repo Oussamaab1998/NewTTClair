@@ -643,7 +643,10 @@
       "n": "n",
       "k": "k",
       "factorial": "factorielle",
-      "choose": "combinaison"
+      "choose": "combinaison",
+      "x": "x",
+      "e": "e",
+      "power": "puissance"
     },
     "issue": {
       "empty_slot": "Une case est vide (marquée) : remplis-la ou efface-la.",
@@ -719,7 +722,11 @@
       "not_order_word": "Ce mot ne dit pas si l'ordre compte.",
       "given_value": "Ce nombre est donné par l'énoncé. Écris le calcul qui y mène.",
       "show_work": "Le nombre seul ne suffit pas : écris le calcul qui le donne, comme sur la copie.",
-      "checkLead": "Vérifie en multipliant :"
+      "checkLead": "Vérifie en multipliant :",
+      "expr_numerator": "Cette ligne n'est pas égale à la précédente : regarde au-dessus de la barre de fraction.",
+      "expr_denominator": "Cette ligne n'est pas égale à la précédente : regarde sous la barre de fraction.",
+      "expr_whole": "Cette ligne n'est pas égale à la précédente : vérifie la transformation que tu as faite.",
+      "expr_parentheses": "La barre de fraction doit couvrir tout : mets des parenthèses."
     },
     "readback": {
       "ask": "Que veux-tu diviser ?",
@@ -1009,5 +1016,25 @@
     "dev": {
       "toggle": "Dev"
     }
+  },
+  "warmup": {
+    "title": "Échauffement avant l'exercice",
+    "progress": "Question {{n}} sur {{total}}",
+    "count": "{{n}} / {{total}}",
+    "introTitle": "Avant de commencer",
+    "introLead": "On veut connaître ton niveau sur ce dont cet exercice a besoin.",
+    "introSmall": "Quelques petites questions, une par une.",
+    "introNoMark": "Ce n'est pas un examen : pas de note.",
+    "introDontKnow": "Si tu ne sais pas, dis « Je ne sais pas ». Ça nous aide aussi.",
+    "introGuide": "Selon tes réponses, on te guide dans l'exercice.",
+    "checks": "On va vérifier :",
+    "checksThis": "Cette question vérifie",
+    "begin": "Commencer l'échauffement",
+    "answer": "Réponse",
+    "dontKnow": "Je ne sais pas",
+    "skip": "Passer à l'exercice",
+    "unreadable": "Ligne illisible : vérifie-la et réessaie.",
+    "doneTitle": "Très bien !",
+    "start": "Commencer l'exercice"
   }
 }

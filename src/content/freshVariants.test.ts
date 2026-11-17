@@ -6,8 +6,8 @@
  * the parent knows (authored and procedure values).
  */
 import { fractionToPlain } from '../engine/format';
-import ex2 from './exercises/bac2022c-ex2.json';
-import ex2Misconceptions from './exercises/bac2022c-ex2.misconceptions.json';
+import ex2 from './fixtures/ex2.v050.json';
+import ex2Misconceptions from './fixtures/ex2Misconceptions.v050.json';
 import { loadExercise, stepKey } from './loader';
 
 const clone = <T>(x: T): T => JSON.parse(JSON.stringify(x)) as T;

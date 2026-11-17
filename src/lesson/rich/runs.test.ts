@@ -204,7 +204,7 @@ describe('the real A1 sentence «…والصورة متاع −x هي نفس ا�
   // the minus is drawn left of the x, i.e. "−x" in LTR order, with Tajawal and
   // with the system font. These segments are what makes that hold.
   const step = (
-    require('../../content/exercises/bac2022c-ex4.json') as {
+    require('../../content/fixtures/ex4.v010.json') as {
       parts: {
         id: string;
         groups: { steps: { id: string; text?: { ar: ArRuns } }[] }[];

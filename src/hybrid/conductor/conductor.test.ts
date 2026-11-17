@@ -133,6 +133,15 @@ describe('conductor: lines', () => {
     expect(view(ctx, state)?.frameId).toBe('m1.c_fav');
   });
 
+  it('reads the counting keys: C(10,3) = 120 settles the total (fix list B5)', () => {
+    const { state, out } = play([line('C(10,3)=120')], atTotal());
+    expect(out).toMatchObject({ reason: 'credit', advanced: true });
+    expect(state.session.credited.main).toContain('total');
+    expect(view(ctx, state)?.frameId).toBe('m1.c_fav');
+    const fav = play([line('C(4,1)*C(6,2)=60')], state);
+    expect(fav.state.session.credited.main).toContain('fav');
+  });
+
   it('names a right intermediate without moving', () => {
     const { state, out } = play([line('10*9*8=720')], atTotal());
     expect(out).toMatchObject({ tier: 'instant', reason: 'line_note' });

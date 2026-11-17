@@ -5,10 +5,12 @@
  * nothing is ever shown that he did not compute. Pure.
  */
 import { chooseLine } from '../engine/calcLines';
+import { parseExpression, toLatex } from '../engine/expression';
 import { fractionToLatex, fractionToPlain } from '../engine/format';
 import type { Fraction } from '../engine/rational';
 import type { Finding, Rich } from '../content/schema';
 import type { Graph, GraphNode } from './graph';
+import { exprSides } from './exprLine';
 import { evalChain } from './lineChain';
 
 export interface FindingLine {
@@ -40,6 +42,10 @@ export function isExplained(g: Graph, nodeId: string, raw: string): boolean {
   const n = node(g, nodeId);
   if (!n) {
     return false;
+  }
+  // A step written with a letter: the board accepted the whole road.
+  if (n.expr) {
+    return true;
   }
   const c = evalChain(raw);
   if (c.kind === 'unreadable') {
@@ -153,13 +159,31 @@ export function fillSkeleton(input: {
     const c = evalChain(raw);
     return c.kind === 'unreadable' ? null : c.value;
   };
+  // A step written with a letter: the last side of his last line.
+  const lastSide = (id: string): string | null => {
+    const n = node(input.graph, id);
+    const raw = input.lines[id];
+    if (!n?.expr || raw === undefined) {
+      return null;
+    }
+    const lastLine = raw.split('\n').at(-1) ?? raw;
+    return exprSides(lastLine).at(-1) ?? null;
+  };
+  const exprLatex = (id: string): string | null => {
+    const side = lastSide(id);
+    if (side === null) {
+      return null;
+    }
+    const p = parseExpression(side, { variables: ['x', 'n'] });
+    return p.ok ? toLatex(p.ast) : side;
+  };
   const valueOf = (id: string): string | null => {
     const v = fractionOf(id);
-    return v ? fractionToPlain(v) : null;
+    return v ? fractionToPlain(v) : lastSide(id);
   };
   return input.skeleton.flatMap((line): SkeletonRow[] => {
     const blanks = [...(line.math ?? '').matchAll(HIS_BLANK)].map(m => m[1]!);
-    if (blanks.some(id => fractionOf(id) === null)) {
+    if (blanks.some(id => fractionOf(id) === null && exprLatex(id) === null)) {
       return [];
     }
     const parts: SkeletonPart[] = [];
@@ -178,7 +202,7 @@ export function fillSkeleton(input: {
     if (line.math !== undefined) {
       const math = line.math.replace(HIS_BLANK, (_all, id: string) => {
         const v = fractionOf(id);
-        return v ? fractionToLatex(v) : '\\ldots';
+        return v ? fractionToLatex(v) : exprLatex(id) ?? '\\ldots';
       });
       return [{ id: line.id, parts, math }];
     }

@@ -279,4 +279,140 @@ export const TUTOR_NOTES: Readonly<
       components: [],
     },
   },
+  // Bac 2022, session de contrôle, Mathématiques, exercice 2 (ex2-1.0.0):
+  // balls carry NUMBERS (−1, 0, 0, 1, 2), two drawn at once; no colours.
+  'bac2022c-ex2': {
+    '1a': {
+      hybridOnly: true,
+      route: [
+        'The balls carry numbers, not colours: −1, 0, 0, 1, 2. The two balls 0 are two DIFFERENT balls. Never speak of red or black balls in this exercise.',
+        'All draws (card total): two balls together among five, order does not matter: C(5,2), or 5×4 over 2×1. Confusions: ordered draws (5×4); the two balls 0 taken as one ball (four balls, C(4,2)); 5 × 2 (a trap: it lands on the right number with these numbers, a bare number is never his calculation here).',
+        'Same number (card fav): only one number is on two balls, so only ONE draw has two equal numbers (the two balls 0). Confusions: he counts the balls that carry it (2) instead of the draws; he pairs each number with itself as if a ball could be drawn twice (the number 1 is on one ball only).',
+        'The division (card ratio): favourable draws over all draws. Confusion: balls over balls (the real session divided by the five balls).',
+        'Never first: that only the two balls 0 make the event, or the number of favourable draws.',
+      ],
+      notationAfter: null,
+      skills: [
+        'counting-pairs',
+        'simultaneous-draw',
+        'equiprobability',
+        'probability-by-counting',
+      ],
+      prerequisites: ['listing-systematically', 'combinations-count'],
+      components: [],
+    },
+    '1b': {
+      hybridOnly: true,
+      route: [
+        'He must SHOW a printed result (« Montrer que »): the calculation is the answer, a bare value is never his result.',
+        'The word « au moins » makes the direct count long: the opposite event is « no ball carries 0 », the two balls taken among the three balls without 0. This is the idea of the question: never say it first.',
+        'Opposite event (card none): its draws, C(3,2), then its probability over all draws. Confusions: he takes the opposite as « exactly one 0 »; three balls for three draws (a trap with these numbers: ask for the calculation); balls over balls (3 over 5, the real session).',
+        'Result (card result): 1 minus the opposite probability, or the draws counted directly (one 0 and one other, plus the draw with both 0). Confusions: he gives the opposite probability as the answer; counted directly, he forgets the draw with the two balls 0.',
+        'Never first: the opposite event, or which balls the draws of the opposite are taken from.',
+      ],
+      notationAfter: null,
+      skills: ['complement-event', 'au-moins-un', 'combinations-count'],
+      prerequisites: ['event-as-set', 'probability-sure-event'],
+      components: [],
+    },
+    '2a': {
+      hybridOnly: true,
+      route: [
+        'X is the PRODUCT of the two numbers drawn. The law is a table: each value X takes and its probability.',
+        'Values (card values, a pick, no line): the products of the ten draws, each value written once. Confusions: he lists the numbers on the balls; he adds the product 1 (1 is on one ball only); he adds 4 (2 is on one ball only).',
+        'Product zero (card reuse): X = 0 exactly when at least one ball carries 0, which is the event of 1.b: its probability is reused. Confusion: the opposite probability (no ball 0). Never say the link first: ask when a product is zero.',
+        'Other values (card others, three lines): each comes from ONE draw only, so each is one draw over all draws. Several lines have the same value here: the card closes with the last one. Confusion: balls over balls.',
+        'Check (card check): the probabilities of the law added give 1; a sum below 1 means a value is missing.',
+        'Never first: the list of values, or which draw gives which value.',
+      ],
+      notationAfter: null,
+      skills: ['random-variable-values', 'random-variable-law', 'product-zero'],
+      prerequisites: ['sign-of-product', 'counting-pairs', 'law-sum-one'],
+      components: [],
+    },
+    '2b': {
+      hybridOnly: true,
+      route: [
+        'From the law of 2.a. Mean (card mean): each value times its probability, added; negative values keep their sign. Confusions: the plain average of the values; the signs dropped. A bare value is never his result: the sum of products is.',
+        'Mean of the squares (card square): each value squared times its probability. Confusions: the square of the mean; a negative value squared kept negative.',
+        'Variance (card var): the mean of the squares minus the square of the mean. Confusions: minus the mean (not its square); plus the square; the two terms the other way round (a negative variance). The official correction prints 8,9: the engine value is the right one.',
+        'Never first: the formula of the variance, or which number is squared.',
+      ],
+      notationAfter: null,
+      skills: ['expectation', 'variance'],
+      prerequisites: ['random-variable-law', 'fractions-operations', 'powers-rules'],
+      components: [],
+    },
+  },
+  // Bac 2022, session de contrôle, Mathématiques, exercice 4, Partie A
+  // (ex4-1.0.0): f(x) = e^x/(1+e^(2x)). Lines are written with x; the
+  // board compares each line with the one before it.
+  'bac2022c-ex4': {
+    A1: {
+      hybridOnly: true,
+      route: [
+        'Show that f is even. Domain (card domain, a pick): R is symmetric, -x is in R for every x. Confusion: "R has negative numbers so it is not symmetric"; skipping the domain.',
+        'Computation (card rewrite, lines in x): f(-x) written out, then simplified until the form of f(x): multiply top and bottom by e^(2x). Confusions: e^(-x) taken as -e^x (a negative exponent read as a negative number); e^(-x)·e^(2x) written e^(-2x); only the top multiplied.',
+        'Conclusion (card conclude, a pick): f(-x) = f(x) on a symmetric domain, so f is even. Confusion: "odd" after f(-x) = f(x); one point is not a proof.',
+        'Never first: what to multiply by, or the simplified form.',
+      ],
+      notationAfter: null,
+      skills: ['domain-symmetric', 'function-parity', 'exp-rules'],
+      prerequisites: ['powers-rules', 'fractions-operations'],
+      components: [],
+    },
+    A2: {
+      hybridOnly: true,
+      route: [
+        'Show that f tends to 0 at +infinity, then interpret. The given form is infinity over infinity: it must be rewritten first.',
+        'Rewrite (card rewrite, lines in x): divide top and bottom by the fastest exponential, e^(2x), to reach e^(-x)/(e^(-2x)+1) (or the same with 1+e^(-2x), which is also f(-x): parity can be used). Confusions: the top becomes 0 after cancelling; only one part divided.',
+        'Limit (card limit, a number line such as 0/(0+1) = 0): every exponential with a negative exponent tends to 0. Confusion: the value at x = 0 (1/(1+1)) given for the limit.',
+        'Interpretation (card interpret, a pick): the line y = 0 is a horizontal asymptote at +infinity. Confusions: a vertical line x = 0; "the curve cuts the axis" (f > 0 always).',
+        'Never first: what to divide by, or the rewritten form.',
+      ],
+      notationAfter: null,
+      skills: ['exp-limits', 'forme-indeterminee', 'limit-at-infinity', 'asymptote-interpretation'],
+      prerequisites: ['exp-rules', 'fractions-operations'],
+      components: [],
+    },
+    A3a: {
+      hybridOnly: true,
+      route: [
+        'Show the printed formula of f\'(x) (« Montrer que »): the calculation is the answer.',
+        'Rule (card rule, a pick): (u/v)\' = (u\'v - uv\')/v^2. Confusions: a plus between the terms; u\'/v\'.',
+        'Inner derivative (card inner, a line in x): v(x) = 1+e^(2x), v\'(x) = 2e^(2x). Confusions: e^(2x) (the factor 2 forgotten); 2x·e^(2x).',
+        'Full computation (card derive, lines in x): apply the rule, then factor e^x until the printed form. Confusions: the 2 of v\' forgotten (gives e^x/(1+e^(2x))^2); a plus in the rule; the denominator not squared.',
+        'Never first: the factorisation, or the next line.',
+      ],
+      notationAfter: null,
+      skills: ['quotient-rule', 'chain-rule-exp', 'derivative-meaning'],
+      prerequisites: ['exp-rules', 'algebraic-fractions'],
+      components: [],
+    },
+    A3b: {
+      hybridOnly: true,
+      route: [
+        'The variation table from f\'. Sign (card sign, a pick): e^x > 0 and the square is positive, so f\' has the sign of 1 - e^(2x): positive before 0, negative after. Confusion: the signs reversed.',
+        'Top value (card top, a number line): f(0) = 1/(1+1) = 1/2. Confusion: e^0 taken as 0.',
+        'Ends (card ends, a pick): 0 at +infinity (question 2) and, f being even, 0 at -infinity.',
+        'Table (card table, a pick): increasing up to 0, maximum 1/2, then decreasing. Confusions: arrows against the sign; no extremum.',
+        'Never first: the sign, or the table.',
+      ],
+      notationAfter: null,
+      skills: ['variation-table', 'sign-of-product', 'exp-rules'],
+      prerequisites: ['function-parity', 'limit-at-infinity'],
+      components: [],
+    },
+    A4: {
+      hybridOnly: true,
+      route: [
+        'Draw the curve from the earlier results. Symmetry (card symmetry, a pick): f even, so the curve is symmetric about the y-axis. Asymptote (card asymptote, a pick): y = 0 at both ends. Top (card top, a number line): the point (0 ; 1/2).',
+        'Then the app shows the curve (a picture step). Confusions: symmetry about the origin (that is odd); an asymptote on one side only.',
+      ],
+      notationAfter: null,
+      skills: ['variation-table', 'asymptote-interpretation', 'function-parity'],
+      prerequisites: ['variation-table'],
+      components: [],
+    },
+  },
 };

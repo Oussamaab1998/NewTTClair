@@ -4,8 +4,8 @@
  * logged as skipped, and never counts as a step the student did. A1's
  * PredictReveal is the gate used here (the reducer treats every gate alike).
  */
-import ex4 from '../../content/exercises/bac2022c-ex4.json';
-import ex4Misconceptions from '../../content/exercises/bac2022c-ex4.misconceptions.json';
+import ex4 from '../../content/fixtures/ex4.v010.json';
+import ex4Misconceptions from '../../content/fixtures/ex4Misconceptions.v010.json';
 import { loadExercise } from '../../content/loader';
 import { createRulesPlanner } from '../../planner/rules';
 import type { Event } from '../../telemetry/events';

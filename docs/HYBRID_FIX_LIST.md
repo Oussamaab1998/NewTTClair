@@ -20,6 +20,12 @@ Written for: the product owner and the next coding session. Source: review of fo
   - **N4.** Without an AI key the tree exercise opens in the old lesson, which does not draw the tree.
 - **Still open:** B5, U3, U5–U9, S2–S7, S9, and S1 for the urn exercise.
 
+**Status 2026-11-17 (not committed):** **B5 fixed.**
+- The board's reader (`src/method/lineChain.ts`) reads C(n,k), A(n,k) and n! as the product a student writes for them (`expandCounting` in `src/engine/expression/counting.ts`). So `C(10,3) = 120` keeps the factors of `10*9*8/(3*2*1)`, is credited with its calculation written, and still meets the slip matcher.
+- His line is shown as C_{10}^{3}, never as its value.
+- The `total` and `fav` cards show the keys ! and C(n,k), without the letters n and k (`counting="numbers"` on the worksheet).
+- `npm test` is green: 257 suites.
+
 Each item: what the student sees, the cause, the fix direction. UX items that change a screen get a mockup approved by the owner before they are built.
 
 ## A. Bugs
@@ -32,7 +38,7 @@ Each item: what the student sees, the cause, the fix direction. UX items that ch
 
 **B4. «كمّلت» is the only button under a question that asks for a number.** The AI asked "how many draws did you find?". «كمّلت» cannot carry a number; it becomes a `component_result` on the light tier with hint 2 (`10×9×8`) as the fallback (`conductor.ts:350-355`). If the AI is not allowed at that moment, the tap reveals hint 2 and uses it up. Fix: when a move asks for a value, he answers in an input (the case card or the step's input); «كمّلت» never spends a hint.
 
-**B5. He cannot write `C(10,3)` on the "all draws" step.** The n, k, ! and C keys show only on cards `count` and `law` (`src/app/screens/hybrid/LineEntry.tsx:33`). The conductor's line reader (`src/method/frame.ts:100`, `evalChain(input.raw)`) does not read C(n,k) (found by a scratch test; to confirm), while `src/ai/checks/lines.ts:65` does. `Card(Ω) = C₁₀³ = 120` is what he must write on the exam copy. Fix: counting keys on `total` too; the reader accepts C(n,k) and n!.
+**B5 (fixed 2026-11-17). He cannot write `C(10,3)` on the "all draws" step.** The n, k, ! and C keys show only on cards `count` and `law` (`src/app/screens/hybrid/LineEntry.tsx:33`). The conductor's line reader (`src/method/frame.ts:100`, `evalChain(input.raw)`) does not read C(n,k) (found by a scratch test; to confirm), while `src/ai/checks/lines.ts:65` does. `Card(Ω) = C₁₀³ = 120` is what he must write on the exam copy. Fix: counting keys on `total` too; the reader accepts C(n,k) and n!.
 
 **B6. The verifier lets letter groups through inside an Arabic sentence when they sit in brackets.** `(ab هو نفسه ba)` passed. Cause (confirmed): `LABEL_RUN` (`src/ai/verify/message.ts:81`) is tested on runs that keep their brackets (`runs.ts:195`), so `(ab` and `ba)` do not match. Fix: strip brackets before the test; add this sentence to `message.test.ts`.
 

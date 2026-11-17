@@ -311,6 +311,10 @@ export const size = {
   eventPanelMaxHeight: 220,
   /** Header progress bar (DESIGN.md §3). */
   progressBar: 6,
+  /** The warm-up's explanation screen: the circle around its target icon. */
+  warmupBadge: 52,
+  /** The warm-up's explanation screen: the dot before each line. */
+  warmupBullet: 8,
   /** The number circle of a question row in the «الورقة» sheet. */
   paperNumber: 32,
   /** The paper screen's current-question dot (mockup 07). */

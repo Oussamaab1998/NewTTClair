@@ -29,6 +29,7 @@ import {
 } from '../engine/probability';
 import { parseLatexSubset } from '../lesson/math/latexSubset';
 import { HIS_BLANK } from '../method/findings';
+import { warmupIssues } from '../warmup/warmup';
 import { expandMethodSteps } from '../method/expand';
 import { buildGraphFor, templateOf } from '../method/templates';
 import { mutationLibrary } from '../method/library';
@@ -1132,6 +1133,13 @@ export function loadExercise(
       ok: false,
       errors: parsed.error.issues.map(i => `${i.path.join('.')}: ${i.message}`),
     };
+  }
+  // The warm-up: every answer read by the engine, links and skills that exist.
+  if (parsed.data.warmup) {
+    const issues = warmupIssues(parsed.data.warmup);
+    if (issues.length > 0) {
+      return { ok: false, errors: issues };
+    }
   }
   // A `method` block becomes ordinary steps (plan, read, lines frames) and
   // brings the shared `mut.*` misconception library with it.

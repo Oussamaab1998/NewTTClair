@@ -1104,6 +1104,70 @@ function collectBlockIds(blocks: readonly Block[], out: string[]): string[] {
   return out;
 }
 
+/**
+ * The warm-up of an exercise (owner, 2026-11-17): 3 to 5 small questions
+ * asked once, before the whole exercise, on what its questions need (its own
+ * skills and the older ones under them). Not a test: «ما نعرفش» is an answer,
+ * he can skip, no mark is shown, and the end says one general sentence. His
+ * answers go to his profile and to the tutor. Each exercise has its own.
+ */
+export const WarmupCardSchema = z.strictObject({
+  id: Id,
+  text: RichSchema,
+  truth: z.enum(['true', 'false']),
+  /** What a wrong card says about him (English, for the tutor). */
+  means: z.string().min(1).optional(),
+});
+
+export const WarmupQuestionSchema = z.strictObject({
+  id: Id,
+  /** The skill it checks (a skill of src/content/skillMap.json). */
+  skill: Id,
+  /**
+   * What it checks, as the French math term the student knows
+   * («dénombrement», «événement contraire»): a chip on the explanation
+   * screen and above the question. Plain French, no math, no answer.
+   */
+  topic: z.string().min(1).max(32),
+  prompt: RichSchema,
+  input: z.discriminatedUnion('kind', [
+    z.strictObject({
+      kind: z.literal('line'),
+      /** The right value, as a calculation the engine reads (`C(4,2)`, `1-1/4`): never typed as a value. */
+      answer: z.string().min(1),
+      /** Known wrong values (a calculation each), with what they say about him. */
+      wrong: z
+        .array(z.strictObject({ expr: z.string().min(1), means: z.string().min(1) }))
+        .default([]),
+      /** Extra keys: the counting keys ! and C. */
+      keys: z.enum(['counting']).optional(),
+    }),
+    z.strictObject({
+      kind: z.literal('pick'),
+      cards: z.array(WarmupCardSchema).min(2).max(4),
+    }),
+  ]),
+  /** An easier question (an older skill), asked when this one is missed. */
+  down: Id.optional(),
+});
+export type WarmupQuestion = z.infer<typeof WarmupQuestionSchema>;
+
+export const WarmupSchema = z.strictObject({
+  /**
+   * Optional: one more sentence on the explanation screen, for this exercise
+   * only. The explanation itself (why the warm-up, not a test) is the
+   * screen's own text (i18n `warmup.*`), the same for every exercise.
+   */
+  intro: RichSchema.optional(),
+  /** The main questions, in order (at most 5 are asked in all). */
+  start: z.array(Id).min(1).max(5),
+  questions: z.array(WarmupQuestionSchema).min(1).max(12),
+  /** The general sentence at the end: everything known, or something to take along. */
+  done: z.strictObject({ clean: RichSchema, gaps: RichSchema }),
+  reviewed: z.boolean(),
+});
+export type Warmup = z.infer<typeof WarmupSchema>;
+
 export const ExerciseSchema = z
   .strictObject({
     id: Id,
@@ -1121,6 +1185,8 @@ export const ExerciseSchema = z
     statement: RichSchema,
     /** The figure printed beside the statement (a probability tree), with what each step marks on it. */
     figure: FigureSchema.optional(),
+    /** The warm-up asked once before the exercise (its own questions). */
+    warmup: WarmupSchema.optional(),
     /** The exam paper: parts, questions, sub-questions (optional; see PaperSchema). */
     paper: PaperSchema.optional(),
     parts: z.array(QuestionSchema).min(1),

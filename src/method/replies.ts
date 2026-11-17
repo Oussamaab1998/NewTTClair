@@ -228,6 +228,20 @@ export function replyForLine(
   if (fresh && text) {
     explained = misconceptionId;
     parts.push({ kind: 'feedback', tone: 'warning', rich: text });
+  } else if (o.kind === 'expr_wrong') {
+    // A line with a letter: where it stops being equal (never the right line).
+    parts.push(
+      note('warning', {
+        kind: 'neutral',
+        code: o.parentheses
+          ? 'expr_parentheses'
+          : o.where === 'numerator'
+          ? 'expr_numerator'
+          : o.where === 'denominator'
+          ? 'expr_denominator'
+          : 'expr_whole',
+      }),
+    );
   } else if (misconceptionId === undefined) {
     parts.push(
       note('warning', {

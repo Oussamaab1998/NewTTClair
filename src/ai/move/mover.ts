@@ -141,7 +141,8 @@ export const TREE_DEEP_COMPUTE = ['evaluate'] as const;
 /** The compute tools a deep call may run, by the question's domain. */
 export const deepCompute = (
   domain?: QuestionDomain | null,
-): readonly string[] => (domain === 'tree' ? TREE_DEEP_COMPUTE : DEEP_COMPUTE);
+): readonly string[] =>
+  domain === 'tree' || domain === 'analysis' ? TREE_DEEP_COMPUTE : DEEP_COMPUTE;
 
 /** Models that accept a forced tool (with thinking off). */
 const FORCED_TOOL_MODELS: ReadonlySet<string> = new Set([AI_MODELS.haiku]);
@@ -192,6 +193,8 @@ const toolResult = (
 let deepTools: ToolDefinition[] | null = null;
 let lightTools: ToolDefinition[] | null = null;
 let treeDeepTools: ToolDefinition[] | null = null;
+let analysisDeepTools: ToolDefinition[] | null = null;
+let analysisLightTools: ToolDefinition[] | null = null;
 let treeLightTools: ToolDefinition[] | null = null;
 
 /** evaluate as a tree question describes it (the same input, examples without counting notation). */
@@ -207,6 +210,23 @@ export function moveTools(
   compute: boolean,
   domain?: QuestionDomain | null,
 ): ToolDefinition[] {
+  if (domain === 'analysis') {
+    if (compute) {
+      analysisDeepTools ??= [
+        ...toolDefinitions()
+          .filter(t =>
+            (TREE_DEEP_COMPUTE as readonly string[]).includes(t.name),
+          )
+          .map(t =>
+            t.name === 'evaluate' ? { ...t, description: TREE_EVALUATE } : t,
+          ),
+        moveToolDefinition('analysis'),
+      ].sort((a, b) => a.name.localeCompare(b.name));
+      return analysisDeepTools;
+    }
+    analysisLightTools ??= [moveToolDefinition('analysis')];
+    return analysisLightTools;
+  }
   if (domain === 'tree') {
     if (compute) {
       treeDeepTools ??= [

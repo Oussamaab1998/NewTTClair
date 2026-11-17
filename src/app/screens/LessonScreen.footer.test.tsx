@@ -7,6 +7,15 @@ import '../../i18n';
 import { fixedClock } from '../../telemetry/log';
 import { LessonScreen } from './LessonScreen';
 
+// The old lesson's screens are tested on the frozen ex2 0.5.0 (questions 1.b
+// and 2.a): ex2 1.0.0 moved to the hybrid board (docs/EX2_EX4_UPGRADE_PROGRESS.md).
+jest.mock('../../content/exercises/bac2022c-ex2.json', () =>
+  jest.requireActual('../../content/fixtures/ex2.v050.json'),
+);
+jest.mock('../../content/exercises/bac2022c-ex2.misconceptions.json', () =>
+  jest.requireActual('../../content/fixtures/ex2Misconceptions.v050.json'),
+);
+
 const tap = (id: string) => fireEvent.press(screen.getAllByTestId(id).at(-1)!);
 const layout = (id: string, y: number, height: number) =>
   fireEvent(screen.getAllByTestId(id).at(-1)!, 'layout', {

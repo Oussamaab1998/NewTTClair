@@ -4379,5 +4379,233 @@
     }
   ],
   "deepDives": [],
-  "variants": []
+  "variants": [],
+  "warmup": {
+    "start": [
+      "w_mult",
+      "w_branch",
+      "w_cond",
+      "w_comp"
+    ],
+    "questions": [
+      {
+        "id": "w_mult",
+        "skill": "fractions-operations",
+        "topic": "produit de fractions",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "احسب:"
+            }
+          ],
+          "math": "\\frac{3}{5} \\times \\frac{1}{2}"
+        },
+        "input": {
+          "kind": "line",
+          "answer": "3/5*1/2",
+          "wrong": [
+            {
+              "expr": "4/7",
+              "means": "added the numerators and the denominators"
+            },
+            {
+              "expr": "3/5+1/2",
+              "means": "added instead of multiplying"
+            }
+          ]
+        },
+        "down": "w_simplify"
+      },
+      {
+        "id": "w_simplify",
+        "skill": "fractions-simplify",
+        "topic": "simplification",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "شنوّة الكسر اللي يساوي هذا؟"
+            }
+          ],
+          "math": "\\frac{6}{12}"
+        },
+        "input": {
+          "kind": "pick",
+          "cards": [
+            {
+              "id": "k_half",
+              "text": {
+                "math": "\\frac{1}{2}"
+              },
+              "truth": "true"
+            },
+            {
+              "id": "k_six",
+              "text": {
+                "math": "\\frac{1}{6}"
+              },
+              "truth": "false",
+              "means": "divides the numerator by the denominator"
+            },
+            {
+              "id": "k_three",
+              "text": {
+                "math": "\\frac{6}{2}"
+              },
+              "truth": "false",
+              "means": "simplifies only the denominator"
+            }
+          ]
+        }
+      },
+      {
+        "id": "w_branch",
+        "skill": "probability-tree",
+        "topic": "arbre pondéré",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "في شجرة احتمالات، الفروع اللي يخرجو من نفس العقدة: قدّاش مجموعهم؟"
+            }
+          ]
+        },
+        "input": {
+          "kind": "pick",
+          "cards": [
+            {
+              "id": "k_one",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "واحد"
+                  }
+                ]
+              },
+              "truth": "true"
+            },
+            {
+              "id": "k_free",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "ما فماش قاعدة"
+                  }
+                ]
+              },
+              "truth": "false",
+              "means": "does not know that branches from a node add up to 1"
+            },
+            {
+              "id": "k_half",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "نص"
+                  }
+                ]
+              },
+              "truth": "false",
+              "means": "thinks the branches add up to one half"
+            }
+          ]
+        }
+      },
+      {
+        "id": "w_cond",
+        "skill": "conditional-probability",
+        "topic": "probabilité conditionnelle",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "شنوّة تعني الكتيبة هاذي؟"
+            }
+          ],
+          "math": "p(F/A)"
+        },
+        "input": {
+          "kind": "pick",
+          "cards": [
+            {
+              "id": "k_given",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "احتمال الحدث الثاني كي نعرفو إنّ الأوّل صار."
+                  }
+                ]
+              },
+              "truth": "true"
+            },
+            {
+              "id": "k_both",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "احتمال الزوز يصيرو مع بعض."
+                  }
+                ]
+              },
+              "truth": "false",
+              "means": "confuses a conditional with an intersection"
+            },
+            {
+              "id": "k_reverse",
+              "text": {
+                "ar": [
+                  {
+                    "ar": "احتمال الأوّل كي نعرفو إنّ الثاني صار."
+                  }
+                ]
+              },
+              "truth": "false",
+              "means": "reverses the condition"
+            }
+          ]
+        }
+      },
+      {
+        "id": "w_comp",
+        "skill": "complement-event",
+        "topic": "événement contraire",
+        "prompt": {
+          "ar": [
+            {
+              "ar": "هذا احتمال حدث. شنوّة احتمال العكس متاعو؟"
+            }
+          ],
+          "math": "p(A) = \\frac{3}{5}"
+        },
+        "input": {
+          "kind": "line",
+          "answer": "1-3/5",
+          "wrong": [
+            {
+              "expr": "3/5",
+              "means": "gave the same probability"
+            },
+            {
+              "expr": "5/3",
+              "means": "turned the fraction upside down"
+            }
+          ]
+        }
+      }
+    ],
+    "done": {
+      "clean": {
+        "ar": [
+          {
+            "ar": "الحاجات اللي يحتاجها التمرين واضحة عندك. نبداو."
+          }
+        ]
+      },
+      "gaps": {
+        "ar": [
+          {
+            "ar": "عرفنا وين نبداو. الحاجات اللي ما كانتش واضحة نراجعوها مع بعض كي نوصلولها في التمرين."
+          }
+        ]
+      }
+    },
+    "reviewed": false
+  }
 }

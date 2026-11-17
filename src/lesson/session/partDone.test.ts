@@ -4,8 +4,8 @@
  * at least once; `answered` and `counted` are unchanged, so "done"
  * (answered >= 1) is unchanged.
  */
-import ex2 from '../../content/exercises/bac2022c-ex2.json';
-import ex2Misconceptions from '../../content/exercises/bac2022c-ex2.misconceptions.json';
+import ex2 from '../../content/fixtures/ex2.v050.json';
+import ex2Misconceptions from '../../content/fixtures/ex2Misconceptions.v050.json';
 import { loadExercise } from '../../content/loader';
 import { countsAsDone } from '../../state/doneParts';
 import type { Event } from '../../telemetry/events';

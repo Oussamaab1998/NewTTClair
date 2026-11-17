@@ -215,3 +215,30 @@ describe('a line is evaluated and matched in one call', () => {
     expect(run('10*9*8/(3*2*1) = 120').readback).toBeNull();
   });
 });
+
+describe('the counting keys on the urn (fix list B5)', () => {
+  const g = buildUrnGraph({ reds: 4, blacks: 6, k: 3, j: 1 });
+  const table = mutationsFor(g);
+  const run = (raw: string, card: 'total' | 'fav') =>
+    evaluateLine({ raw, graph: g, table, card, credited: new Set() });
+
+  it('C(10,3) = 120 is the right total, with its calculation written', () => {
+    expect(run('C(10,3)=120', 'total').outcome).toMatchObject({
+      kind: 'credit',
+      derivation: 'exact',
+      completes: true,
+    });
+  });
+  it('C(4,1)*C(6,2) = 60 is the right favourable count', () => {
+    expect(run('C(4,1)*C(6,2)=60', 'fav').outcome).toMatchObject({
+      kind: 'credit',
+      derivation: 'exact',
+    });
+  });
+  it('A(10,3) = 720 reads like 10*9*8 = 720: the ordered draws, a step towards the total', () => {
+    const viaA = run('A(10,3)=720', 'total').outcome;
+    const written = run('10*9*8=720', 'total').outcome;
+    expect(viaA).toEqual(written);
+    expect(viaA.kind).toBe('support');
+  });
+});

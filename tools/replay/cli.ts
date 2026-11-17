@@ -18,8 +18,8 @@
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 
-import ex2 from '../../src/content/exercises/bac2022c-ex2.json';
-import ex2Misconceptions from '../../src/content/exercises/bac2022c-ex2.misconceptions.json';
+import ex2 from '../../src/content/fixtures/ex2.v050.json';
+import ex2Misconceptions from '../../src/content/fixtures/ex2Misconceptions.v050.json';
 import { loadExercise } from '../../src/content/loader';
 import {
   LEGACY_VERSION,
@@ -42,8 +42,8 @@ import {
 } from '../../src/planner/llm/fixtures/guardFixtures';
 import { runEval } from './evalCli';
 import { formatHelpUsage, helpUsage } from '../../src/telemetry/helpUsage';
-import ex4 from '../../src/content/exercises/bac2022c-ex4.json';
-import ex4Misconceptions from '../../src/content/exercises/bac2022c-ex4.misconceptions.json';
+import ex4 from '../../src/content/fixtures/ex4.v010.json';
+import ex4Misconceptions from '../../src/content/fixtures/ex4Misconceptions.v010.json';
 import exSc2 from '../../src/content/exercises/bac2022c-sc-ex2.json';
 import exSc2Misconceptions from '../../src/content/exercises/bac2022c-sc-ex2.misconceptions.json';
 import { buildContent } from '../../src/lesson/session/lesson';
