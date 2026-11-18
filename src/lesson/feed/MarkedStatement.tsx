@@ -6,10 +6,11 @@
  * nested runs, so the line wraps like any paragraph and stays cheap.
  * (RichView has no underline.)
  */
-import React from 'react';
+import React, { useContext } from 'react';
 import { StyleSheet, Text } from 'react-native';
 
 import { theme } from '../../theme';
+import { Askable, AskTargetContext } from './RichView';
 
 export interface StatementMark {
   word: string;
@@ -32,7 +33,9 @@ export function MarkedStatement({
 }) {
   const kindOf = new Map(marks.map(m => [m.word.toLowerCase(), m.kind]));
   const tokens = text.split(/(\s+)/u);
-  return (
+  // On the lesson board a long press selects words of the paper to ask about them.
+  const ask = useContext(AskTargetContext);
+  const line = (
     <Text
       style={[styles.line, { color }]}
       accessibilityLanguage="fr"
@@ -58,6 +61,23 @@ export function MarkedStatement({
         );
       })}
     </Text>
+  );
+  return ask ? (
+    <Askable
+      kind="fr"
+      text={text}
+      font={{
+        fontSize: theme.font.paper.fontSize,
+        fontFamily: theme.font.paper.fontFamily,
+        paper: true,
+      }}
+      target={ask}
+      testID={`${testID}-ask`}
+    >
+      {line}
+    </Askable>
+  ) : (
+    line
   );
 }
 

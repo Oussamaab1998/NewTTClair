@@ -12,8 +12,8 @@ export type { AskKind };
 export interface AskRequest {
   /** «شنوّة معناها؟» / «كيفاش نقراها بالفرنسي؟» / «علاش نستعملوها هنا؟» / «نكتب سؤالي وحدي». */
   kind: AskKind;
-  /** What he long-pressed (or the chip he picked in it): LaTeX, or the paper's French words. */
-  pressed: { kind: 'math' | 'fr'; text: string };
+  /** What he selected (or the chip he picked in it): LaTeX, French words, or Arabic words. */
+  pressed: { kind: 'math' | 'fr' | 'ar'; text: string };
   /** The glossary entry of the chip he picked (null: none picked, or no glossary). */
   entryId: string | null;
 }

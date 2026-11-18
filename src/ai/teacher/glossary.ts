@@ -1,19 +1,41 @@
 /**
- * Prepared answers from the exercise's glossary (src/content/help): a long
- * press on a symbol or on the paper's French words that a glossary entry
- * covers is answered at once, free, with no call:
- *   «شنوّة معناها؟»         -> its meaning, then how it is read in French;
- *   «كيفاش نقراها بالفرنسي؟» -> its French reading, then what it means;
- *   «علاش نستعملوها هنا؟»    -> why it is used in this exercise (authored);
- * anything the entry does not hold (no reading, no use, several entries and
- * none picked, his own question) goes to the AI teacher.
+ * The options he gets on what he selected, and the prepared answers from
+ * the exercise's glossary (src/content/help). Each kind of text has its own
+ * options (owner, 2026-11-18: "those options are not always valid"):
+ *   a formula or a symbol: «شنوّة معناها؟» «كيفاش نقراها بالفرنسي؟»
+ *     «علاش نستعملوها هنا؟» «نكتب سؤالي وحدي»;
+ *   the paper's French words: «شنوّة معناها بالدارجة؟» «شنوّة يطلبو منّي
+ *     نعمل؟» «نكتب سؤالي وحدي»;
+ *   Arabic text (our help, the step, the teacher's answer): «ما فهمتش،
+ *     فسّرهالي بطريقة أخرى» «عطيني مثال» «نكتب سؤالي وحدي».
+ * A glossary entry answers at once, free: its meaning (with its French
+ * reading for a symbol), its reading, why it is used here; anything the
+ * entry does not hold goes to the AI teacher.
  */
 import type { GlossaryEntry } from '../../content/help/schema';
 import type { Rich } from '../../content/schema';
 import type { TeacherBlock } from './types';
 
-/** The long-press menu's four options. */
-export type AskKind = 'meaning' | 'reading' | 'use' | 'own';
+/** The options of the menu after a selection. */
+export type AskKind =
+  | 'meaning'
+  | 'reading'
+  | 'use'
+  | 'darija'
+  | 'task'
+  | 'rephrase'
+  | 'example'
+  | 'own';
+
+/** What he selected: a formula, the paper's French, or Arabic text. */
+export type AskSubject = 'math' | 'fr' | 'ar';
+
+/** The options each kind of text gets, in order (his own question last). */
+export const ASK_OPTIONS: Readonly<Record<AskSubject, readonly AskKind[]>> = {
+  math: ['meaning', 'reading', 'use', 'own'],
+  fr: ['darija', 'task', 'own'],
+  ar: ['rephrase', 'example', 'own'],
+};
 
 /** A Rich as the teacher's blocks: its Arabic, its French line, its formula. */
 export function richBlocks(r: Rich): TeacherBlock[] {
@@ -66,6 +88,15 @@ export function glossaryAnswer(
           ];
     case 'use':
       return entry.use ? entry.use.flatMap(richBlocks) : null;
+    // The paper's words in darija: what the entry says they mean.
+    case 'darija':
+      return entry.meaning.flatMap(richBlocks);
+    // What the paper asks him to do: the entry's use here, else the AI.
+    case 'task':
+      return entry.use ? entry.use.flatMap(richBlocks) : null;
+    // Our own text said again, or an example: always the AI.
+    case 'rephrase':
+    case 'example':
     case 'own':
       return null;
   }

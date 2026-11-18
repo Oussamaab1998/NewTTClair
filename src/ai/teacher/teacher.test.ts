@@ -552,6 +552,12 @@ describe('the glossary answers', () => {
     const e = entries[1]!;
     expect(glossaryAnswer(e, 'reading')).toBeNull();
     expect(glossaryAnswer(e, 'use')).toBeNull();
+    // The paper's words: their meaning in darija is the entry's; what is asked needs its use.
+    expect(glossaryAnswer(e, 'darija')).toHaveLength(1);
+    expect(glossaryAnswer(e, 'task')).toBeNull();
+    // Our own text said again, or an example: always the AI.
+    expect(glossaryAnswer(e, 'rephrase')).toBeNull();
+    expect(glossaryAnswer(e, 'example')).toBeNull();
     expect(glossaryAnswer(e, 'meaning')).toHaveLength(1);
   });
 

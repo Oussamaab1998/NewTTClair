@@ -339,6 +339,9 @@ export const size = {
   ladderMark: 22,
   ladderDot: 10,
   legendSymbol: 44,
+  /** Select any text (mockups 4a-4c): a handle's dot, and the magnifier above the finger. */
+  selectDot: 14,
+  selectLoupe: 110,
   /** The hand-over's step marks (✓ ● ○). */
   handoffMark: 20,
   /** Extra touch area around the small "..." button, each side. */

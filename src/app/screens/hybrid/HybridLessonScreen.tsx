@@ -192,6 +192,14 @@ export function HybridLessonScreen(p: HybridLessonScreenProps) {
     setTeacherOpen(true);
   }, []);
   const closeTeacher = useCallback(() => setTeacherOpen(false), []);
+  // From a sheet (its own modal): the sheet closes, then the teacher opens.
+  const askFromSheet = useCallback(
+    (r: AskRequest) => {
+      setTab(null);
+      askTeacher(r);
+    },
+    [askTeacher],
+  );
 
   // Debug builds: the acts given at launch, one per answer (the next one
   // waits while the AI side is asked). An act that has no button at that
@@ -512,16 +520,19 @@ export function HybridLessonScreen(p: HybridLessonScreenProps) {
         )}
         {__DEV__ && <DevOverlay entries={s.dev} />}
         <BoardSheet tab={tab} onTab={setTab} onClose={() => setTab(null)}>
-          {tab === 'exercise' && <ExerciseTab sheet={s.sheets.exercise()} />}
-          {tab === 'road' && (
-            <RoadTab road={s.sheets.road()} questionLabels={questionLabels} />
-          )}
-          {tab === 'found' && (
-            <FoundTab
-              found={s.sheets.found()}
-              figure={s.sheets.foundFigure()}
-            />
-          )}
+          {/* The sheet is a modal of its own: its selection layer lives inside it. */}
+          <AskProvider exerciseId={s.ctx.exerciseId} onAsk={askFromSheet}>
+            {tab === 'exercise' && <ExerciseTab sheet={s.sheets.exercise()} />}
+            {tab === 'road' && (
+              <RoadTab road={s.sheets.road()} questionLabels={questionLabels} />
+            )}
+            {tab === 'found' && (
+              <FoundTab
+                found={s.sheets.found()}
+                figure={s.sheets.foundFigure()}
+              />
+            )}
+          </AskProvider>
         </BoardSheet>
       </AskProvider>
       {/* Last child of the root: it fills the board (not a Modal, see teacher/index.ts). */}

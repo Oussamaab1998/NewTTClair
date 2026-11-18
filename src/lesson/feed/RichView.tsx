@@ -12,7 +12,7 @@ import { RichText } from '../blocks/RichText';
 import { MathBlock } from '../math/MathBlock';
 import { ScrollingMath } from '../math/ScrollingMath';
 import { spokenMath } from '../math/spoken';
-import { toPlainText } from '../rich/runs';
+import { toPlainText, type ArRuns } from '../rich/runs';
 import { theme } from '../../theme';
 
 /** Where a long-pressed text sits on the screen (window coordinates). */
@@ -23,10 +23,26 @@ export interface AskFrame {
   height: number;
 }
 
-/** A long press on a formula (LaTeX) or on French words, to ask the teacher about it. */
+/** The face of a pressed text, so the selection draws it the same. */
+export interface AskFont {
+  fontSize: number;
+  fontFamily: string;
+  /** The exam paper's French (STIX, theme.font.paper). */
+  paper: boolean;
+}
+
+/**
+ * A long press on a formula (LaTeX), French words or an Arabic paragraph,
+ * to select some of it and ask the teacher (select any text, 2026-11-18).
+ */
 export interface AskPress {
-  kind: 'math' | 'fr';
+  kind: 'math' | 'fr' | 'ar';
   text: string;
+  /** An Arabic paragraph's runs (its French words stay isolated). */
+  runs?: ArRuns;
+  /** Where the finger is (window); null: a screen reader's action, the whole text. */
+  point: { x: number; y: number } | null;
+  font: AskFont;
   /** Measures the pressed view (its frame, or null when it cannot be measured). */
   measure: (done: (frame: AskFrame | null) => void) => void;
 }
@@ -56,15 +72,19 @@ const ASK_MOVE_SLOP = 10;
  * scroll still scrolls; presenting the menu cancels the touch underneath.
  * Screen readers get a "long press" action.
  */
-function Askable({
+export function Askable({
   kind,
   text,
+  runs,
+  font,
   target,
   children,
   testID,
 }: {
   kind: AskPress['kind'];
   text: string;
+  runs?: ArRuns;
+  font: AskFont;
   target: AskTarget;
   children: React.ReactNode;
   testID?: string;
@@ -80,11 +100,14 @@ function Askable({
     start.current = null;
   };
   useEffect(() => cancel, []);
-  const fire = () => {
+  const fire = (point: AskPress['point']) => {
     cancel();
     target.onPress({
       kind,
       text,
+      ...(runs !== undefined && { runs }),
+      point,
+      font,
       measure: done => {
         const node = ref.current;
         if (typeof node?.measureInWindow !== 'function') {
@@ -106,8 +129,9 @@ function Askable({
     if ((e.nativeEvent.touches?.length ?? 1) > 1) {
       return;
     }
-    start.current = { x: e.nativeEvent.pageX, y: e.nativeEvent.pageY };
-    timer.current = setTimeout(fire, ASK_LONG_PRESS_MS);
+    const at = { x: e.nativeEvent.pageX, y: e.nativeEvent.pageY };
+    start.current = at;
+    timer.current = setTimeout(() => fire(at), ASK_LONG_PRESS_MS);
   };
   const onTouchMove = (e: GestureResponderEvent) => {
     const s = start.current;
@@ -129,7 +153,7 @@ function Askable({
       accessibilityActions={[{ name: 'longpress', label: target.label }]}
       onAccessibilityAction={(e: AccessibilityActionEvent) => {
         if (e.nativeEvent.actionName === 'longpress') {
-          fire();
+          fire(null);
         }
       }}
       {...(testID !== undefined && { testID })}
@@ -172,15 +196,28 @@ export function RichView({
   testID,
 }: RichViewProps) {
   const Formula = mathScroll ? ScrollingMath : MathBlock;
-  // Inside the lesson board only: its formulas and French words open the ask menu.
+  // Inside the lesson board only: a long press on any of its text selects it to ask.
   const ask = useContext(AskTargetContext);
   const askable = (
     kind: AskPress['kind'],
     text: string,
     node: React.ReactElement,
+    runs?: ArRuns,
   ): React.ReactElement =>
     ask ? (
-      <Askable kind={kind} text={text} target={ask} testID={`ask-${kind}`}>
+      <Askable
+        kind={kind}
+        text={text}
+        {...(runs !== undefined && { runs })}
+        font={{
+          fontSize:
+            kind === 'fr' ? fontSize - theme.font.secondaryRunDelta : fontSize,
+          fontFamily,
+          paper: kind === 'fr' && variant === 'paper',
+        }}
+        target={ask}
+        testID={`ask-${kind}`}
+      >
         {node}
       </Askable>
     ) : (
@@ -188,18 +225,22 @@ export function RichView({
     );
   return (
     <View testID={testID}>
-      {rich.ar && (
-        <RichText
-          runs={rich.ar}
-          {...(numberOfLines !== undefined && { numberOfLines })}
-          style={{
-            color,
-            fontSize,
-            fontFamily,
-            lineHeight: fontSize * theme.font.readingLineRatio,
-          }}
-        />
-      )}
+      {rich.ar &&
+        askable(
+          'ar',
+          toPlainText(rich.ar),
+          <RichText
+            runs={rich.ar}
+            {...(numberOfLines !== undefined && { numberOfLines })}
+            style={{
+              color,
+              fontSize,
+              fontFamily,
+              lineHeight: fontSize * theme.font.readingLineRatio,
+            }}
+          />,
+          rich.ar,
+        )}
       {rich.fr !== undefined &&
         askable(
           'fr',

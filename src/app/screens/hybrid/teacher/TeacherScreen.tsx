@@ -54,7 +54,8 @@ import {
 import { glossaryMatches, helpFor } from '../../../../content/help/help';
 import type { Rich } from '../../../../content/schema';
 import { RichText } from '../../../../lesson/blocks/RichText';
-import { AskTargetContext, RichView } from '../../../../lesson/feed/RichView';
+import { RichView } from '../../../../lesson/feed/RichView';
+import { AskProvider } from './AskProvider';
 import { MathBlock } from '../../../../lesson/math/MathBlock';
 import { toPlainText } from '../../../../lesson/rich/runs';
 import { theme } from '../../../../theme';
@@ -118,6 +119,9 @@ const answerChars = (blocks: readonly TeacherBlock[]): number =>
   blocksText(blocks).length;
 
 /** The teacher's blocks, drawn like the lesson's (Arabic runs, the paper's French, formulas). */
+/** Words he selected, between quotes as a quote. */
+const quoted = (s: string): string => ['«', s, '»'].join('');
+
 function AnswerBlocks({ blocks }: { blocks: readonly TeacherBlock[] }) {
   return (
     <View style={styles.blocks}>
@@ -185,6 +189,10 @@ function HisBubble({ his }: { his: His }) {
                 color={theme.color.textOnAccent}
                 fontSize={theme.font.size.bodyLarge}
               />
+            ) : his.pressed.kind === 'ar' ? (
+              <Text style={[styles.hisText, styles.rtl]}>
+                {quoted(his.pressed.text)}
+              </Text>
             ) : (
               <Text style={[styles.hisText, styles.ltr, styles.paper]}>
                 {his.pressed.text}
@@ -535,7 +543,8 @@ export function TeacherScreen({
   const fieldRtl = text === '' || /^[\s]*[\u0600-\u06FF]/.test(text);
 
   return (
-    <AskTargetContext.Provider value={null}>
+    // His own text and the answers are selectable too: a selection asks here.
+    <AskProvider exerciseId={exerciseId} onAsk={askMenu}>
       <View
         ref={root}
         style={[styles.root, { paddingBottom: inset }]}
@@ -782,7 +791,7 @@ export function TeacherScreen({
           </View>
         </View>
       </View>
-    </AskTargetContext.Provider>
+    </AskProvider>
   );
 }
 

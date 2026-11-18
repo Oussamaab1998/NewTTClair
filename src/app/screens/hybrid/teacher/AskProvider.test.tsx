@@ -49,6 +49,18 @@ async function longPress(testID: string) {
   await act(async () => {
     jest.advanceTimersByTime(ASK_LONG_PRESS_MS + 10);
   });
+  // The selection opens (measuring answers nothing in tests), then selects.
+  for (let i = 0; i < 2; i++) {
+    await act(async () => {
+      jest.advanceTimersByTime(1000);
+    });
+  }
+}
+
+/** A long press, then «اسأل الأستاذ» on what is selected: the four options. */
+async function longPressAsk(testID: string) {
+  await longPress(testID);
+  await fireEvent.press(screen.getByTestId('select-ask'));
 }
 
 describe('long press to ask', () => {
@@ -70,6 +82,10 @@ describe('long press to ask', () => {
     );
     expect(screen.queryByTestId('ask-menu')).toBeNull();
     await longPress('ask-math');
+    // The formula is lifted and selected whole first.
+    expect(screen.getByTestId('select-layer')).toBeTruthy();
+    expect(screen.queryByTestId('ask-menu')).toBeNull();
+    await fireEvent.press(screen.getByTestId('select-ask'));
     expect(screen.getByTestId('ask-menu')).toBeTruthy();
     expect(screen.getByText('نسأل الأستاذ على الكتيبة هاذي')).toBeTruthy();
     for (const label of [
@@ -99,17 +115,54 @@ describe('long press to ask', () => {
         <RichView rich={{ fr: sentence }} variant="paper" />
       </AskProvider>,
     );
-    await longPress('ask-fr');
+    await longPressAsk('ask-fr');
     expect(screen.getByText('اختار شنوّة تحب تفهم:')).toBeTruthy();
     expect(screen.getByTestId('ask-chip-montrer')).toBeTruthy();
     expect(screen.getByTestId('ask-chip-arbre')).toBeTruthy();
     await fireEvent.press(screen.getByTestId('ask-chip-arbre'));
-    await fireEvent.press(screen.getByTestId('ask-option-reading'));
+    // The paper's French words: what they mean in darija, what is asked, his own question.
+    expect(screen.queryByTestId('ask-option-reading')).toBeNull();
+    await fireEvent.press(screen.getByTestId('ask-option-darija'));
     expect(onAsk).toHaveBeenCalledWith({
-      kind: 'reading',
+      kind: 'darija',
       pressed: { kind: 'fr', text: 'arbre de probabilité' },
       entryId: 'arbre',
     });
+  });
+
+  it('each kind of text gets its own options', async () => {
+    await render(
+      <AskProvider exerciseId="x" onAsk={() => {}}>
+        <RichView rich={{ math: 'p(A \\cap F)' }} />
+        <RichView rich={{ fr: 'On tire une boule' }} variant="paper" />
+        <RichView rich={{ ar: [{ ar: 'نمشيو مع الطريق فرع بفرع' }] }} />
+      </AskProvider>,
+    );
+    const optionsOf = async (id: string) => {
+      await longPressAsk(id);
+      const ids = screen
+        .getAllByTestId(/^ask-option-/)
+        .map(o => o.props.testID as string);
+      await fireEvent.press(screen.getByTestId('ask-menu-scrim'));
+      return ids;
+    };
+    expect(await optionsOf('ask-math')).toEqual([
+      'ask-option-meaning',
+      'ask-option-reading',
+      'ask-option-use',
+      'ask-option-own',
+    ]);
+    expect(await optionsOf('ask-fr')).toEqual([
+      'ask-option-darija',
+      'ask-option-task',
+      'ask-option-own',
+    ]);
+    // Our own Arabic: said differently, an example, his own question.
+    expect(await optionsOf('ask-ar')).toEqual([
+      'ask-option-rephrase',
+      'ask-option-example',
+      'ask-option-own',
+    ]);
   });
 
   it('asks about the whole text when no chip is picked', async () => {
@@ -120,7 +173,7 @@ describe('long press to ask', () => {
         <RichView rich={{ fr: sentence }} />
       </AskProvider>,
     );
-    await longPress('ask-fr');
+    await longPressAsk('ask-fr');
     await fireEvent.press(screen.getByTestId('ask-option-own'));
     expect(onAsk).toHaveBeenCalledWith({
       kind: 'own',

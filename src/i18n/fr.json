@@ -1060,6 +1060,17 @@
       "list": "Retour aux exercices"
     },
     "teacher": {
+      "select": {
+        "startHandle": "Début de la sélection : à faire glisser",
+        "endHandle": "Fin de la sélection : à faire glisser",
+        "more": "Un mot de plus",
+        "less": "Un mot de moins",
+        "sentence": "La phrase entière",
+        "ask": "Demander au professeur",
+        "chosen": "Sélection :",
+        "parts": "Choisir une partie :",
+        "about": "Sur :"
+      },
       "open": "Le prof",
       "title": "Le prof",
       "subtitle": "Il t'explique jusqu'à ce que tu comprennes",
@@ -1095,9 +1106,14 @@
       },
       "menu": {
         "title": "Demander au prof à propos de ceci",
+        "titleWords": "Demander au professeur à propos de ces mots",
         "meaning": "Ça veut dire quoi ?",
         "reading": "Comment ça se lit en français ?",
         "use": "Pourquoi on l'utilise ici ?",
+        "darija": "Qu'est-ce que ça veut dire en darija ?",
+        "task": "Qu'est-ce qu'on me demande de faire ?",
+        "rephrase": "Je n'ai pas compris, explique autrement",
+        "example": "Donne-moi un exemple",
         "own": "J'écris ma question",
         "pick": "Choisis ce que tu veux comprendre :",
         "frIcon": "Fr",
