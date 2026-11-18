@@ -48,6 +48,9 @@
  *   -devMover slow     the lesson board's AI side waits about 5 s, then gives
  *                      no move: the waiting state, then the prepared reply
  *                      (no model call, nothing spent; src/hybrid/live.ts)
+ *   -devTeacher canned  the teacher's screen answers every question with
+ *                      its fixed, checked example after a moment (no model
+ *                      call, nothing spent; src/ai/teacher/canned.ts)
  *   -devHybridActs "start,dontKnow,dontKnow,line:(2/3)*(1/4)=1/6,back"
  *                      the lesson board plays these acts once it is open, one
  *                      per answer, through the path its buttons use: `start`
@@ -305,6 +308,10 @@ export function slowMover(ms = SLOW_MOVER_MS): Mover {
 /** `-devMover slow`: the slow stand-in (src/hybrid/live.ts); anything else is ignored. */
 export const devMoverAtLaunch = (): Mover | null =>
   stringArg('devMover') === 'slow' ? slowMover() : null;
+
+/** `-devTeacher canned`: the teacher's free stand-in (src/ai/teacher); anything else is ignored. */
+export const devTeacherAtLaunch = (): 'canned' | null =>
+  stringArg('devTeacher') === 'canned' ? 'canned' : null;
 
 export function runDevBench() {
   if (arg('devBench') !== 'events') {

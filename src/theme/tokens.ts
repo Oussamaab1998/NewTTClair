@@ -333,6 +333,14 @@ export const size = {
   paperNumber: 32,
   /** The paper screen's current-question dot (mockup 07). */
   paperDot: 12,
+  /** The help ladder (student test 2026-11-18): a slot of the line to fill, its chips, the level mark, the level dots, the legend's symbol column. */
+  fillSlotWidth: 56,
+  fillSlotHeight: 52,
+  ladderMark: 22,
+  ladderDot: 10,
+  legendSymbol: 44,
+  /** The hand-over's step marks (✓ ● ○). */
+  handoffMark: 20,
   /** Extra touch area around the small "..." button, each side. */
   blockMenuSlop: 8,
   reportInputMinHeight: 64,

@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import { exercisePack } from '../../../ai/tutor';
 import { localLlmConfig } from '../../../config/llm';
 import { liveAi } from '../../../hybrid/live';
+import { liveTeacher } from './teacher';
 import { appStore } from '../../../storage/appStore';
 import type * as DevOnly from '../../dev';
 import type * as DevLaunch from '../../dev/launch';
@@ -42,12 +43,21 @@ export function LiveHybridLessonScreen(
       devMover: devOnly?.devMoverAtLaunch() ?? null,
     }),
   );
+  // The teacher's own calls and allowance (`-devTeacher canned`: a free stand-in).
+  const [teacher] = useState(() =>
+    liveTeacher({
+      store: p.store ?? appStore(),
+      apiKey: localLlmConfig().anthropicApiKey,
+      devTeacher: devOnly?.devTeacherAtLaunch() ?? null,
+    }),
+  );
   const [devActs] = useState(() => devLaunch?.devHybridActsAtLaunch() ?? []);
   return (
     <HybridLessonScreen
       {...p}
       mover={ai.mover}
       templates={ai.templates}
+      teacher={teacher}
       {...(devActs.length > 0 && { devActs })}
     />
   );

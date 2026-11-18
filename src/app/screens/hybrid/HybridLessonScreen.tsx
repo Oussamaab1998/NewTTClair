@@ -41,7 +41,6 @@ import {
 import type { LoadedExercise } from '../../../content/loader';
 import { appPaperQuestions } from '../../../content/paper';
 import type { Rich } from '../../../content/schema';
-import { printedFigure } from '../../../hybrid/figure';
 import type { Mover, Templates } from '../../../hybrid/mover';
 import { RichView } from '../../../lesson/feed/RichView';
 import type { DoneRecord } from '../../../state/doneParts';
@@ -53,11 +52,19 @@ import { ExerciseTab } from './board/ExerciseTab';
 import { FoundTab } from './board/FoundTab';
 import { RoadTab } from './board/RoadTab';
 import { TabBar, type BoardTab } from './board/TabBar';
-import { ChatDrawer } from './ChatDrawer';
 import { CollapsedStep } from './CollapsedStep';
 import { DevOverlay } from './DevOverlay';
+import { Handoff } from './solo/Handoff';
+import { PaperFirst } from './solo/PaperFirst';
+import { SoloSheet } from './solo/SoloSheet';
 import { ExchangeView, StepCard } from './StepCard';
-import { TripScreen } from './trip/TripScreen';
+import {
+  AskProvider,
+  noTeacher,
+  TeacherScreen,
+  type AskRequest,
+  type TeacherAi,
+} from './teacher';
 import { useHybridSession } from './useHybridSession';
 
 const BACK_MARK = '→';
@@ -82,6 +89,8 @@ export interface HybridLessonScreenProps {
   /** The AI side (default: none, the prepared replies only). */
   mover?: Mover;
   templates?: Templates;
+  /** The teacher's answers (default: none; the glossary still answers). */
+  teacher?: TeacherAi;
   /** Tests: memory stores. */
   store?: KeyValueStore;
   doneRecord?: DoneRecord;
@@ -161,6 +170,28 @@ export function HybridLessonScreen(p: HybridLessonScreenProps) {
     return () => clearTimeout(timer);
   }, [touring]);
   const start = useCallback(() => send({ kind: 'continue' }), [send]);
+  const startSolo = useCallback(() => send({ kind: 'solo' }), [send]);
+  // «تعطّلت؟» on the solo sheet: the hand-over shows before the steps go on.
+  const [handoff, setHandoff] = useState(false);
+  const { solo } = s;
+  useEffect(() => {
+    if (!solo) {
+      setHandoff(false);
+    }
+  }, [solo]);
+  const goSteps = useCallback(() => send({ kind: 'steps' }), [send]);
+  // «الأستاذ»: his own screen; a long press opens it with the question asked.
+  const [teacherOpen, setTeacherOpen] = useState(false);
+  const [teacherAsk, setTeacherAsk] = useState<AskRequest | null>(null);
+  const openTeacher = useCallback(() => {
+    setTeacherAsk(null);
+    setTeacherOpen(true);
+  }, []);
+  const askTeacher = useCallback((r: AskRequest) => {
+    setTeacherAsk(r);
+    setTeacherOpen(true);
+  }, []);
+  const closeTeacher = useCallback(() => setTeacherOpen(false), []);
 
   // Debug builds: the acts given at launch, one per answer (the next one
   // waits while the AI side is asked). An act that has no button at that
@@ -275,161 +306,233 @@ export function HybridLessonScreen(p: HybridLessonScreenProps) {
       : null;
   const step = s.frame ? s.ctx.frames.get(s.frame.frameId) : undefined;
   const experiment = p.loaded.exercise.experiment;
-  const figure = printedFigure(s.ctx);
   const labelOf = (id: string) => questionLabels[id] ?? id;
+  // The line step the solo sheet writes for (its keys: C(n,k), x...).
+  const soloKey = useMemo(() => {
+    const done = s.state.solo?.done ?? [];
+    for (const id of s.state.route.slice(s.state.at)) {
+      const f = s.ctx.frames.get(id)?.frame;
+      if (f?.type === 'lines' && !done.includes(id)) {
+        return f.key;
+      }
+    }
+    return null;
+  }, [s.ctx, s.state]);
+  // His solo lines that finished a step (the hand-over's green card).
+  const soloLines = s.sheet
+    .filter(x => x.reason === 'solo_credit')
+    .flatMap(x => x.his.flatMap(c => (c.kind === 'typed' ? [c.raw] : [])));
 
   return (
     <KeyboardAvoidingView
       style={styles.root}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      // Android draws edge to edge (gradle edgeToEdgeEnabled): the window is
+      // no longer resized for the keyboard (adjustResize does nothing), so
+      // with no behavior the keyboard covered the input there (student test
+      // 2026-11-18). 'padding' lifts the content on both platforms.
+      behavior={Platform.select({ ios: 'padding', android: 'padding' })}
       testID="hybrid-screen"
     >
-      <View style={styles.header}>
-        <Pressable
-          style={styles.headerButton}
-          accessibilityRole="button"
-          accessibilityLabel={t('hybrid.back')}
-          testID="hybrid-back"
-          onPress={p.onBack}
-        >
-          <Text style={styles.headerMark}>{BACK_MARK}</Text>
-        </Pressable>
-        <View style={styles.headerTitle}>
-          <RichView
-            rich={title.ar ? { ar: title.ar } : title}
-            numberOfLines={1}
-            mathScroll={false}
-          />
-          <View style={styles.row}>
-            <Text style={styles.headerSub}>{t('hybrid.question')}</Text>
-            <Text style={styles.headerSub}>{label}</Text>
-          </View>
-        </View>
-      </View>
-      <View style={styles.tabs}>
-        <TabBar
-          selected={null}
-          flash={flash ? 'road' : null}
-          onSelect={setTab}
-        />
-      </View>
-      {touring ? (
-        <TripScreen
-          road={s.road}
-          reused={s.reused}
-          questionLabels={questionLabels}
-          figure={figure}
-          waiting={s.waiting}
-          onStart={start}
-        />
-      ) : (
-        <ScrollView
-          ref={scroll}
-          style={styles.main}
-          contentContainerStyle={styles.mainContent}
-          keyboardShouldPersistTaps="handled"
-          // Growing content never moves the screen (only `reveal` does).
-          onContentSizeChange={(_w, h) => {
-            port.current.content = h;
-          }}
-          onLayout={e => {
-            port.current.height = e.nativeEvent.layout.height;
-          }}
-          onTouchStart={() => {
-            touching.current = true;
-            glideUntil.current = 0;
-          }}
-          onTouchEnd={() => {
-            touching.current = false;
-          }}
-          onTouchCancel={() => {
-            touching.current = false;
-          }}
-          onScrollBeginDrag={() => {
-            touching.current = true;
-          }}
-          onMomentumScrollBegin={() => {
-            glideUntil.current = Date.now() + GLIDE_MAX_MS;
-          }}
-          onMomentumScrollEnd={e => {
-            glideUntil.current = 0;
-            onScroll(e);
-          }}
-          onScrollEndDrag={e => {
-            touching.current = false;
-            onScroll(e);
-          }}
-          onScroll={onScroll}
-          scrollEventThrottle={SCROLL_THROTTLE_MS}
-          testID="hybrid-main"
-        >
-          {s.steps
-            .filter(x => x.status === 'done')
-            .map(x => (
-              <CollapsedStep
-                key={x.key}
-                step={x}
-                fromLabel={
-                  x.fromQuestionId !== null ? labelOf(x.fromQuestionId) : null
-                }
-                onPress={openRoad}
-              />
-            ))}
-          {s.frame && step ? (
-            <StepCard
-              frame={s.frame}
-              step={step}
-              stage={s.state.progress.stage}
-              similarLines={s.state.progress.lines}
-              next={s.strip.next}
-              exchanges={s.card}
-              readback={s.readback}
-              waiting={s.waiting}
-              experiment={experiment}
-              live={s.live}
-              onAct={s.send}
-              onReadback={s.chooseReadback}
-              onFinishMove={exchangeId => s.finishComponent({ exchangeId })}
-              onFinishPicture={spec => s.finishComponent({ spec })}
-              state={s.state}
-              levelOf={s.levelOf}
-              figure={s.figure}
-              givens={s.givens}
-              lettersOf={s.lettersOf}
-              onReveal={reveal}
-              onLayout={onCardLayout}
+      {/* A long press on a formula or on the paper's French asks the teacher. */}
+      <AskProvider exerciseId={s.ctx.exerciseId} onAsk={askTeacher}>
+        <View style={styles.header}>
+          <Pressable
+            style={styles.headerButton}
+            accessibilityRole="button"
+            accessibilityLabel={t('hybrid.back')}
+            testID="hybrid-back"
+            onPress={p.onBack}
+          >
+            <Text style={styles.headerMark}>{BACK_MARK}</Text>
+          </Pressable>
+          <View style={styles.headerTitle}>
+            <RichView
+              rich={title.ar ? { ar: title.ar } : title}
+              numberOfLines={1}
+              mathScroll={false}
             />
-          ) : (
-            <>
-              {s.card.map(x => (
-                <ExchangeView key={x.id} x={x} live={null} />
+            <View style={styles.row}>
+              <Text style={styles.headerSub}>{t('hybrid.question')}</Text>
+              <Text style={styles.headerSub}>{label}</Text>
+            </View>
+          </View>
+          <Pressable
+            style={styles.teacher}
+            accessibilityRole="button"
+            testID="hybrid-teacher"
+            onPress={openTeacher}
+          >
+            <Text style={styles.teacherText}>{t('hybrid.teacher.open')}</Text>
+          </Pressable>
+        </View>
+        <View style={styles.tabs}>
+          <TabBar
+            selected={null}
+            flash={flash ? 'road' : null}
+            onSelect={setTab}
+          />
+        </View>
+        {touring ? (
+          <PaperFirst
+            sheet={s.sheets.exercise()}
+            soloPossible={s.soloPossible}
+            waiting={s.waiting}
+            onSolo={startSolo}
+            onSteps={start}
+          />
+        ) : solo && handoff ? (
+          <Handoff
+            lines={soloLines}
+            steps={s.road.steps}
+            waiting={s.waiting}
+            onGo={goSteps}
+            onBack={() => setHandoff(false)}
+          />
+        ) : solo ? (
+          <SoloSheet
+            paper={s.sheets.exercise}
+            state={s.state}
+            stepKey={soloKey}
+            givens={s.givens}
+            levelOf={s.levelOf}
+            lettersOf={s.lettersOf}
+            sheet={s.sheet}
+            readback={s.readback}
+            waiting={s.waiting}
+            onLine={raw => send({ kind: 'line', raw })}
+            onReadback={s.chooseReadback}
+            onStuck={() => setHandoff(true)}
+          />
+        ) : (
+          <ScrollView
+            ref={scroll}
+            style={styles.main}
+            contentContainerStyle={styles.mainContent}
+            keyboardShouldPersistTaps="handled"
+            // Growing content never moves the screen (only `reveal` does).
+            onContentSizeChange={(_w, h) => {
+              port.current.content = h;
+            }}
+            onLayout={e => {
+              port.current.height = e.nativeEvent.layout.height;
+            }}
+            onTouchStart={() => {
+              touching.current = true;
+              glideUntil.current = 0;
+            }}
+            onTouchEnd={() => {
+              touching.current = false;
+            }}
+            onTouchCancel={() => {
+              touching.current = false;
+            }}
+            onScrollBeginDrag={() => {
+              touching.current = true;
+            }}
+            onMomentumScrollBegin={() => {
+              glideUntil.current = Date.now() + GLIDE_MAX_MS;
+            }}
+            onMomentumScrollEnd={e => {
+              glideUntil.current = 0;
+              onScroll(e);
+            }}
+            onScrollEndDrag={e => {
+              touching.current = false;
+              onScroll(e);
+            }}
+            onScroll={onScroll}
+            scrollEventThrottle={SCROLL_THROTTLE_MS}
+            testID="hybrid-main"
+          >
+            {s.steps
+              .filter(x => x.status === 'done')
+              .map(x => (
+                <CollapsedStep
+                  key={x.key}
+                  step={x}
+                  fromLabel={
+                    x.fromQuestionId !== null ? labelOf(x.fromQuestionId) : null
+                  }
+                  onPress={openRoad}
+                />
               ))}
-              <Ended
-                next={next}
-                onNext={() => next && p.onNext?.(next.id)}
-                onBack={p.onBack}
-              />
-            </>
+            {s.frame && step ? (
+              <>
+                <StepCard
+                  frame={s.frame}
+                  step={step}
+                  stage={s.state.progress.stage}
+                  similarLines={s.state.progress.lines}
+                  next={s.strip.next}
+                  exchanges={s.card}
+                  readback={s.readback}
+                  waiting={s.waiting}
+                  experiment={experiment}
+                  live={s.live}
+                  onAct={s.send}
+                  onReadback={s.chooseReadback}
+                  onFinishMove={exchangeId => s.finishComponent({ exchangeId })}
+                  onFinishPicture={spec => s.finishComponent({ spec })}
+                  state={s.state}
+                  levelOf={s.levelOf}
+                  figure={s.figure}
+                  givens={s.givens}
+                  lettersOf={s.lettersOf}
+                  onReveal={reveal}
+                  onLayout={onCardLayout}
+                />
+                {/* He can switch to writing the rest alone at any step. */}
+                {s.soloPossible && (
+                  <Pressable
+                    style={[styles.switch, s.waiting && styles.off]}
+                    accessibilityRole="button"
+                    disabled={s.waiting}
+                    testID="hybrid-switch-solo"
+                    onPress={startSolo}
+                  >
+                    <Text style={styles.switchText}>
+                      {t('hybrid.solo.switch')}
+                    </Text>
+                  </Pressable>
+                )}
+              </>
+            ) : (
+              <>
+                {s.card.map(x => (
+                  <ExchangeView key={x.id} x={x} live={null} />
+                ))}
+                <Ended
+                  next={next}
+                  onNext={() => next && p.onNext?.(next.id)}
+                  onBack={p.onBack}
+                />
+              </>
+            )}
+          </ScrollView>
+        )}
+        {__DEV__ && <DevOverlay entries={s.dev} />}
+        <BoardSheet tab={tab} onTab={setTab} onClose={() => setTab(null)}>
+          {tab === 'exercise' && <ExerciseTab sheet={s.sheets.exercise()} />}
+          {tab === 'road' && (
+            <RoadTab road={s.sheets.road()} questionLabels={questionLabels} />
           )}
-        </ScrollView>
-      )}
-      {!s.ended && (
-        <ChatDrawer
-          exchanges={s.chat}
-          disabled={s.waiting}
-          onSend={text => s.send({ kind: 'free', text })}
-        />
-      )}
-      {__DEV__ && <DevOverlay entries={s.dev} />}
-      <BoardSheet tab={tab} onTab={setTab} onClose={() => setTab(null)}>
-        {tab === 'exercise' && <ExerciseTab sheet={s.sheets.exercise()} />}
-        {tab === 'road' && (
-          <RoadTab road={s.sheets.road()} questionLabels={questionLabels} />
-        )}
-        {tab === 'found' && (
-          <FoundTab found={s.sheets.found()} figure={s.sheets.foundFigure()} />
-        )}
-      </BoardSheet>
+          {tab === 'found' && (
+            <FoundTab
+              found={s.sheets.found()}
+              figure={s.sheets.foundFigure()}
+            />
+          )}
+        </BoardSheet>
+      </AskProvider>
+      {/* Last child of the root: it fills the board (not a Modal, see teacher/index.ts). */}
+      <TeacherScreen
+        visible={teacherOpen}
+        onClose={closeTeacher}
+        exerciseId={s.ctx.exerciseId}
+        question={{ ctx: s.ctx, state: s.state }}
+        ai={p.teacher ?? noTeacher}
+        initial={teacherAsk}
+      />
     </KeyboardAvoidingView>
   );
 }
@@ -508,4 +611,31 @@ const styles = StyleSheet.create({
     backgroundColor: theme.color.surfaceCard,
   },
   secondaryText: { ...theme.font.body, color: theme.color.textPrimary },
+  teacher: {
+    minHeight: theme.size.touch,
+    justifyContent: 'center',
+    paddingHorizontal: theme.space.lg,
+    borderRadius: theme.radius.pill,
+    borderWidth: theme.border.active,
+    borderColor: theme.color.pen,
+    backgroundColor: theme.color.card,
+  },
+  teacherText: {
+    ...theme.font.body,
+    fontFamily: theme.font.family.ui.bold,
+    color: theme.color.pen,
+  },
+  switch: {
+    alignSelf: 'center',
+    minHeight: theme.size.touch,
+    justifyContent: 'center',
+    paddingHorizontal: theme.space.lg,
+  },
+  switchText: {
+    ...theme.font.small,
+    color: theme.color.pen,
+    textDecorationLine: 'underline',
+    writingDirection: 'rtl',
+  },
+  off: { opacity: theme.opacity.disabled },
 });

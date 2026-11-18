@@ -13,7 +13,6 @@ import { fractionToPlain } from '../../engine/format';
 import { frac, type Fraction } from '../../engine/rational';
 import { solveTwoEventTree, type TreeQuantity } from '../../engine/tree';
 import { fillSkeleton } from '../../method/findings';
-import type { ReplyPart } from '../../method/replies';
 import { exerciseSheet } from '../board';
 import { passTour } from '../tour/passTour';
 import { TRIP_FILE_ISSUES, roadView, type Carried } from '../tour/tour';
@@ -21,11 +20,31 @@ import {
   act,
   applyFallback,
   questionCtx,
+  soloPossible,
   startQuestion,
   view,
   type QuestionCtx,
 } from './conductor';
 import type { ActOut, ConductorState } from './types';
+
+/**
+ * The old hints path (a step without a help ladder, src/content/help):
+ * these tests switch the ladders off, so «ما نعرفش» gives the hints and the AI as before.
+ */
+const mockLadders = { off: false };
+jest.mock('../../content/help/help', () => {
+  const actual = jest.requireActual<typeof import('../../content/help/help')>(
+    '../../content/help/help',
+  );
+  return {
+    ...actual,
+    ladderFor: (...a: Parameters<typeof actual.ladderFor>) =>
+      mockLadders.off ? null : actual.ladderFor(...a),
+  };
+});
+afterEach(() => {
+  mockLadders.off = false;
+});
 
 const ID = 'bac2022p-sc-ex2';
 const entry = CATALOG.find(e => e.id === ID)!;
@@ -166,10 +185,6 @@ const slipOf = (out: ActOut): string[] =>
   out.reply.flatMap(part =>
     part.kind === 'feedback' && part.tone === 'warning' ? ['warned'] : [],
   );
-const mathOf = (parts: readonly ReplyPart[]): string =>
-  parts
-    .flatMap(part => (part.kind === 'feedback' ? [part.rich.math ?? ''] : []))
-    .join(' | ');
 
 describe(`${ID}: the content is wired`, () => {
   it('loads, with its trips and its small examples', () => {
@@ -267,47 +282,30 @@ describe('t1: the other path («Montrer que»)', () => {
     expect(r.state.session.credited.main).not.toContain('na_and_f');
   });
 
-  it('«ما نعرفش» twice: a hint, then the small example, then its bridge back', () => {
+  it('«ما نعرفش»: the three help levels, then the solution, never an AI call', () => {
     const { ctx, state } = onCard('t1', 'a_and_f');
-    const stuck = play(ctx, [DK, DK], state);
-    expect(stuck.outs.map(x => `${x.tier}:${x.reason}`)).toEqual([
-      'instant:hint',
-      'instant:case_open',
+    expect(view(ctx, state)?.ladder).toBe(0);
+    const r = play(ctx, [DK, DK, DK, DK], state);
+    expect(r.outs.map(x => `${x.tier}:${x.reason}`)).toEqual([
+      'instant:ladder',
+      'instant:ladder',
+      'instant:ladder',
+      'instant:reveal',
     ]);
-    const spec = stuck.state.session.cases[stuck.state.onCase!]!;
-    expect(spec).toMatchObject({ kind: 'tree', node: 'a_and_f' });
-    if (spec.kind !== 'tree') {
-      throw new Error('a tree case');
-    }
-    // He counts on the example: the people at the end of the path over everyone.
-    const done = play(ctx, [line(`${spec.af}/${spec.n}`)], stuck.state);
-    expect(done.out).toMatchObject({
-      tier: 'instant',
-      reason: 'case_done',
-      advanced: false,
-    });
-    expect(done.state.onCase).toBeNull();
-    // The bridge shows his own line of the example, never a value of the question he has not found.
-    const said = JSON.stringify(done.out.reply);
-    expect(mathOf(done.out.reply)).toContain(String(spec.af));
-    for (const hidden of [T.a_and_f, T.not_a, T.f_given_na, T.not_f]) {
-      expect(said).not.toContain(`\\\\frac{${hidden[0]}}{${hidden[1]}}`);
-      expect(said).not.toContain(`"${p(hidden)}"`);
-    }
-    // Back on the question, his line is credited.
-    const back = play(ctx, [line(RIGHT.a_and_f!)], done.state);
+    expect(view(ctx, r.state)?.ladder).toBe(3);
+    // The small example is solved on the card now: no case to work on.
+    expect(r.state.onCase).toBeNull();
+    // He still writes the line himself, and it is credited.
+    const back = play(ctx, [line(RIGHT.a_and_f!)], r.state);
     expect(back.out).toMatchObject({ reason: 'credit', advanced: true });
   });
 
-  it('after the example, the ladder goes on: a second hint, then the AI tiers as before', () => {
-    const { ctx, state } = onCard('t1', 'na_and_f');
-    const r = play(ctx, [DK, DK, { kind: 'continue' }, DK], state);
-    expect(r.outs.map(x => `${x.tier}:${x.reason}`)).toEqual([
-      'instant:hint',
-      'instant:case_open',
-      'instant:case_back',
-      'deep:stuck_again',
-    ]);
+  it('a question to the teacher on a ladder step never uses up a level', () => {
+    const { ctx, state } = onCard('t1', 'a_and_f');
+    const r = play(ctx, [{ kind: 'free', text: 'chnwa ma3neha' }, DK], state);
+    expect(r.outs[0]!.hintPending).toBeUndefined();
+    expect(r.out.reason).toBe('ladder');
+    expect(view(ctx, r.state)?.ladder).toBe(1);
   });
 });
 
@@ -361,6 +359,7 @@ describe('t2: a branch of the second level', () => {
   });
 
   it('the small example of the conditional counts among one side only', () => {
+    mockLadders.off = true;
     const { ctx, state } = onCard('t2', 'f_given_na');
     const stuck = play(ctx, [DK, DK], state);
     expect(stuck.out).toMatchObject({ tier: 'instant', reason: 'case_open' });
@@ -457,6 +456,7 @@ describe('t4: the tree read backwards', () => {
   });
 
   it('the small example of the last step counts among those who are not F', () => {
+    mockLadders.off = true;
     const { ctx, state } = onCard('t4', 'na_given_nf');
     const stuck = play(ctx, [DK, DK], state);
     const spec = stuck.state.session.cases[stuck.state.onCase!]!;
@@ -511,3 +511,94 @@ function sub12(x: Fraction, y: Fraction): string {
   const num = (x[0] * 12) / x[1] - (y[0] * 12) / y[1];
   return `${num}/12`;
 }
+
+describe('written alone (the solo sheet, student test 2026-11-18)', () => {
+  /** The question opened on the paper, then «نكتب الحل وحدي». */
+  function solo(q: string) {
+    const ctx = ctxOf(q);
+    const from = startQuestion(ctx, { carried: CARRIED[q]! });
+    return { ctx, ...play(ctx, [{ kind: 'solo' }], from) };
+  }
+
+  it('from the paper: the trip ends and the sheet opens', () => {
+    const { ctx, state, out } = solo('t1');
+    expect(out).toMatchObject({ tier: 'instant', reason: 'solo_start' });
+    expect(state.solo).toEqual({ on: true, from: 0, done: [] });
+    expect(soloPossible(ctx, state)).toBe(true);
+  });
+
+  it('credits any step, in any order, and ends the question when every line step is his', () => {
+    const { ctx, state } = solo('t1');
+    // The second line step first (the first one's value written in it).
+    const second = play(ctx, [line(RIGHT.na_and_f!)], state);
+    expect(second.out).toMatchObject({
+      tier: 'instant',
+      reason: 'solo_credit',
+    });
+    expect(second.state.solo?.done).toEqual(['mt1.c_rest']);
+    expect(second.state.done).toBe(false);
+    const first = play(ctx, [line(RIGHT.a_and_f!)], second.state);
+    expect(first.out).toMatchObject({ reason: 'solo_credit', advanced: true });
+    expect(first.state.done).toBe(true);
+    expect(first.state.session.credited.main).toEqual(
+      expect.arrayContaining(['a_and_f', 'na_and_f']),
+    );
+  });
+
+  it('a wrong line is answered at once with no AI call, and nothing is credited', () => {
+    const { ctx, state } = solo('t1');
+    const r = play(ctx, [line(`${o(T.a)}-${o(T.f)}=${p(T.na_and_f)}`)], state);
+    expect(r.out).toMatchObject({ tier: 'instant', reason: 'solo_wrong' });
+    expect(r.state.session.credited.main ?? []).not.toContain('na_and_f');
+  });
+
+  it('«تعطّلت؟» after the first step: the steps go on at the next one, his line stays', () => {
+    const { ctx, state } = solo('t1');
+    const one = play(ctx, [line(RIGHT.a_and_f!)], state);
+    const handed = play(ctx, [{ kind: 'steps' }], one.state);
+    expect(handed.out).toMatchObject({ reason: 'handoff', advanced: true });
+    expect(handed.state.solo?.on).toBe(false);
+    // The reason card between the two paths comes next, then the other path.
+    expect(view(ctx, handed.state)?.frameId).toBe('mt1.c_split');
+    expect(handed.state.session.credited.main).toContain('a_and_f');
+  });
+
+  it('a step finished alone is skipped when the steps reach it', () => {
+    const { ctx, state } = solo('t1');
+    const rest = play(ctx, [line(RIGHT.na_and_f!), { kind: 'steps' }], state);
+    expect(view(ctx, rest.state)?.frameId).toBe('mt1.c_path');
+    const path = play(ctx, rightAct(ctx, rest.state), rest.state);
+    expect(view(ctx, path.state)?.frameId).toBe('mt1.c_split');
+    const pick = play(ctx, rightAct(ctx, path.state), path.state);
+    // mt1.c_rest was his already: the recipe comes next.
+    expect(view(ctx, pick.state)?.frameId).toBe('mt1.recipe');
+  });
+
+  it('every question of the tree can be written alone to the end', () => {
+    for (const q of ['t1', 't2', 't3', 't4']) {
+      const { ctx, state } = solo(q);
+      let s = state;
+      const keys = s.route
+        .map(id => ctx.frames.get(id)!.frame)
+        .flatMap(f => (f.type === 'lines' ? [f.key] : []));
+      for (const k of keys) {
+        s = play(ctx, [line(RIGHT[k]!)], s).state;
+      }
+      expect([q, s.done]).toEqual([q, true]);
+    }
+  });
+});
+
+describe('written alone: a line no step accepts is never called right', () => {
+  it('two sides that differ get "does not count", with the board\'s note', () => {
+    const ctx = ctxOf('t1');
+    const from = startQuestion(ctx, { carried: CARRIED.t1! });
+    const s = play(ctx, [{ kind: 'solo' }], from).state;
+    // Seen on the simulator 2026-11-18: «2/3 1/4 = 1/3» was answered «صحيح».
+    const r = play(ctx, [line(`${o(T.a)}*${o(T.f_given_a)}=1/3`)], s);
+    expect(r.out).toMatchObject({ tier: 'instant', reason: 'solo_wrong' });
+    expect(
+      r.out.reply.some(x => x.kind === 'message' && x.tone === 'success'),
+    ).toBe(false);
+  });
+});

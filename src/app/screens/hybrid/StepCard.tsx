@@ -71,7 +71,9 @@ import { ballsOf } from '../../../method/repair';
 import { seededOrder } from '../../../method/shuffle';
 import { theme } from '../../../theme';
 import { TutorMessage } from '../tutor/TutorMessage';
+import { ladderFor } from '../../../content/help/help';
 import { CasePanel, type CaseBusy } from './CasePanel';
+import { LadderView } from './ladder/LadderView';
 import { FigureView } from './FigureView';
 import { LineEntry } from './LineEntry';
 import { TreeCasePanel } from './TreeCasePanel';
@@ -95,7 +97,7 @@ type Pressed =
   | 'case_back'
   | 'other';
 
-function PartView({ part }: { part: ReplyPart }) {
+export function PartView({ part }: { part: ReplyPart }) {
   switch (part.kind) {
     case 'note':
       return (
@@ -401,6 +403,26 @@ export function StepCard(p: StepCardProps) {
     (a: StudentAct) => act(a.kind === 'line' ? 'line' : 'other', a),
     [act],
   );
+  // The help ladder of the step (null: the old hints): its levels, the
+  // button that names the next one, then «ورّيني الحل الكامل» once.
+  const ladder =
+    frame.ladder === null
+      ? null
+      : ladderFor(p.state.exerciseId, p.state.questionId, frame.frameId);
+  const level = frame.ladder ?? 0;
+  const revealed = p.exchanges.some(x => x.reason === 'reveal');
+  // On a line step the third level's line to fill is where he writes.
+  const filling =
+    ladder !== null &&
+    level >= 3 &&
+    frame.type === 'lines' &&
+    ladder.method.fill !== undefined;
+  const dontKnowLabel =
+    ladder === null
+      ? t('hybrid.step.dontKnow')
+      : level >= 3
+      ? t('hybrid.ladder.reveal')
+      : t(`hybrid.ladder.next${level as 0 | 1 | 2}`);
   const caseBusy: CaseBusy = busy('case_list')
     ? 'list'
     : busy('case_back')
@@ -516,6 +538,18 @@ export function StepCard(p: StepCardProps) {
           testID="step-figure"
         />
       )}
+      {ladder && level > 0 && (
+        <LadderView
+          // A new step starts its ladder folded the same way.
+          key={frame.frameId}
+          ladder={ladder}
+          level={level}
+          lines={frame.type === 'lines'}
+          disabled={p.waiting}
+          busy={busy('line')}
+          onLine={raw => act('line', { kind: 'line', raw })}
+        />
+      )}
       {p.exchanges.map(x => {
         const last = x.id === lastId;
         const c = x.said?.kind === 'blocks' ? x.said.component : null;
@@ -598,8 +632,8 @@ export function StepCard(p: StepCardProps) {
       )}
       {/* Folded, the paper stays mounted (his page and his draft are kept). */}
       <View
-        style={[styles.input, box && styles.hidden]}
-        pointerEvents={p.waiting || box ? 'none' : 'auto'}
+        style={[styles.input, (box || filling) && styles.hidden]}
+        pointerEvents={p.waiting || box || filling ? 'none' : 'auto'}
         onLayout={layoutOf('paper')}
         testID="step-input"
       >
@@ -610,9 +644,12 @@ export function StepCard(p: StepCardProps) {
           lineBusy={busy('line')}
         />
       </View>
-      {HELPED.has(frame.type) && !box && (
+      {HELPED.has(frame.type) && !box && !(ladder && revealed) && (
         <Pressable
-          style={[styles.chip, p.waiting && !busy('dont_know') && styles.off]}
+          style={[
+            ladder && level >= 3 ? styles.link : styles.chip,
+            p.waiting && !busy('dont_know') && styles.off,
+          ]}
           accessibilityRole="button"
           accessibilityState={{
             disabled: p.waiting,
@@ -630,7 +667,13 @@ export function StepCard(p: StepCardProps) {
                 testID="hybrid-dont-know-busy"
               />
             )}
-            <Text style={styles.chipText}>{t('hybrid.step.dontKnow')}</Text>
+            <Text
+              style={
+                ladder && level >= 3 ? styles.linkText : styles.chipText
+              }
+            >
+              {dontKnowLabel}
+            </Text>
           </View>
         </Pressable>
       )}
@@ -1017,6 +1060,20 @@ const styles = StyleSheet.create({
   chipText: {
     ...theme.font.body,
     color: theme.color.textPrimary,
+    writingDirection: 'rtl',
+  },
+  // «ورّيني الحل الكامل»: the last thing the help gives, quieter than a button.
+  link: {
+    alignSelf: 'center',
+    minHeight: theme.size.touch,
+    justifyContent: 'center',
+    paddingHorizontal: theme.space.lg,
+  },
+  linkText: {
+    ...theme.font.body,
+    fontFamily: theme.font.family.ui.bold,
+    color: theme.color.pen,
+    textDecorationLine: 'underline',
     writingDirection: 'rtl',
   },
   // Off while an answer is on its way: dimmed, and announced as disabled.

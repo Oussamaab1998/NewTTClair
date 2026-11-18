@@ -15,6 +15,22 @@ import { passTour } from '../tour/passTour';
 import { fill, pick, TEMPLATE_FILES, templates } from './fill';
 import { ReplyTemplateFileSchema, ReplyTemplateSchema } from './schema';
 
+/**
+ * The old hints path (a step without a help ladder, src/content/help):
+ * this file switch the ladders off, so «ما نعرفش» gives the hints and the AI as before.
+ */
+const mockLadders = { off: true };
+jest.mock('../../content/help/help', () => {
+  const actual = jest.requireActual<typeof import('../../content/help/help')>(
+    '../../content/help/help',
+  );
+  return {
+    ...actual,
+    ladderFor: (...a: Parameters<typeof actual.ladderFor>) =>
+      mockLadders.off ? null : actual.ladderFor(...a),
+  };
+});
+
 const entry = CATALOG.find(e => e.id === 'bac2022c-sc-ex2')!;
 const loaded = entry.result.ok ? entry.result.loaded : null;
 const ctxs = new Map(
@@ -256,10 +272,7 @@ describe('reply templates: each one fills from a real lesson and passes verifyAs
 
 describe('reply templates: what keeps the conductor reply', () => {
   it('a slot that cannot be filled: no total line yet', () => {
-    const { state, out } = play('1', [
-      ...passTour(ctxOf('1')),
-      DK,
-    ]);
+    const { state, out } = play('1', [...passTour(ctxOf('1')), DK]);
     expect(out.reason).toBe('hint');
     expect(fill(template('scaffold_fav_intro'), ctxOf('1'), state, out)).toBe(
       null,

@@ -191,7 +191,11 @@ function cardLines(
 /** The words he found in this question's statement (read frames he passed). */
 export function tappedWords(ctx: QuestionCtx, s: ConductorState): string[] {
   // A word frame he passed (a question without a trip; the trip shows its word).
-  const passed = new Set(s.done ? s.route : s.route.slice(0, s.at));
+  // Steps behind him, and the line steps he finished alone on the solo sheet.
+  const passed = new Set([
+    ...(s.done ? s.route : s.route.slice(0, s.at)),
+    ...(s.solo?.done ?? []),
+  ]);
   return framesOf(ctx, [...passed]).flatMap(f => {
     const w = wordFound(f, s.facts);
     return w ? [w] : [];
@@ -284,7 +288,11 @@ export function boardSteps(ctx: QuestionCtx, s: ConductorState): BoardStep[] {
     keys.splice(before >= 0 ? before : afterCards, 0, id);
   }
   const nowId = s.done ? null : s.route[s.at] ?? null;
-  const passed = new Set(s.done ? s.route : s.route.slice(0, s.at));
+  // Steps behind him, and the line steps he finished alone on the solo sheet.
+  const passed = new Set([
+    ...(s.done ? s.route : s.route.slice(0, s.at)),
+    ...(s.solo?.done ?? []),
+  ]);
   const ordered = s.planOrder !== null;
   const cards = planCardsOf(ctx.frames.values());
   const graph = ctx.pack.main?.graph ?? null;

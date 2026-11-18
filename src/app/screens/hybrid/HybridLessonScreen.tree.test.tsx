@@ -261,7 +261,7 @@ describe('HybridLessonScreen: an exercise without a figure', () => {
       />,
     );
     expect(screen.queryByTestId('trip-figure')).toBeNull();
-    await tap('trip-start');
+    await tap('paper-steps');
     expect(screen.getByTestId('step-card')).toBeOnTheScreen();
     expect(screen.queryByTestId('step-figure')).toBeNull();
     await tap('board-tabs-exercise');

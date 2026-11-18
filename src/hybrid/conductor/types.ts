@@ -42,6 +42,18 @@ export const INSTANT_REASONS = [
   'case_open',
   // A line on a small tree the engine can answer by itself: right so far, or a known slip.
   'case_note',
+  // «ما نعرفش» on a step with a help ladder (src/content/help): the next level, no AI call.
+  'ladder',
+  // After the third level: the step's solution («ورّيني الحل الكامل»).
+  'reveal',
+  // «نكتب الحل وحدي» (write it alone): the sheet opens, from the paper or from a step.
+  'solo_start',
+  // A line on the solo sheet: it finishes a step, is right on the way, or is not right.
+  'solo_credit',
+  'solo_note',
+  'solo_wrong',
+  // «نكمّلو خطوة بخطوة» after «تعطّلت؟»: the steps go on from the first one not done.
+  'handoff',
 ] as const;
 export const LIGHT_REASONS = [
   'free_text',
@@ -89,6 +101,21 @@ export interface FrameProgress {
   listFails: number;
   /** Small tree examples whose own hint was given (each gives it once); absent: none. */
   caseHints?: string[];
+  /** The help ladder's level he opened on this step (1 to 3); absent: none. */
+  ladder?: number;
+}
+
+/**
+ * He writes the question alone, like in the exam (student test 2026-11-18):
+ * every line is judged against all the line steps not done yet. `from`: the
+ * route index he started from (steps before it are done); `done`: the line
+ * steps his solo lines finished, in any order. `on` false: he handed over to
+ * the steps (they skip `done`).
+ */
+export interface SoloProgress {
+  on: boolean;
+  from: number;
+  done: string[];
 }
 
 export interface ConductorState {
@@ -121,6 +148,8 @@ export interface ConductorState {
   tour: TourProgress | null;
   /** His results of earlier questions, by "question/node" (from the records). */
   carried: Carried;
+  /** Written alone (absent or null: never; resumes older than 2026-11-18 have none). */
+  solo?: SoloProgress | null;
 }
 
 export interface ActOut {
@@ -143,4 +172,6 @@ export interface FrameView {
   prompt: Rich | null;
   header: { now: Rich; why: Rich; next: Rich } | null;
   hintsLeft: number;
+  /** The help ladder's level shown (0: none yet); null: the step has no ladder (old hints). */
+  ladder: number | null;
 }

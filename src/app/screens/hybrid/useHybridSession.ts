@@ -62,6 +62,7 @@ import {
   applyFallback,
   applyMove,
   questionCtx,
+  soloPossible,
   startQuestion,
   view,
   type QuestionCtx,
@@ -171,6 +172,12 @@ export interface HybridView {
   card: Exchange[];
   /** Free text and its answers (the chat drawer). */
   chat: Exchange[];
+  /** He writes the question alone: the solo sheet is the screen. */
+  solo: boolean;
+  /** «نكتب الحل وحدي» is offered (a line step is left). */
+  soloPossible: boolean;
+  /** His lines on the solo sheet and their marks, oldest first. */
+  sheet: Exchange[];
   /** An ambiguous division: both readings, he says which he meant. */
   readback: { literal: string; grouped: string } | null;
   waiting: boolean;
@@ -197,6 +204,14 @@ export interface HybridView {
 
 /** Exchanges kept on the step card (older ones scroll off; the sheets keep his work). */
 const CARD_MAX = 6;
+/** Lines kept on the solo sheet (a question is a few lines; this is a guard). */
+const SHEET_MAX = 40;
+/** Acts answered on the solo sheet. */
+const SOLO_REASONS: ReadonlySet<Reason> = new Set([
+  'solo_credit',
+  'solo_note',
+  'solo_wrong',
+]);
 
 const ctxCache = new WeakMap<LoadedExercise, Map<string, QuestionCtx | null>>();
 
@@ -242,7 +257,10 @@ function hisOf(a: StudentAct, out: ActOut): StudentContent[] {
     return [{ kind: 'text', text: a.text }];
   }
   if (a.kind === 'dont_know') {
-    return [{ kind: 'message', message: 'notSure' }];
+    // A help level is its own answer on the card: no «ما نعرفش» chip.
+    return out.reason === 'ladder'
+      ? []
+      : [{ kind: 'message', message: 'notSure' }];
   }
   return out.reply.flatMap(p => (p.kind === 'student' ? [p.content] : []));
 }
@@ -327,6 +345,7 @@ export function useHybridSession(o: {
   );
   const [card, setCard] = useState<Exchange[]>([]);
   const [chat, setChat] = useState<Exchange[]>([]);
+  const [sheet, setSheet] = useState<Exchange[]>([]);
   const [readback, setReadback] = useState<HybridView['readback']>(null);
   const [waiting, setWaiting] = useState(false);
   const [dev, setDev] = useState<DevEntry[]>([]);
@@ -425,6 +444,29 @@ export function useHybridSession(o: {
       const r = act(ctx, before, a);
       const id = nextId();
       const toChat = a.kind === 'free';
+      // The solo sheet keeps every line he writes there, with its mark.
+      if (r.out.reason === 'solo_start') {
+        setSheet([]);
+      }
+      if (
+        SOLO_REASONS.has(r.out.reason) ||
+        (before.solo?.on === true && r.out.reason === 'unreadable')
+      ) {
+        stateRef.current = r.state;
+        setState(r.state);
+        const x: Exchange = {
+          id,
+          his: hisOf(a, r.out),
+          said: prepared(ctx, r.state, r.out, noTemplates),
+          pending: false,
+          tier: r.out.tier,
+          reason: r.out.reason,
+        };
+        setSheet(list => [...list, x].slice(-SHEET_MAX));
+        setReadback(null);
+        persist(before, r.state);
+        return;
+      }
       // «نبداو» starts his first step's card, as a step that moved.
       const moved =
         r.out.advanced || isTouring(ctx, before) !== isTouring(ctx, r.state);
@@ -673,6 +715,9 @@ export function useHybridSession(o: {
     strip,
     card,
     chat,
+    solo: state.solo?.on === true,
+    soloPossible: soloPossible(ctx, state),
+    sheet,
     readback,
     waiting,
     ended: state.done,

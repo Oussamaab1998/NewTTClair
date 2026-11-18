@@ -94,18 +94,19 @@ describe(`${ID}: the hybrid board opens for every question`, () => {
   );
 
   it.each(['t1', 't2', 't3', 't4'])(
-    '%s: the trip shows the printed tree, «نبداو» opens the step card with the live tree',
+    '%s: the paper comes first with the printed tree, «نمشيو خطوة بخطوة» opens the step card with the live tree',
     async q => {
       await renderQ(q);
-      const trip = within(screen.getByTestId('trip-screen'));
-      expect(trip.getByTestId(`trip-q-${q}-current`)).toBeOnTheScreen();
+      const paper = within(screen.getByTestId('paper-first'));
+      expect(paper.getByTestId(`board-q-${q}-current`)).toBeOnTheScreen();
+      expect(paper.getByTestId('paper-solo')).toBeOnTheScreen();
       // As printed on the exam: two numbers, the other branches empty.
-      const printed = within(trip.getByTestId('trip-figure'));
+      const printed = within(paper.getByTestId('exercise-figure'));
       expect(drawn(printed.getByTestId('tree-num-a'))).toBe(String(T.a[0]));
       expect(drawn(printed.getByTestId('tree-den-a'))).toBe(String(T.a[1]));
       expect(printed.queryByTestId(/^tree-unknown-/)).toBeNull();
-      await tap('trip-start');
-      expect(screen.queryByTestId('trip-screen')).toBeNull();
+      await tap('paper-steps');
+      expect(screen.queryByTestId('paper-first')).toBeNull();
       expect(screen.getByTestId('step-card')).toBeOnTheScreen();
       const live = within(screen.getByTestId('step-figure'));
       // What he has not found is a "?", and the step's branch is marked.
@@ -120,7 +121,7 @@ describe(`${ID}: the hybrid board opens for every question`, () => {
 describe(`${ID}: question 1 on the instant path`, () => {
   it('plays to the end with no AI: trip, lines, pick, recipe, the two similar questions', async () => {
     const { store, doneRecord, onNext } = await renderQ('t1');
-    await tap('trip-start');
+    await tap('paper-steps');
 
     // The path whose two branches are printed: both come from their tiles.
     const figure = () => within(screen.getByTestId('step-figure'));
@@ -195,7 +196,7 @@ describe(`${ID}: question 1 on the instant path`, () => {
 
   it('question 2 opened after it: the trip shows the result he carries', async () => {
     const { store } = await renderQ('t1');
-    await tap('trip-start');
+    await tap('paper-steps');
     await tile(fractionToPlain(T.a));
     await keys('×');
     await tile(fractionToPlain(T.f_given_a));
@@ -207,10 +208,9 @@ describe(`${ID}: question 1 on the instant path`, () => {
       `${T.a_and_f[0]}÷${T.a_and_f[1]}=${T.na_and_f[0]}÷${T.na_and_f[1]}`,
     );
     await renderQ('t2', store);
-    const trip = within(last('trip-screen'));
-    expect(trip.getByTestId('trip-q-t2-current')).toBeOnTheScreen();
-    expect(trip.getByTestId('trip-changed')).toBeOnTheScreen();
-    await tap('trip-start');
+    const paper = within(last('paper-first'));
+    expect(paper.getByTestId('board-q-t2-current')).toBeOnTheScreen();
+    await tap('paper-steps');
     // The first step of question 2: the lower first branch is asked on the tree.
     const live = within(last('step-figure'));
     expect(live.getByTestId('tree-mark-na')).toBeOnTheScreen();

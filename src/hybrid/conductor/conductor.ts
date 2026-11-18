@@ -36,6 +36,7 @@ import {
   type SessionRuntime,
 } from '../../ai/session/state';
 import { exercisePack } from '../../ai/tutor';
+import { ladderFor } from '../../content/help/help';
 import {
   stepKey,
   type LoadedExercise,
@@ -48,11 +49,7 @@ import {
   type LineEvaluation,
   type LineOutcome,
 } from '../../method/frame';
-import {
-  evalChain,
-  isLiteralValue,
-  lineLatex,
-} from '../../method/lineChain';
+import { evalChain, isLiteralValue, lineLatex } from '../../method/lineChain';
 import { recap } from '../../method/narration';
 import {
   replyForCards,
@@ -87,6 +84,7 @@ import {
   type FrameProgress,
   type FrameView,
   type Reason,
+  type SoloProgress,
 } from './types';
 import { caseBridge, treeBridge, treeOpening } from './bridge';
 
@@ -215,16 +213,37 @@ export function view(ctx: QuestionCtx, s: ConductorState): FrameView | null {
     prompt: 'prompt' in step ? (step.prompt as Rich) : null,
     header: 'header' in step ? (step.header as FrameView['header']) : null,
     hintsLeft: hintsLeft(step, s.progress),
+    ladder: ladderOf(ctx, step) ? s.progress.ladder ?? 0 : null,
   };
 }
+
+/** The help ladder of a step (src/content/help), or null: the old hints. */
+const ladderOf = (ctx: QuestionCtx, step: MethodFrameStep) =>
+  step.frame.type === 'lines' || step.frame.type === 'cards'
+    ? ladderFor(ctx.exerciseId, ctx.questionId, step.id)
+    : null;
+
+/** The ladder's levels: the idea, a solved example, the method on our numbers. */
+export const LADDER_LEVELS = 3;
 
 function hintsLeft(step: MethodFrameStep, p: FrameProgress): number {
   const hints = 'hints' in step ? (step.hints as Rich[] | undefined) ?? [] : [];
   return Math.max(0, Math.min(HINTS_USED, hints.length) - p.hints);
 }
 
-/** The next hint of the ladder (not counted yet); null when none is left. */
-function nextHint(step: MethodFrameStep, p: FrameProgress): ReplyPart | null {
+/**
+ * The next hint of the old ladder (not counted yet); null when none is left,
+ * and always on a step with a help ladder (its levels replace the hints:
+ * an AI reply or a chat message never uses one up).
+ */
+function nextHint(
+  step: MethodFrameStep,
+  p: FrameProgress,
+  ctx?: QuestionCtx,
+): ReplyPart | null {
+  if (ctx && ladderOf(ctx, step)) {
+    return null;
+  }
   if (hintsLeft(step, p) === 0) {
     return null;
   }
@@ -265,6 +284,11 @@ export function applyFallback(prev: ConductorState, o: ActOut): ConductorState {
 
 function advance(s: ConductorState): void {
   s.at += 1;
+  // Steps he finished alone on the solo sheet are not asked again.
+  const done = s.solo?.done ?? [];
+  while (s.at < s.route.length && done.includes(s.route[s.at]!)) {
+    s.at += 1;
+  }
   s.progress = emptyProgress();
   if (s.at >= s.route.length) {
     s.done = true;
@@ -288,6 +312,11 @@ export function act(
   if (isTouring(ctx, s)) {
     s.turn += 1;
     s.session.turn = s.turn;
+    // «نكتب الحل وحدي» on the paper: the trip ends as with «نبداو», the sheet opens.
+    if (a.kind === 'solo') {
+      tourAct(ctx, s, { kind: 'continue' });
+      return { state: s, out: soloStart(ctx, s) };
+    }
     return { state: s, out: tourAct(ctx, s, a) ?? out('not_now', []) };
   }
   const step = s.done ? undefined : frameOf(ctx, s);
@@ -299,15 +328,53 @@ export function act(
   const rt = restoreRuntime(s.session, ctx.pack.main);
   const p = s.progress;
 
+  if (a.kind === 'solo') {
+    return {
+      state: s,
+      out: s.solo?.on ? out('not_now', []) : soloStart(ctx, s),
+    };
+  }
+  if (s.solo?.on) {
+    return soloAct(ctx, s, a);
+  }
+  if (a.kind === 'steps') {
+    return { state: s, out: out('not_now', []) };
+  }
+
   if (a.kind === 'dont_know') {
     p.dontKnows += 1;
     s.session.dontKnows += 1;
+    // A step with a help ladder: each press opens the next level, then the
+    // solution; no AI call, nothing that asks him a question.
+    if (ladderOf(ctx, step)) {
+      const level = p.ladder ?? 0;
+      if (level < LADDER_LEVELS) {
+        p.ladder = level + 1;
+        return { state: s, out: out('ladder', []) };
+      }
+      const answer = answerOf(ctx, step);
+      return {
+        state: s,
+        out: out(
+          'reveal',
+          answer
+            ? [
+                {
+                  kind: 'feedback',
+                  tone: 'info',
+                  rich: methodRevealRich(step, answer),
+                },
+              ]
+            : [],
+        ),
+      };
+    }
     // On a small tree example he is stuck on the example: its own hint, once.
     const caseHint = treeCaseHint(ctx, s);
     if (caseHint) {
       return { state: s, out: out('case_note', [caseHint]) };
     }
-    const hint = nextHint(step, p);
+    const hint = nextHint(step, p, ctx);
     if (p.dontKnows === 1 && hint) {
       p.hints += 1;
       return { state: s, out: out('hint', [hint]) };
@@ -356,7 +423,7 @@ export function act(
         out(claim ? 'claim' : 'free_text', [
           { kind: 'student', content: { kind: 'typed', raw: a.text } },
         ]),
-        nextHint(step, p),
+        nextHint(step, p, ctx),
       ),
     };
   }
@@ -866,13 +933,14 @@ function onLine(
   const reply = exprMain
     ? {
         ...replied,
-        parts: replied.parts.map((x): ReplyPart =>
-          x.kind === 'student' && x.content.kind === 'typed'
-            ? {
-                kind: 'student',
-                content: { kind: 'rich', rich: { math: lineLatex(raw) } },
-              }
-            : x,
+        parts: replied.parts.map(
+          (x): ReplyPart =>
+            x.kind === 'student' && x.content.kind === 'typed'
+              ? {
+                  kind: 'student',
+                  content: { kind: 'rich', rich: { math: lineLatex(raw) } },
+                }
+              : x,
         ),
       }
     : replied;
@@ -927,6 +995,202 @@ function onLine(
   // the next hint goes with it.
   const explains = reply.parts.some(x => x.kind === 'feedback');
   return tierOf(reason) !== 'instant' && !explains
-    ? withHint(out(reason, reply.parts), nextHint(step, p))
+    ? withHint(out(reason, reply.parts), nextHint(step, p, ctx))
     : out(reason, reply.parts);
+}
+
+// ---------------------------------------------------------------------------
+// Written alone (student test 2026-11-18): the solo sheet.
+
+/** The line steps he still has to write alone, in his route's order. */
+function soloLeft(
+  ctx: QuestionCtx,
+  s: ConductorState,
+  solo: SoloProgress,
+): string[] {
+  return s.route.filter(
+    (id, i) =>
+      i >= solo.from &&
+      ctx.frames.get(id)?.frame.type === 'lines' &&
+      !solo.done.includes(id),
+  );
+}
+
+/** Can he write this question alone from where he is (a line step is left)? */
+export function soloPossible(ctx: QuestionCtx, s: ConductorState): boolean {
+  if (s.done) {
+    return false;
+  }
+  const from = isTouring(ctx, s) ? 0 : s.at;
+  const route = isTouring(ctx, s)
+    ? [...ctx.frames.keys()].filter(
+        id => ctx.frames.get(id)?.frame.type === 'lines',
+      )
+    : s.route;
+  return route.some(
+    (id, i) =>
+      (isTouring(ctx, s) || i >= from) &&
+      ctx.frames.get(id)?.frame.type === 'lines' &&
+      !(s.solo?.done ?? []).includes(id),
+  );
+}
+
+/**
+ * Where the steps go on after «تعطّلت؟»: the first step not done. A line
+ * step is done when a solo line finished it; a card step (a reason to pick)
+ * is behind him when he finished a line step after it alone.
+ */
+export function soloAt(
+  ctx: QuestionCtx,
+  s: ConductorState,
+  solo: SoloProgress,
+): number {
+  const done = new Set(solo.done);
+  let last = solo.from - 1;
+  s.route.forEach((id, i) => {
+    if (done.has(id)) {
+      last = Math.max(last, i);
+    }
+  });
+  for (let i = solo.from; i < s.route.length; i++) {
+    const id = s.route[i]!;
+    if (ctx.frames.get(id)?.frame.type === 'lines') {
+      if (!done.has(id)) {
+        return i;
+      }
+    } else if (i > last) {
+      return i;
+    }
+  }
+  return s.route.length;
+}
+
+/** «نكتب الحل وحدي»: the sheet opens where he is (steps behind him stay done). */
+function soloStart(ctx: QuestionCtx, s: ConductorState): ActOut {
+  const solo: SoloProgress = {
+    on: true,
+    from: s.at,
+    done: s.solo?.done ?? [],
+  };
+  if (soloLeft(ctx, s, solo).length === 0) {
+    return out('not_now', []);
+  }
+  s.solo = solo;
+  s.onCase = null;
+  s.progress = emptyProgress();
+  return out('solo_start', [], true);
+}
+
+/**
+ * A line on the solo sheet: each line step he has not finished judges it,
+ * in his route's order, and the first one it is right for takes it (a step
+ * finished, or a right line on the way). Not right for any: what the first
+ * step left says about it (a known slip's own text), never an AI call; he
+ * fixes it, or hands over to the steps. «نكمّلو خطوة بخطوة»: the steps go on
+ * from the first one not done (soloAt), the solo lines stay his.
+ */
+function soloAct(
+  ctx: QuestionCtx,
+  s: ConductorState,
+  a: StudentAct,
+): { state: ConductorState; out: ActOut } {
+  const solo = s.solo!;
+  if (a.kind === 'steps') {
+    solo.on = false;
+    s.at = soloAt(ctx, s, solo);
+    s.progress = emptyProgress();
+    s.onCase = null;
+    s.done = s.at >= s.route.length;
+    return { state: s, out: out('handoff', [], true) };
+  }
+  if (a.kind !== 'line') {
+    return { state: s, out: out('not_now', []) };
+  }
+  const left = soloLeft(ctx, s, solo);
+  let first: { state: ConductorState; out: ActOut } | null = null;
+  for (const id of left) {
+    const step = ctx.frames.get(id);
+    if (!step) {
+      continue;
+    }
+    const trial = JSON.parse(JSON.stringify(s)) as ConductorState;
+    trial.at = trial.route.indexOf(id);
+    trial.progress = emptyProgress();
+    trial.onCase = null;
+    const rt = restoreRuntime(trial.session, ctx.pack.main);
+    const before = (trial.session.credited.main ?? []).length;
+    const o = onLine(ctx, trial, rt, step, a);
+    // An ambiguous division: he says how he meant it, then the line comes again.
+    if (o.reason === 'readback') {
+      return { state: s, out: o };
+    }
+    const credited = (trial.session.credited.main ?? []).length > before;
+    const verdict = trial.session.lines.at(-1)?.match?.verdict;
+    if (
+      o.advanced ||
+      credited ||
+      verdict === 'support' ||
+      verdict === 'credit'
+    ) {
+      return soloSettle(
+        ctx,
+        trial,
+        id,
+        o,
+        o.advanced ? 'solo_credit' : 'solo_note',
+      );
+    }
+    first ??= { state: trial, out: o };
+  }
+  if (!first) {
+    return { state: s, out: out('not_now', []) };
+  }
+  const o = first.out;
+  // No step accepts it: never "right". A note on it (its two sides differ,
+  // nothing to judge yet) is shown with the "does not count" word.
+  return soloSettle(
+    ctx,
+    first.state,
+    null,
+    o,
+    o.reason === 'unreadable' ? 'unreadable' : 'solo_wrong',
+  );
+}
+
+/** The sheet after a solo line: the step it finished, where a hand-over would go, the end. */
+function soloSettle(
+  ctx: QuestionCtx,
+  s: ConductorState,
+  finished: string | null,
+  o: ActOut,
+  reason: Reason,
+): { state: ConductorState; out: ActOut } {
+  const solo = s.solo!;
+  if (finished && reason === 'solo_credit' && !solo.done.includes(finished)) {
+    solo.done.push(finished);
+  }
+  solo.on = true;
+  s.progress = emptyProgress();
+  s.onCase = null;
+  s.at = soloAt(ctx, s, solo);
+  const left = soloLeft(ctx, s, solo);
+  s.done = left.length === 0;
+  const typed = o.reply.filter(x => x.kind === 'student');
+  // What the board says about a line that does not count: its notes and
+  // explanations (a bare "wrong" is replaced by the sheet's own word).
+  const explained = o.reply.filter(
+    x => x.kind === 'feedback' || x.kind === 'note',
+  );
+  const reply: ReplyPart[] =
+    reason === 'solo_credit' || reason === 'solo_note'
+      ? [...typed, { kind: 'message', tone: 'success', message: 'correct' }]
+      : reason === 'unreadable'
+      ? o.reply
+      : [
+          ...typed,
+          ...(explained.length > 0
+            ? explained
+            : [{ kind: 'message', tone: 'info', message: 'wrong' } as const]),
+        ];
+  return { state: s, out: out(reason, reply, s.done) };
 }

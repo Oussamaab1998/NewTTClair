@@ -12,6 +12,25 @@ import type { ConductorState } from './types';
 import { passTour } from '../tour/passTour';
 import { roadView } from '../tour/tour';
 
+/**
+ * The old hints path (a step without a help ladder, src/content/help):
+ * these tests switch the ladders off, so «ما نعرفش» gives the hints and the AI as before.
+ */
+const mockLadders = { off: false };
+jest.mock('../../content/help/help', () => {
+  const actual = jest.requireActual<typeof import('../../content/help/help')>(
+    '../../content/help/help',
+  );
+  return {
+    ...actual,
+    ladderFor: (...a: Parameters<typeof actual.ladderFor>) =>
+      mockLadders.off ? null : actual.ladderFor(...a),
+  };
+});
+afterEach(() => {
+  mockLadders.off = false;
+});
+
 const entry = CATALOG.find(e => e.id === 'bac2022c-sc-ex2')!;
 const loaded = entry.result.ok ? entry.result.loaded : null;
 const ctx = questionCtx(loaded!, entry.raw as never, '1');
@@ -176,6 +195,7 @@ describe('conductor: lines', () => {
   });
 
   it('sends an undiagnosed line deep, with a hint that counts only if shown', () => {
+    mockLadders.off = true;
     const start = play([...TOUR, line('10*9*8/6=120')]).state;
     const r = act(ctx, start, line('4*6=24'));
     expect(r.out).toMatchObject({
@@ -192,6 +212,7 @@ describe('conductor: lines', () => {
 
 describe('conductor: help and free text', () => {
   it('gives the first hint at once and sends a second «ما نعرفش» deep', () => {
+    mockLadders.off = true;
     const dk: StudentAct = { kind: 'dont_know' };
     expect(play([dk], atTotal()).out).toMatchObject({
       tier: 'instant',
@@ -456,6 +477,7 @@ describe('conductor: a small box and the bridge back to the question', () => {
 
 describe('conductor: «كمّلت» under a component', () => {
   it('never spends or shows a hint, even when the AI does not answer', () => {
+    mockLadders.off = true;
     const dk: StudentAct = { kind: 'dont_know' };
     const afterHint = play([dk], atTotal()).state;
     expect(afterHint.progress.hints).toBe(1);

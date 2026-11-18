@@ -24,6 +24,10 @@ export type StudentAct =
   | { kind: 'free'; text: string }
   | { kind: 'dont_know' }
   | { kind: 'continue' }
+  /** «نكتب الحل وحدي»: he writes the question alone (the board's solo sheet). */
+  | { kind: 'solo' }
+  /** «نكمّلو خطوة بخطوة» from the solo sheet: the steps go on where he stopped. */
+  | { kind: 'steps' }
   | { kind: 'line'; raw: string; readback?: 'grouped' | 'literal' }
   /** A formula typed as text (letters n, k): checked by src/ai/checks/formula.ts. */
   | { kind: 'formula'; raw: string }
@@ -118,6 +122,15 @@ export function autoCheck(
       return {
         result: { reply: 'continue' },
         text: 'Student tapped continue.',
+      };
+    case 'solo':
+    case 'steps':
+      return {
+        result: { reply: act.kind },
+        text:
+          act.kind === 'solo'
+            ? 'Student chose to write the question alone.'
+            : 'Student asked to go on step by step.',
       };
     case 'line': {
       const expect = input?.kind === 'line' ? input.expect : null;

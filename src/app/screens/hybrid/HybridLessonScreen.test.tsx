@@ -22,6 +22,7 @@ import { passTour } from '../../../hybrid/tour/passTour';
 import { theme } from '../../../theme';
 import { HybridLessonScreen } from './HybridLessonScreen';
 import { StepCard } from './StepCard';
+import type { TeacherAi } from './teacher';
 import { hybridCtx, useHybridSession } from './useHybridSession';
 
 const entry = CATALOG.find(e => e.id === 'bac2022c-sc-ex2')!;
@@ -58,6 +59,7 @@ async function renderQ(
     questionId?: string;
     store?: KeyValueStore;
     mover?: Mover;
+    teacher?: TeacherAi;
   } = {},
 ) {
   const store = o.store ?? memoryStore();
@@ -73,13 +75,42 @@ async function renderQ(
       store={store}
       doneRecord={doneRecord}
       {...(o.mover && { mover: o.mover })}
+      {...(o.teacher && { teacher: o.teacher })}
     />,
   );
   return { store, doneRecord, onNext, view };
 }
 
+/** A teacher that answers every question with one sentence (never a real call). */
+function fakeTeacher() {
+  return jest.fn<ReturnType<TeacherAi>, Parameters<TeacherAi>>(async () => ({
+    ok: true,
+    answer: {
+      blocks: [
+        { type: 'ar', runs: [{ ar: 'الكتيبة هاذي معناها الزوز مع بعض.' }] },
+      ],
+      source: 'ai',
+      costUsd: 0.01,
+    },
+  }));
+}
+
+/** He asks the teacher on its own screen, then comes back to the board. */
+async function askTeacher(text: string) {
+  await tap('hybrid-teacher');
+  expect(screen.getByTestId('teacher-screen')).toBeOnTheScreen();
+  await fireEvent.changeText(screen.getByTestId('teacher-input'), text);
+  await tap('teacher-send');
+  await flush();
+  await waitFor(() =>
+    expect(screen.getByTestId('teacher-answer')).toBeOnTheScreen(),
+  );
+  await tap('teacher-close');
+  expect(screen.queryByTestId('teacher-screen')).toBeNull();
+}
+
 /** «نبداو»: the trip's only act (the map is shown, he builds nothing). */
-const startTrip = () => tap('trip-start');
+const startTrip = () => tap('paper-steps');
 
 /** A mover he waits for: each call answers when the test releases it (a move, or none). */
 function heldMover() {
@@ -101,86 +132,59 @@ const layout = (y: number, height = 100) => ({
   nativeEvent: { layout: { x: 0, y, width: 320, height } },
 });
 
-describe('HybridLessonScreen: the trip', () => {
-  it('shows the exercise from above and the map; «نبداو» is the only thing to tap, and opens step ①', async () => {
+describe('HybridLessonScreen: the paper first', () => {
+  it('opens on the exam paper, this question highlighted, with the two ways to work it', async () => {
     await renderQ();
-    const trip = within(screen.getByTestId('trip-screen'));
-    // The exercise from above: this question marked, how it feeds the next.
-    expect(trip.getByTestId('trip-overview')).toBeOnTheScreen();
-    expect(trip.getByTestId('trip-q-1-current')).toBeOnTheScreen();
-    expect(trip.getByTestId('trip-q-3b')).toBeOnTheScreen();
-    expect(trip.getByTestId('trip-q-1-link')).toBeOnTheScreen();
-    expect(trip.queryByTestId('trip-changed')).toBeNull();
-    // What we have, what is asked: the exam's lines left to right.
-    expect(trip.getByTestId('trip-have-0-fr')).toHaveTextContent(
-      '4 rouges + 6 noires = 10 boules',
-    );
-    expect(trip.getByTestId('trip-goal-fr')).toHaveTextContent(
-      'Montrer que P(A) = 0,5',
-    );
-    // The stations: the first one says where we start; then the end.
-    expect(trip.getByTestId('trip-step-c_total-now')).toBeOnTheScreen();
-    expect(trip.getByTestId('trip-step-c_total-tag')).toHaveTextContent(
-      'نبداو من هنا',
-    );
-    expect(trip.getByTestId('trip-step-c_fav-later')).toBeOnTheScreen();
-    expect(trip.getByTestId('trip-step-c_ratio-later')).toBeOnTheScreen();
-    expect(trip.queryByTestId(/^trip-line-/)).toBeNull();
-    expect(trip.getByTestId('trip-finish-later')).toBeOnTheScreen();
-    expect(trip.getByTestId('trip-after-recipe-later')).toBeOnTheScreen();
-    expect(trip.getByTestId('trip-after-similar-later')).toBeOnTheScreen();
-    // Nothing to build: «نبداو» is the only thing to tap on the trip.
-    expect(trip.getAllByRole('button').map(b => b.props.testID)).toEqual([
-      'trip-start',
+    const paper = within(screen.getByTestId('paper-first'));
+    expect(paper.getByTestId('exercise-statement')).toBeOnTheScreen();
+    expect(paper.getByTestId('board-q-1-current')).toBeOnTheScreen();
+    expect(paper.getByTestId('board-q-3b-available')).toBeOnTheScreen();
+    // Two ways: write it alone, or the steps.
+    expect(paper.getAllByRole('button').map(b => b.props.testID)).toEqual([
+      'paper-solo',
+      'paper-steps',
     ]);
-    // No step card yet; the chat stays in reach.
-    expect(screen.queryByTestId('step-card')).toBeNull();
-    expect(screen.getByTestId('chat-open')).toBeOnTheScreen();
-
-    await startTrip();
-    expect(screen.queryByTestId('trip-screen')).toBeNull();
+    await tap('paper-steps');
+    expect(screen.queryByTestId('paper-first')).toBeNull();
     expect(screen.getByTestId('step-card')).toBeOnTheScreen();
-    expect(screen.getByTestId('step-header')).toHaveTextContent(
-      /نعدّو كل التيراجات/,
-    );
-    // No progress strip over the card: the map went into «الطريق», whose segment flashes.
-    expect(screen.queryByTestId('hybrid-map')).toBeNull();
-    expect(screen.getByTestId('board-tabs-road-flash')).toBeOnTheScreen();
-    // The first step starts clean (no reply of the trip on it).
-    expect(screen.queryByTestId(/^exchange-/)).toBeNull();
-    await onRoad(
-      'trip-step-c_total-now',
-      'trip-step-c_fav-later',
-      'trip-finish-later',
-    );
+    // The question's map is in «الطريق».
+    await onRoad('trip-step-c_total-now', 'trip-step-c_fav-later');
   });
 
-  it('free text during the trip goes to the chat; the trip stays until «نبداو»', async () => {
+  it('«نكتب الحل وحدي»: the solo sheet credits his line, «تعطّلت؟» hands over to the next step', async () => {
     await renderQ();
-    await tap('chat-open');
-    await fireEvent.changeText(
-      screen.getByTestId('chat-input'),
-      'chnowa hedha',
-    );
-    await tap('chat-send');
-    await flush();
-    await waitFor(() =>
-      expect(screen.queryByTestId('hybrid-waiting')).toBeNull(),
-    );
-    expect(screen.getByTestId('chat-count')).toHaveTextContent('1');
-    expect(screen.getByTestId('trip-screen')).toBeOnTheScreen();
-    expect(screen.getByTestId('trip-start')).toBeEnabled();
+    await tap('paper-solo');
+    expect(screen.getByTestId('solo-sheet')).toBeOnTheScreen();
+    await write('10×9×8÷(3×2×1)=120');
+    expect(screen.getByTestId('solo-word-solo_credit')).toBeOnTheScreen();
+    await tap('solo-stuck');
+    const handoff = within(screen.getByTestId('solo-handoff'));
+    expect(handoff.getByTestId('solo-handoff-done')).toBeOnTheScreen();
+    expect(handoff.getByTestId('solo-handoff-step-now')).toBeOnTheScreen();
+    await tap('solo-handoff-go');
+    expect(screen.queryByTestId('solo-sheet')).toBeNull();
+    await onRoad('trip-step-c_total-done', 'trip-step-c_fav-now');
+  });
+
+  it("«الأستاذ» on the paper opens the teacher's own screen; the paper stays until he chooses", async () => {
+    const teacher = fakeTeacher();
+    await renderQ({ teacher });
+    expect(screen.queryByTestId('chat-drawer')).toBeNull();
+    await askTeacher('chnowa hedha');
+    expect(teacher).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('paper-first')).toBeOnTheScreen();
+    expect(screen.getByTestId('paper-steps')).toBeEnabled();
   });
 
   it('shows the trip again until he starts; after «نبداو» it is not shown again', async () => {
     const { store, view } = await renderQ();
     await view.unmount();
     const again = await renderQ({ store });
-    expect(screen.getByTestId('trip-screen')).toBeOnTheScreen();
+    expect(screen.getByTestId('paper-first')).toBeOnTheScreen();
     await startTrip();
     await again.view.unmount();
     await renderQ({ store });
-    expect(screen.queryByTestId('trip-screen')).toBeNull();
+    expect(screen.queryByTestId('paper-first')).toBeNull();
     expect(screen.getByTestId('step-card')).toBeOnTheScreen();
     await onRoad('trip-step-c_total-now');
   });
@@ -190,15 +194,8 @@ describe('HybridLessonScreen: the trip', () => {
     await startTrip();
     await write('10×9×8÷(3×2×1)=120');
     await renderQ({ questionId: '2', store });
-    const trip = within(screen.getByTestId('trip-screen'));
-    expect(trip.getByTestId('trip-q-2-current')).toBeOnTheScreen();
-    expect(trip.getByTestId('trip-changed')).toBeOnTheScreen();
-    expect(trip.getByTestId('trip-step-c_total-done')).toBeOnTheScreen();
-    expect(trip.getByTestId('trip-reused-c_total')).toHaveTextContent(/1$/);
-    expect(trip.getByTestId('trip-line-c_total')).toBeOnTheScreen();
-    // We start at the next station.
-    expect(trip.getByTestId('trip-step-c_fav-now')).toBeOnTheScreen();
-    expect(trip.getByTestId('trip-step-c_fav-tag')).toBeOnTheScreen();
+    const paper = within(screen.getByTestId('paper-first'));
+    expect(paper.getByTestId('board-q-2-current')).toBeOnTheScreen();
     await startTrip();
     expect(screen.getByTestId('collapsed-c_total-reused')).toBeOnTheScreen();
     await onRoad('trip-step-c_total-done', 'trip-step-c_fav-now');
@@ -280,7 +277,7 @@ describe('HybridLessonScreen: the instant path', () => {
 });
 
 describe('HybridLessonScreen: the AI tiers', () => {
-  it('with no move, an act for the AI shows the prepared reply (with its hint)', async () => {
+  it('with no move, an act for the AI shows the prepared reply, and no help level is used up', async () => {
     await renderQ();
     await startTrip();
     await write('10×9×8÷(3×2×1)=120');
@@ -289,11 +286,14 @@ describe('HybridLessonScreen: the AI tiers', () => {
     await waitFor(() =>
       expect(screen.queryByTestId('hybrid-waiting')).toBeNull(),
     );
-    const x = last('exchange-undiagnosed');
-    expect(within(x).getByTestId('feedback-info')).toBeOnTheScreen();
+    expect(last('exchange-undiagnosed')).toBeOnTheScreen();
     expect(screen.getByTestId('dev-overlay-last')).toHaveTextContent(
       'deep:undiagnosed $0.0000',
     );
+    // The help ladder is still closed: the first «ما نعرفش» opens its first level.
+    expect(screen.queryByTestId('ladder-1')).toBeNull();
+    await tap('hybrid-dont-know');
+    expect(screen.getByTestId('ladder-1')).toBeOnTheScreen();
     await onRoad('trip-step-c_fav-now');
   });
 
@@ -330,25 +330,19 @@ describe('HybridLessonScreen: the AI tiers', () => {
     );
   });
 
-  it('free text goes to the chat drawer, not the step card', async () => {
-    await renderQ();
+  it('a question to the teacher never touches the step card, the AI moves or the help levels', async () => {
+    const teacher = fakeTeacher();
+    const { mover } = heldMover();
+    await renderQ({ teacher, mover });
     await startTrip();
-    await tap('chat-open');
-    await fireEvent.changeText(
-      screen.getByTestId('chat-input'),
-      'ma fhemtch chnowa n7seb',
-    );
-    await tap('chat-send');
-    await flush();
-    await waitFor(() =>
-      expect(screen.queryByTestId('hybrid-waiting')).toBeNull(),
-    );
-    const drawer = screen.getByTestId('chat-drawer');
-    expect(within(drawer).getByText(/ma fhemtch/)).toBeOnTheScreen();
-    expect(within(drawer).getByTestId('exchange-free_text')).toBeOnTheScreen();
+    await askTeacher('ma fhemtch chnowa n7seb');
+    expect(teacher).toHaveBeenCalledTimes(1);
+    expect(mover).not.toHaveBeenCalled();
     const card = screen.getByTestId('step-card');
-    expect(within(card).queryByTestId('exchange-free_text')).toBeNull();
-    expect(screen.getByTestId('chat-count')).toHaveTextContent('1');
+    expect(within(card).queryAllByTestId(/^exchange-/)).toHaveLength(0);
+    // The first «ما نعرفش» still opens the first help level.
+    await tap('hybrid-dont-know');
+    expect(screen.getByTestId('ladder-1')).toBeOnTheScreen();
   });
 });
 
@@ -572,6 +566,7 @@ describe('the readback choice of the conductor', () => {
           prompt: null,
           header: null,
           hintsLeft: 2,
+          ladder: null,
         }}
         step={step}
         stage={0}
@@ -628,45 +623,17 @@ describe('HybridLessonScreen: the step card while he waits, on a case, and folde
     expect(screen.getByTestId('hybrid-component-done')).toBeEnabled();
     expect(screen.getByTestId('hybrid-dont-know')).toBeEnabled();
 
-    // A question in the chat: the card waits too, «كمّلت» included; send spins.
-    await tap('chat-open');
-    await fireEvent.changeText(screen.getByTestId('chat-input'), 'kifech');
-    await tap('chat-send');
-    expect(mover).toHaveBeenCalledTimes(2);
-    expect(screen.getByTestId('chat-send-busy')).toBeOnTheScreen();
-    expect(screen.getByTestId('chat-send')).toBeDisabled();
-    expect(screen.getByTestId('hybrid-component-done')).toBeDisabled();
-    expect(screen.getByTestId('hybrid-dont-know')).toBeDisabled();
-    expect(screen.getByTestId('hybrid-dont-know')).toHaveStyle({
-      opacity: theme.opacity.disabled,
-    });
-    expect(screen.queryByTestId('hybrid-dont-know-busy')).toBeNull();
-    expect(screen.getByTestId('worksheet-key-1')).toBeDisabled();
-    expect(screen.getByTestId('worksheet-tile-0')).toBeDisabled();
-    expect(screen.getByTestId('worksheet-submit')).toBeDisabled();
-    expect(screen.queryByTestId('worksheet-submit-busy')).toBeNull();
-    await release(null);
-    expect(screen.queryByTestId('chat-send-busy')).toBeNull();
-    expect(screen.getByTestId('worksheet-key-1')).toBeEnabled();
-    await tap('chat-close');
-
-    // «ما نعرفش» twice: each tap shows as his chip; the second waits for the AI.
+    // «ما نعرفش» twice: the help levels open at once, with no AI call and no chip.
     await tap('hybrid-dont-know');
-    expect(
-      within(last('exchange-hint')).getByTestId('his-chip'),
-    ).toHaveTextContent('ما نعرفش');
+    expect(screen.getByTestId('ladder-1')).toBeOnTheScreen();
     await tap('hybrid-dont-know');
-    expect(mover).toHaveBeenCalledTimes(3);
-    x = within(last('exchange-stuck_again'));
-    expect(x.getByTestId('his-chip')).toHaveTextContent('ما نعرفش');
-    expect(x.getByTestId('hybrid-waiting')).toHaveTextContent('الأستاذ يكتب');
-    expect(screen.getByTestId('hybrid-dont-know-busy')).toBeOnTheScreen();
-    expect(screen.getByTestId('hybrid-dont-know')).toBeDisabled();
-    expect(screen.getByTestId('worksheet-key-1')).toBeDisabled();
-    await release(null);
+    expect(screen.getByTestId('ladder-2')).toBeOnTheScreen();
+    expect(mover).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId('his-chip')).toBeNull();
     expect(screen.queryByTestId('hybrid-waiting')).toBeNull();
-    expect(screen.queryByTestId('hybrid-dont-know-busy')).toBeNull();
     expect(screen.getByTestId('hybrid-dont-know')).toBeEnabled();
+    x = within(last(/^exchange-/));
+    expect(x.queryByTestId('hybrid-waiting')).toBeNull();
   });
 
   it('on a small box the case card is the only place to act: the paper folds, «ما نعرفش» hides, the component is a picture; back, the paper returns', async () => {
@@ -687,9 +654,8 @@ describe('HybridLessonScreen: the step card while he waits, on a case, and folde
     await renderQ({ mover });
     await startTrip();
     expect(screen.queryByTestId('paper-folded')).toBeNull();
-    await write('10');
-    await tap('hybrid-dont-know');
-    await tap('hybrid-dont-know');
+    // A line the engine cannot place goes to the AI: its move opens the box.
+    await write('4×6=24');
     await flush();
     await waitFor(() =>
       expect(screen.getByTestId('case-panel')).toBeOnTheScreen(),
@@ -725,7 +691,8 @@ describe('HybridLessonScreen: the step card while he waits, on a case, and folde
     expect(within(first).queryAllByTestId(/^feedback-/).length).toBeGreaterThan(
       0,
     );
-    await tap('hybrid-dont-know');
+    await write('4×6=24');
+    await flush();
     const xs = screen.getAllByTestId(/^exchange-/);
     expect(xs).toHaveLength(2);
     const older = within(xs[0]!);
@@ -774,10 +741,10 @@ describe('HybridLessonScreen: the step card while he waits, on a case, and folde
       }),
     );
 
-    // His finger on the screen: nothing moves.
+    // His finger on the screen: nothing moves (the AI's move opens a box).
     scrollTo.mockClear();
     await fireEvent(main, 'touchStart');
-    await tap('hybrid-dont-know');
+    await write('4×6=24');
     await fireEvent(last(/^exchange-/), 'layout', layout(800));
     await flush();
     await new Promise(r => setTimeout(r, 120));
@@ -785,8 +752,6 @@ describe('HybridLessonScreen: the step card while he waits, on a case, and folde
     await fireEvent(main, 'touchEnd');
 
     // On the case, groups he adds grow the card: the screen stays.
-    await tap('hybrid-dont-know');
-    await flush();
     await waitFor(() =>
       expect(screen.getByTestId('case-panel')).toBeOnTheScreen(),
     );

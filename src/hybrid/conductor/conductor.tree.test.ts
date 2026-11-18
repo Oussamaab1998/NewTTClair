@@ -22,6 +22,25 @@ import {
 import { TO_FIRST_LINES, TREE_MINI_FRAMES, treeMini } from './treeFixture';
 import type { ConductorState } from './types';
 
+/**
+ * The old hints path (a step without a help ladder, src/content/help):
+ * these tests switch the ladders off, so «ما نعرفش» gives the hints and the AI as before.
+ */
+const mockLadders = { off: false };
+jest.mock('../../content/help/help', () => {
+  const actual = jest.requireActual<typeof import('../../content/help/help')>(
+    '../../content/help/help',
+  );
+  return {
+    ...actual,
+    ladderFor: (...a: Parameters<typeof actual.ladderFor>) =>
+      mockLadders.off ? null : actual.ladderFor(...a),
+  };
+});
+afterEach(() => {
+  mockLadders.off = false;
+});
+
 const { ctx } = treeMini();
 const WORDS = arTN.hybrid;
 
@@ -110,6 +129,7 @@ describe('conductor: a prepared small tree example (S1)', () => {
   });
 
   it('the urn exercise still sends a second «ما نعرفش» deep', () => {
+    mockLadders.off = true;
     const entry = CATALOG.find(e => e.id === 'bac2022c-sc-ex2')!;
     const urn = questionCtx(
       entry.result.ok ? entry.result.loaded : (null as never),

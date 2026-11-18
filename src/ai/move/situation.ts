@@ -103,6 +103,10 @@ export function actText(a: StudentAct, step?: MethodFrameStep): string {
       return 'tapped «ما نعرفش»';
     case 'continue':
       return 'tapped continue';
+    case 'solo':
+      return 'chose to write the question alone';
+    case 'steps':
+      return 'asked to go on step by step';
     case 'line':
       return `line «${a.raw}»${
         a.readback ? ` (he said he meant it ${a.readback})` : ''

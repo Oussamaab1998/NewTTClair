@@ -262,6 +262,10 @@ export function actText(act: StudentAct): string {
     }
     case 'continue':
       return 'continue';
+    case 'solo':
+      return '«نكتب الحل وحدي»';
+    case 'steps':
+      return '«نكمّلو خطوة بخطوة»';
     case 'dont_know':
       return '«ما نعرفش»';
   }

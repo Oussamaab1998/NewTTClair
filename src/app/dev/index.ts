@@ -35,6 +35,7 @@ export {
   aiEveryMistakeAtLaunch,
   devLlmAtLaunch,
   devMoverAtLaunch,
+  devTeacherAtLaunch,
   devWarmupAtLaunch,
   devWarmupActsAtLaunch,
   devOnboardingAtLaunch,

@@ -38,6 +38,22 @@ import {
   type CallRecord,
 } from './moves';
 
+/**
+ * The old hints path (a step without a help ladder, src/content/help):
+ * this file switch the ladders off, so «ما نعرفش» gives the hints and the AI as before.
+ */
+const mockLadders = { off: true };
+jest.mock('../../src/content/help/help', () => {
+  const actual = jest.requireActual<
+    typeof import('../../src/content/help/help')
+  >('../../src/content/help/help');
+  return {
+    ...actual,
+    ladderFor: (...a: Parameters<typeof actual.ladderFor>) =>
+      mockLadders.off ? null : actual.ladderFor(...a),
+  };
+});
+
 const script = (name: string): Script =>
   JSON.parse(
     readFileSync(path.join(__dirname, 'scripts', `${name}.json`), 'utf8'),

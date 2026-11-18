@@ -5,7 +5,8 @@
  * 1. Shape and right-to-left: Arabic text is split into isolated runs
  *    (isolateLlmRuns); LaTeX, a bidi control or a long formula inside Arabic
  *    text is refused; a run of one repeated character is refused.
- * 2. Math blocks parse with the app's renderer; no Arabic inside.
+ * 2. Math blocks parse with the app's renderer; no Arabic and no words
+ *    inside (wordsInMath: «3 people in A∩F» is refused).
  * 3. Provenance: every number above 10 comes from the statement, his lines,
  *    or an engine result this session. A false "=" in a math block is refused.
  * 4. Leak: a value of the question's graph he has not earned yet is refused,
@@ -92,6 +93,114 @@ const bareRun = (s: string): string =>
   s.replace(/^[^A-Za-z0-9]+/, '').replace(/[^A-Za-z0-9]+$/, '');
 /** A line id of the session (L1, L12): his lines are shown with student_line blocks. */
 const LINE_ID = /\bL\d+\b/;
+
+/** Function and operator names written without a backslash (ln x, lim, card). */
+const MATH_NAMES: ReadonlySet<string> = new Set([
+  'ln',
+  'log',
+  'lim',
+  'exp',
+  'sin',
+  'cos',
+  'tan',
+  'sinh',
+  'cosh',
+  'tanh',
+  'arcsin',
+  'arccos',
+  'arctan',
+  'card',
+  'max',
+  'min',
+  'sup',
+  'inf',
+  'det',
+  'mod',
+  'pgcd',
+  'ppcm',
+  'arg',
+]);
+/** Short English and French words a formula never holds (a label like ab or AB stays allowed). */
+const SHORT_WORDS: ReadonlySet<string> = new Set([
+  'in',
+  'of',
+  'and',
+  'the',
+  'is',
+  'are',
+  'for',
+  'to',
+  'on',
+  'or',
+  'at',
+  'by',
+  'if',
+  'not',
+  'so',
+  'as',
+  'an',
+  'be',
+  'et',
+  'ou',
+  'de',
+  'des',
+  'du',
+  'la',
+  'le',
+  'les',
+  'un',
+  'une',
+  'est',
+  'en',
+  'sur',
+  'par',
+  'que',
+  'qui',
+  'si',
+  'au',
+  'aux',
+]);
+const VOWEL = /[aeiouyàâäéèêëîïôöùûü]/i;
+
+/** One run of letters of a formula: a word (refused) or a symbol, label or function name. */
+function isWord(run: string): boolean {
+  // All capitals (AB, ABCD, RRN, QCM): points, labels or sequences of draws.
+  if (run.length > 1 && run === run.toUpperCase()) {
+    return false;
+  }
+  const lower = run.toLowerCase();
+  // Lowercase or Capitalized only: mixed case is a product of symbols (xA, pB).
+  if (run.slice(1) !== lower.slice(1)) {
+    return false;
+  }
+  if (SHORT_WORDS.has(lower)) {
+    return true;
+  }
+  if (run.length < 4 || MATH_NAMES.has(lower) || !VOWEL.test(run)) {
+    return false;
+  }
+  // A function name and its variable written together (sinx, limx, lnxy).
+  for (const name of MATH_NAMES) {
+    if (lower.startsWith(name) && lower.length - name.length <= 2) {
+      return false;
+    }
+  }
+  // Letters of a small alphabet (abcd, bacd, face): the urn's ball labels.
+  return !/^[a-h]+$/.test(lower);
+}
+
+/**
+ * Words in a math block, English or French («3 people in A∩F», the AI on
+ * 2026-11-18; \text{ et } too): a math block holds the formula only, its
+ * words go in an ar or fr block. Single letters (A, p, x, e, C), labels
+ * (ab, R1, AB, RRN) and function names (ln, lim, card) stay allowed.
+ */
+export function wordsInMath(latex: string): string[] {
+  const bare = latex.replace(/\\[A-Za-z]+/g, ' ');
+  return [...bare.matchAll(/[A-Za-zÀ-ÿ]+/g)]
+    .map(m => m[0])
+    .filter(w => w.length > 1 && isWord(w));
+}
 
 type TextPart =
   | { kind: 'text'; text: string }
@@ -209,7 +318,7 @@ export function fractionNumbers(text: string): Fraction[] {
 }
 
 /** A math block "a = b" whose sides the engine can evaluate and that disagree. */
-function falseEquality(latex: string): string | null {
+export function falseEquality(latex: string): string | null {
   if (/\\neq|\\ne\b|≠|\\approx|≈/.test(latex)) {
     return null;
   }
@@ -226,6 +335,8 @@ interface Context {
   pack: QuestionPack;
   experiment: Experiment | null;
 }
+/** What a message is checked against: the session, the question's pack, its urn. */
+export type VerifyContext = Context;
 
 /** What he has on the question's own graph: the nodes he earned, the numbers he wrote, his tries. */
 function evidence(c: Context): {
@@ -309,7 +420,7 @@ export function forbiddenValues(
  * (`\div`, ÷ and the French `:` are a division). Tree questions only: a
  * quotient of two branches is the calculation that must not be shown.
  */
-const lineOperators = (latex: string): string =>
+export const lineOperators = (latex: string): string =>
   latex
     .replace(/\\[,;!: ]/g, '')
     .replace(/\\div(?![A-Za-z])|÷|:/g, '/')
@@ -360,6 +471,24 @@ function hiddenRoads(
     .filter(n => !n.expr && n.role !== 'support' && !earned.has(n.id))
     .filter(n => attempts(n.id) < revealAfter)
     .map(node => ({ node, roads: node.forms.flatMap(roadsIn) }));
+}
+
+/**
+ * Tree question: the step whose calculation `calculation` writes ("2/3*1/4"
+ * is the road to p(A ∩ F)), when he has not earned that step yet; null
+ * otherwise. `revealAfter`: Infinity for an answer that never reveals.
+ */
+export function leakedRoad(
+  c: Context,
+  calculation: string,
+  revealAfter = REVEAL_AFTER,
+): string | null {
+  const hidden = hiddenRoads(c, revealAfter);
+  const roads = hidden.length > 0 ? roadsIn(calculation) : [];
+  return (
+    hidden.find(h => h.roads.some(r => roads.some(x => sameRoad(r, x))))?.node
+      .id ?? null
+  );
 }
 
 function notationOpen(c: Context): boolean {
@@ -487,6 +616,17 @@ export function verifyAsk(ask: AskStudent, c: Context): VerifyResult {
       case 'math': {
         if (ARABIC.test(b.latex)) {
           reasons.push(`${where}: Arabic text inside a math block`);
+          break;
+        }
+        const words = wordsInMath(b.latex);
+        if (words.length > 0) {
+          reasons.push(
+            `${where}: words in a math block (${words
+              .map(w => `"${w}"`)
+              .join(
+                ', ',
+              )}): a math block holds the formula only; put the words in an ar or fr block`,
+          );
           break;
         }
         try {
