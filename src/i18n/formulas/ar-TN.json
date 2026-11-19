@@ -1,0 +1,113 @@
+{
+  "tab": "Formules",
+  "back": "Retour",
+  "close": "Fermer",
+  "years": {
+    "1s": "1ère",
+    "2s": "2ème",
+    "3s": "3ème",
+    "4s": "Bac"
+  },
+  "group": "{{year}} · {{chapter}}",
+  "reminder": "Rappel de {{year}} · {{chapter}}",
+  "status": {
+    "nouvelle": "Nouvelle",
+    "en_cours": "En cours",
+    "retenue": "Retenue"
+  },
+  "due": {
+    "today": "À revoir aujourd’hui",
+    "tomorrow": "Revient demain",
+    "days": "Revient dans {{count}} jours"
+  },
+  "list": {
+    "title": "Formules",
+    "subtitle": "{{theme}} · {{who}}",
+    "filtersA11y": "Filtrer les formules",
+    "filters": {
+      "all": "Toutes",
+      "nouvelle": "Nouvelles",
+      "en_cours": "En cours",
+      "retenue": "Retenues"
+    },
+    "train": "S’entraîner",
+    "hide": "Mode caché",
+    "empty": "Pas encore de formule de ce thème pour ta classe.",
+    "checkTitle": "Vérif rapide",
+    "checkText_one": "{{count}} formule à revoir · environ 1 min",
+    "checkText_other": "{{count}} formules à revoir · environ {{minutes}} min",
+    "checkStart": "Commencer la vérif"
+  },
+  "hide": {
+    "title": "Mode caché",
+    "subtitle": "Dis la formule dans ta tête, puis touche pour voir.",
+    "cover": "Touche pour voir",
+    "knew": "Je savais",
+    "didnt": "Je ne savais pas",
+    "note": "Le mode caché ne change pas le statut. Seule la vérif le change.",
+    "showAll": "Tout montrer"
+  },
+  "card": {
+    "say": "Se dit : « {{text}} »",
+    "example": "Exemple",
+    "trap": "Le piège",
+    "copy": "Sur ta copie",
+    "train_one": "S’entraîner · {{count}} question",
+    "train_other": "S’entraîner · {{count}} questions"
+  },
+  "drill": {
+    "title": "S’entraîner",
+    "progress": "{{name}} · {{at}} / {{total}}",
+    "tab": {
+      "complete": "Complète",
+      "true_false": "Vrai ou faux",
+      "calc": "Calcule",
+      "recognise": "Reconnaître"
+    },
+    "prompt": {
+      "complete": "Complète la formule.",
+      "true_false": "Cette égalité est-elle vraie ?",
+      "calc": "Calcule f′(x).",
+      "recognise": "Quelle règle pour dériver f ?"
+    },
+    "true": "Vrai",
+    "false": "Faux",
+    "right": "Juste",
+    "notQuite": "Pas tout à fait. La bonne formule :",
+    "isRule": "Vrai : c’est la règle.",
+    "wasRule": "Non : cette égalité est la règle.",
+    "counter": "Faux. Un contre-exemple, en x = {{x}} :",
+    "counterWrong": "Non, elle est fausse. Un contre-exemple, en x = {{x}} :",
+    "recogniseRight": "Oui.",
+    "recogniseWrong": "Non. La bonne règle :",
+    "calcRight": "Juste.",
+    "calcWrong": "Ce n’est pas f′(x). Regarde la règle et refais le calcul.",
+    "calcUnreadable": "Cette ligne ne se lit pas. Vérifie les parenthèses.",
+    "lineStep": "f′(x)",
+    "help": "ما نعرفش",
+    "helpTitle": {
+      "1": "La règle",
+      "2": "Pour cette fonction",
+      "3": "La réponse"
+    },
+    "continue": "Continuer",
+    "endTitle": "Entraînement fini",
+    "endText": "Ces formules reviendront dans la vérif rapide.",
+    "endBack": "Retour aux formules"
+  },
+  "check": {
+    "title": "Vérif rapide",
+    "subtitle": "Formules du jour · sans aide",
+    "noHelp": "Pas d’indice ici. Ce que tu rates revient demain.",
+    "noted": "Noté.",
+    "next": "Suivant",
+    "resultTitle": "Vérif finie",
+    "resultSub": "Ce qui change pour chaque formule",
+    "review": "Revoir la formule ratée",
+    "finish": "Terminer",
+    "nothing": "Rien à revoir aujourd’hui."
+  },
+  "demo": {
+    "reset": "Effacer mes réponses"
+  }
+}

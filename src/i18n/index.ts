@@ -3,13 +3,16 @@ import { initReactI18next } from 'react-i18next';
 
 import arTN from './ar-TN.json';
 import fr from './fr.json';
+import formulasArTN from './formulas/ar-TN.json';
+import formulasFr from './formulas/fr.json';
 
 export const LOCALES = ['ar-TN', 'fr'] as const;
 export type Locale = (typeof LOCALES)[number];
 
+/** «Formules» (docs/FORMULAS_PLAN.md) keeps its words in its own namespace. */
 export const resources = {
-  'ar-TN': { translation: arTN },
-  fr: { translation: fr },
+  'ar-TN': { translation: arTN, formulas: formulasArTN },
+  fr: { translation: fr, formulas: formulasFr },
 } as const;
 
 export function isRtlLocale(locale: Locale): boolean {

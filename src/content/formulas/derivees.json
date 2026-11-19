@@ -1,0 +1,188 @@
+{
+  "v": 1,
+  "theme": "derivees",
+  "title": "Dérivées",
+  "reviewed": false,
+  "rules": [
+    {
+      "id": "deriv.power_x",
+      "name": "Dérivée de x puissance n",
+      "chapters": ["3s-m.fonction-derivee", "3s-se.fonction-derivee", "3s-st.derivabilite", "3s-si.fonctions-derivees"],
+      "law": { "of": "x^n", "d": "nx^(n-1)" },
+      "condition": "n entier naturel non nul, pour tout réel x",
+      "say": "x puissance n a pour dérivée n fois x puissance n moins 1",
+      "example": { "f": "x^5", "d": "5x^4" },
+      "traps": [
+        { "id": "forgot_n", "d": "x^(n-1)", "title": "Oublier le facteur n", "why": "L’exposant descend devant : la dérivée de x puissance n est n fois x puissance n moins 1." },
+        { "id": "same_power", "d": "nx^n", "title": "Garder le même exposant", "why": "L’exposant baisse de 1 : x puissance n devient x puissance n moins 1." }
+      ],
+      "copy": "f est dérivable sur ℝ comme fonction polynôme.",
+      "complete": { "template": "?x^(n-1)", "tiles": ["n", "n-1", "x", "1"], "right": 0 }
+    },
+    {
+      "id": "deriv.sqrt_x",
+      "name": "Dérivée de la racine carrée",
+      "chapters": ["3s-m.fonction-derivee", "3s-se.fonction-derivee", "3s-st.derivabilite", "3s-si.fonctions-derivees"],
+      "law": { "of": "sqrt(x)", "d": "1/(2sqrt(x))" },
+      "condition": "pour x > 0",
+      "say": "racine de x a pour dérivée 1 sur 2 racine de x",
+      "example": { "f": "3sqrt(x)", "d": "3/(2sqrt(x))", "where": "pour x > 0" },
+      "traps": [
+        { "id": "forgot_two", "d": "1/sqrt(x)", "title": "Oublier le 2", "why": "Le 2 reste au dénominateur : la dérivée de racine de x est 1 sur 2 racine de x." },
+        { "id": "lost_root", "d": "1/(2x)", "title": "Enlever la racine", "why": "La racine reste au dénominateur : 1 sur 2 racine de x, pas 1 sur 2x." }
+      ],
+      "copy": "La fonction racine carrée est dérivable sur ]0, +∞[, mais pas en 0.",
+      "complete": { "template": "1/(?sqrt(x))", "tiles": ["2", "1", "x", "1/2"], "right": 0 }
+    },
+    {
+      "id": "deriv.inv_x",
+      "name": "Dérivée de l’inverse de x",
+      "chapters": ["3s-m.fonction-derivee", "3s-se.fonction-derivee", "3s-st.derivabilite", "3s-si.fonctions-derivees"],
+      "law": { "of": "1/x", "d": "-1/x^2" },
+      "condition": "pour x ≠ 0",
+      "say": "1 sur x a pour dérivée moins 1 sur x au carré",
+      "example": { "f": "5/x", "d": "-5/x^2", "where": "pour x ≠ 0" },
+      "traps": [
+        { "id": "lost_minus", "d": "1/x^2", "title": "Oublier le signe moins", "why": "La fonction inverse décroît sur chaque intervalle, donc sa dérivée est négative : moins 1 sur x au carré." },
+        { "id": "lost_square", "d": "-1/x", "title": "Oublier le carré", "why": "Le dénominateur est x au carré : moins 1 sur x au carré." }
+      ],
+      "copy": "La fonction inverse est dérivable sur ]−∞, 0[ et sur ]0, +∞[.",
+      "complete": { "template": "-1/?", "tiles": ["x^2", "x", "2x", "x^(-1)"], "right": 0 }
+    },
+    {
+      "id": "deriv.sum",
+      "name": "Dérivée d’une somme",
+      "chapters": ["3s-m.fonction-derivee", "3s-se.fonction-derivee", "3s-st.derivabilite", "3s-si.fonctions-derivees"],
+      "law": { "of": "u+v", "d": "U+V" },
+      "condition": "u et v dérivables sur I",
+      "say": "la dérivée d’une somme est la somme des dérivées",
+      "example": { "f": "x^3+5x", "u": "x^3", "v": "5x", "d": "3x^2+5" },
+      "traps": [
+        { "id": "one_term", "d": "U+v", "title": "Dériver un seul terme", "why": "Chaque terme se dérive : la dérivée de u + v est u′ + v′." },
+        { "id": "product_rule", "d": "Uv+uV", "title": "Prendre la règle du produit", "why": "Pour une somme, on dérive chaque terme et on ajoute : u′ + v′." }
+      ],
+      "copy": "f est dérivable sur I comme somme de deux fonctions dérivables sur I.",
+      "complete": { "template": "U+?", "tiles": ["V", "v", "UV", "u"], "right": 0 }
+    },
+    {
+      "id": "deriv.scalar",
+      "name": "Dérivée de k fois u",
+      "chapters": ["3s-m.fonction-derivee", "3s-se.fonction-derivee", "3s-st.derivabilite", "3s-si.fonctions-derivees"],
+      "law": { "of": "ku", "d": "kU" },
+      "condition": "k réel, u dérivable sur I",
+      "say": "k fois u a pour dérivée k fois u prime",
+      "example": { "f": "7(x^2+1)", "u": "x^2+1", "k": 7, "d": "14x" },
+      "traps": [
+        { "id": "lost_k", "d": "U", "title": "Perdre le facteur k", "why": "Le facteur k reste devant : la dérivée de k fois u est k fois u′." }
+      ],
+      "copy": "f est dérivable sur I comme produit d’une fonction dérivable sur I par un réel.",
+      "complete": { "template": "?U", "tiles": ["k", "1", "0", "ku"], "right": 0 }
+    },
+    {
+      "id": "deriv.product",
+      "name": "Dérivée d’un produit",
+      "chapters": ["3s-m.fonction-derivee", "3s-se.fonction-derivee", "3s-st.derivabilite", "3s-si.fonctions-derivees"],
+      "law": { "of": "uv", "d": "Uv+uV" },
+      "condition": "u et v dérivables sur I",
+      "say": "u prime v, plus u v prime",
+      "example": { "f": "(2x+1)(x^2-3)", "u": "2x+1", "v": "x^2-3", "d": "6x^2+2x-6" },
+      "traps": [
+        { "id": "product_of_derivatives", "d": "UV", "title": "Multiplier les deux dérivées", "why": "La dérivée d’un produit n’est pas le produit des dérivées : c’est u′v + uv′." },
+        { "id": "minus_sign", "d": "Uv-uV", "title": "Mettre un moins comme pour un quotient", "why": "Pour un produit, les deux termes s’ajoutent : u′v + uv′." }
+      ],
+      "copy": "f est dérivable sur I comme produit de deux fonctions dérivables sur I.",
+      "complete": { "template": "Uv+?", "tiles": ["uV", "UV", "uv", "Uv"], "right": 0 }
+    },
+    {
+      "id": "deriv.inv_v",
+      "name": "Dérivée de l’inverse d’une fonction",
+      "chapters": ["3s-m.fonction-derivee", "3s-se.fonction-derivee", "3s-st.derivabilite", "3s-si.fonctions-derivees"],
+      "law": { "of": "1/v", "d": "-V/v^2" },
+      "condition": "v dérivable sur I et v(x) ≠ 0 sur I",
+      "say": "1 sur v a pour dérivée moins v prime sur v au carré",
+      "example": { "f": "1/(x^2+1)", "v": "x^2+1", "d": "-2x/(x^2+1)^2" },
+      "traps": [
+        { "id": "inverse_of_derivative", "d": "1/V", "title": "Prendre l’inverse de la dérivée", "why": "On ne prend pas l’inverse de v′ : la dérivée de 1 sur v est moins v′ sur v au carré." },
+        { "id": "lost_minus", "d": "V/v^2", "title": "Oublier le signe moins", "why": "Il y a un signe moins devant : moins v′ sur v au carré." }
+      ],
+      "copy": "f est dérivable sur I comme inverse d’une fonction dérivable sur I qui ne s’annule pas sur I.",
+      "complete": { "template": "-V/?", "tiles": ["v^2", "v", "V^2", "2v"], "right": 0 }
+    },
+    {
+      "id": "deriv.quotient",
+      "name": "Dérivée d’un quotient",
+      "chapters": ["3s-m.fonction-derivee", "3s-se.fonction-derivee", "3s-st.derivabilite", "3s-si.fonctions-derivees"],
+      "law": { "of": "u/v", "d": "(Uv-uV)/v^2" },
+      "condition": "u et v dérivables sur I et v(x) ≠ 0 sur I",
+      "say": "u prime v, moins u v prime, sur v au carré",
+      "example": { "f": "(2x+1)/(x-3)", "u": "2x+1", "v": "x-3", "d": "-7/(x-3)^2", "where": "pour x ≠ 3" },
+      "traps": [
+        { "id": "quotient_of_derivatives", "d": "U/V", "title": "Diviser les deux dérivées", "why": "La dérivée d’un quotient n’est pas le quotient des dérivées : c’est u′v moins uv′, sur v au carré." },
+        { "id": "order_swapped", "d": "(uV-Uv)/v^2", "title": "Inverser l’ordre au numérateur", "why": "L’ordre compte : u′v d’abord, puis moins uv′." },
+        { "id": "lost_square", "d": "(Uv-uV)/v", "title": "Oublier le carré", "why": "Le dénominateur est v au carré, pas v." }
+      ],
+      "copy": "f est dérivable sur I comme quotient de deux fonctions dérivables sur I, le dénominateur ne s’annulant pas sur I.",
+      "complete": { "template": "(Uv-?)/v^2", "tiles": ["uV", "UV", "uv", "Uv"], "right": 0 }
+    },
+    {
+      "id": "deriv.power_u",
+      "name": "Dérivée de u puissance n",
+      "chapters": ["3s-m.fonction-derivee", "3s-se.fonction-derivee", "3s-st.derivabilite", "3s-si.fonctions-derivees"],
+      "law": { "of": "u^n", "d": "nUu^(n-1)" },
+      "condition": "n entier naturel non nul, u dérivable sur I",
+      "say": "u puissance n a pour dérivée n fois u prime fois u puissance n moins 1",
+      "example": { "f": "(3x-1)^4", "u": "3x-1", "n": 4, "d": "12(3x-1)^3" },
+      "traps": [
+        { "id": "forgot_inner", "d": "nu^(n-1)", "title": "Oublier u′", "why": "On multiplie aussi par u′ : n fois u′ fois u puissance n moins 1." },
+        { "id": "forgot_n", "d": "Uu^(n-1)", "title": "Oublier le facteur n", "why": "L’exposant n descend devant : n fois u′ fois u puissance n moins 1." }
+      ],
+      "copy": "f est dérivable sur I comme puissance d’une fonction dérivable sur I.",
+      "complete": { "template": "nU?", "tiles": ["u^(n-1)", "u^n", "U^(n-1)", "u^(n+1)"], "right": 0 }
+    },
+    {
+      "id": "deriv.sqrt_u",
+      "name": "Dérivée de la racine de u",
+      "chapters": ["4s-m.derivabilite", "4s-se.derivabilite", "4s-st.derivabilite", "4s-si.derivation-primitives"],
+      "law": { "of": "sqrt(u)", "d": "U/(2sqrt(u))" },
+      "condition": "u dérivable sur I et u(x) > 0 sur I",
+      "say": "racine de u a pour dérivée u prime sur 2 racine de u",
+      "example": { "f": "sqrt(x^2+1)", "u": "x^2+1", "d": "x/sqrt(x^2+1)" },
+      "traps": [
+        { "id": "forgot_inner", "d": "1/(2sqrt(u))", "title": "Oublier u′", "why": "On multiplie par u′ : u′ sur 2 racine de u." },
+        { "id": "forgot_two", "d": "U/sqrt(u)", "title": "Oublier le 2", "why": "Le 2 reste au dénominateur : u′ sur 2 racine de u." }
+      ],
+      "copy": "f est dérivable sur I comme racine d’une fonction dérivable et strictement positive sur I.",
+      "complete": { "template": "?/(2sqrt(u))", "tiles": ["U", "1", "u", "2U"], "right": 0 }
+    },
+    {
+      "id": "deriv.exp_u",
+      "name": "Dérivée de e puissance u",
+      "chapters": ["4s-m.fonction-exponentielle", "4s-se.fonction-exponentielle", "4s-st.fonction-exponentielle", "4s-si.fonction-exponentielle"],
+      "law": { "of": "e^u", "d": "Ue^u" },
+      "condition": "u dérivable sur I",
+      "say": "e puissance u a pour dérivée u prime fois e puissance u",
+      "example": { "f": "e^(2x+1)", "u": "2x+1", "d": "2e^(2x+1)" },
+      "traps": [
+        { "id": "forgot_inner", "d": "e^u", "title": "Oublier u′", "why": "On multiplie par u′ : u′ fois e puissance u." },
+        { "id": "power_rule", "d": "ue^(u-1)", "title": "Dériver comme une puissance de u", "why": "Ici u est l’exposant, pas la base : la dérivée est u′ fois e puissance u." }
+      ],
+      "copy": "f est dérivable sur I comme composée de deux fonctions dérivables.",
+      "complete": { "template": "?e^u", "tiles": ["U", "u", "1", "e"], "right": 0 }
+    },
+    {
+      "id": "deriv.ln_u",
+      "name": "Dérivée de ln u",
+      "chapters": ["4s-m.fonction-logarithme", "4s-se.fonction-logarithme", "4s-st.fonction-logarithme", "4s-si.fonction-logarithme"],
+      "law": { "of": "ln(u)", "d": "U/u" },
+      "condition": "u dérivable sur I et u(x) > 0 sur I",
+      "say": "ln de u a pour dérivée u prime sur u",
+      "example": { "f": "ln(x^2+1)", "u": "x^2+1", "d": "2x/(x^2+1)" },
+      "traps": [
+        { "id": "forgot_inner", "d": "1/u", "title": "Oublier u′", "why": "On multiplie par u′ : la dérivée de ln u est u′ sur u." },
+        { "id": "ln_of_derivative", "d": "ln(U)", "title": "Prendre le ln de la dérivée", "why": "La dérivée de ln u est un quotient : u′ sur u." }
+      ],
+      "copy": "f est dérivable sur I comme composée de deux fonctions dérivables, avec u(x) > 0 sur I.",
+      "complete": { "template": "?/u", "tiles": ["U", "1", "u", "ln(U)"], "right": 0 }
+    }
+  ]
+}

@@ -18,21 +18,30 @@ import {
   ProbabilityDemoScreen,
 } from './src/app/screens/ProbabilityDemoScreen';
 import { WorksheetDemoScreen } from './src/app/screens/WorksheetDemoScreen';
+import { FormulasDemoScreen } from './src/app/screens/formulas/FormulasDemoScreen';
 import { setDevTools, useDevTools } from './src/app/devFlags';
 import type * as DevOnly from './src/app/dev';
 import { theme } from './src/theme';
 
-type Tab = 'lesson' | 'demo' | 'proba' | 'analyse' | 'sheet' | 'bidi';
+type Tab =
+  | 'lesson'
+  | 'demo'
+  | 'proba'
+  | 'analyse'
+  | 'sheet'
+  | 'formulas'
+  | 'bidi';
 const TABS: readonly Tab[] = [
   'lesson',
   'demo',
   'proba',
   'analyse',
   'sheet',
+  'formulas',
   'bidi',
 ];
 /** The worksheet tab's label lives in its own namespace (plan v2, track C). */
-const tabLabel = (name: Tab) =>
+const tabLabel = (name: Exclude<Tab, 'formulas'>) =>
   name === 'sheet' ? ('worksheet.tab' as const) : (`app.tab.${name}` as const);
 
 /** Debug builds only; `__DEV__` is false in release, so Metro drops the require. */
@@ -55,6 +64,8 @@ function launchTab(): Tab | null {
 
 function Root() {
   const { t } = useTranslation();
+  // «Formules» keeps its words in its own namespace (docs/FORMULAS_PLAN.md).
+  const { t: tf } = useTranslation('formulas');
   const insets = useSafeAreaInsets();
   const [atLaunch] = useState(launchTab);
   const [tab, setTab] = useState<Tab>(atLaunch ?? 'lesson');
@@ -78,6 +89,7 @@ function Root() {
         {shown === 'proba' && <ProbabilityDemoScreen />}
         {shown === 'analyse' && <AnalysisDemoScreen />}
         {shown === 'sheet' && <WorksheetDemoScreen />}
+        {shown === 'formulas' && <FormulasDemoScreen />}
         {shown === 'bidi' && <BidiTestScreen />}
       </View>
       {devTools && (
@@ -91,7 +103,9 @@ function Root() {
               accessibilityState={{ selected: tab === name }}
               testID={`tab-${name}`}
             >
-              <Text style={styles.tabText}>{t(tabLabel(name))}</Text>
+              <Text style={styles.tabText}>
+                {name === 'formulas' ? tf('tab') : t(tabLabel(name))}
+              </Text>
             </Pressable>
           ))}
         </View>
