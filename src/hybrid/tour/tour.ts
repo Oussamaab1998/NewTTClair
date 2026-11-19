@@ -16,18 +16,26 @@ import ex2 from '../../content/trips.bac2022c-ex2.json';
 import ex4 from '../../content/trips.bac2022c-ex4.json';
 import tree from '../../content/trips.bac2022p-sc-ex2.json';
 import scEx2 from '../../content/trips.sc-ex2.json';
+// new-exercise: imports (npm run new-exercise -- <id> --register writes above)
 import type { QuestionCtx } from '../conductor/conductor';
 import type { ActOut, ConductorState, Reason } from '../conductor/types';
 import { tierOf } from '../conductor/types';
 import {
   TripFileSchema,
+  type TripFile,
   type TripLine,
   type TripOverview,
   type TripQuestion,
 } from './schema';
 
 /** One trips file per exercise (an invalid file is dropped here; `TRIP_FILE_ISSUES` names it and a test keeps it empty). */
-const SOURCES: readonly unknown[] = [scEx2, tree, ex2, ex4];
+const SOURCES: readonly unknown[] = [
+  scEx2,
+  tree,
+  ex2,
+  ex4,
+  // new-exercise: sources
+];
 export const TRIP_FILE_ISSUES: string[] = [];
 const FILES = SOURCES.flatMap(f => {
   const r = TripFileSchema.safeParse(f);
@@ -36,6 +44,10 @@ const FILES = SOURCES.flatMap(f => {
   }
   return r.success ? [r.data] : [];
 });
+
+/** The trips file of an exercise as read (the coverage test checks it against the exercise). */
+export const tripFileFor = (exerciseId: string): TripFile | null =>
+  FILES.find(f => f.exerciseId === exerciseId) ?? null;
 
 /** A question's trip: the exercise overview and this question's map. */
 export interface Trip {

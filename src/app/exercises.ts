@@ -10,6 +10,7 @@ import ex4 from '../content/exercises/bac2022c-ex4.json';
 import ex4Misconceptions from '../content/exercises/bac2022c-ex4.misconceptions.json';
 import exTree from '../content/exercises/bac2022p-sc-ex2.json';
 import exTreeMisconceptions from '../content/exercises/bac2022p-sc-ex2.misconceptions.json';
+// new-exercise: imports (npm run new-exercise -- <id> --register writes above)
 import { loadExercise, type LoadResult } from '../content/loader';
 import { checkWalkthroughs } from '../lesson/walkthroughCheck';
 import { appPaperQuestions } from '../content/paper';
@@ -25,7 +26,10 @@ export interface CatalogEntry {
 }
 
 /** Loads, then checks what needs the lesson content (walk-throughs, B4): any error fails the load. */
-function loadChecked(raw: unknown, misconceptions: unknown): LoadResult {
+export function loadChecked(
+  raw: unknown,
+  misconceptions: unknown,
+): LoadResult {
   const r = loadExercise(raw, misconceptions);
   if (!r.ok) {
     return r;
@@ -48,6 +52,7 @@ export const CATALOG: readonly CatalogEntry[] = [
   entry(ex4, ex4Misconceptions),
   // Session principale, Sciences expérimentales: the probability tree.
   entry(exTree, exTreeMisconceptions),
+  // new-exercise: entries
 ];
 
 export interface Opened {

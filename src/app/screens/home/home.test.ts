@@ -181,9 +181,15 @@ describe('the domains and the sessions', () => {
     const d = homeData(
       input({ done: new Set([partKey('bac2022c-ex2', '1a')]) }),
     );
+    // Counted from the app's exercises (a new one changes the numbers, not the test).
+    const of = (subject: string) =>
+      CATALOG.filter(
+        e => e.result.ok && e.result.loaded.exercise.subject === subject,
+      ).length;
+    expect(of('probability')).toBeGreaterThanOrEqual(3);
     expect(d.domains.map(x => [x.domain, x.exercises])).toEqual([
-      ['probability', 3],
-      ['analysis', 1],
+      ['probability', of('probability')],
+      ['analysis', of('analysis')],
       ['sequences', 0],
       ['complex', 0],
     ]);

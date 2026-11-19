@@ -8,6 +8,7 @@ import ex2 from './bac2022c-ex2.json';
 import ex4 from './bac2022c-ex4.json';
 import scEx2 from './bac2022c-sc-ex2.json';
 import tree from './bac2022p-sc-ex2.json';
+// new-exercise: imports (npm run new-exercise -- <id> --register writes above)
 import {
   HelpFileSchema,
   type GlossaryEntry,
@@ -21,6 +22,7 @@ export const HELP_SOURCES: Readonly<Record<string, unknown>> = {
   'bac2022c-sc-ex2': scEx2,
   'bac2022c-ex2': ex2,
   'bac2022c-ex4': ex4,
+  // new-exercise: sources
 };
 
 const parsed = new Map<string, HelpFile | null>();

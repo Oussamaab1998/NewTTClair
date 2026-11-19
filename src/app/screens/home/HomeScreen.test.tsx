@@ -9,6 +9,7 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 
 import '../../../i18n';
 import i18n from '../../../i18n';
+import { CATALOG } from '../../exercises';
 import { partKey } from '../../../state/doneParts';
 import { memoryStore } from '../../../storage/kv';
 import { HomeScreen } from './HomeScreen';
@@ -101,8 +102,12 @@ describe('the home screen', () => {
   it('the domains open their exercises; the empty ones are «قريبا»; the sessions too', async () => {
     const h = home();
     await render(h.el);
+    // Counted from the app's exercises (a new one changes the number, not the test).
+    const probability = CATALOG.filter(
+      e => e.result.ok && e.result.loaded.exercise.subject === 'probability',
+    ).length;
     expect(screen.getByTestId('home-domain-probability')).toHaveTextContent(
-      /Probabilités3 exercicesالاحتمالات/,
+      new RegExp(`Probabilités${probability} exercicesالاحتمالات`),
     );
     expect(screen.getByTestId('home-soon-sequences')).toHaveTextContent(
       /Suitesقريبا/,

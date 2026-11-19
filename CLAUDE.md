@@ -39,6 +39,7 @@ Many users have cheap Android phones. Interactive visuals should stay smooth whi
 - Do not copy the official correction text verbatim; write our own explanations.
 - Official-correction typos exist (see `docs/exercises/EX2_PROBABILITY.md`). Verify with the engine.
 - If a requirement is unclear, ask one precise question.
+- **A new exercise: follow `docs/NEW_EXERCISE.md`.** Start it with `npm run new-exercise`, get the owner's yes on the plan (stage 0), and run `npm run check:exercise -- <id> --stage <n>` after each piece of work (about a second), never only at the end.
 
 ## Commands
 - Install: `npm ci` then `npm run pods` (CocoaPods via Bundler)
@@ -49,5 +50,6 @@ Many users have cheap Android phones. Interactive visuals should stay smooth whi
 - Single steps: `npm run lint`, `npm run typecheck`, `npm test`, `npm run test:watch`
 - Regenerate KaTeX CSS after upgrading `katex`: `npm run build:katex-css`
 - Replay harness: `npm run replay -- table|convert|agree ...` (see `tools/replay/README.md`)
+- New exercise: `npm run new-exercise -- <id> --chapter <chapter-id> --subject probability|analysis`, then `--register` once stages 1 to 3 pass; its check: `npm run check:exercise -- <id> [--stage n] [--fast]` (see `docs/NEW_EXERCISE.md`)
 
 Gotchas: RN Testing Library 14 `render`/`fireEvent` are async (`await` them). Write bidi controls and special spaces as `\u` escapes, never literal characters (a test enforces it).

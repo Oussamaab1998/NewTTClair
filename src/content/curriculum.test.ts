@@ -1,4 +1,5 @@
 import { CATALOG } from '../app/exercises';
+import { examSession } from '../app/screens/home/home';
 import {
   CURRICULUM,
   CurriculumSchema,
@@ -131,16 +132,25 @@ describe('curriculum map', () => {
           c.id,
           expect.arrayContaining([ex.section as SectionId]),
         ]);
-        // Every exercise so far is a bac paper.
-        expect([c.id, track.year]).toEqual([c.id, '4s']);
+        // A bac paper is linked in a 4ème track; another exercise (3ème,
+        // our own) in the track of its own year.
+        if (examSession(ex.id) !== null) {
+          expect([c.id, track.year]).toEqual([c.id, '4s']);
+        }
         for (const link of c.exercises.filter(e => e.id === ex.id)) {
           for (const p of link.parts ?? partIds) {
-            expect([c.id, partIds]).toEqual([c.id, expect.arrayContaining([p])]);
+            expect([c.id, partIds]).toEqual([
+              c.id,
+              expect.arrayContaining([p]),
+            ]);
             covered.add(p);
           }
         }
       }
-      expect([ex.id, [...covered].sort()]).toEqual([ex.id, [...partIds].sort()]);
+      expect([ex.id, [...covered].sort()]).toEqual([
+        ex.id,
+        [...partIds].sort(),
+      ]);
     }
   });
 
@@ -177,7 +187,9 @@ describe('curriculum map', () => {
       const dup = clone(raw);
       const t = track(dup, '4s-m');
       t.chapters.push(clone(t.chapters[0]!));
-      expect(errorsOf(dup)).toEqual(['duplicate chapter 4s-m.continuite-et-limites']);
+      expect(errorsOf(dup)).toEqual([
+        'duplicate chapter 4s-m.continuite-et-limites',
+      ]);
 
       const moved = clone(raw);
       track(moved, '4s-m').chapters[0]!.id = '4s-se.continuite-et-limites';

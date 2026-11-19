@@ -1222,19 +1222,19 @@
                 {
                   "id": "a",
                   "latex": "A",
-                  "count": 16,
+                  "count": 7,
                   "children": [
-                    { "id": "a.f", "latex": "F", "count": 3 },
-                    { "id": "a.nf", "latex": "\\overline{F}", "count": 13 }
+                    { "id": "a.f", "latex": "F", "count": 5 },
+                    { "id": "a.nf", "latex": "\\overline{F}", "count": 2 }
                   ]
                 },
                 {
                   "id": "na",
                   "latex": "\\overline{A}",
-                  "count": 9,
+                  "count": 18,
                   "children": [
-                    { "id": "na.f", "latex": "F", "count": 4 },
-                    { "id": "na.nf", "latex": "\\overline{F}", "count": 5 }
+                    { "id": "na.f", "latex": "F", "count": 7 },
+                    { "id": "na.nf", "latex": "\\overline{F}", "count": 11 }
                   ]
                 }
               ]
@@ -1243,15 +1243,15 @@
           "lines": [
             {
               "say": { "ar": [{ "ar": "اللي يلبسو مرايات، على القسم الكل:" }] },
-              "math": "p(F) = \\frac{7}{25}"
+              "math": "p(F) = \\frac{12}{25}"
             },
             {
               "say": { "ar": [{ "ar": "اللي ما يلبسوش، من العكس:" }] },
-              "math": "p(\\overline{F}) = 1 - \\frac{7}{25} = \\frac{18}{25}"
+              "math": "p(\\overline{F}) = 1 - \\frac{12}{25} = \\frac{13}{25}"
             },
             {
               "say": { "ar": [{ "ar": "ونثبّتو بالعدّ في الجهتين:" }] },
-              "math": "\\frac{13}{25} + \\frac{5}{25} = \\frac{18}{25}"
+              "math": "\\frac{2}{25} + \\frac{11}{25} = \\frac{13}{25}"
             }
           ],
           "rule": { "ar": [{ "ar": "احتمال العكس: واحد ناقص احتمال الحدث." }] },
@@ -1323,19 +1323,19 @@
                 {
                   "id": "a",
                   "latex": "A",
-                  "count": 16,
+                  "count": 7,
                   "children": [
-                    { "id": "a.f", "latex": "F", "count": 3 },
-                    { "id": "a.nf", "latex": "\\overline{F}", "count": 13 }
+                    { "id": "a.f", "latex": "F", "count": 5 },
+                    { "id": "a.nf", "latex": "\\overline{F}", "count": 2 }
                   ]
                 },
                 {
                   "id": "na",
                   "latex": "\\overline{A}",
-                  "count": 9,
+                  "count": 18,
                   "children": [
-                    { "id": "na.f", "latex": "F", "count": 4 },
-                    { "id": "na.nf", "latex": "\\overline{F}", "count": 5 }
+                    { "id": "na.f", "latex": "F", "count": 7 },
+                    { "id": "na.nf", "latex": "\\overline{F}", "count": 11 }
                   ]
                 }
               ]
@@ -1344,11 +1344,11 @@
           "lines": [
             {
               "say": { "ar": [{ "ar": "اللي ما همش في النادي وما يلبسوش مرايات، على القسم الكل:" }] },
-              "math": "p(\\overline{A} \\cap \\overline{F}) = \\frac{5}{25}"
+              "math": "p(\\overline{A} \\cap \\overline{F}) = \\frac{11}{25}"
             },
             {
               "say": { "ar": [{ "ar": "نفس الشي، نمشيو مع الطريق فرع بفرع:" }] },
-              "math": "\\frac{9}{25} \\times \\frac{5}{9} = \\frac{5}{25}"
+              "math": "\\frac{18}{25} \\times \\frac{11}{18} = \\frac{11}{25}"
             }
           ],
           "rule": { "ar": [{ "ar": "الطريق الكامل: نضربو الفرع الأوّل في الفرع الثاني." }] },
@@ -1439,19 +1439,19 @@
                 {
                   "id": "a",
                   "latex": "A",
-                  "count": 16,
+                  "count": 7,
                   "children": [
-                    { "id": "a.f", "latex": "F", "count": 3 },
-                    { "id": "a.nf", "latex": "\\overline{F}", "count": 13 }
+                    { "id": "a.f", "latex": "F", "count": 5 },
+                    { "id": "a.nf", "latex": "\\overline{F}", "count": 2 }
                   ]
                 },
                 {
                   "id": "na",
                   "latex": "\\overline{A}",
-                  "count": 9,
+                  "count": 18,
                   "children": [
-                    { "id": "na.f", "latex": "F", "count": 4 },
-                    { "id": "na.nf", "latex": "\\overline{F}", "count": 5 }
+                    { "id": "na.f", "latex": "F", "count": 7 },
+                    { "id": "na.nf", "latex": "\\overline{F}", "count": 11 }
                   ]
                 }
               ]
@@ -1460,15 +1460,15 @@
           "lines": [
             {
               "say": { "ar": [{ "ar": "اللي ما يلبسوش مرايات من الجهتين، على القسم الكل:" }] },
-              "math": "p(\\overline{F}) = \\frac{18}{25}"
+              "math": "p(\\overline{F}) = \\frac{13}{25}"
             },
             {
               "say": { "ar": [{ "ar": "منهم اللي ما همش في النادي، الطريق المعلَّم:" }] },
-              "math": "p(\\overline{A} \\cap \\overline{F}) = \\frac{5}{25}"
+              "math": "p(\\overline{A} \\cap \\overline{F}) = \\frac{11}{25}"
             },
             {
               "say": { "ar": [{ "ar": "في وسط اللي ما يلبسوش مرايات برك:" }] },
-              "math": "p(\\overline{A}/\\overline{F}) = \\frac{\\frac{5}{25}}{\\frac{18}{25}} = \\frac{5}{18}"
+              "math": "p(\\overline{A}/\\overline{F}) = \\frac{\\frac{11}{25}}{\\frac{13}{25}} = \\frac{11}{13}"
             }
           ],
           "rule": { "ar": [{ "ar": "بالمقلوب: نقسمو الطريق اللي يجمع الزوز على احتمال اللي نعرفوه." }] },
@@ -1543,19 +1543,19 @@
                 {
                   "id": "a",
                   "latex": "A",
-                  "count": 16,
+                  "count": 7,
                   "children": [
-                    { "id": "a.f", "latex": "F", "count": 3 },
-                    { "id": "a.nf", "latex": "\\overline{F}", "count": 13 }
+                    { "id": "a.f", "latex": "F", "count": 5 },
+                    { "id": "a.nf", "latex": "\\overline{F}", "count": 2 }
                   ]
                 },
                 {
                   "id": "na",
                   "latex": "\\overline{A}",
-                  "count": 9,
+                  "count": 18,
                   "children": [
-                    { "id": "na.f", "latex": "F", "count": 4 },
-                    { "id": "na.nf", "latex": "\\overline{F}", "count": 5 }
+                    { "id": "na.f", "latex": "F", "count": 7 },
+                    { "id": "na.nf", "latex": "\\overline{F}", "count": 11 }
                   ]
                 }
               ]
@@ -1564,15 +1564,15 @@
           "lines": [
             {
               "say": { "ar": [{ "ar": "في وسط اللي ما همش في النادي، اللي ما يلبسوش مرايات:" }] },
-              "math": "p(\\overline{F}/\\overline{A}) = \\frac{5}{9}"
+              "math": "p(\\overline{F}/\\overline{A}) = \\frac{11}{18}"
             },
             {
               "say": { "ar": [{ "ar": "في وسط اللي ما يلبسوش مرايات، اللي ما همش في النادي:" }] },
-              "math": "p(\\overline{A}/\\overline{F}) = \\frac{5}{18}"
+              "math": "p(\\overline{A}/\\overline{F}) = \\frac{11}{13}"
             },
             {
               "say": { "ar": [{ "ar": "نفس التلامذة، أما كل مرّة نقسمو على مجموعة أخرى:" }] },
-              "math": "\\frac{5}{9} \\neq \\frac{5}{18}"
+              "math": "\\frac{11}{18} \\neq \\frac{11}{13}"
             }
           ],
           "rule": {
