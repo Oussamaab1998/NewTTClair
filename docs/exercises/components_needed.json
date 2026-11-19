@@ -1,0 +1,1665 @@
+{
+ "years": {
+  "1s": 32,
+  "2sc": 38,
+  "3se": 40
+ },
+ "components": [
+  {
+   "name": "Worksheet",
+   "status": "extend",
+   "domain": "generic",
+   "purpose": "Method frame (board Worksheet / old-feed LineInput): the student writes each calculation line and the engine checks it against the step's expected solution graph; the default for every 'calculer / montrer que' question.",
+   "student_action": "type lines with the math keys and number tiles; tap an earlier line to fix it",
+   "engine_needs": "src/method line chains (lineChain, exprLine, mutations) plus one new solution-graph template per 3se question type (continuity, limits, asymptotes, symmetry, derivative, sequences, dot product, determinants, complex forms, counting, statistics)",
+   "props_sketch": "frame type 'lines': graph {template, params}, variables (x, n, m, t, a, b), tiles",
+   "extends_note": "3se lines need what the parser and line engine lack today: (1) complex numbers (constant i, NumberSystem for a + bi) for T2_CH04; (2) vectors / coordinate triples and dot products as line items (vec(AB)(2, -1, 2), u.v) for T2_CH01/05/06/07; (3) equation, inequality and equivalence lines (=, <, <=, <=>) and inequality chains (0 <= |wn - 3| <= 5/(n + 1)), with solution sets and 'k in Z' families; (4) partie entiere E(x); (5) parameters (m, a, b, k, t) judged on samples of the parameter too; (6) exact display of surds (2 sqrt 7, 6 sqrt 21 / 7) and multiples of pi",
+   "first_year": "3se",
+   "notes_by_year": {
+    "3se": "3se lines need what the parser and line engine lack today: (1) complex numbers (constant i, NumberSystem for a + bi) for T2_CH04; (2) vectors / coordinate triples and dot products as line items (vec(AB)(2, -1, 2), u.v) for T2_CH01/05/06/07; (3) equation, inequality and equivalence lines (=, <, <=, <=>) and inequality chains (0 <= |wn - 3| <= 5/(n + 1)), with solution sets and 'k in Z' families; (4) partie entiere E(x); (5) parameters (m, a, b, k, t) judged on samples of the parameter too; (6) exact display of surds (2 sqrt 7, 6 sqrt 21 / 7) and multiples of pi",
+    "2sc": "Beyond the 3se list (inequality / equivalence lines, parameters, exact surds and pi multiples, vectors, complex numbers): (1) radicals: sqrt(p - q sqrt r) simplified, conjugate to clear a denominator, sqrt(u^2) = |u|; (2) absolute values |x - a| removed by sign; (3) encadrement lines (2.236 < sqrt5 < 2.237 => 0.236 < t < 0.237) checked bound by bound, 'valeur approchee par defaut / par exces', rounding; (4) percentages, coefficients multiplicateurs, indices base 100, scientific notation; (5) integers written with digit letters (6a3b) and division statements N = dq + r; (6) plane vectors as symbols vec(AB): Chasles rewriting, linear combinations in a base (vec(AB), vec(AC)), components and det(u, v); (7) cartesian equations of lines and circles and a 3x3 linear system by elimination; (8) arithmetic and geometric sums n(a + b)/2 and a(1 - q^n)/(1 - q); (9) money rounded to the millime",
+    "1s": "beyond the 3se and 2eme notes (inequality / equivalence lines, surds, pi, vectors as symbols with Chasles, components, encadrements, percentages, scientific notation, N = dq + r, systems by elimination): (1) angles in degrees as quantities (angle ADB = 180 - 80 - 30 = 70); (2) named lengths and angles of the current figure as symbols bound to engine values (AN = (3/4) x 8 = 6; cos ABC = BH / AB), so a line about the figure is judged without coordinates on screen; (3) synthetic vector lines (vec(ED) = vec(EC) + vec(CD) = 2 vec(AB), vec(GA) + vec(GB) + vec(GC) = 0) judged on several random instances of the figure, as check_ch01 / check_ch05 do; (4) prime-power products (2^2 x 3^3 x 7) kept factored for PGCD / PPCM lines; (5) the long-division step 90 = 14 x 6 + 6 written as a line"
+   },
+   "exercises": {
+    "1s": [
+     "1s/CH01_ANGLES/Ex1",
+     "1s/CH01_ANGLES/Ex2",
+     "1s/CH02_THALES/Ex1",
+     "1s/CH02_THALES/Ex2",
+     "1s/CH03_TRIGONOMETRIE_TRIANGLE_RECTANGLE/Ex1",
+     "1s/CH03_TRIGONOMETRIE_TRIANGLE_RECTANGLE/Ex2",
+     "1s/CH04_VECTEURS_TRANSLATIONS/Ex1",
+     "1s/CH04_VECTEURS_TRANSLATIONS/Ex2",
+     "1s/CH05_SOMME_VECTEURS_COLINEAIRES/Ex1",
+     "1s/CH05_SOMME_VECTEURS_COLINEAIRES/Ex2",
+     "1s/CH06_ACTIVITES_REPERE/Ex1",
+     "1s/CH06_ACTIVITES_REPERE/Ex2",
+     "1s/CH07_QUART_DE_TOUR/Ex1",
+     "1s/CH07_QUART_DE_TOUR/Ex2",
+     "1s/CH08_SECTIONS_PLANES/Ex1",
+     "1s/CH08_SECTIONS_PLANES/Ex2",
+     "1s/CH09_ACTIVITES_NUMERIQUES_I/Ex1",
+     "1s/CH09_ACTIVITES_NUMERIQUES_I/Ex2",
+     "1s/CH10_ACTIVITES_NUMERIQUES_II/Ex1",
+     "1s/CH10_ACTIVITES_NUMERIQUES_II/Ex2",
+     "1s/CH11_ACTIVITES_ALGEBRIQUES/Ex1",
+     "1s/CH11_ACTIVITES_ALGEBRIQUES/Ex2",
+     "1s/CH12_FONCTIONS_LINEAIRES/Ex1",
+     "1s/CH12_FONCTIONS_LINEAIRES/Ex2",
+     "1s/CH13_EQUATIONS_INEQUATIONS/Ex1",
+     "1s/CH13_EQUATIONS_INEQUATIONS/Ex2",
+     "1s/CH14_FONCTIONS_AFFINES/Ex1",
+     "1s/CH14_FONCTIONS_AFFINES/Ex2",
+     "1s/CH15_SYSTEMES/Ex1",
+     "1s/CH15_SYSTEMES/Ex2",
+     "1s/CH16_EXPLOITATION_INFORMATION/Ex1",
+     "1s/CH16_EXPLOITATION_INFORMATION/Ex2"
+    ],
+    "2sc": [
+     "2sc/T1_CH01_CALCUL_DANS_R/Ex1",
+     "2sc/T1_CH01_CALCUL_DANS_R/Ex2",
+     "2sc/T1_CH02_PREMIER_SECOND_DEGRE/Ex1",
+     "2sc/T1_CH02_PREMIER_SECOND_DEGRE/Ex2",
+     "2sc/T1_CH03_POLYNOMES/Ex1",
+     "2sc/T1_CH03_POLYNOMES/Ex2",
+     "2sc/T1_CH04_ARITHMETIQUE/Ex1",
+     "2sc/T1_CH04_ARITHMETIQUE/Ex2",
+     "2sc/T1_CH05_CALCUL_VECTORIEL/Ex1",
+     "2sc/T1_CH05_CALCUL_VECTORIEL/Ex2",
+     "2sc/T1_CH06_BARYCENTRE/Ex1",
+     "2sc/T1_CH06_BARYCENTRE/Ex2",
+     "2sc/T1_CH07_TRANSLATIONS/Ex1",
+     "2sc/T1_CH07_TRANSLATIONS/Ex2",
+     "2sc/T1_CH08_HOMOTHETIES/Ex1",
+     "2sc/T1_CH08_HOMOTHETIES/Ex2",
+     "2sc/T1_CH09_ROTATIONS/Ex1",
+     "2sc/T1_CH09_ROTATIONS/Ex2",
+     "2sc/T2_CH01_SUITES_ARITHMETIQUES/Ex1",
+     "2sc/T2_CH01_SUITES_ARITHMETIQUES/Ex2",
+     "2sc/T2_CH02_SUITES_GEOMETRIQUES/Ex1",
+     "2sc/T2_CH02_SUITES_GEOMETRIQUES/Ex2",
+     "2sc/T2_CH03_GENERALITES_FONCTIONS/Ex1",
+     "2sc/T2_CH03_GENERALITES_FONCTIONS/Ex2",
+     "2sc/T2_CH04_FONCTIONS_DE_REFERENCE/Ex1",
+     "2sc/T2_CH04_FONCTIONS_DE_REFERENCE/Ex2",
+     "2sc/T2_CH05_TRIGONOMETRIE/Ex1",
+     "2sc/T2_CH05_TRIGONOMETRIE/Ex2",
+     "2sc/T2_CH06_GEOMETRIE_ANALYTIQUE/Ex1",
+     "2sc/T2_CH06_GEOMETRIE_ANALYTIQUE/Ex2",
+     "2sc/T2_CH07_DROITES_PLANS_ESPACE/Ex1",
+     "2sc/T2_CH07_DROITES_PLANS_ESPACE/Ex2",
+     "2sc/T2_CH08_PARALLELISME_ESPACE/Ex1",
+     "2sc/T2_CH08_PARALLELISME_ESPACE/Ex2",
+     "2sc/T2_CH09_ORTHOGONALITE_ESPACE/Ex1",
+     "2sc/T2_CH09_ORTHOGONALITE_ESPACE/Ex2",
+     "2sc/T2_CH10_STATISTIQUES/Ex1",
+     "2sc/T2_CH10_STATISTIQUES/Ex2"
+    ],
+    "3se": [
+     "3se/T1_CH01_GENERALITES_FONCTIONS/Ex1",
+     "3se/T1_CH01_GENERALITES_FONCTIONS/Ex2",
+     "3se/T1_CH02_CONTINUITE/Ex1",
+     "3se/T1_CH02_CONTINUITE/Ex2",
+     "3se/T1_CH03_LIMITES_ET_CONTINUITE/Ex1",
+     "3se/T1_CH03_LIMITES_ET_CONTINUITE/Ex2",
+     "3se/T1_CH04_LIMITES_COMPORTEMENTS_ASYMPTOTIQUES/Ex1",
+     "3se/T1_CH04_LIMITES_COMPORTEMENTS_ASYMPTOTIQUES/Ex2",
+     "3se/T1_CH05_NOMBRE_DERIVE/Ex1",
+     "3se/T1_CH05_NOMBRE_DERIVE/Ex2",
+     "3se/T1_CH06_FONCTION_DERIVEE/Ex1",
+     "3se/T1_CH06_FONCTION_DERIVEE/Ex2",
+     "3se/T1_CH07_ETUDE_DE_FONCTIONS/Ex1",
+     "3se/T1_CH07_ETUDE_DE_FONCTIONS/Ex2",
+     "3se/T1_CH08_FONCTIONS_TRIGONOMETRIQUES/Ex1",
+     "3se/T1_CH08_FONCTIONS_TRIGONOMETRIQUES/Ex2",
+     "3se/T1_CH09_SUITES_REELLES/Ex1",
+     "3se/T1_CH09_SUITES_REELLES/Ex2",
+     "3se/T1_CH10_LIMITES_DE_SUITES/Ex1",
+     "3se/T1_CH10_LIMITES_DE_SUITES/Ex2",
+     "3se/T2_CH01_PRODUIT_SCALAIRE_PLAN/Ex1",
+     "3se/T2_CH01_PRODUIT_SCALAIRE_PLAN/Ex2",
+     "3se/T2_CH02_ANGLES_ORIENTES/Ex1",
+     "3se/T2_CH02_ANGLES_ORIENTES/Ex2",
+     "3se/T2_CH03_TRIGONOMETRIE/Ex1",
+     "3se/T2_CH03_TRIGONOMETRIE/Ex2",
+     "3se/T2_CH04_NOMBRES_COMPLEXES/Ex1",
+     "3se/T2_CH04_NOMBRES_COMPLEXES/Ex2",
+     "3se/T2_CH05_VECTEURS_ESPACE/Ex1",
+     "3se/T2_CH05_VECTEURS_ESPACE/Ex2",
+     "3se/T2_CH06_PRODUIT_SCALAIRE_ESPACE/Ex1",
+     "3se/T2_CH06_PRODUIT_SCALAIRE_ESPACE/Ex2",
+     "3se/T2_CH07_DROITES_ET_PLANS/Ex1",
+     "3se/T2_CH07_DROITES_ET_PLANS/Ex2",
+     "3se/T2_CH08_DENOMBREMENT/Ex1",
+     "3se/T2_CH08_DENOMBREMENT/Ex2",
+     "3se/T2_CH09_STATISTIQUES/Ex1",
+     "3se/T2_CH09_STATISTIQUES/Ex2",
+     "3se/T2_CH10_PROBABILITES/Ex1",
+     "3se/T2_CH10_PROBABILITES/Ex2"
+    ]
+   },
+   "exercise_count": 110
+  },
+  {
+   "name": "CardsPick",
+   "status": "existing",
+   "domain": "generic",
+   "purpose": "Method frame: pick one of 2-5 sentence cards giving the reason, rule or claim behind a step ('polynome donc continue', 'terme de plus haut degre', 'orthogonal a deux vecteurs non colineaires').",
+   "student_action": "tap a card",
+   "engine_needs": "card evaluators (src/method/cards.ts, claims.ts); new claim kinds per chapter",
+   "props_sketch": "frame type 'cards': cards [{id, text}], evaluator",
+   "first_year": "3se",
+   "notes_by_year": {},
+   "exercises": {
+    "1s": [
+     "1s/CH01_ANGLES/Ex1",
+     "1s/CH01_ANGLES/Ex2",
+     "1s/CH02_THALES/Ex1",
+     "1s/CH02_THALES/Ex2",
+     "1s/CH03_TRIGONOMETRIE_TRIANGLE_RECTANGLE/Ex1",
+     "1s/CH03_TRIGONOMETRIE_TRIANGLE_RECTANGLE/Ex2",
+     "1s/CH04_VECTEURS_TRANSLATIONS/Ex1",
+     "1s/CH04_VECTEURS_TRANSLATIONS/Ex2",
+     "1s/CH05_SOMME_VECTEURS_COLINEAIRES/Ex1",
+     "1s/CH05_SOMME_VECTEURS_COLINEAIRES/Ex2",
+     "1s/CH06_ACTIVITES_REPERE/Ex1",
+     "1s/CH06_ACTIVITES_REPERE/Ex2",
+     "1s/CH07_QUART_DE_TOUR/Ex1",
+     "1s/CH07_QUART_DE_TOUR/Ex2",
+     "1s/CH08_SECTIONS_PLANES/Ex1",
+     "1s/CH08_SECTIONS_PLANES/Ex2",
+     "1s/CH09_ACTIVITES_NUMERIQUES_I/Ex1",
+     "1s/CH10_ACTIVITES_NUMERIQUES_II/Ex1",
+     "1s/CH10_ACTIVITES_NUMERIQUES_II/Ex2",
+     "1s/CH11_ACTIVITES_ALGEBRIQUES/Ex1",
+     "1s/CH11_ACTIVITES_ALGEBRIQUES/Ex2",
+     "1s/CH12_FONCTIONS_LINEAIRES/Ex1",
+     "1s/CH12_FONCTIONS_LINEAIRES/Ex2",
+     "1s/CH13_EQUATIONS_INEQUATIONS/Ex1",
+     "1s/CH13_EQUATIONS_INEQUATIONS/Ex2",
+     "1s/CH14_FONCTIONS_AFFINES/Ex1",
+     "1s/CH15_SYSTEMES/Ex1",
+     "1s/CH15_SYSTEMES/Ex2",
+     "1s/CH16_EXPLOITATION_INFORMATION/Ex1",
+     "1s/CH16_EXPLOITATION_INFORMATION/Ex2"
+    ],
+    "2sc": [
+     "2sc/T1_CH01_CALCUL_DANS_R/Ex1",
+     "2sc/T1_CH01_CALCUL_DANS_R/Ex2",
+     "2sc/T1_CH02_PREMIER_SECOND_DEGRE/Ex1",
+     "2sc/T1_CH02_PREMIER_SECOND_DEGRE/Ex2",
+     "2sc/T1_CH03_POLYNOMES/Ex1",
+     "2sc/T1_CH03_POLYNOMES/Ex2",
+     "2sc/T1_CH04_ARITHMETIQUE/Ex1",
+     "2sc/T1_CH04_ARITHMETIQUE/Ex2",
+     "2sc/T1_CH05_CALCUL_VECTORIEL/Ex1",
+     "2sc/T1_CH05_CALCUL_VECTORIEL/Ex2",
+     "2sc/T1_CH07_TRANSLATIONS/Ex1",
+     "2sc/T1_CH07_TRANSLATIONS/Ex2",
+     "2sc/T1_CH08_HOMOTHETIES/Ex1",
+     "2sc/T1_CH08_HOMOTHETIES/Ex2",
+     "2sc/T1_CH09_ROTATIONS/Ex1",
+     "2sc/T1_CH09_ROTATIONS/Ex2",
+     "2sc/T2_CH01_SUITES_ARITHMETIQUES/Ex1",
+     "2sc/T2_CH01_SUITES_ARITHMETIQUES/Ex2",
+     "2sc/T2_CH02_SUITES_GEOMETRIQUES/Ex1",
+     "2sc/T2_CH03_GENERALITES_FONCTIONS/Ex1",
+     "2sc/T2_CH03_GENERALITES_FONCTIONS/Ex2",
+     "2sc/T2_CH04_FONCTIONS_DE_REFERENCE/Ex1",
+     "2sc/T2_CH05_TRIGONOMETRIE/Ex1",
+     "2sc/T2_CH05_TRIGONOMETRIE/Ex2",
+     "2sc/T2_CH06_GEOMETRIE_ANALYTIQUE/Ex1",
+     "2sc/T2_CH06_GEOMETRIE_ANALYTIQUE/Ex2",
+     "2sc/T2_CH07_DROITES_PLANS_ESPACE/Ex1",
+     "2sc/T2_CH07_DROITES_PLANS_ESPACE/Ex2",
+     "2sc/T2_CH08_PARALLELISME_ESPACE/Ex1",
+     "2sc/T2_CH08_PARALLELISME_ESPACE/Ex2",
+     "2sc/T2_CH09_ORTHOGONALITE_ESPACE/Ex1",
+     "2sc/T2_CH09_ORTHOGONALITE_ESPACE/Ex2",
+     "2sc/T2_CH10_STATISTIQUES/Ex1",
+     "2sc/T2_CH10_STATISTIQUES/Ex2"
+    ],
+    "3se": [
+     "3se/T1_CH01_GENERALITES_FONCTIONS/Ex1",
+     "3se/T1_CH02_CONTINUITE/Ex2",
+     "3se/T1_CH03_LIMITES_ET_CONTINUITE/Ex1",
+     "3se/T1_CH04_LIMITES_COMPORTEMENTS_ASYMPTOTIQUES/Ex1",
+     "3se/T1_CH05_NOMBRE_DERIVE/Ex1",
+     "3se/T1_CH06_FONCTION_DERIVEE/Ex1",
+     "3se/T1_CH10_LIMITES_DE_SUITES/Ex1",
+     "3se/T2_CH02_ANGLES_ORIENTES/Ex1",
+     "3se/T2_CH04_NOMBRES_COMPLEXES/Ex1",
+     "3se/T2_CH05_VECTEURS_ESPACE/Ex1",
+     "3se/T2_CH06_PRODUIT_SCALAIRE_ESPACE/Ex1",
+     "3se/T2_CH07_DROITES_ET_PLANS/Ex1",
+     "3se/T2_CH09_STATISTIQUES/Ex1"
+    ]
+   },
+   "exercise_count": 77
+  },
+  {
+   "name": "PlanCards",
+   "status": "existing",
+   "domain": "generic",
+   "purpose": "Method frame: order 3-5 plan cards of a multi-step argument (continuity on R: pieces then junction; existence then uniqueness; plan d'etude of a function).",
+   "student_action": "order the cards, confirm",
+   "engine_needs": "checkPlan (any order respecting what each card uses)",
+   "props_sketch": "frame type 'plan': cards [{id, text, uses[]}]",
+   "first_year": "3se",
+   "notes_by_year": {},
+   "exercises": {
+    "1s": [
+     "1s/CH01_ANGLES/Ex1",
+     "1s/CH02_THALES/Ex1",
+     "1s/CH04_VECTEURS_TRANSLATIONS/Ex1",
+     "1s/CH05_SOMME_VECTEURS_COLINEAIRES/Ex1",
+     "1s/CH06_ACTIVITES_REPERE/Ex2",
+     "1s/CH07_QUART_DE_TOUR/Ex1",
+     "1s/CH07_QUART_DE_TOUR/Ex2",
+     "1s/CH08_SECTIONS_PLANES/Ex1",
+     "1s/CH09_ACTIVITES_NUMERIQUES_I/Ex2"
+    ],
+    "2sc": [
+     "2sc/T1_CH04_ARITHMETIQUE/Ex1",
+     "2sc/T1_CH06_BARYCENTRE/Ex2",
+     "2sc/T1_CH07_TRANSLATIONS/Ex1",
+     "2sc/T1_CH08_HOMOTHETIES/Ex1",
+     "2sc/T2_CH03_GENERALITES_FONCTIONS/Ex1",
+     "2sc/T2_CH07_DROITES_PLANS_ESPACE/Ex1",
+     "2sc/T2_CH07_DROITES_PLANS_ESPACE/Ex2",
+     "2sc/T2_CH08_PARALLELISME_ESPACE/Ex1",
+     "2sc/T2_CH09_ORTHOGONALITE_ESPACE/Ex1",
+     "2sc/T2_CH09_ORTHOGONALITE_ESPACE/Ex2"
+    ],
+    "3se": [
+     "3se/T1_CH02_CONTINUITE/Ex1",
+     "3se/T1_CH02_CONTINUITE/Ex2",
+     "3se/T1_CH03_LIMITES_ET_CONTINUITE/Ex2",
+     "3se/T1_CH05_NOMBRE_DERIVE/Ex2",
+     "3se/T1_CH06_FONCTION_DERIVEE/Ex1",
+     "3se/T1_CH07_ETUDE_DE_FONCTIONS/Ex1",
+     "3se/T2_CH02_ANGLES_ORIENTES/Ex2",
+     "3se/T2_CH05_VECTEURS_ESPACE/Ex2"
+    ]
+   },
+   "exercise_count": 27
+  },
+  {
+   "name": "NumericTwin",
+   "status": "extend",
+   "domain": "generic",
+   "purpose": "Pick values for the letter(s) and see both sides of an identity agree before proving it (1 - f(x) = (x - 1)^2/(x^2 + 1), cos 3x = 4cos^3 x - 3cos x, f(x) = ax + b + c/(x - 2)).",
+   "student_action": "tap values, compare both sides",
+   "engine_needs": "safe parser evaluates both sides at each value (exists); exact values for pi-multiples and surds",
+   "props_sketch": "symbols (1-2 letters), template, compare, values (numbers or 'pi/12', 'sqrt(2)')",
+   "extends_note": "allow two symbols (a, b) for f(a) - f(b) = ..., an integer symbol n, and values given as safe-parser strings (pi/12, sqrt(2)) shown exactly",
+   "first_year": "3se",
+   "notes_by_year": {
+    "3se": "allow two symbols (a, b) for f(a) - f(b) = ..., an integer symbol n, and values given as safe-parser strings (pi/12, sqrt(2)) shown exactly",
+    "2sc": "3se adds two symbols, an integer symbol n and exact values; 2eme adds integer functions gcd(a, b), mod(a, d) and units(n) in the safe parser for an integer symbol, so the PGCD pattern of T1_CH04 can be watched before it is proved"
+   },
+   "exercises": {
+    "1s": [
+     "1s/CH06_ACTIVITES_REPERE/Ex2",
+     "1s/CH11_ACTIVITES_ALGEBRIQUES/Ex1",
+     "1s/CH11_ACTIVITES_ALGEBRIQUES/Ex2"
+    ],
+    "2sc": [
+     "2sc/T1_CH02_PREMIER_SECOND_DEGRE/Ex1",
+     "2sc/T1_CH03_POLYNOMES/Ex1",
+     "2sc/T1_CH04_ARITHMETIQUE/Ex1",
+     "2sc/T2_CH03_GENERALITES_FONCTIONS/Ex1",
+     "2sc/T2_CH03_GENERALITES_FONCTIONS/Ex2",
+     "2sc/T2_CH05_TRIGONOMETRIE/Ex1"
+    ],
+    "3se": [
+     "3se/T1_CH01_GENERALITES_FONCTIONS/Ex1",
+     "3se/T1_CH03_LIMITES_ET_CONTINUITE/Ex1",
+     "3se/T1_CH04_LIMITES_COMPORTEMENTS_ASYMPTOTIQUES/Ex1",
+     "3se/T1_CH05_NOMBRE_DERIVE/Ex2",
+     "3se/T1_CH06_FONCTION_DERIVEE/Ex1",
+     "3se/T1_CH06_FONCTION_DERIVEE/Ex2",
+     "3se/T1_CH07_ETUDE_DE_FONCTIONS/Ex1",
+     "3se/T1_CH08_FONCTIONS_TRIGONOMETRIQUES/Ex1",
+     "3se/T2_CH03_TRIGONOMETRIE/Ex1"
+    ]
+   },
+   "exercise_count": 18
+  },
+  {
+   "name": "PredictReveal",
+   "status": "existing",
+   "domain": "generic",
+   "purpose": "Commit to a prediction (which draw is most favourable? the same door?) before the inner visual appears.",
+   "student_action": "pick a prediction, then explore the revealed visual",
+   "engine_needs": "none of its own (the inner component computes; the prediction is not graded)",
+   "props_sketch": "prompt, options (2-4), reveal (inner spec), insight",
+   "first_year": "3se",
+   "notes_by_year": {},
+   "exercises": {
+    "1s": [
+     "1s/CH01_ANGLES/Ex2",
+     "1s/CH02_THALES/Ex1",
+     "1s/CH02_THALES/Ex2",
+     "1s/CH08_SECTIONS_PLANES/Ex1",
+     "1s/CH08_SECTIONS_PLANES/Ex2",
+     "1s/CH10_ACTIVITES_NUMERIQUES_II/Ex2",
+     "1s/CH12_FONCTIONS_LINEAIRES/Ex2",
+     "1s/CH16_EXPLOITATION_INFORMATION/Ex1"
+    ],
+    "2sc": [
+     "2sc/T1_CH01_CALCUL_DANS_R/Ex2",
+     "2sc/T2_CH01_SUITES_ARITHMETIQUES/Ex2",
+     "2sc/T2_CH02_SUITES_GEOMETRIQUES/Ex2",
+     "2sc/T2_CH04_FONCTIONS_DE_REFERENCE/Ex2",
+     "2sc/T2_CH10_STATISTIQUES/Ex1"
+    ],
+    "3se": [
+     "3se/T1_CH06_FONCTION_DERIVEE/Ex2",
+     "3se/T1_CH09_SUITES_REELLES/Ex2",
+     "3se/T2_CH10_PROBABILITES/Ex1",
+     "3se/T2_CH10_PROBABILITES/Ex2"
+    ]
+   },
+   "exercise_count": 17
+  },
+  {
+   "name": "StatementTap",
+   "status": "existing",
+   "domain": "generic",
+   "purpose": "Method frame: tap the word of the French statement that decides the method (avec / sans remise, simultanement, au moins, exactement, un seul, ni ... ni, par defaut).",
+   "student_action": "tap a word in the statement",
+   "engine_needs": "none (targets in content)",
+   "props_sketch": "frame type 'read': sentence, targets",
+   "first_year": "3se",
+   "notes_by_year": {},
+   "exercises": {
+    "1s": [
+     "1s/CH08_SECTIONS_PLANES/Ex1",
+     "1s/CH09_ACTIVITES_NUMERIQUES_I/Ex2",
+     "1s/CH12_FONCTIONS_LINEAIRES/Ex2",
+     "1s/CH13_EQUATIONS_INEQUATIONS/Ex2",
+     "1s/CH16_EXPLOITATION_INFORMATION/Ex1"
+    ],
+    "2sc": [
+     "2sc/T1_CH02_PREMIER_SECOND_DEGRE/Ex2",
+     "2sc/T1_CH04_ARITHMETIQUE/Ex2",
+     "2sc/T1_CH09_ROTATIONS/Ex2",
+     "2sc/T2_CH02_SUITES_GEOMETRIQUES/Ex2"
+    ],
+    "3se": [
+     "3se/T1_CH02_CONTINUITE/Ex2",
+     "3se/T1_CH09_SUITES_REELLES/Ex2",
+     "3se/T2_CH08_DENOMBREMENT/Ex1",
+     "3se/T2_CH08_DENOMBREMENT/Ex2",
+     "3se/T2_CH09_STATISTIQUES/Ex2",
+     "3se/T2_CH10_PROBABILITES/Ex1",
+     "3se/T2_CH10_PROBABILITES/Ex2"
+    ]
+   },
+   "exercise_count": 16
+  },
+  {
+   "name": "CounterexampleHunt",
+   "status": "reserved",
+   "domain": "generic",
+   "purpose": "'Try to break this claim': the student proposes x, n or a bound M against a 'for all' statement (f(x) <= 1, d(x) >= 2, tan x >= x, g has a maximum, (An) is bounded) and the engine says whether the claim survives or is broken (local max 1 beaten by f(4) = 17).",
+   "student_action": "type or drag a trial value, submit tries, then pick 'holds' or 'fails'",
+   "engine_needs": "claim = inequality between two content expressions on a domain, or 'has a maximum' / 'is bounded above'; exact evaluation at the tried value; the true answer known from the analysis / sequences engine (sup, max, limit) so the final pick is graded; for 'bounded above' the engine returns an n with An > M",
+   "props_sketch": "claim {kind: le | ge | has_max | bounded_above, lhs, rhs, domain}, variable, maxTries, hintValues",
+   "first_year": "3se",
+   "notes_by_year": {},
+   "exercises": {
+    "1s": [
+     "1s/CH04_VECTEURS_TRANSLATIONS/Ex2",
+     "1s/CH11_ACTIVITES_ALGEBRIQUES/Ex2"
+    ],
+    "2sc": [
+     "2sc/T1_CH03_POLYNOMES/Ex2",
+     "2sc/T2_CH03_GENERALITES_FONCTIONS/Ex1",
+     "2sc/T2_CH04_FONCTIONS_DE_REFERENCE/Ex2"
+    ],
+    "3se": [
+     "3se/T1_CH01_GENERALITES_FONCTIONS/Ex1",
+     "3se/T1_CH01_GENERALITES_FONCTIONS/Ex2",
+     "3se/T1_CH03_LIMITES_ET_CONTINUITE/Ex2",
+     "3se/T1_CH04_LIMITES_COMPORTEMENTS_ASYMPTOTIQUES/Ex2",
+     "3se/T1_CH06_FONCTION_DERIVEE/Ex1",
+     "3se/T1_CH08_FONCTIONS_TRIGONOMETRIQUES/Ex1",
+     "3se/T1_CH09_SUITES_REELLES/Ex2"
+    ]
+   },
+   "exercise_count": 12
+  },
+  {
+   "name": "CompareTwo",
+   "status": "existing",
+   "domain": "generic",
+   "purpose": "Two inner visuals stacked to compare (draws with vs without order; notes before vs after the affine change).",
+   "student_action": "explore both inner visuals",
+   "engine_needs": "none of its own",
+   "props_sketch": "left, right (inner specs), leftLabel, rightLabel, insight",
+   "first_year": "3se",
+   "notes_by_year": {},
+   "exercises": {
+    "1s": [
+     "1s/CH05_SOMME_VECTEURS_COLINEAIRES/Ex2"
+    ],
+    "2sc": [
+     "2sc/T2_CH10_STATISTIQUES/Ex1"
+    ],
+    "3se": [
+     "3se/T2_CH09_STATISTIQUES/Ex1",
+     "3se/T2_CH10_PROBABILITES/Ex2"
+    ]
+   },
+   "exercise_count": 4
+  },
+  {
+   "name": "IntervalBuilder",
+   "status": "new",
+   "domain": "numbers & algebra",
+   "purpose": "Write a domain or a solution set by building it on a number line (open / closed ends, unions, isolated points, excluded values); the written form ]-inf, -4] U [2, +inf[ builds itself.",
+   "student_action": "tap endpoints on the line (chips of allowed values), toggle bracket ends, add a piece or a point, choose +-infinity",
+   "engine_needs": "new src/engine/intervals.ts: exact endpoints (fractions, surds, multiples of pi), union normalisation, set equality with the engine's set (domain of a content expression, solution of an inequality, or a given set), localized feedback (wrong end, wrong bracket, missing piece)",
+   "props_sketch": "axis {min, max, ticks: num | pi}, chips, expected: {domainOf: expr} | {solve: inequality} | {set}, allowPoints, allowInfinity",
+   "first_year": "3se",
+   "notes_by_year": {
+    "1s": "beyond the 3se / 2eme spec: a whole-numbers filter (N or Z) for 'x entier naturel' (tariffs {0, ..., 19}, n <= 4.6 -> 0..4, integers of [-2, -1.5]) and the equality case of the distance condition (|x + 2| = 3 gives the two points -5 and 1)"
+   },
+   "exercises": {
+    "1s": [
+     "1s/CH06_ACTIVITES_REPERE/Ex1",
+     "1s/CH10_ACTIVITES_NUMERIQUES_II/Ex1",
+     "1s/CH13_EQUATIONS_INEQUATIONS/Ex1",
+     "1s/CH13_EQUATIONS_INEQUATIONS/Ex2",
+     "1s/CH14_FONCTIONS_AFFINES/Ex1",
+     "1s/CH14_FONCTIONS_AFFINES/Ex2",
+     "1s/CH15_SYSTEMES/Ex2"
+    ],
+    "2sc": [
+     "2sc/T1_CH01_CALCUL_DANS_R/Ex1",
+     "2sc/T1_CH02_PREMIER_SECOND_DEGRE/Ex1",
+     "2sc/T1_CH02_PREMIER_SECOND_DEGRE/Ex2",
+     "2sc/T1_CH03_POLYNOMES/Ex1",
+     "2sc/T1_CH03_POLYNOMES/Ex2",
+     "2sc/T2_CH03_GENERALITES_FONCTIONS/Ex1",
+     "2sc/T2_CH03_GENERALITES_FONCTIONS/Ex2",
+     "2sc/T2_CH04_FONCTIONS_DE_REFERENCE/Ex1"
+    ],
+    "3se": [
+     "3se/T1_CH01_GENERALITES_FONCTIONS/Ex1",
+     "3se/T1_CH01_GENERALITES_FONCTIONS/Ex2",
+     "3se/T1_CH03_LIMITES_ET_CONTINUITE/Ex1",
+     "3se/T1_CH04_LIMITES_COMPORTEMENTS_ASYMPTOTIQUES/Ex1",
+     "3se/T1_CH07_ETUDE_DE_FONCTIONS/Ex1",
+     "3se/T1_CH07_ETUDE_DE_FONCTIONS/Ex2",
+     "3se/T1_CH08_FONCTIONS_TRIGONOMETRIQUES/Ex1",
+     "3se/T1_CH08_FONCTIONS_TRIGONOMETRIQUES/Ex2",
+     "3se/T2_CH03_TRIGONOMETRIE/Ex1",
+     "3se/T2_CH03_TRIGONOMETRIE/Ex2"
+    ]
+   },
+   "exercise_count": 25
+  },
+  {
+   "name": "ProductGrid",
+   "status": "new",
+   "domain": "numbers & algebra",
+   "purpose": "The 'generic rectangle' for products of polynomials: each term of one factor times each term of the other fills a cell, cells of the same degree share a colour and are collected into the expanded form; used to expand (sqrt5 - 1)^2, to identify unknown coefficients (P(x) = (x - 3)(mx^2 + nx + p)), to read the degree and leading term of a product, and in complete-square mode to build a canonical form (x^2 + bx as a square missing its corner (b/2)^2).",
+   "student_action": "type a monomial in a cell, tap same-degree cells to collect them, type the unknown coefficients degree by degree; in complete-square mode read the missing corner and write a(x - alpha)^2 + beta",
+   "engine_needs": "new src/engine/polynomial.ts: exact polynomials over rationals and simple surds (sqrt5, sqrt3), expansion and collection by degree, coefficient comparison, solving the triangular identification system (m, n, p, then the check on the last coefficient), canonical form with exact alpha and beta; cells checked by sample equivalence through the safe parser",
+   "props_sketch": "left, right (lists of terms, unknown coefficients allowed), target (polynomial to match), mode: expand | identify | degree | complete_square, unknowns, givenCells",
+   "first_year": "2sc",
+   "notes_by_year": {},
+   "exercises": {
+    "1s": [
+     "1s/CH10_ACTIVITES_NUMERIQUES_II/Ex1",
+     "1s/CH11_ACTIVITES_ALGEBRIQUES/Ex1",
+     "1s/CH11_ACTIVITES_ALGEBRIQUES/Ex2",
+     "1s/CH13_EQUATIONS_INEQUATIONS/Ex1"
+    ],
+    "2sc": [
+     "2sc/T1_CH01_CALCUL_DANS_R/Ex1",
+     "2sc/T1_CH02_PREMIER_SECOND_DEGRE/Ex1",
+     "2sc/T1_CH02_PREMIER_SECOND_DEGRE/Ex2",
+     "2sc/T1_CH03_POLYNOMES/Ex1",
+     "2sc/T1_CH03_POLYNOMES/Ex2",
+     "2sc/T1_CH09_ROTATIONS/Ex1",
+     "2sc/T2_CH02_SUITES_GEOMETRIQUES/Ex1",
+     "2sc/T2_CH04_FONCTIONS_DE_REFERENCE/Ex1",
+     "2sc/T2_CH06_GEOMETRIE_ANALYTIQUE/Ex2"
+    ],
+    "3se": []
+   },
+   "exercise_count": 13
+  },
+  {
+   "name": "BoundsRuler",
+   "status": "new",
+   "domain": "numbers & algebra",
+   "purpose": "A zoomable graduated ruler for encadrements and approximations: a bracket a < x < b is pushed through the operations of the question (subtract 2, square a positive, multiply by 600, take 1/x of a positive) and the student sees the new bracket, then whether it decides a rounding (does it straddle the half-way mark?) or gives an approximation par defaut / par exces at 10^-n.",
+   "student_action": "tap the operation to apply, drag or type the new bounds, tap 'arrondi = ...' or 'on ne peut pas conclure'; zoom one decimal further",
+   "engine_needs": "new src/engine/bounds.ts: exact rational interval arithmetic for monotone operations (+c, x k with the sign rule, x^2 and sqrt on positives, 1/x on positives), the rounding decision at 10^-n (nearest, par defaut, par exces, unit above), the true value (surd or rational) placed to check every bracket; a bracket that does not contain the true value is refused",
+   "props_sketch": "start {lower, upper, of}, ops [{kind: add | mul | square | sqrt | inv, by}], target {expr, decimals, mode: nearest | default | excess | ceil}, ticks, zoomLevels",
+   "first_year": "2sc",
+   "notes_by_year": {
+    "1s": "beyond the 2eme spec (par defaut / par exces, rounding): the 1ere 'valeur approchee a 10^p pres' test (both 0.64 and 0.65 approximate 9/14 to 10^-2), a compare target that may answer 'the bracket cannot decide' (21.21 < 15 sqrt 2 < 21.225 against 21.22), and a start given as an inequality on an expression (-1 <= 2x - 3 <= 1/2) pushed back to x"
+   },
+   "exercises": {
+    "1s": [
+     "1s/CH09_ACTIVITES_NUMERIQUES_I/Ex1",
+     "1s/CH10_ACTIVITES_NUMERIQUES_II/Ex1",
+     "1s/CH10_ACTIVITES_NUMERIQUES_II/Ex2"
+    ],
+    "2sc": [
+     "2sc/T1_CH01_CALCUL_DANS_R/Ex1",
+     "2sc/T1_CH01_CALCUL_DANS_R/Ex2",
+     "2sc/T1_CH02_PREMIER_SECOND_DEGRE/Ex2",
+     "2sc/T1_CH03_POLYNOMES/Ex2",
+     "2sc/T2_CH02_SUITES_GEOMETRIQUES/Ex2"
+    ],
+    "3se": []
+   },
+   "exercise_count": 8
+  },
+  {
+   "name": "PartWholeBar",
+   "status": "extend",
+   "domain": "numbers & algebra",
+   "purpose": "Bars for a quantity and its changes: in the new percent-change mode each step (x 1.2, x 0.8; + 6 % of the start vs + 5 % of what is there; index base 100) is drawn on its own whole, so +20 % then -20 % visibly does not come back to 45 D and 18 index points are not 18 % of 2024.",
+   "student_action": "drag the stepped handle to the new value, tap the whole a percentage is taken of, read the global coefficient",
+   "engine_needs": "src/engine/partWhole.ts (exists: exact ratio, above-whole flag) extended to chains: product of coefficients, global change, the coefficient that comes back (5/6), percentage between two indices, simple vs compound growth of one year",
+   "props_sketch": "whole, part, mode: place | fraction_of_quantity | feedback | percent_change, steps [{coef | percent, of: start | current}], indexBase, ticks",
+   "extends_note": "today modes place / fraction_of_quantity / feedback for a probability above 1; add mode percent_change with a chain of steps, each measured on its own whole, the global coefficient, the back-to-start coefficient and an index-base-100 axis",
+   "first_year": "2sc",
+   "notes_by_year": {
+    "2sc": "today modes place / fraction_of_quantity / feedback for a probability above 1; add mode percent_change with a chain of steps, each measured on its own whole, the global coefficient, the back-to-start coefficient and an index-base-100 axis",
+    "1s": "nothing beyond the 2eme percent_change mode: 1ere uses it for x 1.08 then x 0.75 (the seller's -17 % claim), the antecedent 432 / 1.08 = 400, the photo area x 2.56 and x 16/225, and indices base 100 in 2018; fraction_of_quantity (exists) for the tombola tickets"
+   },
+   "exercises": {
+    "1s": [
+     "1s/CH09_ACTIVITES_NUMERIQUES_I/Ex2",
+     "1s/CH10_ACTIVITES_NUMERIQUES_II/Ex2",
+     "1s/CH12_FONCTIONS_LINEAIRES/Ex2",
+     "1s/CH16_EXPLOITATION_INFORMATION/Ex2"
+    ],
+    "2sc": [
+     "2sc/T1_CH01_CALCUL_DANS_R/Ex2",
+     "2sc/T2_CH02_SUITES_GEOMETRIQUES/Ex2",
+     "2sc/T2_CH10_STATISTIQUES/Ex2"
+    ],
+    "3se": []
+   },
+   "exercise_count": 7
+  },
+  {
+   "name": "DivisibilityChecker",
+   "status": "new",
+   "domain": "numbers & algebra",
+   "purpose": "An integer written digit by digit with a divisor's criterion lit (units digit for 2 and 5, last two digits for 4 and 25, last three for 8, digit sum for 3 and 9, S1 - S2 by rank from the right for 11 with the manual's d + 11p rule) and the remainder it gives; unknown digits as slots (4c17, 6a3b, xyz) the student tries; a list filter (two-digit endings divisible by 4 using allowed digits).",
+   "student_action": "tap a divisor to light its criterion and type the remainder; try a digit in a slot and see if the condition holds; strike the numbers of a list that fail",
+   "engine_needs": "arithmetic.ts: remainders by 2, 3, 4, 5, 8, 9, 11, 25 through the criterion and by direct division (both must agree), rank parity from the right, the d + 11p rule for a negative d, every digit value satisfying a set of conditions (enumeration over 0-9 per slot), the symbolic criterion for letter digits (d = x + z - y)",
+   "props_sketch": "number (digits or letter slots), divisors, ask: divisible | remainder | find_digits {conditions} | filter {list, conditions}, showCriterion",
+   "first_year": "2sc",
+   "notes_by_year": {
+    "1s": "beyond the 2eme spec (criteria, digit slots, filters): a division mode a = bq + r with 0 <= r < b (500 = 12 x 41 + 8 -> 41 multiples of 12 up to 500), a remainder-pattern row (18k mod 12 for k = 1..6), the Euclid chain (1176, 756 -> 84), and a long-division mode that lists the remainders, lights the first one that repeats and gives the n-th digit (9/14 = 0.6428571..., 100th digit 8)"
+   },
+   "exercises": {
+    "1s": [
+     "1s/CH09_ACTIVITES_NUMERIQUES_I/Ex1",
+     "1s/CH09_ACTIVITES_NUMERIQUES_I/Ex2"
+    ],
+    "2sc": [
+     "2sc/T1_CH04_ARITHMETIQUE/Ex1",
+     "2sc/T1_CH04_ARITHMETIQUE/Ex2",
+     "2sc/T2_CH01_SUITES_ARITHMETIQUES/Ex1"
+    ],
+    "3se": []
+   },
+   "exercise_count": 5
+  },
+  {
+   "name": "FactorTree",
+   "status": "new",
+   "domain": "numbers & algebra",
+   "purpose": "Prime factorisation as a tree or a ladder of divisions (19683 -> 3^9, 2400 = 2^5 x 3 x 5^2); in radical mode equal primes pair into squares so the largest square comes out of the root (sqrt2400 = 20 sqrt6, sqrt720 = 12 sqrt5).",
+   "student_action": "tap a prime divisor to split the current number until every leaf is prime; pair equal primes; type the simplified radical",
+   "engine_needs": "new src/engine/arithmetic.ts: factorisation of integers up to a few million, divisor check, exponents, largest square factor (n = k^2 m, m square-free), 'is a power of b'; PGCD / PPCM from factorisations (1ere)",
+   "props_sketch": "n, mode: tree | ladder | sqrt_simplify, ask: factorise | is_power_of {base} | simplify_sqrt",
+   "first_year": "2sc",
+   "notes_by_year": {
+    "1s": "beyond the 2eme spec (tree, ladder, sqrt_simplify): an exponent table for two numbers with PGCD = smaller exponents and PPCM = larger exponents (756 and 1176 -> 84 and 10584), a common-divisor grid 2^a x 3^b (252 and 180: 9 divisors, 7 cannot appear), a perfect-power mode (smallest k making 756 k a square: 21; 1176 k' a cube: 63), a reduce-fraction mode (756/1176 = 9/14), and a powers mode for exponent rules (2^5 x 3^-2 x 6^3 / (4^3 x 3))"
+   },
+   "exercises": {
+    "1s": [
+     "1s/CH09_ACTIVITES_NUMERIQUES_I/Ex1",
+     "1s/CH09_ACTIVITES_NUMERIQUES_I/Ex2",
+     "1s/CH10_ACTIVITES_NUMERIQUES_II/Ex1"
+    ],
+    "2sc": [
+     "2sc/T1_CH01_CALCUL_DANS_R/Ex2",
+     "2sc/T2_CH02_SUITES_GEOMETRIQUES/Ex1"
+    ],
+    "3se": []
+   },
+   "exercise_count": 5
+  },
+  {
+   "name": "LinearSystemBoard",
+   "status": "new",
+   "domain": "numbers & algebra",
+   "purpose": "A system of two first-degree equations as two equation cards and two lines: substitution, elimination with multipliers the student chooses (each combination is one more line through the same point), and the three cases (one point; parallel lines, 0 = 7; the same line, 0 = 0).",
+   "student_action": "pick the method; choose a multiplier for each equation until one unknown cancels; tap the solution point or the case; read the line of each equation",
+   "engine_needs": "new src/engine/systems.ts: exact 2 x 2 solving over rationals, classification (one / none / infinitely many), the combination k1 E1 + k2 E2 and the unknown it cancels, equivalence of two systems (same solution set), each equation as a line (y = mx + p, or vertical) for the plot",
+   "props_sketch": "equations [{a, b, c}] x 2 (ax + by = c, rationals), unknowns {x, y}, method: substitution | elimination | graph, multipliers (chosen by the student), window, ask: multipliers | solution | classify",
+   "first_year": "1s",
+   "notes_by_year": {},
+   "exercises": {
+    "1s": [
+     "1s/CH15_SYSTEMES/Ex1",
+     "1s/CH15_SYSTEMES/Ex2"
+    ],
+    "2sc": [],
+    "3se": []
+   },
+   "exercise_count": 2
+  },
+  {
+   "name": "FunctionPlot",
+   "status": "extend",
+   "domain": "functions & analysis",
+   "purpose": "Draw one or more curves with engine-placed points, asymptotes and lines (tangent, y = m, oblique asymptote) so the student reads what the exam asks about the graph.",
+   "student_action": "look, then tap a marker, a line or a region to answer (new tap ask); tap to expand",
+   "engine_needs": "src/engine/analysis.ts: content-defined functions (safe-parser expression strings validated at load, not only registry ids), piecewise pieces with open / closed ends, E(x) (floor) in the parser, trig on a pi-graduated axis; vertical and oblique asymptotes checked against engine limits; image band f([a, b]) of an x-band; exact y-values at rational points",
+   "props_sketch": "curves [{fn: id | expr | pieces [{expr, from, to, closedFrom, closedTo}], label, style}], domain, range, xTicks: num | pi, markers: point | hole | hline | vline | asymptote | line {a, b} | xband {from, to} (<= 8), shade {between, from, to}, ask {kind: tap_marker | tap_region}",
+   "extends_note": "today one registry function, 6 markers (point, hline, vline, horizontal asymptote) and no events; add content expressions and pieces (with E(x)), several curves and lines (tangent, oblique asymptote, y = m), vertical asymptotes, hole / open-end dots, an x-band with its engine image band, a pi axis, and a tap ask that emits an event",
+   "first_year": "3se",
+   "notes_by_year": {
+    "3se": "today one registry function, 6 markers (point, hline, vline, horizontal asymptote) and no events; add content expressions and pieces (with E(x)), several curves and lines (tangent, oblique asymptote, y = m), vertical asymptotes, hole / open-end dots, an x-band with its engine image band, a pi axis, and a tap ask that emits an event",
+    "2sc": "3se adds content expressions, several curves, lines, vertical asymptotes, holes, x-band and a tap ask; 2eme adds a values table the student fills (cells checked exactly, filled points appear on the plot), a place_points ask for sketching (vertex, axis intercepts, symmetric point), a centre marker for a hyperbola, and an 'on the curve?' check for given points",
+    "1s": "beyond today's code and the 3se / 2eme extensions (content expressions, several curves and lines, tap ask, values table, place_points): place_points used to draw a line from two points of y = ax + b, a read_point ask (coordinates of an intersection read on the grid), a slope step-triangle marker (x + dx -> y + a dx), lines given as ax + by = c, curves restricted to an interval (segments for x in [0, 1000] or t in [0.5, 11/6]), orthogonal axes with different units (6 cm per hour, 1 cm per 10 km)"
+   },
+   "exercises": {
+    "1s": [
+     "1s/CH12_FONCTIONS_LINEAIRES/Ex1",
+     "1s/CH12_FONCTIONS_LINEAIRES/Ex2",
+     "1s/CH14_FONCTIONS_AFFINES/Ex1",
+     "1s/CH14_FONCTIONS_AFFINES/Ex2",
+     "1s/CH15_SYSTEMES/Ex1",
+     "1s/CH15_SYSTEMES/Ex2"
+    ],
+    "2sc": [
+     "2sc/T1_CH02_PREMIER_SECOND_DEGRE/Ex1",
+     "2sc/T2_CH03_GENERALITES_FONCTIONS/Ex1",
+     "2sc/T2_CH03_GENERALITES_FONCTIONS/Ex2",
+     "2sc/T2_CH04_FONCTIONS_DE_REFERENCE/Ex1",
+     "2sc/T2_CH04_FONCTIONS_DE_REFERENCE/Ex2"
+    ],
+    "3se": [
+     "3se/T1_CH01_GENERALITES_FONCTIONS/Ex1",
+     "3se/T1_CH01_GENERALITES_FONCTIONS/Ex2",
+     "3se/T1_CH02_CONTINUITE/Ex1",
+     "3se/T1_CH02_CONTINUITE/Ex2",
+     "3se/T1_CH03_LIMITES_ET_CONTINUITE/Ex2",
+     "3se/T1_CH04_LIMITES_COMPORTEMENTS_ASYMPTOTIQUES/Ex1",
+     "3se/T1_CH04_LIMITES_COMPORTEMENTS_ASYMPTOTIQUES/Ex2",
+     "3se/T1_CH05_NOMBRE_DERIVE/Ex2",
+     "3se/T1_CH07_ETUDE_DE_FONCTIONS/Ex1",
+     "3se/T1_CH07_ETUDE_DE_FONCTIONS/Ex2",
+     "3se/T1_CH08_FONCTIONS_TRIGONOMETRIQUES/Ex1",
+     "3se/T1_CH08_FONCTIONS_TRIGONOMETRIQUES/Ex2"
+    ]
+   },
+   "exercise_count": 23
+  },
+  {
+   "name": "HorizontalLineSweep",
+   "status": "new",
+   "domain": "functions & analysis",
+   "purpose": "Drag a horizontal line y = m over the curve and count the crossings: solve f(x) = m and f(x) <= k graphically and discuss the number of solutions according to m.",
+   "student_action": "drag m (stepped), tap the intersection points, fill the 'm -> number of solutions' rows; in inequality mode shade the x where the curve is under the line",
+   "engine_needs": "analysis.ts: intersections with y = m on each monotone piece (exact for piecewise-affine and degree <= 2 cases, bracketed otherwise), critical m values (extrema, limits, end values), solution set of f(x) <= k as intervals (handed to IntervalBuilder)",
+   "props_sketch": "fn, domain, m {min, max, step, init}, criticalM, mode: count | inequality, ask: discussion rows",
+   "first_year": "3se",
+   "notes_by_year": {
+    "1s": "beyond the 3se spec (one fn, count / inequality modes): several curves under one sweep line, a whole-number domain (keep the largest number of entries), and a read mode that only reads the antecedent of m on one line"
+   },
+   "exercises": {
+    "1s": [
+     "1s/CH11_ACTIVITES_ALGEBRIQUES/Ex2",
+     "1s/CH12_FONCTIONS_LINEAIRES/Ex2",
+     "1s/CH13_EQUATIONS_INEQUATIONS/Ex2",
+     "1s/CH14_FONCTIONS_AFFINES/Ex2"
+    ],
+    "2sc": [
+     "2sc/T1_CH02_PREMIER_SECOND_DEGRE/Ex2",
+     "2sc/T1_CH03_POLYNOMES/Ex2",
+     "2sc/T1_CH09_ROTATIONS/Ex1",
+     "2sc/T2_CH03_GENERALITES_FONCTIONS/Ex1",
+     "2sc/T2_CH03_GENERALITES_FONCTIONS/Ex2",
+     "2sc/T2_CH04_FONCTIONS_DE_REFERENCE/Ex2"
+    ],
+    "3se": [
+     "3se/T1_CH01_GENERALITES_FONCTIONS/Ex2",
+     "3se/T1_CH02_CONTINUITE/Ex2",
+     "3se/T1_CH03_LIMITES_ET_CONTINUITE/Ex2",
+     "3se/T1_CH06_FONCTION_DERIVEE/Ex1",
+     "3se/T1_CH06_FONCTION_DERIVEE/Ex2",
+     "3se/T1_CH07_ETUDE_DE_FONCTIONS/Ex1",
+     "3se/T1_CH08_FONCTIONS_TRIGONOMETRIQUES/Ex2",
+     "3se/T2_CH03_TRIGONOMETRIE/Ex2"
+    ]
+   },
+   "exercise_count": 18
+  },
+  {
+   "name": "ParameterPlayground",
+   "status": "reserved",
+   "domain": "functions & analysis",
+   "purpose": "Sliders for the parameters of a function (a, b, m) with live engine outputs and the linked curve, to find the values that make a property hold (limit at 1 exists, extremum at 2, sign of f(a) - f(b)).",
+   "student_action": "drag sliders, read outputs, tap 'found' when the property holds",
+   "engine_needs": "analysis.ts: parameters substituted into content expressions; outputs as engine calls (value, one-sided limit, derivative, difference); the condition's solution set known to the engine to grade 'found'",
+   "props_sketch": "params [{name, min, max, step, init}], expr, outputs [{label, call: value | limit | derivative | diff, at}], goal, render: FunctionPlot props",
+   "first_year": "3se",
+   "notes_by_year": {
+    "2sc": "3se renders on a FunctionPlot; 2eme adds a number-line render (several outputs as points, their order visible) and a GeometryCanvas render (circle Gamma_k), and a 'never' answer for unreachable goals",
+    "1s": "nothing beyond the 2eme extension (number-line render with the order of several outputs, a 'never' answer): 1ere uses the FunctionPlot render for the lines and the number line for a, a^2, sqrt a, 1/a"
+   },
+   "exercises": {
+    "1s": [
+     "1s/CH10_ACTIVITES_NUMERIQUES_II/Ex1",
+     "1s/CH12_FONCTIONS_LINEAIRES/Ex1",
+     "1s/CH14_FONCTIONS_AFFINES/Ex1",
+     "1s/CH15_SYSTEMES/Ex2"
+    ],
+    "2sc": [
+     "2sc/T1_CH01_CALCUL_DANS_R/Ex1",
+     "2sc/T1_CH02_PREMIER_SECOND_DEGRE/Ex1",
+     "2sc/T2_CH02_SUITES_GEOMETRIQUES/Ex2",
+     "2sc/T2_CH03_GENERALITES_FONCTIONS/Ex1",
+     "2sc/T2_CH03_GENERALITES_FONCTIONS/Ex2",
+     "2sc/T2_CH06_GEOMETRIE_ANALYTIQUE/Ex2"
+    ],
+    "3se": [
+     "3se/T1_CH01_GENERALITES_FONCTIONS/Ex1",
+     "3se/T1_CH03_LIMITES_ET_CONTINUITE/Ex2",
+     "3se/T1_CH06_FONCTION_DERIVEE/Ex1"
+    ]
+   },
+   "exercise_count": 13
+  },
+  {
+   "name": "SituationToGraph",
+   "status": "new",
+   "domain": "functions & analysis",
+   "purpose": "Link a concrete figure (car and antenna, door under an arch, tangent from a point to a circle, ferris-wheel cabin) to the graph of the quantity studied: one slider moves the figure and the point on the graph.",
+   "student_action": "drag the parameter (x or t); tap the graph point matching the figure (or the reverse); predict where the extremum is",
+   "engine_needs": "analysis.ts + geometry2d.ts: the quantity measured on the figure and given by the formula, checked equal (AM = sqrt(x^2 + 2x + 5), S(x) = 2x(12 - x^2), MT = sqrt(x^2 + 2x - 8), h(t)); special positions (extrema, crossings) from the analysis engine",
+   "props_sketch": "scene: GeometryCanvas spec with a parameter point (presets car_antenna, door_arch, circle_tangent, wheel), param {name, min, max, step}, quantity {expr, label}, graph: FunctionPlot props",
+   "first_year": "3se",
+   "notes_by_year": {
+    "2sc": "3se: a generic scene with one moving point plus 4 presets; 2eme needs scene points given by expressions of the parameter (rectangle x by 60 - 2x, box net with h = 32/x^2, square MNPQ, object and image on a lens bench) and two quantities on one graph (S and T with S + T = 36)",
+    "1s": "nothing beyond the 2eme extension (scene points given as expressions of the parameter, two quantities on one graph) and FunctionPlot's 2eme values table: 1ere scenes are the box cut from a 20 cm sheet, the truck and the car on the road A-B (d1 and d2 on one graph) and the bridge sliding along the river"
+   },
+   "exercises": {
+    "1s": [
+     "1s/CH04_VECTEURS_TRANSLATIONS/Ex2",
+     "1s/CH11_ACTIVITES_ALGEBRIQUES/Ex2",
+     "1s/CH14_FONCTIONS_AFFINES/Ex2"
+    ],
+    "2sc": [
+     "2sc/T1_CH02_PREMIER_SECOND_DEGRE/Ex2",
+     "2sc/T1_CH03_POLYNOMES/Ex2",
+     "2sc/T1_CH09_ROTATIONS/Ex1",
+     "2sc/T2_CH03_GENERALITES_FONCTIONS/Ex2",
+     "2sc/T2_CH04_FONCTIONS_DE_REFERENCE/Ex2"
+    ],
+    "3se": [
+     "3se/T1_CH04_LIMITES_COMPORTEMENTS_ASYMPTOTIQUES/Ex2",
+     "3se/T1_CH06_FONCTION_DERIVEE/Ex2",
+     "3se/T1_CH07_ETUDE_DE_FONCTIONS/Ex2",
+     "3se/T1_CH08_FONCTIONS_TRIGONOMETRIQUES/Ex2",
+     "3se/T2_CH03_TRIGONOMETRIE/Ex2"
+    ]
+   },
+   "exercise_count": 13
+  },
+  {
+   "name": "SignTableBuilder",
+   "status": "new",
+   "domain": "functions & analysis",
+   "purpose": "Build the sign table of a product or quotient of factors (affine, trinome, sin u on an interval) to get the sign of f'(x), of f(x) - (ax + b), or to drop absolute values.",
+   "student_action": "tap the roots onto the x-line in order, set each factor's sign per interval, deduce the result row (|| at forbidden values)",
+   "engine_needs": "analysis.ts (new helpers): roots of each factor (affine, trinome with discriminant, sin / cos on an interval), exact ordering, sign per interval, product / quotient sign; graded per cell",
+   "props_sketch": "factors [{expr, label, inDenominator}], interval, givenCells, forbidden, resultLabel (same grid as VariationTableBuilder)",
+   "first_year": "3se",
+   "notes_by_year": {},
+   "exercises": {
+    "1s": [
+     "1s/CH11_ACTIVITES_ALGEBRIQUES/Ex2",
+     "1s/CH13_EQUATIONS_INEQUATIONS/Ex1"
+    ],
+    "2sc": [
+     "2sc/T1_CH02_PREMIER_SECOND_DEGRE/Ex1",
+     "2sc/T1_CH03_POLYNOMES/Ex1",
+     "2sc/T1_CH03_POLYNOMES/Ex2"
+    ],
+    "3se": [
+     "3se/T1_CH01_GENERALITES_FONCTIONS/Ex2",
+     "3se/T1_CH02_CONTINUITE/Ex2",
+     "3se/T1_CH04_LIMITES_COMPORTEMENTS_ASYMPTOTIQUES/Ex1",
+     "3se/T1_CH06_FONCTION_DERIVEE/Ex1",
+     "3se/T1_CH06_FONCTION_DERIVEE/Ex2",
+     "3se/T1_CH07_ETUDE_DE_FONCTIONS/Ex1",
+     "3se/T1_CH07_ETUDE_DE_FONCTIONS/Ex2"
+    ]
+   },
+   "exercise_count": 12
+  },
+  {
+   "name": "VariationTableBuilder",
+   "status": "extend",
+   "domain": "functions & analysis",
+   "purpose": "Build the tableau de variation: sign of f', arrows, values at the extrema and limits at the ends and at forbidden values.",
+   "student_action": "tap cells to set signs and arrows, place the x-values, pick values and limits from chips",
+   "engine_needs": "analysis.ts: sign changes of f' (exists), forbidden values (double bar) and domain gaps, one-sided limits at the ends and forbidden values, exact extremum values (fractions, surds like 8 sqrt 3, multiples of pi); graded with hints",
+   "props_sketch": "fn, fPrime, scan, xPoints (engine-checked), forbidden, gaps, ends, givenCells, mode: student_fill | readonly | progressive",
+   "extends_note": "today one f' sign row and arrows, no forbidden values, no limit cells, student_fill only (D79 asks for a mockup first); add || columns, excluded intervals (]-4, 2[), limit and value cells, readonly and progressive modes; shares VariationGrid with SignTableBuilder",
+   "first_year": "3se",
+   "notes_by_year": {
+    "3se": "today one f' sign row and arrows, no forbidden values, no limit cells, student_fill only (D79 asks for a mockup first); add || columns, excluded intervals (]-4, 2[), limit and value cells, readonly and progressive modes; shares VariationGrid with SignTableBuilder",
+    "2sc": "3se adds forbidden values, limit cells, readonly and progressive modes; 2eme adds signRow: false (no f' row, no limits) with arrows judged by the engine's monotony check, since the 2eme programme has no derivatives"
+   },
+   "exercises": {
+    "1s": [],
+    "2sc": [
+     "2sc/T2_CH03_GENERALITES_FONCTIONS/Ex1",
+     "2sc/T2_CH03_GENERALITES_FONCTIONS/Ex2",
+     "2sc/T2_CH04_FONCTIONS_DE_REFERENCE/Ex1",
+     "2sc/T2_CH04_FONCTIONS_DE_REFERENCE/Ex2"
+    ],
+    "3se": [
+     "3se/T1_CH01_GENERALITES_FONCTIONS/Ex1",
+     "3se/T1_CH06_FONCTION_DERIVEE/Ex1",
+     "3se/T1_CH06_FONCTION_DERIVEE/Ex2",
+     "3se/T1_CH07_ETUDE_DE_FONCTIONS/Ex1",
+     "3se/T1_CH07_ETUDE_DE_FONCTIONS/Ex2",
+     "3se/T1_CH08_FONCTIONS_TRIGONOMETRIQUES/Ex1",
+     "3se/T1_CH08_FONCTIONS_TRIGONOMETRIQUES/Ex2"
+    ]
+   },
+   "exercise_count": 11
+  },
+  {
+   "name": "PointOnCurve",
+   "status": "extend",
+   "domain": "functions & analysis",
+   "purpose": "Drag x and see M(x, f(x)) and its image M' by a symmetry or a translation; the engine shows whether M' lands on the curve (parity, axis x = a, centre (a, b), period T).",
+   "student_action": "drag x (stepped), switch the transformation, tap 'on the curve' / 'not on the curve'",
+   "engine_needs": "analysis.ts: f(2a - x) vs f(x) (axis), f(2a - x) vs 2b - f(x) (centre), f(x + T) vs f(x) (period), domain check 2a - x in D_f; exact when rational",
+   "props_sketch": "fn (id | expr), map: even | odd | {axis: a} | {center: [a, b]} | {translate: T}, x0, domain, step, compareFn",
+   "extends_note": "today only the mirror about the y-axis (f(-x)); add odd (centre O), axis x = a, centre (a, b), translation by a period, and content-defined functions",
+   "first_year": "3se",
+   "notes_by_year": {
+    "3se": "today only the mirror about the y-axis (f(-x)); add odd (centre O), axis x = a, centre (a, b), translation by a period, and content-defined functions",
+    "2sc": "3se adds odd, axis x = a, centre (a, b) and a period; 2eme adds a translation by any vector (a, b), a homothety (centre, k) and the reflection in the x-axis, mapping onto a different target curve"
+   },
+   "exercises": {
+    "1s": [],
+    "2sc": [
+     "2sc/T2_CH03_GENERALITES_FONCTIONS/Ex1",
+     "2sc/T2_CH04_FONCTIONS_DE_REFERENCE/Ex1"
+    ],
+    "3se": [
+     "3se/T1_CH01_GENERALITES_FONCTIONS/Ex1",
+     "3se/T1_CH01_GENERALITES_FONCTIONS/Ex2",
+     "3se/T1_CH04_LIMITES_COMPORTEMENTS_ASYMPTOTIQUES/Ex1",
+     "3se/T1_CH04_LIMITES_COMPORTEMENTS_ASYMPTOTIQUES/Ex2",
+     "3se/T1_CH07_ETUDE_DE_FONCTIONS/Ex1",
+     "3se/T1_CH07_ETUDE_DE_FONCTIONS/Ex2",
+     "3se/T1_CH08_FONCTIONS_TRIGONOMETRIQUES/Ex1",
+     "3se/T1_CH08_FONCTIONS_TRIGONOMETRIQUES/Ex2"
+    ]
+   },
+   "exercise_count": 10
+  },
+  {
+   "name": "TangentSlope",
+   "status": "extend",
+   "domain": "functions & analysis",
+   "purpose": "Drag x along the curve, see the tangent and the sign of its slope, find where the tangent is horizontal or parallel to a given line, and link the sign of f' to the arrows.",
+   "student_action": "drag x; tap 'parallel' when the tangent matches the target; fill the mini table from visited regions",
+   "engine_needs": "analysis.ts: f'(x) from a content derivative expression checked against the numeric derivative; solutions of f'(x) = m on the domain (bracketed roots, exact in rational cases); domains with gaps",
+   "props_sketch": "fn, fPrime, x0, domain, step, targetSlope, showTable",
+   "extends_note": "add targetSlope (tangent parallel to y = mx + p), a content derivative expression checked by the engine, and domains with gaps or forbidden values",
+   "first_year": "3se",
+   "notes_by_year": {
+    "3se": "add targetSlope (tangent parallel to y = mx + p), a content derivative expression checked by the engine, and domains with gaps or forbidden values"
+   },
+   "exercises": {
+    "1s": [],
+    "2sc": [],
+    "3se": [
+     "3se/T1_CH05_NOMBRE_DERIVE/Ex1",
+     "3se/T1_CH05_NOMBRE_DERIVE/Ex2",
+     "3se/T1_CH06_FONCTION_DERIVEE/Ex1",
+     "3se/T1_CH06_FONCTION_DERIVEE/Ex2",
+     "3se/T1_CH07_ETUDE_DE_FONCTIONS/Ex1",
+     "3se/T1_CH08_FONCTIONS_TRIGONOMETRIQUES/Ex1",
+     "3se/T1_CH08_FONCTIONS_TRIGONOMETRIQUES/Ex2"
+    ]
+   },
+   "exercise_count": 7
+  },
+  {
+   "name": "CurveCompare",
+   "status": "reserved",
+   "domain": "functions & analysis",
+   "purpose": "Two curves on one plot (two price lines, S and T, sqrt(x + 4) and x + 2, the hyperbola and y = x) with their difference shown live under a dragged x, so the student reads where one is above the other and links it to the sign of f(x) - g(x).",
+   "student_action": "drag x, read both values and the difference, tap the crossing points, shade where f is above g",
+   "engine_needs": "analysis.ts: difference expression and its sign changes (exact roots for affine / degree <= 2 differences and rational differences with one pole), crossings, domain where both exist; the shaded set handed to IntervalBuilder",
+   "props_sketch": "f, g (content expressions), domain, labels, showDiff, ask: crossings | above_set",
+   "first_year": "2sc",
+   "notes_by_year": {
+    "1s": "beyond the 2eme spec (two curves): up to three curves with 'which is lowest' bands (tariffs A, B, C: 0-19, 20, 21-35, 36, 37+) and a whole-number x axis"
+   },
+   "exercises": {
+    "1s": [
+     "1s/CH13_EQUATIONS_INEQUATIONS/Ex2",
+     "1s/CH14_FONCTIONS_AFFINES/Ex1"
+    ],
+    "2sc": [
+     "2sc/T1_CH02_PREMIER_SECOND_DEGRE/Ex2",
+     "2sc/T2_CH03_GENERALITES_FONCTIONS/Ex2",
+     "2sc/T2_CH04_FONCTIONS_DE_REFERENCE/Ex1",
+     "2sc/T2_CH04_FONCTIONS_DE_REFERENCE/Ex2"
+    ],
+    "3se": []
+   },
+   "exercise_count": 6
+  },
+  {
+   "name": "LimitExplorer",
+   "status": "extend",
+   "domain": "functions & analysis",
+   "purpose": "Walk x towards a point a (left or right) or towards +-infinity and read f(x), its parts, a simplified twin and the gap to an asymptote: 0/0 forms, infinite one-sided limits, oblique asymptotes.",
+   "student_action": "drag x towards the target (stepped), switch side, drag an epsilon line and read from which x the gap stays below it",
+   "engine_needs": "analysis.ts: one-sided limit probe at a finite a (finite or +-infinity with sign); simplified twin checked equal to f off a; gap f(x) - (ax + b) and its limit; threshold solve (smallest x with |gap| < eps: x > 102, x > 18.95) exact for rational gaps",
+   "props_sketch": "fn, target: {at, side: left | right | both} | {inf: plus | minus}, numerator, denominator, simplified, asymptote {a, b}, epsilon, xMax, step",
+   "extends_note": "today only x -> +-infinity with a horizontal limit; add finite points with sides, the engine-checked simplified twin (factorised or conjugate form), the oblique-asymptote gap and an epsilon threshold",
+   "first_year": "3se",
+   "notes_by_year": {
+    "3se": "today only x -> +-infinity with a horizontal limit; add finite points with sides, the engine-checked simplified twin (factorised or conjugate form), the oblique-asymptote gap and an epsilon threshold"
+   },
+   "exercises": {
+    "1s": [],
+    "2sc": [],
+    "3se": [
+     "3se/T1_CH03_LIMITES_ET_CONTINUITE/Ex1",
+     "3se/T1_CH03_LIMITES_ET_CONTINUITE/Ex2",
+     "3se/T1_CH04_LIMITES_COMPORTEMENTS_ASYMPTOTIQUES/Ex1",
+     "3se/T1_CH04_LIMITES_COMPORTEMENTS_ASYMPTOTIQUES/Ex2",
+     "3se/T1_CH07_ETUDE_DE_FONCTIONS/Ex1",
+     "3se/T1_CH07_ETUDE_DE_FONCTIONS/Ex2"
+    ]
+   },
+   "exercise_count": 6
+  },
+  {
+   "name": "PiecewiseJoin",
+   "status": "new",
+   "domain": "functions & analysis",
+   "purpose": "Zoom on the point where two pieces of a function meet: do they join (continuity), without a corner (derivability), which parameter makes them join, can a hole be filled (prolongement par continuite)?",
+   "student_action": "drag the parameter slider(s) (m, k), switch continuity / derivability view, tap 'joins', 'jump', 'corner' or 'hole'",
+   "engine_needs": "analysis.ts: left and right limits at the junction, value at the point, jump size, one-sided derivatives (half-tangent slopes), parameter values closing the jump or the corner (exact when the condition is affine in the parameter), jumps of E(x)",
+   "props_sketch": "pieces [{expr, from, to, closedFrom, closedTo}], at, params [{name, min, max, step, init}], view: continuity | derivability, hole {fill}",
+   "first_year": "3se",
+   "notes_by_year": {},
+   "exercises": {
+    "1s": [],
+    "2sc": [],
+    "3se": [
+     "3se/T1_CH01_GENERALITES_FONCTIONS/Ex2",
+     "3se/T1_CH02_CONTINUITE/Ex1",
+     "3se/T1_CH03_LIMITES_ET_CONTINUITE/Ex1",
+     "3se/T1_CH03_LIMITES_ET_CONTINUITE/Ex2",
+     "3se/T1_CH05_NOMBRE_DERIVE/Ex1",
+     "3se/T1_CH05_NOMBRE_DERIVE/Ex2"
+    ]
+   },
+   "exercise_count": 6
+  },
+  {
+   "name": "SecantToTangent",
+   "status": "extend",
+   "domain": "functions & analysis",
+   "purpose": "Shrink h step by step: the rate (f(a + h) - f(a))/h settles on f'(a) and f(a) + f'(a)h hugs f(a + h): derivative by definition, approximation affine and its error, one-sided derivatives, vertical half-tangents.",
+   "student_action": "step h down (and to negative h), read the rate / error table, pick what the rate tends to",
+   "engine_needs": "analysis.ts: exact rate at rational h, engine f'(a); left and right derivatives separately; unbounded-rate detection (vertical half-tangent); approximation error f(a + h) - (f(a) + f'(a)h)",
+   "props_sketch": "fn, a, side: right | left | both, hSteps, show: [secant, tangent, approx], domain, range",
+   "extends_note": "add side (left / right) for corners and demi-tangentes, the approximation-affine readout with its error, the unbounded-rate case, and content functions",
+   "first_year": "3se",
+   "notes_by_year": {
+    "3se": "add side (left / right) for corners and demi-tangentes, the approximation-affine readout with its error, the unbounded-rate case, and content functions"
+   },
+   "exercises": {
+    "1s": [],
+    "2sc": [],
+    "3se": [
+     "3se/T1_CH05_NOMBRE_DERIVE/Ex1",
+     "3se/T1_CH05_NOMBRE_DERIVE/Ex2",
+     "3se/T1_CH06_FONCTION_DERIVEE/Ex2",
+     "3se/T1_CH07_ETUDE_DE_FONCTIONS/Ex2",
+     "3se/T1_CH08_FONCTIONS_TRIGONOMETRIQUES/Ex1"
+    ]
+   },
+   "exercise_count": 5
+  },
+  {
+   "name": "BisectionStepper",
+   "status": "new",
+   "domain": "functions & analysis",
+   "purpose": "Locate a root by halving an interval (dichotomie) or by bracketing it between grid points, the sign of f(c) deciding which half to keep (the IVT made visible).",
+   "student_action": "tap 'keep left' / 'keep right' after f(c) is shown, fill the table row by row; in bracket mode tap the intervals where the sign changes",
+   "engine_needs": "analysis.ts: exact f(c) at dyadic c, sign, halving, amplitude, approximation by default; sign changes on a grid; uniqueness read from the variation table",
+   "props_sketch": "fn, start [a, b], steps (<= 6), mode: bisect | bracket, grid, showTable",
+   "first_year": "3se",
+   "notes_by_year": {},
+   "exercises": {
+    "1s": [],
+    "2sc": [],
+    "3se": [
+     "3se/T1_CH02_CONTINUITE/Ex2",
+     "3se/T1_CH06_FONCTION_DERIVEE/Ex1"
+    ]
+   },
+   "exercise_count": 2
+  },
+  {
+   "name": "SequenceExplorer",
+   "status": "reserved",
+   "domain": "sequences",
+   "purpose": "A sequence as points (n, un) and as a table (terms, differences, ratios), with bounds, a threshold, an epsilon-band around a candidate limit, and two or three sequences side by side.",
+   "student_action": "drag n, tap a term for its exact value, drag a threshold or an epsilon-band and read the first N after which all terms stay inside, compare sequences",
+   "engine_needs": "src/engine/sequences.ts (stub today): explicit un = f(n), recurrence un+1 = g(un) in exact rationals, geometric partial sums, exact differences and ratios, smallest n for a threshold, N for an epsilon-band (proved from a monotone bound when available, else labelled 'observed up to n')",
+   "props_sketch": "series [{id, def: explicit {expr} | recurrence {u0, expr} | sum {first, ratio}, label}] (<= 3), nRange, view: plot | table | both, columns: diff | ratio, threshold, epsilonBand {L, eps}, overlayFn",
+   "extends_note": "reserved name planned for the integral sequence I_n (COMPONENTS_ANALYSIS #9); proposed here as the general sequence explorer, merging SequencePlot and SqueezeVisual of COMPONENTS_COMPLEX_SEQUENCES.md; I_n becomes one more 'def' kind later",
+   "first_year": "3se",
+   "notes_by_year": {
+    "3se": "reserved name planned for the integral sequence I_n (COMPONENTS_ANALYSIS #9); proposed here as the general sequence explorer, merging SequencePlot and SqueezeVisual of COMPONENTS_COMPLEX_SEQUENCES.md; I_n becomes one more 'def' kind later",
+    "2sc": "3se defines the general explorer (plot, table, threshold, epsilon band, up to 3 series); 2eme adds the sum view (bars, pairing first and last, partial sums as a series), the 'is X a term?' query, a first index of 1 (a1 = 800) and money rounding"
+   },
+   "exercises": {
+    "1s": [],
+    "2sc": [
+     "2sc/T2_CH01_SUITES_ARITHMETIQUES/Ex1",
+     "2sc/T2_CH01_SUITES_ARITHMETIQUES/Ex2",
+     "2sc/T2_CH02_SUITES_GEOMETRIQUES/Ex1",
+     "2sc/T2_CH02_SUITES_GEOMETRIQUES/Ex2"
+    ],
+    "3se": [
+     "3se/T1_CH09_SUITES_REELLES/Ex1",
+     "3se/T1_CH09_SUITES_REELLES/Ex2",
+     "3se/T1_CH10_LIMITES_DE_SUITES/Ex1",
+     "3se/T1_CH10_LIMITES_DE_SUITES/Ex2"
+    ]
+   },
+   "exercise_count": 8
+  },
+  {
+   "name": "CobwebDiagram",
+   "status": "new",
+   "domain": "sequences",
+   "purpose": "Build un+1 = f(un) on the graph of f with the line y = x (staircase or spiral) to conjecture monotony, bounds and the limit (fixed point).",
+   "student_action": "tap 'next step' (up to the curve, across to y = x, down to the axis); predict the next term before it is drawn",
+   "engine_needs": "sequences.ts: exact iterates, fixed points (f(x) = x solved), monotony of f on the range, staircase vs spiral",
+   "props_sketch": "f (expr), u0, steps (<= 8), domain, showFixedPoint, predict",
+   "first_year": "3se",
+   "notes_by_year": {},
+   "exercises": {
+    "1s": [],
+    "2sc": [],
+    "3se": [
+     "3se/T1_CH09_SUITES_REELLES/Ex1",
+     "3se/T1_CH10_LIMITES_DE_SUITES/Ex1",
+     "3se/T1_CH10_LIMITES_DE_SUITES/Ex2"
+    ]
+   },
+   "exercise_count": 3
+  },
+  {
+   "name": "InductionStepper",
+   "status": "new",
+   "domain": "sequences",
+   "purpose": "Task frame for a proof by induction in four parts (statement, base case, heredity, conclusion), with the property tested on the first terms so the student sees why the chain works.",
+   "student_action": "check P(n0) in the engine table, write the heredity lines under 'suppose P(n)' in the Worksheet, pick the conclusion card",
+   "engine_needs": "sequences.ts: P(n) evaluated exactly for n = n0 .. n0 + 5; base-case line check; heredity lines with symbolic n through exprLine samples (needs inequality lines, see Worksheet)",
+   "props_sketch": "property {kind: inequality | bounds | formula | membership, expr}, n0, testUpTo, heredityHint",
+   "first_year": "3se",
+   "notes_by_year": {},
+   "exercises": {
+    "1s": [],
+    "2sc": [],
+    "3se": [
+     "3se/T1_CH09_SUITES_REELLES/Ex1",
+     "3se/T1_CH09_SUITES_REELLES/Ex2",
+     "3se/T1_CH10_LIMITES_DE_SUITES/Ex2"
+    ]
+   },
+   "exercise_count": 3
+  },
+  {
+   "name": "GeometryCanvas",
+   "status": "new",
+   "domain": "plane geometry & transformations",
+   "purpose": "One plane board for figures: points by coordinates or constructed (midpoint, projection, intersection, centre of gravity, circumcentre, orthocentre, rotation), segments, lines, circles, vectors, geometric and oriented angle marks, live engine readouts (lengths, dot products, angles, coordinates); also a 1-D axis mode.",
+   "student_action": "drag free points, tap a point / segment / angle to answer, place a constructed point, enter a measure (checked mod 2 pi)",
+   "engine_needs": "new src/engine/geometry2d.ts: exact coordinates (rationals and square roots of small integers), constructions, dot product, lengths, oriented angles as rational multiples of pi mod 2 pi, collinearity / orthogonality / concyclicity checks; transformations (translation, reflection, rotation, homothety) as the extension point for 2eme / 1ere",
+   "props_sketch": "frame: none | axis1d | axes | grid, points [{id, at | construct {kind, of}}], objects [segment | line | ray | circle | vector | polygon | angleMark {oriented}], draggable, readouts [{kind: length | dot | angle | coords, of}], transforms, ask {kind: place | tap | measure}",
+   "first_year": "3se",
+   "notes_by_year": {
+    "2sc": "3se reserves `transforms` for 2eme / 1ere; 2eme makes it real (four transformations, images of points, lines, circles and polygons, chains such as two central symmetries giving a translation), adds the oblique-frame grid and vector tools, and line / circle objects given by equations with normal vectors and distances",
+    "1s": "beyond the 3se spec and the 2eme extension (four transformations with images of points, lines, circles and polygons, length and area ratios, Chasles head-to-tail sums and k u, params): (1) geometric angles in degrees with angle-pair marks and a tap_pair ask (alternes-internes, correspondants, interieurs d'un meme cote; inscrit and au centre on the same arc); (2) points tied to a segment, line or circle (glider: F on [BC], R on [AC], the vertex of an inscribed angle, T on y = 8); (3) construction steps (protractor angle, parallel through a point, equal compass steps on a half-line, bisector, mediatrix) that the student performs or orders; (4) Thales ratio readouts in the three positions of the course; (5) the quarter turn named direct / indirect with the grid-step method (3 right 1 up -> 3 up 1 left), on top of the 2eme rotation; (6) the parallelogram rule and the centre of gravity among the vector tools; (7) circular sectors with their area; (8) presets clock (time slider moves both hands) and river (bridge, boat)"
+   },
+   "exercises": {
+    "1s": [
+     "1s/CH01_ANGLES/Ex1",
+     "1s/CH01_ANGLES/Ex2",
+     "1s/CH02_THALES/Ex1",
+     "1s/CH02_THALES/Ex2",
+     "1s/CH04_VECTEURS_TRANSLATIONS/Ex1",
+     "1s/CH04_VECTEURS_TRANSLATIONS/Ex2",
+     "1s/CH05_SOMME_VECTEURS_COLINEAIRES/Ex1",
+     "1s/CH05_SOMME_VECTEURS_COLINEAIRES/Ex2",
+     "1s/CH06_ACTIVITES_REPERE/Ex1",
+     "1s/CH06_ACTIVITES_REPERE/Ex2",
+     "1s/CH07_QUART_DE_TOUR/Ex1",
+     "1s/CH07_QUART_DE_TOUR/Ex2",
+     "1s/CH10_ACTIVITES_NUMERIQUES_II/Ex2"
+    ],
+    "2sc": [
+     "2sc/T1_CH01_CALCUL_DANS_R/Ex1",
+     "2sc/T1_CH01_CALCUL_DANS_R/Ex2",
+     "2sc/T1_CH05_CALCUL_VECTORIEL/Ex1",
+     "2sc/T1_CH05_CALCUL_VECTORIEL/Ex2",
+     "2sc/T1_CH06_BARYCENTRE/Ex1",
+     "2sc/T1_CH06_BARYCENTRE/Ex2",
+     "2sc/T1_CH07_TRANSLATIONS/Ex1",
+     "2sc/T1_CH07_TRANSLATIONS/Ex2",
+     "2sc/T1_CH08_HOMOTHETIES/Ex1",
+     "2sc/T1_CH08_HOMOTHETIES/Ex2",
+     "2sc/T1_CH09_ROTATIONS/Ex1",
+     "2sc/T1_CH09_ROTATIONS/Ex2",
+     "2sc/T2_CH05_TRIGONOMETRIE/Ex2",
+     "2sc/T2_CH06_GEOMETRIE_ANALYTIQUE/Ex1",
+     "2sc/T2_CH06_GEOMETRIE_ANALYTIQUE/Ex2",
+     "2sc/T2_CH07_DROITES_PLANS_ESPACE/Ex1"
+    ],
+    "3se": [
+     "3se/T1_CH01_GENERALITES_FONCTIONS/Ex2",
+     "3se/T1_CH07_ETUDE_DE_FONCTIONS/Ex2",
+     "3se/T2_CH01_PRODUIT_SCALAIRE_PLAN/Ex1",
+     "3se/T2_CH01_PRODUIT_SCALAIRE_PLAN/Ex2",
+     "3se/T2_CH02_ANGLES_ORIENTES/Ex1",
+     "3se/T2_CH02_ANGLES_ORIENTES/Ex2",
+     "3se/T2_CH03_TRIGONOMETRIE/Ex2"
+    ]
+   },
+   "exercise_count": 36
+  },
+  {
+   "name": "LocusTracer",
+   "status": "new",
+   "domain": "plane geometry & transformations",
+   "purpose": "Drag M and see whether it satisfies a condition (MB.MC = 12, AM.AB = k, MA = MB, (MA, MD) = pi/2 [2 pi], |z - a| = |z - b|, arg z = pi/3); satisfying positions leave a trace, then the student names the set (line, circle, arc, half-line) and its elements.",
+   "student_action": "drag M, read the condition value, drop trace points, pick the set and its centre / radius from cards",
+   "engine_needs": "geometry2d.ts (+ complex.ts for affix conditions): the condition evaluated at M; the true locus from the condition kind (level line of a dot product, mediatrix, circle, arc of an inscribed angle, half-line) to grade the pick and draw it",
+   "props_sketch": "base: GeometryCanvas props, condition {kind: dot_const | dot_fixed_vector | dist_equal | dist_const | oriented_angle | arg_const | modulus_const, params}, tolerance, answerCards",
+   "first_year": "3se",
+   "notes_by_year": {
+    "2sc": "3se conditions are dot products, distances, oriented angles and complex affixes; 2eme adds weighted-vector norm conditions (reduced by the engine), colinearity with a fixed vector, and an image mode (a driving point on a curve, its image traced, excluded points named)",
+    "1s": "beyond the 3se conditions (dot products, distances, oriented angles, affixes): a geometric angle condition in degrees (APB = 90 deg gives the whole circle minus A and B, not an arc) and answer cards with excluded points"
+   },
+   "exercises": {
+    "1s": [
+     "1s/CH01_ANGLES/Ex2"
+    ],
+    "2sc": [
+     "2sc/T1_CH06_BARYCENTRE/Ex1",
+     "2sc/T1_CH07_TRANSLATIONS/Ex2",
+     "2sc/T1_CH09_ROTATIONS/Ex2"
+    ],
+    "3se": [
+     "3se/T2_CH01_PRODUIT_SCALAIRE_PLAN/Ex1",
+     "3se/T2_CH01_PRODUIT_SCALAIRE_PLAN/Ex2",
+     "3se/T2_CH02_ANGLES_ORIENTES/Ex1",
+     "3se/T2_CH02_ANGLES_ORIENTES/Ex2",
+     "3se/T2_CH04_NOMBRES_COMPLEXES/Ex1",
+     "3se/T2_CH04_NOMBRES_COMPLEXES/Ex2"
+    ]
+   },
+   "exercise_count": 10
+  },
+  {
+   "name": "BarycentreBalance",
+   "status": "new",
+   "domain": "plane geometry & transformations",
+   "purpose": "Weighted points on a line or in a triangle: move the weights (negative ones too) and see the barycentre move, leave the segment when the signs differ, stay put when all weights are multiplied by k, and regroup into partial barycentres (G = bar{(A, 3), (I, 3)}, P midpoint of [GC]); also shows alpha vec(MA) + beta vec(MB) = (alpha + beta) vec(MG) for a dragged M.",
+   "student_action": "drag or step the weights, place G on the line (checked), tap two points to regroup them into their partial barycentre, drag M to see the reduction",
+   "engine_needs": "geometry2d.ts: exact barycentre of 2 or 3 weighted points (rational weights, sum != 0), vec(AG) = beta/(alpha + beta) vec(AB), partial barycentres, the reduction vector (constant when the weights sum to 0), check that a placed point or a chosen pair of weights gives the target point",
+   "props_sketch": "points [{id, at}], weights [{id, w, min, max, step}], regroup (allowed groups), showReduction, ask: place | weights_for_point | regroup",
+   "first_year": "2sc",
+   "notes_by_year": {},
+   "exercises": {
+    "1s": [],
+    "2sc": [
+     "2sc/T1_CH06_BARYCENTRE/Ex1",
+     "2sc/T1_CH06_BARYCENTRE/Ex2",
+     "2sc/T1_CH08_HOMOTHETIES/Ex1",
+     "2sc/T1_CH08_HOMOTHETIES/Ex2"
+    ],
+    "3se": []
+   },
+   "exercise_count": 4
+  },
+  {
+   "name": "DeterminantExpander",
+   "status": "new",
+   "domain": "vectors & analytic geometry",
+   "purpose": "Expand a 3x3 determinant along the first column: each entry lights its minor (row and column crossed out) and its sign, and the student writes each 2x2 minor himself.",
+   "student_action": "tap a first-column entry to light its minor, write the minor and the sum in the Worksheet",
+   "engine_needs": "new src/engine/space.ts: exact determinant and minors with rational entries or entries affine in one parameter (m, t), compared on samples; lines checked by the Worksheet",
+   "props_sketch": "columns (three vectors with labels), params, show: minors | signs",
+   "first_year": "3se",
+   "notes_by_year": {},
+   "exercises": {
+    "1s": [],
+    "2sc": [],
+    "3se": [
+     "3se/T2_CH05_VECTEURS_ESPACE/Ex1",
+     "3se/T2_CH05_VECTEURS_ESPACE/Ex2",
+     "3se/T2_CH07_DROITES_ET_PLANS/Ex1"
+    ]
+   },
+   "exercise_count": 3
+  },
+  {
+   "name": "TrigCircle",
+   "status": "new",
+   "domain": "trigonometry",
+   "purpose": "The trigonometric circle: place an angle measure and its principal measure (Chasles, 29pi/3 -> -pi/3), read cos / sin / tan, solve cos u = c and cos u >= c on arcs, map u = ax + b back to x on an interval, polar coordinates.",
+   "student_action": "drag the point or step whole turns, tap the solution points, shade the arc of an inequality, keep the solutions that fall in a given interval",
+   "engine_needs": "new trig helpers (geometry2d.ts or trig.ts): exact values at multiples of pi/12 (pi/8 with nested surds), reduction to the principal measure, solution sets of cos / sin / tan equations and inequalities mod 2 pi intersected with an interval, the substitution u = ax + b",
+   "props_sketch": "mode: measure | equation | inequality | polar | associated, func: cos | sin | tan, c, interval, substitution {a, b}, radius, points",
+   "first_year": "3se",
+   "notes_by_year": {
+    "2sc": "3se uses the full circle with principal measures and oriented angles; 2eme needs range: half ([0, pi], no oriented angles), the degree-radian conversion and arc length, cot, and the complementary mirror"
+   },
+   "exercises": {
+    "1s": [],
+    "2sc": [
+     "2sc/T1_CH09_ROTATIONS/Ex1",
+     "2sc/T2_CH05_TRIGONOMETRIE/Ex1",
+     "2sc/T2_CH05_TRIGONOMETRIE/Ex2"
+    ],
+    "3se": [
+     "3se/T1_CH08_FONCTIONS_TRIGONOMETRIQUES/Ex1",
+     "3se/T1_CH08_FONCTIONS_TRIGONOMETRIQUES/Ex2",
+     "3se/T2_CH02_ANGLES_ORIENTES/Ex1",
+     "3se/T2_CH03_TRIGONOMETRIE/Ex1",
+     "3se/T2_CH03_TRIGONOMETRIE/Ex2"
+    ]
+   },
+   "exercise_count": 8
+  },
+  {
+   "name": "RightTriangleTrig",
+   "status": "new",
+   "domain": "trigonometry",
+   "purpose": "A right triangle with a chosen acute angle: name the opposite and adjacent sides and the hypotenuse, read cos, sin, tan as ratios that stay the same when the triangle is scaled, get an angle from a ratio (calculator, 0.01 deg), swap sin and cos of complementary angles, use the foot H of the altitude (AB x AC = AH x BC, AH^2 = HB x HC, AB^2 = BH x BC), construct an angle from its tangent, and lean the ladder against the wall.",
+   "student_action": "tap the sides for the chosen angle, drag the size or the angle, type a ratio or an angle, tap every angle with a given ratio, slide the ladder's foot and read alpha against the safe band",
+   "engine_needs": "new src/engine/trig.ts (or in geometry2d.ts): exact ratios as fractions or p + q sqrt c, the 30 / 45 / 60 deg table, inverse cos / sin / tan in degrees rounded as a calculator does (labelled approximate), complementary-angle relations, metric relations of the altitude checked exactly, the angles of a figure that have a given ratio",
+   "props_sketch": "vertices {right, focus}, lengths (given ones), angleDeg, altitude {foot}, mode: ratios | scale | inverse | complement | altitude | construct | ladder, slider {kind: size | angle | foot, min, max, step}, band {min, max}, ask {kind: tap_side | tap_angle | ratio | angle}",
+   "first_year": "1s",
+   "notes_by_year": {},
+   "exercises": {
+    "1s": [
+     "1s/CH03_TRIGONOMETRIE_TRIANGLE_RECTANGLE/Ex1",
+     "1s/CH03_TRIGONOMETRIE_TRIANGLE_RECTANGLE/Ex2",
+     "1s/CH05_SOMME_VECTEURS_COLINEAIRES/Ex2",
+     "1s/CH07_QUART_DE_TOUR/Ex2"
+    ],
+    "2sc": [],
+    "3se": []
+   },
+   "exercise_count": 4
+  },
+  {
+   "name": "SolidViewer",
+   "status": "new",
+   "domain": "space geometry",
+   "purpose": "One 3-D viewer for solids (cube, tetrahedron, pyramid) or free points in a frame: points, segments, vectors, planes drawn as their section of the solid, parametric lines, normal vectors and orthogonal projections, with a slider for a parameter (t, alpha, m).",
+   "student_action": "turn the view by stepped drag (preset views), tap a point / edge / face, move the parameter, toggle a plane; answer 'in the plane? parallel? perpendicular?' by taps",
+   "engine_needs": "new src/engine/space.ts: exact rational coordinates, 3x3 determinant, coplanarity, plane equations, line-plane and plane-plane intersections, section polygon of a convex solid by a plane, orthogonal projection, dot product, normal-vector check, distances (surds), volumes",
+   "props_sketch": "solid: cube | tetrahedron | pyramid | custom {vertices, faces}, frame, points [{id, at | construct | param}], segments, vectors, planes [{through}], lines [{point, dir}], params, views (preset), ask",
+   "first_year": "3se",
+   "notes_by_year": {
+    "2sc": "3se is coordinate-based (frames, normals, parametric lines); 2eme adds the synthetic mode (coordinates hidden), relation asks, the auxiliary-plane highlight, a section parallel to a face driven by a slider, equidistant-point highlighting (plan mediateur, axis of a circle) and an unfolded flat view of a face handed to GeometryCanvas",
+    "1s": "beyond the 3se spec and the 2eme extension (synthetic mode without coordinates, a section parallel to a face driven by a slider, an unfolded face): round solids (cone of revolution, sphere / ball, cylinder) and the pave droit with its dimensions, a plane containing an edge or parallel to an edge through two points, the section in true shape beside the 3-D view, the volumes of the two pieces with the reduction ratios k, k^2, k^3 (small pyramid 1/8, cone filled to half height 1/8), and the cone's development as a sector of angle 360 R / l"
+   },
+   "exercises": {
+    "1s": [
+     "1s/CH08_SECTIONS_PLANES/Ex1",
+     "1s/CH08_SECTIONS_PLANES/Ex2"
+    ],
+    "2sc": [
+     "2sc/T2_CH07_DROITES_PLANS_ESPACE/Ex1",
+     "2sc/T2_CH07_DROITES_PLANS_ESPACE/Ex2",
+     "2sc/T2_CH08_PARALLELISME_ESPACE/Ex1",
+     "2sc/T2_CH08_PARALLELISME_ESPACE/Ex2",
+     "2sc/T2_CH09_ORTHOGONALITE_ESPACE/Ex1",
+     "2sc/T2_CH09_ORTHOGONALITE_ESPACE/Ex2"
+    ],
+    "3se": [
+     "3se/T2_CH05_VECTEURS_ESPACE/Ex1",
+     "3se/T2_CH05_VECTEURS_ESPACE/Ex2",
+     "3se/T2_CH06_PRODUIT_SCALAIRE_ESPACE/Ex1",
+     "3se/T2_CH06_PRODUIT_SCALAIRE_ESPACE/Ex2",
+     "3se/T2_CH07_DROITES_ET_PLANS/Ex1",
+     "3se/T2_CH07_DROITES_ET_PLANS/Ex2"
+    ]
+   },
+   "exercise_count": 14
+  },
+  {
+   "name": "ComplexPlane",
+   "status": "new",
+   "domain": "complex numbers",
+   "purpose": "Complex numbers as points and vectors: algebraic and trigonometric forms, conjugate, modulus, argument; a product multiplies moduli and adds arguments; multiplying by i is a quarter turn.",
+   "student_action": "place points by affix, tap the readouts, apply an operation (x i, x a, conjugate, power) and see the image",
+   "engine_needs": "src/engine/complex.ts (stub today): exact a + bi over rationals and sqrt 3-type surds, modulus, argument as a rational multiple of pi when exact, products, quotients, powers, affixes of vectors and midpoints",
+   "props_sketch": "points [{id, z}], vectors, unitCircle, grid, operation {kind: mul | conj | power, by}, readouts",
+   "first_year": "3se",
+   "notes_by_year": {},
+   "exercises": {
+    "1s": [],
+    "2sc": [],
+    "3se": [
+     "3se/T2_CH04_NOMBRES_COMPLEXES/Ex1",
+     "3se/T2_CH04_NOMBRES_COMPLEXES/Ex2"
+    ]
+   },
+   "exercise_count": 2
+  },
+  {
+   "name": "ChoiceProduct",
+   "status": "extend",
+   "domain": "counting & probability",
+   "purpose": "Multiplication principle board: one slot per stage of a choice, the options left at each stage, and the product (bureau 10 x 9 x 8, votes 3^10, photo 10!, block of girls 5 x 6! x 4!).",
+   "student_action": "pick one option per stage, watch the options shrink or repeat, confirm the product",
+   "engine_needs": "combinatorics.ts (exists) for products, A(n, p), n!, n^p; coincidence guard",
+   "props_sketch": "stages [{title, size, labels}] (2-10), withoutRepetition, sameOptions, block, mode: and | or",
+   "extends_note": "today exactly 2 stages of 1-3 options; extend to 2-10 stages with sizes up to 10 drawn as a count plus a few chips, a 'without repetition' flag (arrangements, permutations), a 'same options' flag (p-uplets), a block stage for 'cote a cote', and a compact slot strip",
+   "first_year": "3se",
+   "notes_by_year": {
+    "3se": "today exactly 2 stages of 1-3 options; extend to 2-10 stages with sizes up to 10 drawn as a count plus a few chips, a 'without repetition' flag (arrangements, permutations), a 'same options' flag (p-uplets), a block stage for 'cote a cote', and a compact slot strip",
+    "2sc": "3se extends to 2-10 stages, without repetition and a block stage; 2eme adds the tree view (first branches expanded, the rest collapsed as 'x 4'), stage constraints and a chosen stage order, and a leaf value used to filter leaves",
+    "1s": "nothing beyond the 2eme extension (tree view, leaf value): 1ere draws the arbre de choix of the exponents of 2 and 3 (3 x 3 = 9 leaves) with the leaf value 2^a x 3^b; today's code has only the 2-stage grid"
+   },
+   "exercises": {
+    "1s": [
+     "1s/CH09_ACTIVITES_NUMERIQUES_I/Ex2"
+    ],
+    "2sc": [
+     "2sc/T1_CH04_ARITHMETIQUE/Ex1",
+     "2sc/T1_CH04_ARITHMETIQUE/Ex2"
+    ],
+    "3se": [
+     "3se/T2_CH08_DENOMBREMENT/Ex1",
+     "3se/T2_CH08_DENOMBREMENT/Ex2"
+    ]
+   },
+   "exercise_count": 5
+  },
+  {
+   "name": "EventAreaModel",
+   "status": "existing",
+   "domain": "counting & probability",
+   "purpose": "A whole as one bar whose slices follow their counts; pick events and see complement, intersection and union (multiples of 4 and 6, loaded die, football and swimming).",
+   "student_action": "pick one or two events, then a view, read the engine lines",
+   "engine_needs": "grouping.ts slice counts (exists); authored slices (<= 8)",
+   "props_sketch": "source: authored {slices [{id, label, count}]}, events (1-4), overlays: complement | intersection | union, labels: counts | probabilities",
+   "first_year": "3se",
+   "notes_by_year": {},
+   "exercises": {
+    "1s": [
+     "1s/CH09_ACTIVITES_NUMERIQUES_I/Ex2"
+    ],
+    "2sc": [
+     "2sc/T1_CH04_ARITHMETIQUE/Ex2"
+    ],
+    "3se": [
+     "3se/T2_CH08_DENOMBREMENT/Ex1",
+     "3se/T2_CH08_DENOMBREMENT/Ex2",
+     "3se/T2_CH10_PROBABILITES/Ex1"
+    ]
+   },
+   "exercise_count": 5
+  },
+  {
+   "name": "GroupBoxes",
+   "status": "existing",
+   "domain": "counting & probability",
+   "purpose": "Ordered draws grouped in boxes, one per set, each holding its k! orders: A(n, k) = k! C(n, k), bureau vs comite, simultaneous vs successive.",
+   "student_action": "open a box, read how many orders it holds",
+   "engine_needs": "grouping.ts, coincidence.ts (exist)",
+   "props_sketch": "balls (3-12), k (2-4), groupBy: ball_set, meantToDistinguish",
+   "first_year": "3se",
+   "notes_by_year": {},
+   "exercises": {
+    "1s": [],
+    "2sc": [
+     "2sc/T1_CH04_ARITHMETIQUE/Ex2"
+    ],
+    "3se": [
+     "3se/T2_CH08_DENOMBREMENT/Ex1",
+     "3se/T2_CH08_DENOMBREMENT/Ex2",
+     "3se/T2_CH10_PROBABILITES/Ex2"
+    ]
+   },
+   "exercise_count": 4
+  },
+  {
+   "name": "SlotsPattern",
+   "status": "existing",
+   "domain": "counting & probability",
+   "purpose": "Mark k of n slots and list the patterns (C(n, k)), build a Pascal row, see C(n, k) = C(n, n - k).",
+   "student_action": "toggle slots, add patterns, 'that is all'; build a Pascal row",
+   "engine_needs": "combinatorics.ts (exists)",
+   "props_sketch": "n (2-7), k, mode: free | guided | build_pascal | bridge",
+   "first_year": "3se",
+   "notes_by_year": {},
+   "exercises": {
+    "1s": [],
+    "2sc": [
+     "2sc/T1_CH04_ARITHMETIQUE/Ex2"
+    ],
+    "3se": [
+     "3se/T2_CH08_DENOMBREMENT/Ex1",
+     "3se/T2_CH08_DENOMBREMENT/Ex2"
+    ]
+   },
+   "exercise_count": 3
+  },
+  {
+   "name": "ComplementView",
+   "status": "existing",
+   "domain": "counting & probability",
+   "purpose": "One bar split into P(E) and P(not E) to see 'au moins une' through its complement.",
+   "student_action": "toggle event / complement",
+   "engine_needs": "probability.ts (exists)",
+   "props_sketch": "event, direction: from_complement, labels",
+   "first_year": "3se",
+   "notes_by_year": {},
+   "exercises": {
+    "1s": [],
+    "2sc": [],
+    "3se": [
+     "3se/T2_CH10_PROBABILITES/Ex2"
+    ]
+   },
+   "exercise_count": 1
+  },
+  {
+   "name": "EventPicker",
+   "status": "existing",
+   "domain": "counting & probability",
+   "purpose": "Task: tap every favourable outcome of an event (same colour, at least one white) and get the fraction graded by the engine.",
+   "student_action": "tap outcomes, submit",
+   "engine_needs": "probability.ts events (all_equal, any_value, not) and logic.ts grading (exist)",
+   "props_sketch": "event, reveal: on_submit, showFraction, maxAttempts",
+   "first_year": "3se",
+   "notes_by_year": {},
+   "exercises": {
+    "1s": [],
+    "2sc": [],
+    "3se": [
+     "3se/T2_CH10_PROBABILITES/Ex2"
+    ]
+   },
+   "exercise_count": 1
+  },
+  {
+   "name": "OutcomeSpace",
+   "status": "existing",
+   "domain": "counting & probability",
+   "purpose": "See every outcome of a draw as chips, coloured by an event, with the count (25 ordered with replacement, 20 without, 10 simultaneous).",
+   "student_action": "tap outcomes, read the count",
+   "engine_needs": "probability.ts enumerateOutcomes (exists)",
+   "props_sketch": "draw, k, colorBy: event, event, layout, showCount",
+   "first_year": "3se",
+   "notes_by_year": {},
+   "exercises": {
+    "1s": [],
+    "2sc": [],
+    "3se": [
+     "3se/T2_CH10_PROBABILITES/Ex2"
+    ]
+   },
+   "exercise_count": 1
+  },
+  {
+   "name": "ProbabilityTree",
+   "status": "extend",
+   "domain": "counting & probability",
+   "purpose": "Probability tree drawn as the exam prints it; a tap on a path end writes its product (with and without replacement; three games in a row).",
+   "student_action": "tap path ends, read the product",
+   "engine_needs": "tree.ts checkTree (exists) extended to 3 levels",
+   "props_sketch": "branches [{id, latex, p, show, children}] (2-4 per node), mark, compact",
+   "extends_note": "today 1-2 levels; add a third level for 2-branch trees (8 leaves: GGG ... PPP) with path marking across 3 levels; check the layout on a phone",
+   "first_year": "3se",
+   "notes_by_year": {
+    "3se": "today 1-2 levels; add a third level for 2-branch trees (8 leaves: GGG ... PPP) with path marking across 3 levels; check the layout on a phone"
+   },
+   "exercises": {
+    "1s": [],
+    "2sc": [],
+    "3se": [
+     "3se/T2_CH10_PROBABILITES/Ex2"
+    ]
+   },
+   "exercise_count": 1
+  },
+  {
+   "name": "Urn",
+   "status": "extend",
+   "domain": "counting & probability",
+   "purpose": "Show the urn's balls (and in select mode draw k of them) so the experiment is concrete.",
+   "student_action": "look; in select mode tap k balls",
+   "engine_needs": "probability.ts (exists); a third ball colour",
+   "props_sketch": "balls [{id, value, color: red | black | white}], draw, k, mode: display | select",
+   "extends_note": "ball colour 'white' (letter B) next to red / black: the 3se urn is 3 rouges, 2 blanches; BallColorSchema is shared by OutcomeSpace, EventPicker, ComplementView and GroupBoxes",
+   "first_year": "3se",
+   "notes_by_year": {
+    "3se": "ball colour 'white' (letter B) next to red / black: the 3se urn is 3 rouges, 2 blanches; BallColorSchema is shared by OutcomeSpace, EventPicker, ComplementView and GroupBoxes"
+   },
+   "exercises": {
+    "1s": [],
+    "2sc": [],
+    "3se": [
+     "3se/T2_CH10_PROBABILITES/Ex2"
+    ]
+   },
+   "exercise_count": 1
+  },
+  {
+   "name": "StatsDistribution",
+   "status": "new",
+   "domain": "statistics",
+   "purpose": "A one-variable series as bars and as sorted dots: mean, sigma-bands with the share of values inside, median and quartiles found by rank, box plot, and an affine change y = ax + b.",
+   "student_action": "tap the value of rank r in the sorted dots, drag the box-plot handles, drag the sigma-band multiplier, move a and b of the affine change",
+   "engine_needs": "new src/engine/statistics.ts: mean, variance V = sum(n x^2)/N - mean^2 exact, sigma, cumulative counts, ranks E(N/4) + 1, E(N/2) + 1, E(3N/4) + 1 (the manual's rule), counts in [mean - k sigma, mean + k sigma], effect of y = ax + b, marginal distributions",
+   "props_sketch": "values, counts, view: bars | dots | box | bands, ask: rank | box | band, transform {a, b}, roundTo",
+   "first_year": "3se",
+   "notes_by_year": {
+    "2sc": "3se: bars, sorted dots, sigma bands, ranks E(N/4) + 1, box plot, affine change; 2eme adds grouped classes and the histogram, the cumulative polygon with interpolation, the manual's 'at least 25 %' quartile rule, adding values, and the timeline view with index base 100",
+    "1s": "beyond the 3se spec and the 2eme extension (grouped classes, histogram, cumulative polygon with interpolation, adding values, timeline with index base 100): a frequency table the student fills (frequency, %, cumulative rows), a pie chart with angles 360 n / N, rectangle heights for unequal class widths (the [40 ; 60[ class gets 1.5 cm, not 3 cm), and the 1ere median rule (the mean of the two middle values when N is even), which differs from the 3se rank rule"
+   },
+   "exercises": {
+    "1s": [
+     "1s/CH16_EXPLOITATION_INFORMATION/Ex1",
+     "1s/CH16_EXPLOITATION_INFORMATION/Ex2"
+    ],
+    "2sc": [
+     "2sc/T2_CH10_STATISTIQUES/Ex1",
+     "2sc/T2_CH10_STATISTIQUES/Ex2"
+    ],
+    "3se": [
+     "3se/T2_CH09_STATISTIQUES/Ex1",
+     "3se/T2_CH09_STATISTIQUES/Ex2"
+    ]
+   },
+   "exercise_count": 6
+  },
+  {
+   "name": "TwoWayTable",
+   "status": "new",
+   "domain": "statistics",
+   "purpose": "A two-way table (statistics or probability): tap rows and columns for marginal totals and frequencies, select the cells of a combined condition ('au moins 4 h et au moins le palier 7').",
+   "student_action": "tap row / column totals, select cells, read the count and percentage",
+   "engine_needs": "statistics.ts: marginals, cell sums, exact percentages; counts -> probabilities for probability tables",
+   "props_sketch": "rows, cols, counts, ask: marginal | select {condition}, showPercent",
+   "first_year": "3se",
+   "notes_by_year": {},
+   "exercises": {
+    "1s": [],
+    "2sc": [],
+    "3se": [
+     "3se/T2_CH09_STATISTIQUES/Ex2",
+     "3se/T2_CH10_PROBABILITES/Ex1"
+    ]
+   },
+   "exercise_count": 2
+  },
+  {
+   "name": "ScatterPlot",
+   "status": "new",
+   "domain": "statistics",
+   "purpose": "A cloud of points (weighted or not) with the mean point G and the Mayer fit: split the cloud in two halves, place G1 and G2, draw (G1G2) and use it to estimate.",
+   "student_action": "tap points to split the cloud, place G, G1, G2, drag an x-value to read the estimate",
+   "engine_needs": "statistics.ts: mean point, partial mean points, line through G1 G2 exact, G on the line, estimates; weights from a two-way table",
+   "props_sketch": "points [{x, y, w}], axes, ask: mean_point | split | fit | estimate",
+   "first_year": "3se",
+   "notes_by_year": {},
+   "exercises": {
+    "1s": [],
+    "2sc": [],
+    "3se": [
+     "3se/T2_CH09_STATISTIQUES/Ex2"
+    ]
+   },
+   "exercise_count": 1
+  }
+ ]
+}

@@ -1,0 +1,1636 @@
+{
+ "year": "1s",
+ "components": [
+  {
+   "name": "Worksheet",
+   "status": "extend",
+   "domain": "generic",
+   "purpose": "Method frame (board Worksheet / old-feed LineInput): the student writes each calculation line and the engine checks it against the step's solution graph; the default for every 'calculer / montrer que / resoudre' question of 1ere.",
+   "student_action": "type lines with the math keys and number tiles; tap an earlier line to fix it",
+   "engine_needs": "src/method line chains plus one solution-graph template per 1ere question type (angle sums, Thales ratios, trig ratios and metric relations, vector equalities, coordinates and distances, quarter-turn images, sections and volumes, PGCD / PPCM, powers and surds, factorisation, equations, inequations, systems, linear / affine functions, statistics parameters); named quantities of the figure (AB, AH, angle ABC) bound to engine values; geometric and vector lines judged on several random instances of the figure (as check_ch01 / check_ch05 do)",
+   "props_sketch": "frame type 'lines': graph {template, params}, variables (x, a, k, t, n, b), tiles, symbols (named lengths, angles, vectors of the figure)",
+   "extends_note": "beyond the 3se and 2eme notes (inequality / equivalence lines, surds, pi, vectors as symbols with Chasles, components, encadrements, percentages, scientific notation, N = dq + r, systems by elimination): (1) angles in degrees as quantities (angle ADB = 180 - 80 - 30 = 70); (2) named lengths and angles of the current figure as symbols bound to engine values (AN = (3/4) x 8 = 6; cos ABC = BH / AB), so a line about the figure is judged without coordinates on screen; (3) synthetic vector lines (vec(ED) = vec(EC) + vec(CD) = 2 vec(AB), vec(GA) + vec(GB) + vec(GC) = 0) judged on several random instances of the figure, as check_ch01 / check_ch05 do; (4) prime-power products (2^2 x 3^3 x 7) kept factored for PGCD / PPCM lines; (5) the long-division step 90 = 14 x 6 + 6 written as a line"
+  },
+  {
+   "name": "CardsPick",
+   "status": "existing",
+   "domain": "generic",
+   "purpose": "Method frame: pick one of 2-5 sentence cards giving the reason, rule or claim behind a step (alternes-internes vs correspondants, reciproque de Thales, regle du parallelogramme, 'un produit est nul si et seulement si...', 'multiplier par un negatif change le sens', 'meme coefficient donc droites paralleles').",
+   "student_action": "tap a card",
+   "engine_needs": "card evaluators (src/method/cards.ts, claims.ts); new claim kinds for 1ere: angle-pair kind, parallel or not, nature of a quadrilateral, divides / irreducible, order kept or reversed",
+   "props_sketch": "frame type 'cards': cards [{id, text}], evaluator"
+  },
+  {
+   "name": "PlanCards",
+   "status": "existing",
+   "domain": "generic",
+   "purpose": "Method frame: order 3-5 plan cards: construction steps (triangle from a side and two angles, partage d'un segment), proof chains (parallelogramme puis losange; diagonales -> carre; repere -> distances -> reciproque de Pythagore), the two directions of 'si et seulement si'.",
+   "student_action": "order the cards, confirm",
+   "engine_needs": "checkPlan (any order respecting what each card uses)",
+   "props_sketch": "frame type 'plan': cards [{id, text, uses[]}]"
+  },
+  {
+   "name": "StatementTap",
+   "status": "existing",
+   "domain": "generic",
+   "purpose": "Method frame: tap the word of the French statement that decides the method (exactement / au moins / aucun; au plus / strictement plus; 'sur les prix de janvier'; 'parallele a la face' vs 'parallele a l'arete'; 'entier naturel').",
+   "student_action": "tap a word in the statement",
+   "engine_needs": "none (targets in content)",
+   "props_sketch": "frame type 'read': sentence, targets"
+  },
+  {
+   "name": "PredictReveal",
+   "status": "existing",
+   "domain": "generic",
+   "purpose": "Commit to a prediction before the visual: area x k or x k^2? half full at half height? does the crossing height depend on d? the angle of the hands at 4 h 20? the net change of +8 % then -25 %? which parameter moves when one extreme value is added?",
+   "student_action": "pick a prediction, then explore the revealed visual",
+   "engine_needs": "none of its own (the inner component computes; the prediction is not graded)",
+   "props_sketch": "prompt, options (2-4), reveal (inner spec), insight"
+  },
+  {
+   "name": "CompareTwo",
+   "status": "existing",
+   "domain": "generic",
+   "purpose": "Two inner visuals stacked to compare (the boat's two crossings: engine across the river vs engine turned upstream).",
+   "student_action": "explore both inner visuals",
+   "engine_needs": "none of its own",
+   "props_sketch": "left, right (inner specs), leftLabel, rightLabel, insight"
+  },
+  {
+   "name": "NumericTwin",
+   "status": "existing",
+   "domain": "generic",
+   "purpose": "Pick values for x (or a) and see both sides of an identity agree before proving it: (x + 1)^3 - (x - 1)^3 = 6x^2 + 2, 16000 - 27 V(x) = 4(3x - 10)^2 (40 - 3x), the three forms of E(x), AE^2 + EF^2 = AF^2 for a square of side a.",
+   "student_action": "tap values, compare both sides",
+   "engine_needs": "safe parser evaluates both sides at each value (exists)",
+   "props_sketch": "symbol (one letter), template, compare, values (numbers)"
+  },
+  {
+   "name": "CounterexampleHunt",
+   "status": "reserved",
+   "domain": "generic",
+   "purpose": "'Try to break this claim': the student proposes a value against a 'for all' statement (V(x) <= 16000/27 on ]0, 10[; L >= 120 m for every position of the bridge) and the engine says whether the claim survives; then he picks 'holds' or 'fails'.",
+   "student_action": "type or drag a trial value, submit tries, then pick 'holds' or 'fails'",
+   "engine_needs": "claim kinds le / ge of the 3se spec; exact evaluation (sqrt sums compared by interval arithmetic); the true extremum known to the engine (V(10/3) = 16000/27, L(60) = 120)",
+   "props_sketch": "claim {kind: le | ge, lhs, rhs, domain}, variable, maxTries, hintValues"
+  },
+  {
+   "name": "IntervalBuilder",
+   "status": "extend",
+   "domain": "numbers & algebra",
+   "purpose": "Build intervals and solution sets on the number line (open / closed ends, +-inf, isolated points, whole numbers only); the written form [-6, +inf[ or {0, 1, ..., 19} builds itself.",
+   "student_action": "tap endpoints from chips, toggle bracket ends, add a point, choose +-inf, keep only the whole numbers of the set",
+   "engine_needs": "new src/engine/intervals.ts (3se / 2eme spec: exact endpoints, unions, set equality, distance conditions |x - a| <= r) plus the intersection of a set with N or Z (finite list or 'n >= 37')",
+   "props_sketch": "axis {min, max, ticks}, chips, expected: {solve: inequality} | {set} | {distance {center, r, rel: eq | le}}, allowPoints, allowInfinity, integersOnly: N | Z",
+   "extends_note": "beyond the 3se / 2eme spec: a whole-numbers filter (N or Z) for 'x entier naturel' (tariffs {0, ..., 19}, n <= 4.6 -> 0..4, integers of [-2, -1.5]) and the equality case of the distance condition (|x + 2| = 3 gives the two points -5 and 1)"
+  },
+  {
+   "name": "BoundsRuler",
+   "status": "extend",
+   "domain": "numbers & algebra",
+   "purpose": "A zoomable graduated ruler for encadrements and approximations: a bracket is pushed through the operations of the question and the student sees the new bracket, then whether it decides a rounding or a comparison.",
+   "student_action": "tap the operation to apply, drag or type the new bounds, tap 'arrondi = ...', 'valeur approchee' or 'on ne peut pas conclure'; zoom one decimal further",
+   "engine_needs": "new src/engine/bounds.ts (2eme spec: exact interval arithmetic for monotone operations with the sign rule, rounding decisions, the true value placed to check every bracket) plus the 1ere definition of 'valeur approchee a 10^p pres' (a - 10^p <= b <= a + 10^p, several valid a) and a comparison target (is 15 sqrt 2 below 21.22?)",
+   "props_sketch": "start {lower, upper, of}, ops [{kind: add | mul | square | sqrt | inv, by}], target {expr, decimals, mode: nearest | default | excess | approx | compare {with}}, ticks, zoomLevels",
+   "extends_note": "beyond the 2eme spec (par defaut / par exces, rounding): the 1ere 'valeur approchee a 10^p pres' test (both 0.64 and 0.65 approximate 9/14 to 10^-2), a compare target that may answer 'the bracket cannot decide' (21.21 < 15 sqrt 2 < 21.225 against 21.22), and a start given as an inequality on an expression (-1 <= 2x - 3 <= 1/2) pushed back to x"
+  },
+  {
+   "name": "FactorTree",
+   "status": "extend",
+   "domain": "numbers & algebra",
+   "purpose": "Prime factorisation as a division ladder or a tree, then an exponent table that gives PGCD (smaller exponents), PPCM (larger exponents), all common divisors (grid 2^a x 3^b), the smallest multiplier to a square or a cube, an irreducible fraction and sqrt n = a sqrt b.",
+   "student_action": "pick the next prime divisor and fill the quotient; read the exponents into the table; tap min or max per prime; toggle exponents in the divisor grid; raise exponents to even numbers or multiples of 3",
+   "engine_needs": "arithmetic.ts (2eme spec: factorisation, exponents, largest square factor) plus gcd / lcm by min / max exponents with the check gcd x lcm = a x b, common divisors from exponent ranges, the smallest k with n k a perfect square / cube, fraction reduction by common primes, powers of composite numbers rewritten (6^3 = 2^3 x 3^3)",
+   "props_sketch": "numbers (1-3 integers), mode: tree | ladder | sqrt_simplify | gcd_lcm | divisors | perfect_power {kind: square | cube} | reduce_fraction | powers, ask",
+   "extends_note": "beyond the 2eme spec (tree, ladder, sqrt_simplify): an exponent table for two numbers with PGCD = smaller exponents and PPCM = larger exponents (756 and 1176 -> 84 and 10584), a common-divisor grid 2^a x 3^b (252 and 180: 9 divisors, 7 cannot appear), a perfect-power mode (smallest k making 756 k a square: 21; 1176 k' a cube: 63), a reduce-fraction mode (756/1176 = 9/14), and a powers mode for exponent rules (2^5 x 3^-2 x 6^3 / (4^3 x 3))"
+  },
+  {
+   "name": "DivisibilityChecker",
+   "status": "extend",
+   "domain": "numbers & algebra",
+   "purpose": "Euclidean division a = bq + r (0 <= r < b) and what follows from it: does b divide a, divisibility criteria, how many multiples of b up to N, the pattern of remainders (18k by 12: 6, 0, 6, 0), Euclid's chain to the last nonzero remainder, and the long division of 9 by 14 whose remainders come back.",
+   "student_action": "type q and r (the engine checks 0 <= r < b), tap the criterion that applies, step k and read the remainder row, step the Euclid chain, step the long division and tap the first remainder that repeats",
+   "engine_needs": "arithmetic.ts (2eme spec: criteria and remainders) plus quotient and remainder of a = bq + r, the count of multiples q = floor(N / b), remainders of b k mod m over a k range, the Euclid chain, long-division digits and remainders with the period (start, length) and the n-th digit after the point",
+   "props_sketch": "number, divisors, mode: criteria | division | count_multiples | remainder_pattern | euclid_chain | long_division, a, b, N, kRange, digits, ask",
+   "extends_note": "beyond the 2eme spec (criteria, digit slots, filters): a division mode a = bq + r with 0 <= r < b (500 = 12 x 41 + 8 -> 41 multiples of 12 up to 500), a remainder-pattern row (18k mod 12 for k = 1..6), the Euclid chain (1176, 756 -> 84), and a long-division mode that lists the remainders, lights the first one that repeats and gives the n-th digit (9/14 = 0.6428571..., 100th digit 8)"
+  },
+  {
+   "name": "PartWholeBar",
+   "status": "extend",
+   "domain": "numbers & algebra",
+   "purpose": "Bars for a quantity and its changes: a fraction of a quantity (2/5 of 500, then 3/4 of the 300 left), and in the 2eme percent-change mode a chain of coefficients (+8 % then -25 % is x 0.81, i.e. -19 %), an area x 2.56 = +156 %, indices base 100.",
+   "student_action": "drag the stepped handle to the value, tap the whole a percentage is taken of, read the global coefficient",
+   "engine_needs": "src/engine/partWhole.ts (exists) with the 2eme chain extension (product of coefficients, global change, index base 100)",
+   "props_sketch": "whole, fraction, mode: fraction_of_quantity | percent_change, steps [{coef | percent, of: start | current}], indexBase, unit, ticks",
+   "extends_note": "nothing beyond the 2eme percent_change mode: 1ere uses it for x 1.08 then x 0.75 (the seller's -17 % claim), the antecedent 432 / 1.08 = 400, the photo area x 2.56 and x 16/225, and indices base 100 in 2018; fraction_of_quantity (exists) for the tombola tickets"
+  },
+  {
+   "name": "ProductGrid",
+   "status": "new",
+   "domain": "numbers & algebra",
+   "purpose": "The generic rectangle of the 2eme spec: each term of one factor times each term of the other fills a cell, same-degree cells are collected into the developed form ((2x - 3)^2, (x + 1)^3, x(20 - 2x)^2, (2x + 3)(x + 2), (sqrt 3 - 1)(sqrt 3 + 1), 1002^2 = (1000 + 2)^2).",
+   "student_action": "type a term in a cell, tap same-degree cells to collect them, write the developed form",
+   "engine_needs": "new src/engine/polynomial.ts (2eme spec): exact expansion and collection by degree over rationals and simple surds; cells checked by sample equivalence",
+   "props_sketch": "left, right (lists of terms), mode: expand, givenCells"
+  },
+  {
+   "name": "LinearSystemBoard",
+   "status": "new",
+   "domain": "numbers & algebra",
+   "purpose": "A system of two first-degree equations as two equation cards and two lines: substitution, elimination with multipliers the student chooses (each combination is one more line through the same point), and the three cases (one point; parallel lines, 0 = 7; the same line, 0 = 0).",
+   "student_action": "pick the method; choose a multiplier for each equation until one unknown cancels; tap the solution point or the case; read the line of each equation",
+   "engine_needs": "new src/engine/systems.ts: exact 2 x 2 solving over rationals, classification (one / none / infinitely many), the combination k1 E1 + k2 E2 and the unknown it cancels, equivalence of two systems (same solution set), each equation as a line (y = mx + p, or vertical) for the plot",
+   "props_sketch": "equations [{a, b, c}] x 2 (ax + by = c, rationals), unknowns {x, y}, method: substitution | elimination | graph, multipliers (chosen by the student), window, ask: multipliers | solution | classify"
+  },
+  {
+   "name": "FunctionPlot",
+   "status": "extend",
+   "domain": "functions & analysis",
+   "purpose": "Draw the representations of linear and affine functions (and of V(x)) with engine-placed points so the student reads images, antecedents, intersections and where one line lies under another.",
+   "student_action": "place two points to draw a line (the engine checks they satisfy y = ax + b), tap a point or a region, read the coordinates of an intersection",
+   "engine_needs": "analysis.ts with content-defined expressions (3se); lines given as y = ax + b or ax + by = c (vertical lines too), exact intersection of two lines, the region where f <= g, whole-number x dots, curves restricted to an interval, axes with different units",
+   "props_sketch": "curves [{fn: expr, from, to, label}], lines [{a, b, c}], points, window {x, y, unitX, unitY}, markers: point | step_triangle {x, dx} | intersection | region {below, above}, integerX, ask {kind: place_points | tap_point | tap_region | read_point}",
+   "extends_note": "beyond today's code and the 3se / 2eme extensions (content expressions, several curves and lines, tap ask, values table, place_points): place_points used to draw a line from two points of y = ax + b, a read_point ask (coordinates of an intersection read on the grid), a slope step-triangle marker (x + dx -> y + a dx), lines given as ax + by = c, curves restricted to an interval (segments for x in [0, 1000] or t in [0.5, 11/6]), orthogonal axes with different units (6 cm per hour, 1 cm per 10 km)"
+  },
+  {
+   "name": "CurveCompare",
+   "status": "extend",
+   "domain": "functions & analysis",
+   "purpose": "Two or three lines on one plot with their difference shown under a dragged x, so the student reads where one is under another (f(x) <= g(x) graphically; the cheapest of three tariffs) and links it to the inequation.",
+   "student_action": "drag x, read the values and the difference, tap the crossing points, shade where one line is under the other, tap the band where each tariff is lowest",
+   "engine_needs": "analysis.ts (2eme spec: difference and its sign changes, crossings, the shaded set handed to IntervalBuilder) plus the lowest of three curves per x and whole-number x",
+   "props_sketch": "curves (2-3 content expressions), domain, integerX, labels, showDiff, ask: crossings | above_set | lowest_bands",
+   "extends_note": "beyond the 2eme spec (two curves): up to three curves with 'which is lowest' bands (tariffs A, B, C: 0-19, 20, 21-35, 36, 37+) and a whole-number x axis"
+  },
+  {
+   "name": "ParameterPlayground",
+   "status": "extend",
+   "domain": "functions & analysis",
+   "purpose": "Sliders for a parameter with live engine outputs to find when a property holds: a in ]0, 1[ keeps a^2 < a < sqrt a < 1/a; every y = ax passes through O and a second common point with y = 0.4x needs a = 0.4; no b makes y = 2.5x + b meet y = 2.5x - 4; a 9 L mix reaches only 30 % to 60 % of juice.",
+   "student_action": "drag sliders, read outputs, tap 'found' or 'never'",
+   "engine_needs": "analysis.ts: parameters substituted into content expressions; outputs as engine values; the goal's solution set known to the engine to grade 'found' or 'never'",
+   "props_sketch": "params [{name, min, max, step, init}], expr, outputs [{label, call: value, at}], goal, render: FunctionPlot | numberLine props",
+   "extends_note": "nothing beyond the 2eme extension (number-line render with the order of several outputs, a 'never' answer): 1ere uses the FunctionPlot render for the lines and the number line for a, a^2, sqrt a, 1/a"
+  },
+  {
+   "name": "HorizontalLineSweep",
+   "status": "extend",
+   "domain": "functions & analysis",
+   "purpose": "Drag a horizontal line y = m over one or several curves: read an antecedent graphically (648 D in July -> 800 D), find the largest number of entries a budget pays on each of three tariffs, see that V(x) = 500 is reached but 600 never, and shade where the gap between two vehicles is at most 30 km.",
+   "student_action": "drag m (stepped), tap the crossings, read the antecedent or the largest whole x, shade where a curve is under the line",
+   "engine_needs": "analysis.ts (3se spec: crossings with y = m, solution sets of f(x) <= k handed to IntervalBuilder) plus several curves at once and whole-number domains (largest integer x with f(x) <= m); crossings exact for affine pieces",
+   "props_sketch": "curves [{fn, label}] (1-3), domain, integerX, m {min, max, step, init}, mode: read | count | inequality, ask",
+   "extends_note": "beyond the 3se spec (one fn, count / inequality modes): several curves under one sweep line, a whole-number domain (keep the largest number of entries), and a read mode that only reads the antecedent of m on one line"
+  },
+  {
+   "name": "SituationToGraph",
+   "status": "extend",
+   "domain": "functions & analysis",
+   "purpose": "Link a concrete scene to the graph of the quantity studied: the box cut from a 20 cm sheet (S(x), V(x)), the truck and the car on the road A-B (d1, d2 and their gap), the bridge sliding along the river (path length L).",
+   "student_action": "drag x or t; fill a value table (V(1) ... V(9)) and see the points appear; tap the graph point that matches the scene; predict where the best value is",
+   "engine_needs": "analysis.ts + geometry2d.ts: the quantity measured on the scene equals the formula (V(x) = 4x(10 - x)^2, d2(t) = -90t + 165, L(x) = sqrt(45^2 + x^2) + 20 + sqrt((80 - x)^2 + 15^2)); special positions from the engine (V max at 10/3, meeting at t = 1.1, bridge at 60 m from H); table cells checked exactly",
+   "props_sketch": "scene: GeometryCanvas spec whose points are expressions of the parameter, param {name, min, max, step}, quantities [{expr, label}] (1-2), graph: FunctionPlot props (with its values table)",
+   "extends_note": "nothing beyond the 2eme extension (scene points given as expressions of the parameter, two quantities on one graph) and FunctionPlot's 2eme values table: 1ere scenes are the box cut from a 20 cm sheet, the truck and the car on the road A-B (d1 and d2 on one graph) and the bridge sliding along the river"
+  },
+  {
+   "name": "SignTableBuilder",
+   "status": "new",
+   "domain": "functions & analysis",
+   "purpose": "Build the tableau de signe of a product of first-degree factors (and of a squared factor): place the roots in order, the sign of each factor (sign of a to the right of its root), deduce the product row, then read a solution set.",
+   "student_action": "tap the roots onto the x-line in order, set each factor's sign per interval, deduce the result row",
+   "engine_needs": "analysis.ts helpers of the 3se spec (roots, exact ordering, sign per interval, product sign; graded per cell); 1ere needs only affine factors, a positive constant and a squared affine factor, on R or on ]0, 10[",
+   "props_sketch": "factors [{expr, label}], interval, givenCells, resultLabel"
+  },
+  {
+   "name": "GeometryCanvas",
+   "status": "extend",
+   "domain": "plane geometry & transformations",
+   "purpose": "One plane board for every 1ere figure: triangles and circles with angle marks in degrees, Thales configurations with live ratios, vectors (sum, Chasles, k u, components), translation, quarter turn, half turn and enlargement / reduction, in a free plane, on a grid, in a repere or on one axis.",
+   "student_action": "drag free points or points tied to a segment / line / circle, tap an angle pair, a point or a segment to answer, place an image point, build a vector tip to tail, move a parameter slider (clock time, side a, heights a, b, d)",
+   "engine_needs": "new src/engine/geometry2d.ts (3se spec) plus: geometric angles in degrees and their classification against a secant (alternate interior, corresponding, co-interior; inscribed and central angle on the same arc), points constrained to a segment, line or circle, constructions (parallel / perpendicular through a point, bisector, mediatrix, protractor angle, equal compass steps), exact ratio readouts (AM / AB), translation, quarter turn direct / indirect, half turn and scaling by k with the images of points, segments, lines, circles and polygons, vector sums and multiples, components and colinearity, centre of gravity, circular-sector areas in pi, and sampling of the figure family to judge a geometric claim on many instances",
+   "props_sketch": "frame: none | axis1d | grid | axes, points [{id, at | on {segment | line | circle} | construct {kind, of}}], objects [segment | line | ray | circle | sector | vector | polygon | angleMark {deg, pair}], params [{name, min, max, step}], draggable, readouts [{kind: length | angle_deg | ratio | coords | components | perimeter | area, of}], transforms [{kind: translation | rotation {center, angle: 90, dir: direct | indirect} | central_symmetry | homothety {center, k}, apply_to}], vectorTools: tip_to_tail | parallelogram | multiple, preset: clock | river, ask {kind: place | tap | tap_pair | measure | build_vector}",
+   "extends_note": "beyond the 3se spec and the 2eme extension (four transformations with images of points, lines, circles and polygons, length and area ratios, Chasles head-to-tail sums and k u, params): (1) geometric angles in degrees with angle-pair marks and a tap_pair ask (alternes-internes, correspondants, interieurs d'un meme cote; inscrit and au centre on the same arc); (2) points tied to a segment, line or circle (glider: F on [BC], R on [AC], the vertex of an inscribed angle, T on y = 8); (3) construction steps (protractor angle, parallel through a point, equal compass steps on a half-line, bisector, mediatrix) that the student performs or orders; (4) Thales ratio readouts in the three positions of the course; (5) the quarter turn named direct / indirect with the grid-step method (3 right 1 up -> 3 up 1 left), on top of the 2eme rotation; (6) the parallelogram rule and the centre of gravity among the vector tools; (7) circular sectors with their area; (8) presets clock (time slider moves both hands) and river (bridge, boat)"
+  },
+  {
+   "name": "LocusTracer",
+   "status": "extend",
+   "domain": "plane geometry & transformations",
+   "purpose": "Drag P and see where the angle H12 P H6 equals 90 deg; the positions that work leave a trace (the circle of diameter [H12H6] without its two ends), then the student names the set.",
+   "student_action": "drag P, read the angle, drop trace points, pick the set (and the excluded points) from cards",
+   "engine_needs": "geometry2d.ts: the geometric angle APB in degrees at P; the true locus for 90 deg (circle of diameter [AB] minus A and B) to grade the pick and draw it",
+   "props_sketch": "base: GeometryCanvas props, condition {kind: angle_deg, A, B, value}, tolerance, answerCards",
+   "extends_note": "beyond the 3se conditions (dot products, distances, oriented angles, affixes): a geometric angle condition in degrees (APB = 90 deg gives the whole circle minus A and B, not an arc) and answer cards with excluded points"
+  },
+  {
+   "name": "RightTriangleTrig",
+   "status": "new",
+   "domain": "trigonometry",
+   "purpose": "A right triangle with a chosen acute angle: name the opposite and adjacent sides and the hypotenuse, read cos, sin, tan as ratios that stay the same when the triangle is scaled, get an angle from a ratio (calculator, 0.01 deg), swap sin and cos of complementary angles, use the foot H of the altitude (AB x AC = AH x BC, AH^2 = HB x HC, AB^2 = BH x BC), construct an angle from its tangent, and lean the ladder against the wall.",
+   "student_action": "tap the sides for the chosen angle, drag the size or the angle, type a ratio or an angle, tap every angle with a given ratio, slide the ladder's foot and read alpha against the safe band",
+   "engine_needs": "new src/engine/trig.ts (or in geometry2d.ts): exact ratios as fractions or p + q sqrt c, the 30 / 45 / 60 deg table, inverse cos / sin / tan in degrees rounded as a calculator does (labelled approximate), complementary-angle relations, metric relations of the altitude checked exactly, the angles of a figure that have a given ratio",
+   "props_sketch": "vertices {right, focus}, lengths (given ones), angleDeg, altitude {foot}, mode: ratios | scale | inverse | complement | altitude | construct | ladder, slider {kind: size | angle | foot, min, max, step}, band {min, max}, ask {kind: tap_side | tap_angle | ratio | angle}"
+  },
+  {
+   "name": "SolidViewer",
+   "status": "extend",
+   "domain": "space geometry",
+   "purpose": "One 3-D viewer for the solids of 1ere: the pave droit (12 x 9 x 8), the pyramid GABCD, the cone of revolution and the sphere; a cutting plane parallel to a face or to the base, containing an edge, or parallel to an edge; the section drawn in place and in true shape, with lengths, areas and volumes of the pieces.",
+   "student_action": "turn the view by preset steps, slide the cutting plane, tap where it meets the edges, read the section in true shape, pick its nature, compare volumes",
+   "engine_needs": "space.ts (3se spec) plus: cuboid with dimensions, cone, sphere and cylinder; planes given as 'parallel to a face / the base through a point' or 'through two points, parallel to an edge'; section of a cone (circle of radius r h' / h) and of a sphere (radius sqrt(R^2 - d^2)); volumes exact in pi; reduction ratios k, k^2, k^3; the cone's development (sector angle 360 R / l)",
+   "props_sketch": "solid: cuboid {a, b, c} | pyramid {apex, base} | cone {r, h} | sphere {R} | cylinder {r, h}, extras (ball resting on the cone), plane {kind: parallel_face | parallel_base | through_edge | parallel_edge, through, t}, show: section | true_shape | pieces | net, readouts: length | area | volume | ratio, views (preset), ask",
+   "extends_note": "beyond the 3se spec and the 2eme extension (synthetic mode without coordinates, a section parallel to a face driven by a slider, an unfolded face): round solids (cone of revolution, sphere / ball, cylinder) and the pave droit with its dimensions, a plane containing an edge or parallel to an edge through two points, the section in true shape beside the 3-D view, the volumes of the two pieces with the reduction ratios k, k^2, k^3 (small pyramid 1/8, cone filled to half height 1/8), and the cone's development as a sector of angle 360 R / l"
+  },
+  {
+   "name": "ChoiceProduct",
+   "status": "extend",
+   "domain": "counting & probability",
+   "purpose": "Multiplication principle: one stage per choice; here the exponent of 2 (0, 1, 2) then the exponent of 3 (0, 1, 2) give 3 x 3 = 9 common divisors of 252 and 180.",
+   "student_action": "pick one option per stage, see each path and its value, confirm the product",
+   "engine_needs": "combinatorics.ts (exists) for the count; the path value 2^a x 3^b from arithmetic.ts",
+   "props_sketch": "stages [{title, options, size}], view: slots | tree, leafValue (expr)",
+   "extends_note": "nothing beyond the 2eme extension (tree view, leaf value): 1ere draws the arbre de choix of the exponents of 2 and 3 (3 x 3 = 9 leaves) with the leaf value 2^a x 3^b; today's code has only the 2-stage grid"
+  },
+  {
+   "name": "EventAreaModel",
+   "status": "existing",
+   "domain": "counting & probability",
+   "purpose": "The 500 tickets as one bar in slices (both prizes 13, pen only 28, book only 14, none 445): union, intersection and complement for 'exactement un', 'au moins un', 'aucun'.",
+   "student_action": "pick one or two events, then a view, read the engine lines",
+   "engine_needs": "grouping.ts slice counts (exists); authored slices",
+   "props_sketch": "source: authored {slices [{id, label, count}]}, events, overlays: complement | intersection | union, labels: counts"
+  },
+  {
+   "name": "StatsDistribution",
+   "status": "extend",
+   "domain": "statistics",
+   "purpose": "A one-variable series as a table (effectifs, frequences, %, cumulees), bars, a pie, sorted dots or a histogram with classes: mode, median, mean, range, the cumulative frequency polygon and its median at 0.5, one extreme value added, and a chronological series.",
+   "student_action": "fill the frequency rows, set bar / rectangle heights (area counts for the wide class), tap the 20th and 21st values, read the pie angles, add a value and compare mean and median, read the cumulative curve at 0.5, 15 and 35 min",
+   "engine_needs": "statistics.ts (3se spec) plus: frequencies and cumulative frequencies, pie angles 360 n / N, mode and modal class, the 1ere median (middle value, or the mean of the two middle values when N is even), mean with class centres, rectangle heights for unequal class widths (area proportional to the count), the cumulative polygon and linear interpolation (median 22.5, F(15) = 0.30), range",
+   "props_sketch": "values | classes [{from, to}], counts, view: table | bars | pie | dots | histogram | cumulative | timeline, ask: fill_table | heights | rank | read_curve | add_value, unitArea, roundTo",
+   "extends_note": "beyond the 3se spec and the 2eme extension (grouped classes, histogram, cumulative polygon with interpolation, adding values, timeline with index base 100): a frequency table the student fills (frequency, %, cumulative rows), a pie chart with angles 360 n / N, rectangle heights for unequal class widths (the [40 ; 60[ class gets 1.5 cm, not 3 cm), and the 1ere median rule (the mean of the two middle values when N is even), which differs from the 3se rank rule"
+  }
+ ],
+ "uses": [
+  {
+   "exercise": "1s/CH01_ANGLES/Ex1",
+   "questions": "Q1",
+   "components": [
+    "GeometryCanvas",
+    "PlanCards",
+    "Worksheet"
+   ],
+   "why": "build ABC from BC = 7 cm and the two angles (ruler and protractor), order the construction steps, then 180 - 60 - 40 = 80"
+  },
+  {
+   "exercise": "1s/CH01_ANGLES/Ex1",
+   "questions": "Q2a-b",
+   "components": [
+    "GeometryCanvas",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "the bisector splits 60 into 30 + 30; angle ADB in triangle ABD, then BDC supplementary because A, D, C are aligned; control in BDC"
+  },
+  {
+   "exercise": "1s/CH01_ANGLES/Ex1",
+   "questions": "Q3a-b",
+   "components": [
+    "GeometryCanvas",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "light EDB / DBC across the secant (BD) and pick 'alternes-internes'; AED / ABC and ADE / ACB are 'correspondants'; two equal angles make EBD isosceles"
+  },
+  {
+   "exercise": "1s/CH01_ANGLES/Ex1",
+   "questions": "Q4a-b",
+   "components": [
+    "GeometryCanvas",
+    "PlanCards"
+   ],
+   "why": "drag F along [BC]: (DF) is parallel to (AB) exactly when angle CDF = 80 (the reciprocal); plan: parallelogram first, then two consecutive equal sides"
+  },
+  {
+   "exercise": "1s/CH01_ANGLES/Ex1",
+   "questions": "Q5a-b",
+   "components": [
+    "GeometryCanvas",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "co-interior angles give 60 and 120; BDF alternate with DBA gives 30; [DB) is the bisector; E and F equidistant from B and D so (EF) is the mediatrix"
+  },
+  {
+   "exercise": "1s/CH01_ANGLES/Ex2",
+   "questions": "Q1a-c",
+   "components": [
+    "GeometryCanvas",
+    "Worksheet"
+   ],
+   "why": "clock preset: 12 equal central angles of 360/12; count intervals from H12 to H4; OH12H2 with 60 at O is equilateral"
+  },
+  {
+   "exercise": "1s/CH01_ANGLES/Ex2",
+   "questions": "Q2a-c",
+   "components": [
+    "GeometryCanvas",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "slide the vertex of the inscribed angle along the circle: it stays half of the central angle on the same arc; pick 'same arc, equal angles'; three 60 angles"
+  },
+  {
+   "exercise": "1s/CH01_ANGLES/Ex2",
+   "questions": "Q3a-c",
+   "components": [
+    "GeometryCanvas",
+    "LocusTracer",
+    "Worksheet"
+   ],
+   "why": "[H12H6] is a diameter so the angle at H4 is right; Pythagore gives 10 sqrt 3; drag P keeping angle H12PH6 = 90: the circle without H12 and H6"
+  },
+  {
+   "exercise": "1s/CH01_ANGLES/Ex2",
+   "questions": "Q4a-b",
+   "components": [
+    "GeometryCanvas",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "two inscribed angles of 60 are alternate interior about (H1H7): the reciprocal gives (H1H11) parallel to (H5H7)"
+  },
+  {
+   "exercise": "1s/CH01_ANGLES/Ex2",
+   "questions": "Q5a-b",
+   "components": [
+    "PredictReveal",
+    "GeometryCanvas",
+    "Worksheet"
+   ],
+   "why": "the time slider moves both hands: the minute hand sweeps a 120 deg sector (27 pi); predict the angle at 4 h 20 before seeing the hour hand has moved 10 deg"
+  },
+  {
+   "exercise": "1s/CH02_THALES/Ex1",
+   "questions": "Q1",
+   "components": [
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "36 + 64 = 100: reciprocal of Pythagore (pick it), area 24"
+  },
+  {
+   "exercise": "1s/CH02_THALES/Ex1",
+   "questions": "Q2a-b",
+   "components": [
+    "GeometryCanvas",
+    "PredictReveal",
+    "Worksheet"
+   ],
+   "why": "live ratios AM/AB = AN/AC = MN/BC = 3/4; predict the area factor (3/4 or 9/16) before perimeter x k and area x k^2 appear"
+  },
+  {
+   "exercise": "1s/CH02_THALES/Ex1",
+   "questions": "Q3a-c",
+   "components": [
+    "GeometryCanvas",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "AQ/AB = AP/AC = 1/4 gives (PQ) parallel to (BC); drag R along [AC]: 2/8 vs 3/8, not parallel; pick reciprocal vs 'if parallel then equal ratios'"
+  },
+  {
+   "exercise": "1s/CH02_THALES/Ex1",
+   "questions": "Q4a-b",
+   "components": [
+    "GeometryCanvas",
+    "Worksheet"
+   ],
+   "why": "third position (A between B and E, between C and F): ratios 1/2, EF = 5"
+  },
+  {
+   "exercise": "1s/CH02_THALES/Ex1",
+   "questions": "Q5",
+   "components": [
+    "GeometryCanvas",
+    "PlanCards",
+    "Worksheet"
+   ],
+   "why": "five equal compass steps on [Bx), join U5C, parallel through U2; order the construction; BG = (2/5) x 10"
+  },
+  {
+   "exercise": "1s/CH02_THALES/Ex2",
+   "questions": "Q1a-b",
+   "components": [
+    "GeometryCanvas",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "two perpendiculars to (AD) are parallel; cable lengths 3 sqrt 13 and 3 sqrt 10 by Pythagore"
+  },
+  {
+   "exercise": "1s/CH02_THALES/Ex2",
+   "questions": "Q2a-b",
+   "components": [
+    "GeometryCanvas",
+    "Worksheet"
+   ],
+   "why": "crossed Thales (O between B and D): OD/OB = DC/AB = 1/2, so OD = BD/3"
+  },
+  {
+   "exercise": "1s/CH02_THALES/Ex2",
+   "questions": "Q3a-c",
+   "components": [
+    "GeometryCanvas",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "(OH) parallel to (AB); Thales in DAB, then again in ADC: OH = 2 both ways"
+  },
+  {
+   "exercise": "1s/CH02_THALES/Ex2",
+   "questions": "Q4a-c",
+   "components": [
+    "PredictReveal",
+    "GeometryCanvas",
+    "Worksheet"
+   ],
+   "why": "sliders a, b, d: predict whether the crossing height depends on d, then see OH = ab/(a + b) stay fixed while d moves; lines for OH/a + OH/b = 1"
+  },
+  {
+   "exercise": "1s/CH02_THALES/Ex2",
+   "questions": "Q5-Q6",
+   "components": [
+    "GeometryCanvas",
+    "Worksheet"
+   ],
+   "why": "slide b until OH = 2.4, then solve 2.4/6 + 2.4/b = 1; ring P: BQ/BA = BP/BD gives (PQ) parallel to (AD), height 4, PQ = 3"
+  },
+  {
+   "exercise": "1s/CH03_TRIGONOMETRIE_TRIANGLE_RECTANGLE/Ex1",
+   "questions": "Q1a-b",
+   "components": [
+    "RightTriangleTrig",
+    "Worksheet"
+   ],
+   "why": "altitude mode: cos ABC read in ABH (BH/AB) and in ABC (AB/BC) by tapping the adjacent side and the hypotenuse; BC = 81/5.4 = 15, AC = 12"
+  },
+  {
+   "exercise": "1s/CH03_TRIGONOMETRIE_TRIANGLE_RECTANGLE/Ex1",
+   "questions": "Q2a-b",
+   "components": [
+    "RightTriangleTrig",
+    "Worksheet"
+   ],
+   "why": "AB x AC = AH x BC (two ways to the area), AH = 7.2; AH^2 = HB x HC"
+  },
+  {
+   "exercise": "1s/CH03_TRIGONOMETRIE_TRIANGLE_RECTANGLE/Ex1",
+   "questions": "Q3a-c",
+   "components": [
+    "RightTriangleTrig",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "ratios 0.6, 0.8, 4/3; sin^2 + cos^2 = 1; inverse cos 0.6 = 53.13 deg; complementary angles swap sin and cos"
+  },
+  {
+   "exercise": "1s/CH03_TRIGONOMETRIE_TRIANGLE_RECTANGLE/Ex1",
+   "questions": "Q4",
+   "components": [
+    "RightTriangleTrig",
+    "Worksheet"
+   ],
+   "why": "construct mode: legs 4 and 3 give tan = 0.75; tap every angle of the figure with that tangent (ACB and BAH)"
+  },
+  {
+   "exercise": "1s/CH03_TRIGONOMETRIE_TRIANGLE_RECTANGLE/Ex1",
+   "questions": "Q5a-c",
+   "components": [
+    "RightTriangleTrig",
+    "Worksheet"
+   ],
+   "why": "D on [AC] with angle ABD = 30: AD = 3 sqrt 3, BD = 6 sqrt 3, area BDC = 54 - 13.5 sqrt 3, angle DBC = 23.13"
+  },
+  {
+   "exercise": "1s/CH03_TRIGONOMETRIE_TRIANGLE_RECTANGLE/Ex2",
+   "questions": "A Q1-Q2",
+   "components": [
+    "RightTriangleTrig",
+    "Worksheet"
+   ],
+   "why": "roof: 30 + 60 so right angle at A; AB = 8 cos 30 = 4 sqrt 3, AC = 4; AH two ways; BH and CH by the metric relations"
+  },
+  {
+   "exercise": "1s/CH03_TRIGONOMETRIE_TRIANGLE_RECTANGLE/Ex2",
+   "questions": "A Q3-Q4",
+   "components": [
+    "RightTriangleTrig",
+    "Worksheet"
+   ],
+   "why": "angles BAH = 60, HAC = 30; recover cos 60 and sin 30 from the figure; roof side 40 sqrt 3"
+  },
+  {
+   "exercise": "1s/CH03_TRIGONOMETRIE_TRIANGLE_RECTANGLE/Ex2",
+   "questions": "B Q5a-d",
+   "components": [
+    "RightTriangleTrig",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "ladder mode: slide the foot (2 m, 3 m) and read alpha against the safe band 65-75 and the height; alpha = 75 gives foot and height; pick the positions that reach 5.5 m safely"
+  },
+  {
+   "exercise": "1s/CH04_VECTEURS_TRANSLATIONS/Ex1",
+   "questions": "Q1a-b",
+   "components": [
+    "GeometryCanvas",
+    "CardsPick"
+   ],
+   "why": "translation by vec(AB): place D and E (the engine checks vec(CD) = vec(AB)); pick why ABDC is a parallelogram and B the midpoint of [AE]"
+  },
+  {
+   "exercise": "1s/CH04_VECTEURS_TRANSLATIONS/Ex1",
+   "questions": "Q2a-b",
+   "components": [
+    "GeometryCanvas",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "vec(AB) = vec(CD) iff vec(AC) = vec(BD); BCDE parallelogram, perimeter 22"
+  },
+  {
+   "exercise": "1s/CH04_VECTEURS_TRANSLATIONS/Ex1",
+   "questions": "Q3a-b",
+   "components": [
+    "GeometryCanvas",
+    "Worksheet"
+   ],
+   "why": "image of the triangle and of three lines: lengths kept, image lines parallel, (AB) onto itself"
+  },
+  {
+   "exercise": "1s/CH04_VECTEURS_TRANSLATIONS/Ex1",
+   "questions": "Q4a-b",
+   "components": [
+    "GeometryCanvas",
+    "PlanCards"
+   ],
+   "why": "ACEF parallelogram (diagonals share B), then vec(BD) = vec(FE), then [BE] and [DF] share their midpoint"
+  },
+  {
+   "exercise": "1s/CH04_VECTEURS_TRANSLATIONS/Ex1",
+   "questions": "Q5a-c",
+   "components": [
+    "GeometryCanvas",
+    "PlanCards",
+    "Worksheet"
+   ],
+   "why": "I' midpoint of [BE] and [DF]; image circle of radius 3 centred at I'; the two circles touch only at B (equality case of the triangle inequality)"
+  },
+  {
+   "exercise": "1s/CH04_VECTEURS_TRANSLATIONS/Ex2",
+   "questions": "Q1-Q2",
+   "components": [
+    "GeometryCanvas",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "two bridge positions make a parallelogram, so vec(MN) is always u; A' = t(A) on (AH), 25 m from d1; AM = A'N so L = A'N + NB + 20"
+  },
+  {
+   "exercise": "1s/CH04_VECTEURS_TRANSLATIONS/Ex2",
+   "questions": "Q3a-b",
+   "components": [
+    "SituationToGraph",
+    "CounterexampleHunt",
+    "GeometryCanvas"
+   ],
+   "why": "slide the bridge and watch L on its graph; try to beat 120 m; the broken path A'N + NB against the straight segment [A'B] that crosses d2 at N0"
+  },
+  {
+   "exercise": "1s/CH04_VECTEURS_TRANSLATIONS/Ex2",
+   "questions": "Q4a-c",
+   "components": [
+    "GeometryCanvas",
+    "Worksheet"
+   ],
+   "why": "A'P = 60, PB = 80, A'B = 100 so L min = 120; Thales in A'PB gives QN0 = 60; check 75 + 20 + 25"
+  },
+  {
+   "exercise": "1s/CH04_VECTEURS_TRANSLATIONS/Ex2",
+   "questions": "Q5",
+   "components": [
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "bridge in front of A: 45 + 20 + 5 sqrt 265 = 146.4 m, 26.4 m more"
+  },
+  {
+   "exercise": "1s/CH05_SOMME_VECTEURS_COLINEAIRES/Ex1",
+   "questions": "Q1a-b",
+   "components": [
+    "GeometryCanvas",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "parallelogram rule builds D; the diagonals share I, so vec(AB) + vec(AC) = 2 vec(AI)"
+  },
+  {
+   "exercise": "1s/CH05_SOMME_VECTEURS_COLINEAIRES/Ex1",
+   "questions": "Q2a-b",
+   "components": [
+    "GeometryCanvas",
+    "Worksheet"
+   ],
+   "why": "E by the parallelogram rule; Chasles: vec(CD) + vec(CE) = vec(AB) + vec(BA) = 0, so C is the midpoint of [DE]"
+  },
+  {
+   "exercise": "1s/CH05_SOMME_VECTEURS_COLINEAIRES/Ex1",
+   "questions": "Q3a-b",
+   "components": [
+    "GeometryCanvas",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "vec(ED) = 2 vec(AB): colinear, same sense, ED = 2 AB; ABDE is a trapezoid, not a parallelogram"
+  },
+  {
+   "exercise": "1s/CH05_SOMME_VECTEURS_COLINEAIRES/Ex1",
+   "questions": "Q4a-c",
+   "components": [
+    "GeometryCanvas",
+    "PlanCards",
+    "Worksheet"
+   ],
+   "why": "G at 2/3 of the median: vec(AG) = (1/3) vec(AD); vec(GB) + vec(GC) = 2 vec(GI); G' gives vec(GA) + vec(GB) + vec(GC) = 0; drag A, B, C and the sum stays zero"
+  },
+  {
+   "exercise": "1s/CH05_SOMME_VECTEURS_COLINEAIRES/Ex1",
+   "questions": "Q5a-b",
+   "components": [
+    "GeometryCanvas",
+    "Worksheet"
+   ],
+   "why": "J midpoint of [BE]; vec(BG) = (1/3) vec(BE): B, G, E aligned"
+  },
+  {
+   "exercise": "1s/CH05_SOMME_VECTEURS_COLINEAIRES/Ex2",
+   "questions": "Q1a-b",
+   "components": [
+    "GeometryCanvas",
+    "Worksheet"
+   ],
+   "why": "river preset: u (60 m across) + v (45 m along) by the parallelogram rule, rectangle APM1Q, AM1 = 75"
+  },
+  {
+   "exercise": "1s/CH05_SOMME_VECTEURS_COLINEAIRES/Ex2",
+   "questions": "Q2a-c",
+   "components": [
+    "GeometryCanvas",
+    "RightTriangleTrig",
+    "Worksheet"
+   ],
+   "why": "step the minutes: M1, M2 aligned, M1 the midpoint; Chasles gives vec(HM2) = 2 v so M2 is on d'; tan HAM2 = 0.75 gives 36.9 deg"
+  },
+  {
+   "exercise": "1s/CH05_SOMME_VECTEURS_COLINEAIRES/Ex2",
+   "questions": "Q3a-d",
+   "components": [
+    "GeometryCanvas",
+    "RightTriangleTrig",
+    "Worksheet"
+   ],
+   "why": "turn w (length 60) until w + v lands on [AH); right triangle ANW: AN = 15 sqrt 7, sin WAN = 0.75 gives 48.6 deg upstream; time 8 sqrt 7 / 7 min"
+  },
+  {
+   "exercise": "1s/CH05_SOMME_VECTEURS_COLINEAIRES/Ex2",
+   "questions": "Q4",
+   "components": [
+    "CompareTwo",
+    "CardsPick"
+   ],
+   "why": "the two crossings side by side: 2 min, 150 m, 90 m downstream vs about 3 min 1 s, 120 m, exactly at H"
+  },
+  {
+   "exercise": "1s/CH06_ACTIVITES_REPERE/Ex1",
+   "questions": "A Q1-Q2a",
+   "components": [
+    "GeometryCanvas",
+    "Worksheet"
+   ],
+   "why": "axis mode: x_B = -3 + 4, x_C = 1 - 6; place C, A, O, B; vectors on the line, AB = |x_B - x_A|; vec(KA) = -(1/3) vec(KB)"
+  },
+  {
+   "exercise": "1s/CH06_ACTIVITES_REPERE/Ex1",
+   "questions": "A Q2b",
+   "components": [
+    "IntervalBuilder",
+    "Worksheet"
+   ],
+   "why": "distance mode: the points at distance 3 from K(-2) are 1 and -5, i.e. B and C"
+  },
+  {
+   "exercise": "1s/CH06_ACTIVITES_REPERE/Ex1",
+   "questions": "B Q3-Q4",
+   "components": [
+    "GeometryCanvas",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "grid: components PQ(4, 1), QR(1, 4) counted as steps, k = 4 vs 1/4 so not colinear; place S with vec(PS) = vec(QR); centre (1.5, 0.5)"
+  },
+  {
+   "exercise": "1s/CH06_ACTIVITES_REPERE/Ex1",
+   "questions": "B Q5a-c",
+   "components": [
+    "GeometryCanvas",
+    "Worksheet"
+   ],
+   "why": "distances sqrt 17, sqrt 17, 5 sqrt 2, 3 sqrt 2: rhombus, not a square; area 15"
+  },
+  {
+   "exercise": "1s/CH06_ACTIVITES_REPERE/Ex1",
+   "questions": "B Q6a-b",
+   "components": [
+    "GeometryCanvas",
+    "Worksheet"
+   ],
+   "why": "slide T along y = 8 until P, R, T align (x = 9); vec(PT) = 2 vec(PR), R the midpoint"
+  },
+  {
+   "exercise": "1s/CH06_ACTIVITES_REPERE/Ex2",
+   "questions": "Q1-Q2",
+   "components": [
+    "GeometryCanvas",
+    "PlanCards",
+    "Worksheet"
+   ],
+   "why": "coordinates in (A, U, V); plan: distances, then reciprocal of Pythagore; area 5 two ways"
+  },
+  {
+   "exercise": "1s/CH06_ACTIVITES_REPERE/Ex2",
+   "questions": "Q3-Q5",
+   "components": [
+    "GeometryCanvas",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "G with vec(DG) = 2 vec(DC); A, E, G aligned, E the midpoint; FA = FG so (EF) is the mediatrix; M centre of the circumcircle, B not on it"
+  },
+  {
+   "exercise": "1s/CH06_ACTIVITES_REPERE/Ex2",
+   "questions": "Q6a-b",
+   "components": [
+    "GeometryCanvas",
+    "NumericTwin",
+    "Worksheet"
+   ],
+   "why": "slide the side a: the right angle at E stays; check 5a^2/4 + 5a^2/16 = 25a^2/16 at several a, then write it"
+  },
+  {
+   "exercise": "1s/CH07_QUART_DE_TOUR/Ex1",
+   "questions": "Q1a-c",
+   "components": [
+    "GeometryCanvas",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "grid steps: 3 right 1 up becomes 3 up 1 left (direct) or 3 down 1 right (indirect); place A' and A''; OA = sqrt 10, right angle at O; O the midpoint of [A'A''] (half turn)"
+  },
+  {
+   "exercise": "1s/CH07_QUART_DE_TOUR/Ex1",
+   "questions": "Q2a-c",
+   "components": [
+    "GeometryCanvas",
+    "Worksheet"
+   ],
+   "why": "B' = R(B); AB = A'B' = 3; the image line is perpendicular; K(-1, 1)"
+  },
+  {
+   "exercise": "1s/CH07_QUART_DE_TOUR/Ex1",
+   "questions": "Q3a-c",
+   "components": [
+    "GeometryCanvas",
+    "PlanCards",
+    "Worksheet"
+   ],
+   "why": "image circle centre A', radius sqrt 10, through O; P on both circles; OAPA' parallelogram, then rhombus, then square"
+  },
+  {
+   "exercise": "1s/CH07_QUART_DE_TOUR/Ex1",
+   "questions": "Q4a-b",
+   "components": [
+    "GeometryCanvas",
+    "CardsPick"
+   ],
+   "why": "AOP right isosceles at A, so P is the image of O by a quarter turn of centre A; turn the path and tap direct or indirect"
+  },
+  {
+   "exercise": "1s/CH07_QUART_DE_TOUR/Ex2",
+   "questions": "Q1a-c",
+   "components": [
+    "GeometryCanvas",
+    "CardsPick"
+   ],
+   "why": "apply R to the square: A -> B -> C -> D; the image of [AB] is [BC], so R(E) = F, then G, H, E"
+  },
+  {
+   "exercise": "1s/CH07_QUART_DE_TOUR/Ex2",
+   "questions": "Q2a-b",
+   "components": [
+    "GeometryCanvas",
+    "PlanCards"
+   ],
+   "why": "half turn: O the midpoint of [EG] and [FH]; diagonals with the same midpoint, same length, perpendicular: square"
+  },
+  {
+   "exercise": "1s/CH07_QUART_DE_TOUR/Ex2",
+   "questions": "Q3a-b",
+   "components": [
+    "GeometryCanvas",
+    "Worksheet"
+   ],
+   "why": "EF = 2 sqrt 5, area 20 = 5/9 of 36 (four corner triangles of 4), OE = sqrt 10"
+  },
+  {
+   "exercise": "1s/CH07_QUART_DE_TOUR/Ex2",
+   "questions": "Q4a-c",
+   "components": [
+    "GeometryCanvas",
+    "RightTriangleTrig",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "(BG) is the image of (AF): perpendicular, AF = BG = 2 sqrt 10; right angle at P puts P on the circle of diameter [AB]; altitude mode in ABF gives BP, AP, PF"
+  },
+  {
+   "exercise": "1s/CH07_QUART_DE_TOUR/Ex2",
+   "questions": "Q5a-c",
+   "components": [
+    "GeometryCanvas",
+    "PlanCards",
+    "Worksheet"
+   ],
+   "why": "R(P) = Q as the meeting point of the image lines; PQST square; BQ from BC^2 = BQ x BG, PQ = 6 sqrt 10 / 5, area 14.4 = 2/5"
+  },
+  {
+   "exercise": "1s/CH08_SECTIONS_PLANES/Ex1",
+   "questions": "Q1a-b",
+   "components": [
+    "SolidViewer",
+    "Worksheet"
+   ],
+   "why": "pave 12 x 9 x 8: volume 864; AC = 15 in the base, AG = 17 in triangle ACG (tap the right angle at C)"
+  },
+  {
+   "exercise": "1s/CH08_SECTIONS_PLANES/Ex1",
+   "questions": "Q2a-b",
+   "components": [
+    "SolidViewer",
+    "StatementTap",
+    "Worksheet"
+   ],
+   "why": "tap 'parallele a la face ADHE'; slide that plane to I: rectangle IJKL equal to the face (9 x 8); two paves 288 + 576"
+  },
+  {
+   "exercise": "1s/CH08_SECTIONS_PLANES/Ex1",
+   "questions": "Q3a-b",
+   "components": [
+    "SolidViewer",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "plane (ACG) contains [AE]: rectangle ACGE 15 x 8 = 120; two triangular prisms of 432"
+  },
+  {
+   "exercise": "1s/CH08_SECTIONS_PLANES/Ex1",
+   "questions": "Q4a-b",
+   "components": [
+    "SolidViewer",
+    "PlanCards",
+    "Worksheet"
+   ],
+   "why": "plane through M, N parallel to [BF]: why it contains the parallels through M and N, rectangle MNN'M' 5 x 8; prism of 48"
+  },
+  {
+   "exercise": "1s/CH08_SECTIONS_PLANES/Ex1",
+   "questions": "Q5a-d",
+   "components": [
+    "SolidViewer",
+    "PredictReveal",
+    "Worksheet"
+   ],
+   "why": "pyramid GABCD, height GC, 288 = 864/3; plane at mid-height: midpoints by Thales, section 6 x 4.5 = 1/4 of the base; predict the small pyramid's share before 36 = 288/8"
+  },
+  {
+   "exercise": "1s/CH08_SECTIONS_PLANES/Ex2",
+   "questions": "Q1a-c",
+   "components": [
+    "SolidViewer",
+    "Worksheet"
+   ],
+   "why": "cone: generatrix 12.5, volume 49 pi; development sector of 100.8 deg (net view), paper 43.75 pi"
+  },
+  {
+   "exercise": "1s/CH08_SECTIONS_PLANES/Ex2",
+   "questions": "Q2a-b",
+   "components": [
+    "SolidViewer",
+    "PredictReveal",
+    "Worksheet"
+   ],
+   "why": "fill to half height: section circle of radius 1.75 (Thales); predict 'half full?' before seeing 1/8"
+  },
+  {
+   "exercise": "1s/CH08_SECTIONS_PLANES/Ex2",
+   "questions": "Q3a-c",
+   "components": [
+    "SolidViewer",
+    "Worksheet"
+   ],
+   "why": "ball resting on the opening: IOA right at O, IO = 1.2; top at 16.9 cm, sinks 2.5 cm; great circle of 3.7 vs opening 3.5"
+  },
+  {
+   "exercise": "1s/CH08_SECTIONS_PLANES/Ex2",
+   "questions": "Q4a-b",
+   "components": [
+    "SolidViewer",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "ball 202.612 pi / 3 = 212.2 > 153.9: it overflows by 58.2 cm3"
+  },
+  {
+   "exercise": "1s/CH09_ACTIVITES_NUMERIQUES_I/Ex1",
+   "questions": "Q1-Q2b",
+   "components": [
+    "FactorTree",
+    "Worksheet"
+   ],
+   "why": "division ladders by 2, 3, 7; exponent table: PGCD with the smaller exponents (84), PPCM with the larger (10584); check the product"
+  },
+  {
+   "exercise": "1s/CH09_ACTIVITES_NUMERIQUES_I/Ex1",
+   "questions": "Q2c",
+   "components": [
+    "DivisibilityChecker",
+    "Worksheet"
+   ],
+   "why": "Euclid chain 1176 = 1 x 756 + 420 ... last nonzero remainder 84"
+  },
+  {
+   "exercise": "1s/CH09_ACTIVITES_NUMERIQUES_I/Ex1",
+   "questions": "Q3a-b",
+   "components": [
+    "FactorTree",
+    "DivisibilityChecker",
+    "Worksheet"
+   ],
+   "why": "cancel the common primes: 9/14; common denominator 10584 gives 79/10584; 79 not divisible by 2, 3, 7, so irreducible"
+  },
+  {
+   "exercise": "1s/CH09_ACTIVITES_NUMERIQUES_I/Ex1",
+   "questions": "Q4a-c",
+   "components": [
+    "DivisibilityChecker",
+    "BoundsRuler",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "long division of 9 by 14: the remainder 6 comes back, period 428571; 100th digit from 99 = 6 x 16 + 3; ruler: 0.64 and 0.65 both within 0.01 of 9/14; rounding 0.643"
+  },
+  {
+   "exercise": "1s/CH09_ACTIVITES_NUMERIQUES_I/Ex1",
+   "questions": "Q5a-b",
+   "components": [
+    "FactorTree",
+    "Worksheet"
+   ],
+   "why": "make every exponent even (k = 21, 126^2) or a multiple of 3 (k' = 63, 42^3)"
+  },
+  {
+   "exercise": "1s/CH09_ACTIVITES_NUMERIQUES_I/Ex2",
+   "questions": "A Q1-Q2",
+   "components": [
+    "DivisibilityChecker",
+    "FactorTree",
+    "Worksheet"
+   ],
+   "why": "24 does not divide 252 (remainder 12), 18 divides both; decompositions; largest number of bouquets PGCD = 36, bouquets of 7 roses and 5 tulips"
+  },
+  {
+   "exercise": "1s/CH09_ACTIVITES_NUMERIQUES_I/Ex2",
+   "questions": "A Q3a-b",
+   "components": [
+    "FactorTree",
+    "ChoiceProduct",
+    "Worksheet"
+   ],
+   "why": "divisor grid 2^a x 3^b (7 cannot appear); arbre de choix 3 x 3 = 9"
+  },
+  {
+   "exercise": "1s/CH09_ACTIVITES_NUMERIQUES_I/Ex2",
+   "questions": "B Q1-Q2b",
+   "components": [
+    "DivisibilityChecker",
+    "FactorTree",
+    "PlanCards"
+   ],
+   "why": "500 = 12 x 41 + 8 gives 41 multiples (27 for 18); 18k mod 12 for k = 1..6 reads 6, 0, 6, 0; order both directions of the 'si et seulement si'; PPCM(12, 18) = 36"
+  },
+  {
+   "exercise": "1s/CH09_ACTIVITES_NUMERIQUES_I/Ex2",
+   "questions": "B Q2c-Q3",
+   "components": [
+    "EventAreaModel",
+    "StatementTap",
+    "Worksheet"
+   ],
+   "why": "slices 13 both, 28 pen only, 14 book only, 445 none; tap 'exactement', 'au moins', 'aucun'; 55/500 = 11 %"
+  },
+  {
+   "exercise": "1s/CH09_ACTIVITES_NUMERIQUES_I/Ex2",
+   "questions": "B Q4",
+   "components": [
+    "PartWholeBar",
+    "Worksheet"
+   ],
+   "why": "2/5 of 500, then 3/4 of the 300 left; unsold 3/20 = 15 %; takings 425 x 0.800 = 340 D"
+  },
+  {
+   "exercise": "1s/CH10_ACTIVITES_NUMERIQUES_II/Ex1",
+   "questions": "Q1a-b",
+   "components": [
+    "FactorTree",
+    "Worksheet"
+   ],
+   "why": "6^3 = 2^3 x 3^3 and 4^3 = 2^6, collect exponents: A = 4; B = 1.8 x 10^6, order of magnitude 2 x 10^6"
+  },
+  {
+   "exercise": "1s/CH10_ACTIVITES_NUMERIQUES_II/Ex1",
+   "questions": "Q2a-c",
+   "components": [
+    "FactorTree",
+    "ProductGrid",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "pull out square factors: sqrt 75 = 5 sqrt 3, C = 4 sqrt 3; the grid of (sqrt 3 - 1)(sqrt 3 + 1) gives 2, D = sqrt 3 + 1; compare sqrt 12 and sqrt 18"
+  },
+  {
+   "exercise": "1s/CH10_ACTIVITES_NUMERIQUES_II/Ex1",
+   "questions": "Q3a-d",
+   "components": [
+    "ProductGrid",
+    "ParameterPlayground",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "the grid of (sqrt 3 - 1)^2 gives 4 - 2 sqrt 3; slide a in ]0, 1[ on the number line: a^2 < a < sqrt a < 1/a stays true, pick the rule; 4 - 2 sqrt 3 < sqrt 3 - 1 two ways"
+  },
+  {
+   "exercise": "1s/CH10_ACTIVITES_NUMERIQUES_II/Ex1",
+   "questions": "Q4",
+   "components": [
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "the sign of what is inside decides: |sqrt 3 - 2| = 2 - sqrt 3, |1 - sqrt 3| = sqrt 3 - 1, F = 1"
+  },
+  {
+   "exercise": "1s/CH10_ACTIVITES_NUMERIQUES_II/Ex1",
+   "questions": "Q5a-b",
+   "components": [
+    "BoundsRuler",
+    "Worksheet"
+   ],
+   "why": "push 1.732 < sqrt 3 < 1.733 through -1, x (-2) (the ends swap), +4; bracket of 1/a, approximation to 10^-3 and rounding to 1.37"
+  },
+  {
+   "exercise": "1s/CH10_ACTIVITES_NUMERIQUES_II/Ex1",
+   "questions": "Q6a-c",
+   "components": [
+    "BoundsRuler",
+    "IntervalBuilder",
+    "Worksheet"
+   ],
+   "why": "-1 <= 2x - 3 <= 1/2 pushed back to x, [1, 7/4] drawn on the line; then through 5 - 2x and 2 - x (ends swap); |x - 2| = 2 - x between 1/4 and 1"
+  },
+  {
+   "exercise": "1s/CH10_ACTIVITES_NUMERIQUES_II/Ex2",
+   "questions": "Q1-Q2",
+   "components": [
+    "GeometryCanvas",
+    "PartWholeBar",
+    "Worksheet"
+   ],
+   "why": "scale slider on the photo: perimeter x k, area x k^2 (grid squares); k = 1.6 gives 16 x 24, area 384 = 2.56 x 150, i.e. +156 %"
+  },
+  {
+   "exercise": "1s/CH10_ACTIVITES_NUMERIQUES_II/Ex2",
+   "questions": "Q3a-b",
+   "components": [
+    "PredictReveal",
+    "GeometryCanvas",
+    "BoundsRuler",
+    "Worksheet"
+   ],
+   "why": "predict the ratio that doubles the area (2 or sqrt 2) before the poster appears; 10 sqrt 2, 15 sqrt 2, 50 sqrt 2; multiply the bracket of sqrt 2 by 10, 15, 50"
+  },
+  {
+   "exercise": "1s/CH10_ACTIVITES_NUMERIQUES_II/Ex2",
+   "questions": "Q4a-b",
+   "components": [
+    "BoundsRuler",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "the bracket [21.21, 21.225] contains 21.22, so it cannot decide; compare the squares 450 < 450.2884"
+  },
+  {
+   "exercise": "1s/CH10_ACTIVITES_NUMERIQUES_II/Ex2",
+   "questions": "Q5a-b",
+   "components": [
+    "PartWholeBar",
+    "Worksheet"
+   ],
+   "why": "k = 4/15: width 8/3, area 32/3, i.e. x 16/225 of the photo, 7.11 %"
+  },
+  {
+   "exercise": "1s/CH10_ACTIVITES_NUMERIQUES_II/Ex2",
+   "questions": "Q6a-b",
+   "components": [
+    "Worksheet"
+   ],
+   "why": "2.592 x 10^7 bytes, order of magnitude 3 x 10^7; c = 1/240 cm rounded to 4.17 x 10^-3"
+  },
+  {
+   "exercise": "1s/CH11_ACTIVITES_ALGEBRIQUES/Ex1",
+   "questions": "Q1a-b",
+   "components": [
+    "ProductGrid",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "develop (2x - 3)^2 and (x + 1)^2 in the grid; pick a^2 - b^2 with a = 2x - 3, b = x + 1 to factorise"
+  },
+  {
+   "exercise": "1s/CH11_ACTIVITES_ALGEBRIQUES/Ex1",
+   "questions": "Q2a-c",
+   "components": [
+    "NumericTwin",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "the three forms agree at any x; pick the easiest form for E(0), E(-1), E(4), E(sqrt 2); a product is zero only if a factor is zero; E(x) = 8 gives x(3x - 14) = 0"
+  },
+  {
+   "exercise": "1s/CH11_ACTIVITES_ALGEBRIQUES/Ex1",
+   "questions": "Q3",
+   "components": [
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "recognise the pattern: (5x - 1)^2, common factor x - 1, a^3 - b^3, (x + 2)^3"
+  },
+  {
+   "exercise": "1s/CH11_ACTIVITES_ALGEBRIQUES/Ex1",
+   "questions": "Q4-Q5",
+   "components": [
+    "NumericTwin",
+    "ProductGrid",
+    "Worksheet"
+   ],
+   "why": "check (x + 1)^3 - (x - 1)^3 = 6x^2 + 2 at a few x, develop and prove it, use it at x = 20 and 1000; 1002^2 = (1000 + 2)^2 in the grid, 998^2, 1002 x 998"
+  },
+  {
+   "exercise": "1s/CH11_ACTIVITES_ALGEBRIQUES/Ex2",
+   "questions": "Q1a-d",
+   "components": [
+    "SituationToGraph",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "box scene: slide x, the corners are cut and the box folds; why 0 < x < 10; S(x) = 400 - 4x^2 two ways, = 4(10 - x)(10 + x)"
+  },
+  {
+   "exercise": "1s/CH11_ACTIVITES_ALGEBRIQUES/Ex2",
+   "questions": "Q2-Q3",
+   "components": [
+    "SituationToGraph",
+    "ProductGrid",
+    "Worksheet"
+   ],
+   "why": "V(x) = x(20 - 2x)^2 = 4x(10 - x)^2, developed in the grid; fill the table V(1) ... V(9) and see the points; x = 3 is the best whole number"
+  },
+  {
+   "exercise": "1s/CH11_ACTIVITES_ALGEBRIQUES/Ex2",
+   "questions": "Q4a-c",
+   "components": [
+    "NumericTwin",
+    "SignTableBuilder",
+    "CounterexampleHunt",
+    "Worksheet"
+   ],
+   "why": "check 16000 - 27 V(x) = 4(3x - 10)^2 (40 - 3x); signs of 4, (3x - 10)^2, 40 - 3x on ]0, 10[; try to beat 16000/27; the maximum is at x = 10/3"
+  },
+  {
+   "exercise": "1s/CH11_ACTIVITES_ALGEBRIQUES/Ex2",
+   "questions": "Q5",
+   "components": [
+    "HorizontalLineSweep",
+    "CardsPick"
+   ],
+   "why": "drag y = 500 and y = 600 over the graph of V: 500 is reached (x = 5), 600 never"
+  },
+  {
+   "exercise": "1s/CH12_FONCTIONS_LINEAIRES/Ex1",
+   "questions": "Q1-Q2",
+   "components": [
+    "FunctionPlot",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "a = 6 / (-4) = -1.5; images and antecedents; f(2.8) = f(2) + f(0.8) by linearity (pick the property)"
+  },
+  {
+   "exercise": "1s/CH12_FONCTIONS_LINEAIRES/Ex1",
+   "questions": "Q3a-b",
+   "components": [
+    "FunctionPlot",
+    "Worksheet"
+   ],
+   "why": "g through B(5, 2): c = 0.4; tap C on the line, E off it"
+  },
+  {
+   "exercise": "1s/CH12_FONCTIONS_LINEAIRES/Ex1",
+   "questions": "Q4a-b",
+   "components": [
+    "FunctionPlot",
+    "ParameterPlayground",
+    "Worksheet"
+   ],
+   "why": "draw D and the other line by placing two points each; slide a: every y = ax passes through O, and a second common point needs a = 0.4"
+  },
+  {
+   "exercise": "1s/CH12_FONCTIONS_LINEAIRES/Ex1",
+   "questions": "Q5a-b",
+   "components": [
+    "FunctionPlot",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "M and N on D with O, so aligned; h(x) = 2.5x and Q(3, 7) misses 7.5"
+  },
+  {
+   "exercise": "1s/CH12_FONCTIONS_LINEAIRES/Ex2",
+   "questions": "Q1a-d",
+   "components": [
+    "PartWholeBar",
+    "Worksheet"
+   ],
+   "why": "+8 % is x 1.08 on its bar: 918 D; antecedent 432 / 1.08 = 400; f(850) + f(400) = f(1250) = 1350"
+  },
+  {
+   "exercise": "1s/CH12_FONCTIONS_LINEAIRES/Ex2",
+   "questions": "Q2a-b",
+   "components": [
+    "StatementTap",
+    "PredictReveal",
+    "PartWholeBar"
+   ],
+   "why": "tap 'sur les prix de janvier'; predict the net change (-17 %?) before x 1.08 then x 0.75 on its own whole shows x 0.81, i.e. -19 %"
+  },
+  {
+   "exercise": "1s/CH12_FONCTIONS_LINEAIRES/Ex2",
+   "questions": "Q3a-b",
+   "components": [
+    "FunctionPlot",
+    "HorizontalLineSweep",
+    "Worksheet"
+   ],
+   "why": "two segments for x in [0, 1000]; drag y = 648 to meet h at x = 800, then 648 / 0.81"
+  },
+  {
+   "exercise": "1s/CH12_FONCTIONS_LINEAIRES/Ex2",
+   "questions": "Q4a-b",
+   "components": [
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "e(x) = 0.27x is linear; 81 / 0.27 = 300"
+  },
+  {
+   "exercise": "1s/CH13_EQUATIONS_INEQUATIONS/Ex1",
+   "questions": "Q1a-c",
+   "components": [
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "equation lines, multiply by 6; 2 = 5 is impossible, so S is empty"
+  },
+  {
+   "exercise": "1s/CH13_EQUATIONS_INEQUATIONS/Ex1",
+   "questions": "Q2a-c",
+   "components": [
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "a^2 - b^2 to a product equation; (2x - 3)^2 = 49; |a| = |b| iff a^2 = b^2; pick the product-zero rule"
+  },
+  {
+   "exercise": "1s/CH13_EQUATIONS_INEQUATIONS/Ex1",
+   "questions": "Q3a-b",
+   "components": [
+    "IntervalBuilder",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "divide by -2 and watch the order reverse; build [-6, +inf[ and ]-inf, 10/11[ on the line"
+  },
+  {
+   "exercise": "1s/CH13_EQUATIONS_INEQUATIONS/Ex1",
+   "questions": "Q4a-b",
+   "components": [
+    "ProductGrid",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "common factor 2x + 3: E(x) = (2x + 3)(x + 2); developed in the grid: 2x^2 + 7x + 6; E(x) = 6 gives x(2x + 7) = 0"
+  },
+  {
+   "exercise": "1s/CH13_EQUATIONS_INEQUATIONS/Ex1",
+   "questions": "Q4c-e",
+   "components": [
+    "SignTableBuilder",
+    "IntervalBuilder"
+   ],
+   "why": "roots -2 < -3/2, factor signs, product row; S = ]-2, -3/2[ on the line; keep the integers of [-2, -1.5]: n = -2"
+  },
+  {
+   "exercise": "1s/CH13_EQUATIONS_INEQUATIONS/Ex2",
+   "questions": "Q1a-b",
+   "components": [
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "A(x) = 4x, B(x) = 30 + 2.5x, C(x) = 120; 60, 67.5, 120 for 15 entries"
+  },
+  {
+   "exercise": "1s/CH13_EQUATIONS_INEQUATIONS/Ex2",
+   "questions": "Q2a-b",
+   "components": [
+    "StatementTap",
+    "IntervalBuilder",
+    "Worksheet"
+   ],
+   "why": "tap 'entier naturel'; solve the three inequations and keep whole numbers: {0..19}, {0..35}, {0..29}"
+  },
+  {
+   "exercise": "1s/CH13_EQUATIONS_INEQUATIONS/Ex2",
+   "questions": "Q3",
+   "components": [
+    "CurveCompare",
+    "IntervalBuilder"
+   ],
+   "why": "three tariff lines at whole-number x: tap the band where each is lowest; summary 0-19 A, 20 A or B, 21-35 B, 36 B or C, 37+ C"
+  },
+  {
+   "exercise": "1s/CH13_EQUATIONS_INEQUATIONS/Ex2",
+   "questions": "Q4",
+   "components": [
+    "HorizontalLineSweep",
+    "CardsPick"
+   ],
+   "why": "drag the budget line y = 100 across the three tariffs: at most 25 entries with A, 28 with B, C unaffordable; choose B"
+  },
+  {
+   "exercise": "1s/CH13_EQUATIONS_INEQUATIONS/Ex2",
+   "questions": "Q5",
+   "components": [
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "B(x)/x <= 3 iff 30 + 2.5x <= 3x because x > 0: from 60 entries"
+  },
+  {
+   "exercise": "1s/CH14_FONCTIONS_AFFINES/Ex1",
+   "questions": "Q1a-d",
+   "components": [
+    "FunctionPlot",
+    "Worksheet"
+   ],
+   "why": "step triangle from x = -2 to x = 4: a = -9/6 = -1.5, b = 4; images, antecedents; f(103) - f(100) = 3a"
+  },
+  {
+   "exercise": "1s/CH14_FONCTIONS_AFFINES/Ex1",
+   "questions": "Q2-Q3",
+   "components": [
+    "FunctionPlot",
+    "Worksheet"
+   ],
+   "why": "g through A(-2, -9) and B(4, 6): 2.5x - 4; axis intercepts; draw both lines by placing points"
+  },
+  {
+   "exercise": "1s/CH14_FONCTIONS_AFFINES/Ex1",
+   "questions": "Q4a-b",
+   "components": [
+    "CurveCompare",
+    "IntervalBuilder",
+    "Worksheet"
+   ],
+   "why": "E(2, 1) from f(x) = g(x); drag x and shade where D is under the other line, S = [2, +inf[, then by calculation"
+  },
+  {
+   "exercise": "1s/CH14_FONCTIONS_AFFINES/Ex1",
+   "questions": "Q5a-b",
+   "components": [
+    "ParameterPlayground",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "h(x) = 2.5x + 3; 3 = -4 is impossible; slide b with a = 2.5 fixed: the lines never meet (same coefficient, parallel)"
+  },
+  {
+   "exercise": "1s/CH14_FONCTIONS_AFFINES/Ex2",
+   "questions": "Q1-Q2",
+   "components": [
+    "SituationToGraph",
+    "Worksheet"
+   ],
+   "why": "road scene: slide t and the truck and the car move; d1 = 60t; d2 from d2(0.5) = 120 and d2(1.5) = 30: -90t + 165; 90 km/h, arrival 9 h 50; 15 km apart at 9 h"
+  },
+  {
+   "exercise": "1s/CH14_FONCTIONS_AFFINES/Ex2",
+   "questions": "Q3-Q4",
+   "components": [
+    "SituationToGraph",
+    "FunctionPlot",
+    "Worksheet"
+   ],
+   "why": "two segments on their time intervals with the given units; the meeting at t = 1.1 (9 h 06, 66 km from A) is their crossing point"
+  },
+  {
+   "exercise": "1s/CH14_FONCTIONS_AFFINES/Ex2",
+   "questions": "Q5a-b",
+   "components": [
+    "HorizontalLineSweep",
+    "IntervalBuilder",
+    "Worksheet"
+   ],
+   "why": "gap 165 - 150t, then 150t - 165; drag y = 30 over the gap: t in [0.9, 1.3], 24 min"
+  },
+  {
+   "exercise": "1s/CH15_SYSTEMES/Ex1",
+   "questions": "Q1-Q2",
+   "components": [
+    "LinearSystemBoard",
+    "Worksheet"
+   ],
+   "why": "substitution, then elimination: choose 3 and -2 so x cancels; each combined equation is a line through the same point (2.5, -3)"
+  },
+  {
+   "exercise": "1s/CH15_SYSTEMES/Ex1",
+   "questions": "Q3a-b",
+   "components": [
+    "LinearSystemBoard",
+    "Worksheet"
+   ],
+   "why": "multiply each equation by 6; solve (2, 3) and check in the original system"
+  },
+  {
+   "exercise": "1s/CH15_SYSTEMES/Ex1",
+   "questions": "Q4a-b",
+   "components": [
+    "LinearSystemBoard",
+    "FunctionPlot",
+    "CardsPick"
+   ],
+   "why": "0 = 7 means two parallel distinct lines; the second equation is 3 x the first: the same line, solutions (x, -0.5x + 2)"
+  },
+  {
+   "exercise": "1s/CH15_SYSTEMES/Ex1",
+   "questions": "Q5a-b",
+   "components": [
+    "FunctionPlot",
+    "LinearSystemBoard",
+    "Worksheet"
+   ],
+   "why": "draw D1 and D2, read K(2, 2), confirm by solving the system"
+  },
+  {
+   "exercise": "1s/CH15_SYSTEMES/Ex2",
+   "questions": "A Q1-Q2",
+   "components": [
+    "LinearSystemBoard",
+    "Worksheet"
+   ],
+   "why": "two purchases as a system; substitution x = 12, y = 55; 11 D per litre in a bidon"
+  },
+  {
+   "exercise": "1s/CH15_SYSTEMES/Ex2",
+   "questions": "A Q3a-b",
+   "components": [
+    "IntervalBuilder",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "b = 23 - 5n must be a whole number: n <= 4.6, keep n = 0..4; price 276 - 5n is smallest at n = 4 (256 D)"
+  },
+  {
+   "exercise": "1s/CH15_SYSTEMES/Ex2",
+   "questions": "B Q4-Q5",
+   "components": [
+    "LinearSystemBoard",
+    "FunctionPlot",
+    "Worksheet"
+   ],
+   "why": "mixture system, (6, 3); the two lines meet at (6, 3), only x, y >= 0 make sense"
+  },
+  {
+   "exercise": "1s/CH15_SYSTEMES/Ex2",
+   "questions": "B Q6a-b",
+   "components": [
+    "ParameterPlayground",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "70 %: the solution (-3, 12) is impossible; slide x from 0 to 9: the juice stays between 2.7 and 5.4 L (30 % to 60 %)"
+  },
+  {
+   "exercise": "1s/CH16_EXPLOITATION_INFORMATION/Ex1",
+   "questions": "Q1-Q2",
+   "components": [
+    "StatsDistribution",
+    "Worksheet"
+   ],
+   "why": "fill frequency, % and cumulative rows; bar chart; pie angles at 9 deg per pupil"
+  },
+  {
+   "exercise": "1s/CH16_EXPLOITATION_INFORMATION/Ex1",
+   "questions": "Q3",
+   "components": [
+    "StatsDistribution",
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "mode 2 (unimodal); median: tap the 20th and 21st sorted values; mean 100/40 = 2.5; range 6"
+  },
+  {
+   "exercise": "1s/CH16_EXPLOITATION_INFORMATION/Ex1",
+   "questions": "Q4-Q5",
+   "components": [
+    "StatsDistribution",
+    "StatementTap",
+    "Worksheet"
+   ],
+   "why": "tap 'au plus', 'au moins', 'strictement plus'; 55 %, 27.5 %, 45 %; 12 pupils vs 11, more chances for 'au plus 1'"
+  },
+  {
+   "exercise": "1s/CH16_EXPLOITATION_INFORMATION/Ex1",
+   "questions": "Q6a-b",
+   "components": [
+    "PredictReveal",
+    "StatsDistribution",
+    "CardsPick"
+   ],
+   "why": "predict which parameter moves when a pupil with 10 books is added; mean 110/41 = 2.68, median still 2, range 10"
+  },
+  {
+   "exercise": "1s/CH16_EXPLOITATION_INFORMATION/Ex2",
+   "questions": "A Q1-Q3",
+   "components": [
+    "StatsDistribution",
+    "Worksheet"
+   ],
+   "why": "centres, frequencies, cumulative frequencies; histogram with unequal widths: [40 ; 60[ gets height 1.5, not 3, so the area counts; modal class [10 ; 20[; mean 24 with the centres"
+  },
+  {
+   "exercise": "1s/CH16_EXPLOITATION_INFORMATION/Ex2",
+   "questions": "A Q4-Q5",
+   "components": [
+    "StatsDistribution",
+    "Worksheet"
+   ],
+   "why": "cumulative polygon; median where it crosses 0.5, 20 + 2.5 = 22.5 by proportionality; 68 %, 12 %; F(35) - F(15) = 0.48"
+  },
+  {
+   "exercise": "1s/CH16_EXPLOITATION_INFORMATION/Ex2",
+   "questions": "B Q1-Q4",
+   "components": [
+    "PartWholeBar",
+    "StatsDistribution",
+    "Worksheet"
+   ],
+   "why": "coefficients and indices base 100 (105 ... 125); 2020 to 2023 directly and by indices (1.13); timeline chart; the biggest rise in pupils and in %"
+  },
+  {
+   "exercise": "1s/CH16_EXPLOITATION_INFORMATION/Ex2",
+   "questions": "B Q5",
+   "components": [
+    "CardsPick",
+    "Worksheet"
+   ],
+   "why": "12 % of 1000 = 120 pupils, 3 buses; in 2024 about 125, still 3 buses"
+  }
+ ]
+}
